@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+	<head>
+		<title>InfoJet Service</title>
+		<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+		<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+		<META HTTP-EQUIV="Expires" CONTENT="0">
+		<META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
+		<style>td{font-size:11px;font-family:verdana;}input{font-size:11px;font-family:verdana;}</style>
+		<base target="_self">
+		<!-- //CID //0499 //2010.03.18 //Init -->
+	</head>
+	<body style='padding: 0; margin: 0;' onload="DoLoad()">
+		<script>
+		var PictureWidth = 0;
+		var PictureHeight = 0;
+		//CID 0641 //2010.11.06 //Begin
+		var opener = null;
+		//CID 0641 //2010.11.06 //End
+		function DoLoad() {
+		    document.title = "Ink Picture";
+		    var parent = window.dialogArguments[0];
+			parent.InfoJet_CurrentDialog = window;
+			var backgroundPicture = window.dialogArguments[ 1 ];
+			var inkPicture = window.dialogArguments[ 2 ];
+			var formId = window.dialogArguments[ 3 ];
+
+			//CID 0641 //2010.11.06 //Begin
+			opener = parent;
+			UseLocalResources();
+			//CID 0641 //2010.11.06 //End
+			
+			var backgroundSrc = "";
+			if( backgroundPicture != null ){
+				backgroundSrc = backgroundPicture.src;
+				PictureWidth = backgroundPicture.offsetWidth;
+				PictureHeight = backgroundPicture.offsetHeight;
+			}else{
+				PictureWidth = inkPicture.offsetWidth - 4;
+				PictureHeight = inkPicture.offsetHeight - 4;
+			}
+			
+			var loadInkPicturesForm = document.forms["LoadInkPicturesForm"];
+			loadInkPicturesForm.xdoc_param_form_id.value = formId;
+			loadInkPicturesForm.xdoc_param_background_picture_url.value = backgroundSrc;
+			loadInkPicturesForm.xdoc_param_ink_picture_url.value = inkPicture.src;
+			parent.InfoJet_Submit( document.getElementById( "LoadInkPicturesFormContainer" ) );
+			document.forms[ "InkForm" ].InkPictureControl.width = PictureWidth;
+			document.forms[ "InkForm" ].InkPictureControl.height = PictureHeight;
+        }
+        //CID 0641 //2010.11.06 //Begin
+        function UseLocalResources() {
+            var res = opener.InfoJet_LocalResources["EditInkDialogResources"];
+            if (res != null) {
+                document.title = res["Title"];
+                document.getElementById("SaveButton").value = res["Save"];
+                document.getElementById("CancelButton").value = res["Cancel"];
+            }
+        }
+        //CID 0641 //2010.11.06 //End		
+		function SetInkPictures( backgroundContent, inkContent ){
+			document.getElementById( "LoadingDiv" ).style.display = "none";
+			document.forms[ "InkForm" ].InkPictureControl.SetInkPictures( backgroundContent, inkContent, PictureWidth, PictureHeight );
+			document.getElementById( "ContainerDiv" ).style.border = "#dcdcdc 1px solid";
+			document.getElementById( "ContainerDiv" ).style.width = PictureWidth + 2;
+			document.getElementById( "ContainerDiv" ).style.height = PictureHeight + 2;
+			document.getElementById( "SaveButton" ).style.display = "";
+			document.getElementById( "CancelButton" ).style.display = "";
+		}
+		function DoSave(){
+			var inkData = document.forms[ "InkForm" ].InkPictureControl.GetInkData();
+			if( inkData.length > 0 ){
+				document.forms[ "InkForm" ].InkPictureControl.Dispose();
+				var parent = window.dialogArguments[0];
+				//CID 0844 //2011.03.24 //Begin
+				var action = parent.InfoJet_ResolveServiceAction();
+				//CID 0844 //2011.03.24 //End
+				document.forms[ "InkForm" ].action = action;
+				document.forms[ "InkForm" ].xdoc_param_form_id.value = window.dialogArguments[ 3 ];
+				document.forms[ "InkForm" ].UploadInk.value = inkData;
+				document.forms[ "InkForm" ].submit();
+			}else{
+				DoCancel();
+			}
+		}
+		function DoCancel(){
+			var inkPicture = document.forms[ "InkForm" ].InkPictureControl;
+			if( inkPicture ){
+				inkPicture.Dispose();
+			}
+			window.opener = null;
+			window.close();
+		}
+		</script>
+		<table align="center" height="100%" ID="Table1">
+			<form id="LoadInkPicturesForm" method="post">
+				<div id="LoadInkPicturesFormContainer" style="display:none;">
+					<input type="hidden" name="xdoc_param_command" value="Update_LoadInkPictures"/>
+					<input type="hidden" name="xdoc_param_form_id" value=""/>
+					<input type="hidden" name="xdoc_param_background_picture_url" value=""/>
+					<input type="hidden" name="xdoc_param_ink_picture_url" value=""/>
+				</div>
+			</form>
+			<form id="InkForm" method="post" action="">
+				<input type='hidden' name='xdoc_param_command' value='Update_File'/>
+				<input type='hidden' name='xdoc_param_uploadfile_type' value='xImage'/>
+				<input type='hidden' name='xdoc_param_form_id' value=''/>
+				<input type='hidden' name='UploadInk' value=''/>
+				<tbody>
+					<tr>
+						<td align="center">
+							<div id="LoadingDiv">Loading...</div>
+							<div id="ContainerDiv">
+							<object id="InkPictureControl" height="100" width="100" classid="InfoJetSoft.InkPicture.dll#InfoJetSoft.InkPicture.InkPictureControl"
+							VIEWASTEXT>
+							</object>
+							</div>
+							<div style="height:10px;"></div>
+							<div align="center">
+								<input type="button" id="SaveButton" value="OK" onclick="DoSave();" style="display:none;width:60px;" NAME="SaveButton"/>
+								&nbsp;&nbsp;
+								<input type="button" id="CancelButton" value="Cancel" onclick="DoCancel();" style="display:none;width:60px;" NAME="CancelButton"/>
+							<div>
+						</td>
+					</tr>
+				</tbody>
+			</form>
+		</table>
+	</body>
+</html>

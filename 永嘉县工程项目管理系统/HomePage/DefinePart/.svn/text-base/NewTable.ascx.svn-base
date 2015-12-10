@@ -1,0 +1,35 @@
+﻿<%@ Control Language="VB" AutoEventWireup="false" CodeFile="NewTable.ascx.vb" Inherits="HomePage_DefinePart_NewTable" %>
+
+
+<table id="Table_01" width="580" style="height:180px;" border="0" cellpadding="0" cellspacing="0">
+	<tr style="height:32px;">
+		<td style="background-image:url(images/页面2_09.gif);">
+		<table height=18 border="0" cellpadding="0" cellspacing="0"><tr><td width=533></td><td width=40 onclick="window.location.href='NewTable.aspx'" style="cursor:hand"></td></tr></table>
+		</td>
+	</tr>
+	<tr>
+	<td style="background:url(images/页面2_12.gif);" valign="top">
+	    <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" CellPadding="4"
+    DataKeyNames="MKDM,KSDM" DataSourceID="Conn" ForeColor="#333333" HorizontalAlign="Center"
+    Width="99%" Font-Size="9pt" AllowPaging="True" PageSize="5">
+    <FooterStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
+    <Columns>
+        <asp:BoundField DataField="MKMC" HeaderText="表格名称" SortExpression="ModelName" />
+        <asp:CommandField HeaderText="填写" SelectText="填写表单" ShowSelectButton="True">
+            <ItemStyle HorizontalAlign="Center" Width="60px" />
+        </asp:CommandField>
+    </Columns>
+    <RowStyle BackColor="#F7F6F3" ForeColor="#333333" />
+    <EditRowStyle BackColor="#999999" />
+    <SelectedRowStyle BackColor="#E2DED6" Font-Bold="True" ForeColor="#333333" />
+    <PagerStyle BackColor="#284775" ForeColor="White" HorizontalAlign="Center" />
+    <HeaderStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
+    <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
+    </asp:GridView>
+</td>
+	</tr>
+	<tr><td style="height:7px;"><img src="images/页面2_16.gif" alt="" /></td></tr>
+</table>
+<asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+    SelectCommand="SELECT top 5 [MKDM], [MKMC] FROM [Gy_MKXX] WHERE IsWan=1  order by MKDM desc">
+</asp:SqlDataSource>

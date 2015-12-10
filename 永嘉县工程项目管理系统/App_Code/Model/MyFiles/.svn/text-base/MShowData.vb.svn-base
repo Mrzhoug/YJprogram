@@ -1,0 +1,180 @@
+﻿Imports Microsoft.VisualBasic
+
+Public Class MShowData
+
+
+    Private _id As Guid
+    ''' <summary>
+    ''' ID
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property ID() As Guid
+        Get
+            Return _id
+        End Get
+        Set(ByVal value As Guid)
+            _id = value
+        End Set
+    End Property
+
+
+    Private _type As String
+    ''' <summary>
+    ''' 类型（文件或文件夹）
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property Type() As String
+        Get
+            Return _type
+        End Get
+        Set(ByVal value As String)
+            _type = value
+        End Set
+    End Property
+
+
+    Private _name As String
+    ''' <summary>
+    ''' 名称
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property Name() As String
+        Get
+            Return _name
+        End Get
+        Set(ByVal value As String)
+            _name = value
+        End Set
+    End Property
+
+    Private _createTime As DateTime
+    ''' <summary>
+    ''' 创建时间
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property CreateTime() As DateTime
+        Get
+            Return _createTime
+        End Get
+        Set(ByVal value As DateTime)
+            _createTime = value
+        End Set
+    End Property
+
+
+
+    Private _fileSize As Integer
+    ''' <summary>
+    ''' 文件大小
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property FileSize() As Integer
+        Get
+            Return _fileSize
+        End Get
+        Set(ByVal value As Integer)
+            _fileSize = value
+        End Set
+    End Property
+
+
+    Private _fileType As String
+    ''' <summary>
+    ''' 文件类型
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property FileType() As String
+        Get
+            Return _fileType
+        End Get
+        Set(ByVal value As String)
+            _fileType = value
+        End Set
+    End Property
+
+
+    Private _filePath As String
+    ''' <summary>
+    ''' 文件路径
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property FilePath() As String
+        Get
+            Return _filePath
+        End Get
+        Set(ByVal value As String)
+            _filePath = value
+        End Set
+    End Property
+
+
+
+
+    Private _isSharedFolder As Boolean
+    ''' <summary>
+    ''' 是否为共享文件夹（只针对文件夹）
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property IsSharedFolder() As Boolean
+        Get
+            Return _isSharedFolder
+        End Get
+        Set(ByVal value As Boolean)
+            _isSharedFolder = value
+        End Set
+    End Property
+
+
+    Private _isPublicFolder As String
+    ''' <summary>
+    ''' 是否为公共文件夹
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property IsPublicFolder() As String
+        Get
+            Return _isPublicFolder
+        End Get
+        Set(ByVal value As String)
+            _isPublicFolder = value
+        End Set
+    End Property
+
+
+
+
+    Private _thisID As String
+    ''' <summary>
+    ''' 文件或文件夹ID
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property ThisID() As String
+        Get
+            Return _thisID
+        End Get
+        Set(ByVal value As String)
+            _thisID = value
+        End Set
+    End Property
+
+
+End Class

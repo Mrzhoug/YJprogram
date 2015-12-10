@@ -1,0 +1,98 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="processRuleSetting.aspx.vb" Inherits="manager_ProcessManager_processRuleSetting" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>流转规则设置</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+</head>
+<body>
+    <center>
+    <form id="form1" runat="server" style="width:500px">
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>流转规则设置</span></a></li>
+            </ul>
+        </div>
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">                    
+                    <tr>
+                        <th align="right">
+                            流程名称：
+                        </th>
+                        <td width="75%" style="text-align:left">
+                            <asp:Label ID="txtProName" runat="server" Text=""></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            流程状态名称：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:Label ID="txtProStatusName" runat="server" Text=""></asp:Label>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>
+                            流程表单名称：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:Label ID="txtProFormName" runat="server" Text=""></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            节点名称：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:DropDownList ID="DDLNodeName" runat="server" Width="176px"></asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            条件：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:DropDownList ID="DDLSymbol" runat="server">
+                                <asp:ListItem Value="&gt;">大于</asp:ListItem>
+                                <asp:ListItem Value="&lt;">小于</asp:ListItem>
+                                <asp:ListItem Value="=">等于</asp:ListItem>
+                                <asp:ListItem Value="!=">不等于</asp:ListItem>            
+                                <asp:ListItem Value="like">包含</asp:ListItem>            
+                            </asp:DropDownList>
+                            <asp:TextBox id="TBCondition" runat="server"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            条件序列：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:DropDownList ID="DDLOrder" runat="server" AutoPostBack="true">
+                                <asp:ListItem Value="0">默认</asp:ListItem>
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2" style="text-align:center">
+                            <span style="color:Red">*具有相同条件序列的条件之间关系为or，其他为and</span>
+                        </td>
+                    </tr>
+
+                    
+                    <tr>
+                        <td colspan="2" style="text-align:center">
+                            <asp:Button id="btnConfirm" runat="server" Text="确 定" CssClass="btnsubmit"></asp:Button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+    </center>
+</body>
+</html>

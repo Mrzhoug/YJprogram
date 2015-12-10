@@ -1,0 +1,385 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Main.aspx.vb" Inherits="Main" %>
+
+<html>
+<head id="Head1" runat="server">
+    <title>SunFunSoft Xman 3.0</title>
+    <link rel="stylesheet" type="text/css" href="images/Ext.UI/resources/css/ext-all.css" />
+    <link rel="stylesheet" type="text/css" href="images/Ext.UI/Ext.Define.css" />    
+    <script type="text/javascript" src="images/Ext.UI/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="images/Ext.UI/ext-all.js"></script>
+    <script type="text/javascript" src="images/Ext.UI/TabCloseMenu.js"></script>
+    <script type="text/javascript" src="Pub/function.js"></script>
+    <script type="text/javascript" src="Pub/jquery-1.8.0.js"></script>
+    <script type="text/javascript" src="Pub/jquery.messager.js"></script>
+<style type="text/css">
+	html, body {
+        font:normal 12px verdana;
+        margin:0;
+        padding:0;
+        border:0 none;
+        overflow:hidden;
+        height:100%;
+    }
+	p {
+	    margin:5px;
+	}
+    .settings {
+        background-image:url(images/Ext.UI/icons/fam/folder_wrench.png);
+    }
+    .nav {
+        background-image:url(images/Ext.UI/icons/fam/folder_go.png);
+    }
+    
+    .BarA
+    {
+        font-size:10pt; color:Black; text-decoration:none;
+    }
+    </style>
+</head>
+<body>
+    <div id="west"></div>
+    <div id="north"><table cellspacing="0" cellpadding="0" width="100%" border="0">
+        <tr>
+            <td colspan="2" style="height:1pt;"></td>
+        </tr>
+        <tr>
+            <td align="left" id="logo1" runat="server" style="font-family: 黑体; height:36px;" nowrap>
+                &nbsp;&nbsp;&nbsp;<span style="font-size:15pt; font-family: 黑体; font-weight:bold; ">SunFunSoft Xman 3.0</span>
+                </td><td><span id="ecp" style="font-size:9pt;"></span></td><td style=" width:130px;"><span id="statbar"></span></td>
+            <td align="center" style="width:300px">
+                <table cellspacing="0" cellpadding="0" border="0">
+                <tr valign="top">
+                    <td style="background:url(images/desktop/barf.gif); height:31px; width:71px;" align="right" valign="middle" >
+                        <table cellspacing="0" cellpadding="0" width="60" border="0" height="26"><tr><td align="center"><a href="javascript:void(0);" onclick="Support()" class="BarA">技术支持</a></td></tr></table>
+                    </td>
+                    <td style=" height:31px; width:5px;" align="center"><img src="images/desktop/barh.gif" border="0" alt="" /></td>
+                    <td style="background:url(images/desktop/barback.gif); height:31px; width:60px;" align="center" valign="middle" >
+                        <table cellspacing="0" cellpadding="0" width="60" border="0" height="26"><tr><td align="center"><a href="javascript:void(0);" onclick="onlinehelp()" class="BarA">在线帮助</a></td></tr></table>
+                    </td>
+                    <td style=" height:31px; width:5px; vertical-align:middle " align="center"><img src="images/desktop/barh.gif" border="0" alt="" /></td>
+                    <td style="background:url(images/desktop/barback.gif); height:31px; width:60px;" align="center" valign="middle" >
+                        <table cellspacing="0" cellpadding="0" width="60" border="0" height="26"><tr><td align="center"><a href="javascript:void(0);" onclick="desktopconfig()" class="BarA">桌面选项</a></td></tr></table>
+                    </td>
+                   
+                    <td style=" height:31px; width:5px;" align="center"><img src="images/desktop/barh.gif" border="0" alt="" /></td>
+                    <td style="background:url(images/desktop/barb.gif); height:31px; width:73px;" align="left" valign="middle" >
+                        <table cellspacing="0" cellpadding="0" width="60" border="0" height="26"><tr><td align="center"><a href="logout.aspx" class="BarA">注销系统</a></td></tr></table>
+                    </td>
+                </tr>
+                </table>
+            </td>
+        </tr>
+        </table>
+<script language="JavaScript" type="text/javascript" >
+
+function openDesktop()
+{
+var newURL = "manager/Desktop/MyDesktop.aspx";
+parent.main.location=newURL;
+//window.open(newURL,"","scrollbars,width=680,height=440,top=100,left=200");
+}
+
+function Support()
+{
+    window.open("Support.html","","resizable,scrollbars,width=540,height=440,top=100,left=200,status");
+}
+
+function onlinehelp()
+{
+    window.open("Onlinehelp.html","","resizable,scrollbars,width=540,height=440,top=100,left=200,status");
+}
+
+function desktopconfig()
+{
+    var newURL = "manager/Desktop/DesktopConfig.aspx";
+    window.open(newURL,"","resizable,scrollbars,width=540,height=440,top=100,left=200,status");
+}
+
+function logout()
+{
+    var newURL = "Logout.aspx";
+    parent.location=newURL;
+}
+
+
+
+
+</script>
+        </div>
+    <div id="tabs"></div>
+    
+<script language="javascript" type="text/javascript">
+
+
+    /*
+    JS提醒框功能
+    */
+    getUndoNum();
+    MyTimer();
+    var msgcount = 0;
+    function MyTimer() {
+
+        $.ajax({
+            type: "post",
+            url: "Menu/MsgDialog.aspx",
+            data: null,
+            success: function (msg) {
+                if (msg != 0) {
+                    msgcount = parseInt(msg) + parseInt(msgcount);
+                    $("#message").remove();
+                    $.messager.anim('fade', 1000);
+                    $.messager.show(0, "你有<a href='javascript:void(0);' onclick='showaddpage();'>" + msgcount + "</a>条新消息！");
+                    setTimeout("setTitle1(0)", "1000");
+                }
+
+            }
+        });
+        var timer = setTimeout("MyTimer()", 30000);
+    }    
+
+
+
+    function getUndoNum() {
+        $.ajax({
+            type: "post",
+            url: "Menu/MsgDialog.aspx?type=undo",
+            data: null,
+            success: function (msg) {
+                if (msg != 0) {
+
+                    $("#message").remove();
+                    $.messager.anim('fade', 1000);
+                    $.messager.show(0, "你有<a href='javascript:void(0);' onclick='showaddpage();'>" + msg + "</a>条未读消息！");
+                    var _s = document.getElementById("snd");
+                    //_s.src = "../../message.wav";
+                    //setTimeout("setTitle1(0)", "1000");
+                }
+
+            }
+        });
+    }
+    function showaddpage() {
+        addTab('manager/desktop/Mydesktop.aspx', '信息中心', '');
+    }
+    function setTitle1(times) {
+        document.title = "标题";
+        window.focus();
+        if (times > 20) {
+            setTimeout("setTitle2(" + times++ + ")", "1000");
+        }
+
+    }
+
+    function setTitle2(times) {
+        document.title = "";
+        setTimeout("setTitle1(" + times++ + ")", "1000");
+    }
+
+
+
+
+    /*
+    end JS提醒框功能
+    */
+
+
+
+
+
+
+
+
+
+    /*
+    * Ext JS Library 2.0.2
+    * Copyright(c) 2006-2008, Ext JS, LLC.
+    * licensing@extjs.com
+    * 
+    * http://extjs.com/license
+    */
+
+//初始势
+	var tabs = new Ext.TabPanel({
+	        // renderTo:'center',
+	        region: 'center',
+	        resizeTabs: true, // turn on tab resizing
+	        minTabWidth: 115,
+	        tabWidth: 135,
+	        width: '100%',
+	        // height: '100%',
+					autoHeight: false, 
+	        enableTabScroll: true,
+	        defaults: {autoScroll:true},
+	        plugins: new Ext.ux.TabCloseMenu(),
+	        deferredRender: false,
+					activeTab: 0 // 默认标签
+		});
+
+
+
+		Ext.onReady(function () {
+		    //添加我的桌面为默认
+		    //	var tab = new Ext.TabPanel({
+		    //        id: 'desktop',
+		    //        title: '信息中心',
+		    //        iconCls: 'nav', 
+		    //        html: '<iframe class="iframestyle" src="manager/desktop/Mydesktop.aspx" frameborder=0 ></iframe >',
+		    //        closable: false,
+		    //        autoScroll: true
+		    //    });
+		    //    tabs.add(tab);
+		    //    tab.show();
+		    AddDefaultPage();
+		});
+
+
+function MyDesktopRefresh() {
+    var tab = new Ext.TabPanel({
+        id: 'desktop',
+        title: '信息中心',
+        iconCls: 'nav',
+        html: '<iframe class="iframestyle" src="manager/desktop/Mydesktop.aspx" frameborder=0 ></iframe >',
+        closable: false,
+        autoScroll: true
+    });
+    tabs.add(tab);
+    tab.show();
+}
+
+
+function showTab(url, name, sid) {
+                //不进行刷新.如果存在直接显示,没有则添加
+			for (var i=0;i<tabs.items.length;i++) {
+				if (tabs.getItem(i).id==sid) {
+				    //tabs.remove(tabs.getItem(i));
+					tabs.getItem(i).show();
+					return;
+				}
+			}
+			var tab = new Ext.TabPanel({
+				id: sid,
+				title: name,
+				iconCls: 'nav', 
+				html: '<iframe class="iframestyle" src="'+url+'" frameborder=0 ></iframe >',
+				closable: true,
+				autoScroll: true
+			});
+			tabs.add(tab);
+			tab.show();
+		}		
+
+    function addTab(url, name, sid) {
+
+        if (sid=='desktop')
+        {
+            showdesktop(url,name,sid);
+        }
+        else
+        {  
+			    for (var i=0;i<tabs.items.length;i++) {
+				    // alert(tabs.getItem(i));
+				    if (tabs.getItem(i).id==sid) {
+				        tabs.remove(tabs.getItem(i));
+					    //tabs.getItem(i).show();
+					    //return;
+				    }
+			    }
+			    var tab = new Ext.TabPanel({
+				    id: sid,
+				    title: name,
+				    iconCls: 'nav', 
+				    html: '<iframe class="iframestyle" src="'+url+'" frameborder=0 ></iframe >',
+				    closable: true,
+				    autoScroll: true
+			    });
+			    tabs.add(tab);
+			    tab.show();
+        }			
+    }
+
+	function addTabRefresh(url, name, sid)
+	{   
+	    var hasTab = false;
+	    for (var i=0;i<tabs.items.length;i++) 
+	    {
+		    if (tabs.getItem(i).id==sid)
+		    {
+		        //tabs.remove(tabs.getItem(i));
+			    hasTab = true;
+		    }
+		}
+		if(hasTab == true)
+		{
+	        setTimeout("addTab('"+ url +"','"+ name +"','"+ sid +"');",1500);
+	    }
+	}
+	
+    function showdesktop(url, name, sid) {
+			for (var i=0;i<tabs.items.length;i++) {
+				if (tabs.getItem(i).id==sid) {
+				    tabs.remove(tabs.getItem(i));
+				    break;          //移除后，直接退出，不然有可能导致错误
+				}
+			}
+			var tab = new Ext.TabPanel({
+				id: sid,
+				title: name,
+				iconCls: 'nav', 
+				html: '<iframe class="iframestyle" src="'+url+'" frameborder=0 ></iframe >',
+				closable: false,
+				autoScroll: true
+			});
+			tabs.add(tab);
+			tab.show();            
+		}
+				
+        //显示Ext.UI对话框		
+        function MessageBox(title,content)		
+        {
+            Ext.MessageBox.alert(title,'<br>' + content + '<br>' , '');
+        }
+
+        //显示设置页面
+        function opendialwin()
+		{
+				var newdialoguewin = window.showModalDialog("Menu/SmsSetup.aspx",window,"dialogWidth:500px;DialogHeight=140px;status:no;titlebar:no");
+				if(newdialoguewin!=null){
+					
+				}
+		}
+		
+		
+		showview();
+		
+
+	var obj = document.getElementById("statbar");
+
+    var t = 1;
+    //初始化对象
+    initXMLHttp();
+    if (isECP==true) { Ecp(); }
+    function Ecp()
+    {
+        var obj1 = document.getElementById("ecp");
+        var stat = "";
+        stat = GetStreamFile("Menu/CheckTellphoneCall.aspx?" + Math.random());
+        if (stat.length>1)
+        {
+            var cid;
+            var idx;
+            idx = stat.indexOf("<table")
+            if (idx>0)
+            {
+                cid = stat.substring(0,idx)
+                if (cid!="0") window.open('menu/TellphoneCall.aspx?cid=' + cid ,'ECP','height=500, width=700, top=100, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');
+                obj1.innerHTML = stat.substring(idx);
+            }
+        }
+        var ecptimer=setTimeout("Ecp()",5000);
+    }
+    
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,112 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="MappingExpansion.aspx.vb" Inherits="manager_XJXM_MappingExpansion" ValidateRequest ="false"  Theme="SkinFile" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>映射设置</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <table width ="615" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td style="width: 300px; height:80px" valign="top">
+                    <asp:Panel ID="Panel4" runat="server" GroupingText="统计节点设置" Width="300px" Font-Size="9pt">
+                        <br />
+                        &nbsp; &nbsp;
+                        <asp:DropDownList ID="DropDownList3" runat="server" Width="168px">
+                        </asp:DropDownList><asp:Button ID="Button4" runat="server" Text=" 确 定 " /><br /><br />
+                    </asp:Panel>
+                </td>
+                <td style="width: 5px">
+                </td>
+                <td style="width: 300px" valign="top">
+                    <asp:Panel ID="Panel1" runat="server" GroupingText="二维表映射设置" Width="300px" Font-Size="9pt">
+                        <br />
+                        &nbsp; &nbsp;
+                        <asp:DropDownList ID="NodeName" runat="server" Width="168px">
+                        </asp:DropDownList><asp:Button ID="Button1" runat="server" Text=" 确 定 " /><br />
+                        <br />
+                    </asp:Panel>
+                </td>
+            </tr>
+        <tr><td valign="top" style="width: 300px"><asp:Panel ID="Panel3" runat="server" GroupingText="统计条件设置" Width="300px" Font-Size="9pt" Wrap="False">
+            <br />
+            &nbsp;<asp:DropDownList ID="DropDownList2" runat="server" Width="168px">
+            </asp:DropDownList><asp:Button ID="Button3" runat="server" Text="添加统计节点" />
+            <br />
+            <br /><asp:GridView ID="GridView2" runat="server" DataSourceID="SqlDataSource1"  BackColor="White" BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" ForeColor="Black" GridLines="Vertical" HorizontalAlign="Center"  SkinID="GridViewSkin1" AutoGenerateColumns="False" DataKeyNames="AID,MapExtName">
+                <FooterStyle BackColor="#CCCC99" />
+                <Columns>
+                    <asp:BoundField DataField="MapExtName" HeaderText="映射节点名" SortExpression="MapExtName" >
+                        <ItemStyle ForeColor="Black" />
+                    </asp:BoundField>
+                    <asp:BoundField DataField="dates" HeaderText="添加日期" SortExpression="dates" >
+                        <ItemStyle ForeColor="Black" HorizontalAlign="Center" Width="110px" />
+                    </asp:BoundField>
+                    <asp:TemplateField ShowHeader="False">
+                        <ItemStyle HorizontalAlign="Center" Width="30px" ForeColor="Black" />
+                        <ItemTemplate>
+                            <asp:LinkButton ID="LinkButton1" runat="server" CausesValidation="False" CommandName="Delete"
+                                OnClientClick="return confirm('你确定要删除此表单吗？');" Text="删除"></asp:LinkButton>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+                <RowStyle BackColor="White" />
+                <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+                <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Center" />
+                <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" Wrap="False" />
+                <AlternatingRowStyle BackColor="White" />
+            </asp:GridView>
+            <br />
+            <br />
+            <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>" SelectCommand="SELECT [AID], [MKDM], [MapExtName], [dates] FROM [MapConfig] WHERE ([MKDM] = @MKDM) and (IsTotal = 1)">
+                <SelectParameters>
+                    <asp:Parameter DefaultValue="-1" Name="MKDM" Type="Decimal" />
+                </SelectParameters>
+            </asp:SqlDataSource>
+        </asp:Panel>
+        </td><td style="width: 5px">
+        </td><td style="width: 295px">
+        
+        <asp:Panel ID="Panel2" runat="server" GroupingText="扩展节点映射设置" Width="300px" Font-Size="9pt" Wrap="False">
+            <br />&nbsp;
+            <asp:DropDownList ID="DropDownList1" runat="server" Width="168px">
+        </asp:DropDownList><asp:Button ID="Button2" runat="server" Text="添加扩展节点" />
+            <br />
+            <br />
+        <asp:GridView ID="GridView1" runat="server" DataSourceID="Conn"  BackColor="White" BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" ForeColor="Black" GridLines="Vertical" HorizontalAlign="Center"  SkinID="GridViewSkin1" AutoGenerateColumns="False" DataKeyNames="AID,MapExtName">
+            <FooterStyle BackColor="#CCCC99" />
+            <Columns>
+                <asp:BoundField DataField="MapExtName" HeaderText="映射节点名" SortExpression="MapExtName" >
+                    <ItemStyle ForeColor="Black" />
+                </asp:BoundField>
+                <asp:BoundField DataField="dates" HeaderText="添加日期" SortExpression="dates" >
+                    <ItemStyle ForeColor="Black" HorizontalAlign="Center" Width="110px" />
+                </asp:BoundField>
+                <asp:TemplateField ShowHeader="False">
+                    <ItemStyle HorizontalAlign="Center" Width="30px" ForeColor="Black" />
+                    <ItemTemplate>
+                        <asp:LinkButton ID="LinkButton1" runat="server" CausesValidation="False" CommandName="Delete" OnClientClick="return confirm('你确定要删除此表单吗？');"
+                            Text="删除"></asp:LinkButton>
+                    </ItemTemplate>
+                </asp:TemplateField>
+            </Columns>
+            <RowStyle BackColor="White" />
+            <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+            <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Center" />
+            <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" Wrap="False" />
+            <AlternatingRowStyle BackColor="White" />
+        </asp:GridView>
+        <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>" SelectCommand="SELECT [AID], [MKDM], [MapExtName], [dates] FROM [MapConfig] WHERE ([MKDM] = @MKDM) and (IsTotal = 0 or IsTotal is null)">
+            <SelectParameters>
+                <asp:Parameter DefaultValue="-1" Name="MKDM" Type="Decimal" />
+            </SelectParameters>
+        </asp:SqlDataSource>
+            <br />
+            <br />
+        </asp:Panel>
+    </td></tr></table>
+    </form>
+</body>
+</html>

@@ -1,0 +1,76 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="WritePublicMessage.aspx.vb" Inherits="manager_Desktop_WritePublicMessage" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>编写公告</title>
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    <link rel="Stylesheet" type="text/css" href="../../App_Themes/StyleSheet.css" />
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+     <style type="text/css">
+
+    .addfileI {
+        cursor:hand;
+        position:relative;
+       
+        left:0px;
+        width:70px;
+        height:22px; 
+        opacity:0;
+        filter:alpha(opacity=0);
+      
+
+
+    }
+    </style>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+    <tr><td class="dmenu">
+        &nbsp;<asp:Button ID="Button5" runat="server" Text=" 发布公告 " CssClass="btnsubmit" />
+        <input id="Button6" onclick="BackDesktop(1);window.close();" type="button" value="信息中心" class="btnsubmit" />
+        <input id="Button7" onclick="opener.window.parent.addTab('manager/Desktop/WriteSendMessage.aspx','内部公告','publicmessage');window.close();" type="button" value="返回列表" class="btnsubmit" />
+    </td></tr><tr><td style="height:1px;"></td></tr></table>      
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" class="dback">
+            <tr>
+                <td align="right" style="width: 60px">
+                    标题：</td>
+                <td>
+                    <asp:TextBox ID="TextBox1" runat="server" Width="99%"></asp:TextBox></td>
+            </tr>
+            <tr>
+                <td align="right" style="width: 60px">
+                </td>
+                <td>
+            <asp:Panel ID="Panel2" runat="server" GroupingText="文件附件" Height="56px" Width="100%">
+            &nbsp;<asp:Button ID="Button2" runat="server" Text="附件上传" CssClass="btncancel" style="position:absolute;"/><asp:FileUpload ID="FileUpload1" runat="server" onpropertychange="test1();" CssClass="addfileI"/>
+            <script language="javascript" type="text/javascript">
+            var obj1 = document.getElementById("Button2");
+            function test1()
+            {
+                obj1.click();
+            }
+            </script>
+            <br />
+            <span id="filelist" runat="server"></span></asp:Panel>
+                </td>
+            </tr>
+            <tr>
+                <td align="right" style="width: 60px; height: 177px;" valign="top">
+                    内容：</td>
+                <td style="height: 177px;" valign="top">
+                    <asp:TextBox ID="TextBox2" runat="server" Height="325px" Width="99%" TextMode="MultiLine"></asp:TextBox></td>
+                <td align="right" style="height: 177px">
+                </td>
+            </tr>
+        </table>
+    <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="height:1px;"></td></tr>
+    <tr><td class="dmenu">
+        &nbsp;<asp:Button ID="Button1" runat="server" Text="发布公告" CssClass="btnsubmit" />
+        <input id="Button3" onclick="BackDesktop(1);window.close();" type="button" value="信息中心" class="btnsubmit" />
+        <input id="Button4" onclick="opener.window.parent.addTab('manager/Desktop/WriteSendMessage.aspx','内部公告','publicmessage');window.close();" type="button" value="返回列表" class="btnsubmit" />
+    </td></tr></table>        
+    </form>
+</body>
+</html>
+

@@ -1,0 +1,220 @@
+Imports Microsoft.VisualBasic
+Imports System.Data.OleDb
+Public Class SunfunExcel
+    Private dataset As New DataSet
+    Private mytable As DataTable
+    Private dbconnstr As String
+    Sub New(ByVal ExcelFile As String)
+        dbconnstr = "Provider=Microsoft.Jet.OleDb.4.0;Data Source=" & ExcelFile & "; Extended ProPerties=""Excel 8.0;HDR=Yes;"""
+    End Sub
+
+    Function SaveExcel2(ByVal str As String)
+        Dim MyOleDbCn As New OleDbConnection
+        Dim MyOleDbCmd As New OleDbCommand
+        Dim strSql As String = ""
+        Try
+            MyOleDbCn.ConnectionString = dbconnstr
+            MyOleDbCn.Open()
+            MyOleDbCmd.Connection = MyOleDbCn
+            MyOleDbCmd.CommandType = CommandType.Text
+
+            Dim c As Integer
+            Dim tbstr() As String = Nothing
+            If str.IndexOf("$") > -1 Then
+                tbstr = str.Split("$")
+                For c = 0 To tbstr.Length - 1
+                    If tbstr(c).IndexOf("&") > -1 Then
+                        Dim tbname() As String
+                        tbname = tbstr(c).Split("&")
+                        Dim Line() As String = tbname(1).Split("|")
+                        Dim Tmp() As String
+                        Dim i, j As Integer
+                        For i = 0 To Line.GetLongLength(0) - 1
+                            If Line(i).Trim <> "" Then
+                                Tmp = Line(i).Split("@")
+                                For j = 0 To Tmp.GetLongLength(0) - 1
+                                    If i = 0 Then
+                                        If j = 0 Then
+                                            strSql = "CREATE TABLE " & tbname(0) & " ("
+                                        End If
+                                        If j <> Tmp.GetLongLength(0) - 1 Then
+                                            strSql = strSql & Tmp(j) & " text,"
+                                        Else
+                                            strSql = strSql & Tmp(j) & " text)"
+                                        End If
+                                    Else
+                                        If j = 0 Then
+                                            strSql = "INSERT INTO " & tbname(0) & " VALUES('"
+                                        End If
+                                        If j <> Tmp.GetLongLength(0) - 1 Then
+                                            strSql = strSql & Tmp(j) & "','"
+                                        Else
+                                            strSql = strSql & Tmp(j) & "')"
+                                        End If
+                                    End If
+                                Next
+                                MyOleDbCmd.CommandText = strSql
+                                MyOleDbCmd.ExecuteNonQuery()
+                            End If
+                        Next
+                    Else
+                        Dim Line() As String = tbstr(c).Split("|")
+                        Dim Tmp() As String
+                        Dim i, j As Integer
+                        For i = 0 To Line.GetLongLength(0) - 1
+                            If Line(i).Trim <> "" Then
+                                Tmp = Line(i).Split("@")
+                                For j = 0 To Tmp.GetLongLength(0) - 1
+                                    If i = 0 Then
+                                        If j = 0 Then
+                                            strSql = "CREATE TABLE 导出数据" & c + 1 & " ("
+                                        End If
+                                        If j <> Tmp.GetLongLength(0) - 1 Then
+                                            strSql = strSql & Tmp(j) & " text,"
+                                        Else
+                                            strSql = strSql & Tmp(j) & " text)"
+                                        End If
+                                    Else
+                                        If j = 0 Then
+                                            strSql = "INSERT INTO 导出数据" & c + 1 & " VALUES('"
+                                        End If
+                                        If j <> Tmp.GetLongLength(0) - 1 Then
+                                            strSql = strSql & Tmp(j) & "','"
+                                        Else
+                                            strSql = strSql & Tmp(j) & "')"
+                                        End If
+                                    End If
+                                Next
+                                MyOleDbCmd.CommandText = strSql
+                                MyOleDbCmd.ExecuteNonQuery()
+                            End If
+                        Next
+                    End If
+                Next
+            Else
+                If str.IndexOf("&") > -1 Then
+                    Dim tbname() As String
+                    tbname = str.Split("&")
+                    Dim Line() As String = tbname(1).Split("|")
+                    Dim Tmp() As String
+                    Dim i, j As Integer
+                    For i = 0 To Line.GetLongLength(0) - 1
+                        If Line(i).Trim <> "" Then
+                            Tmp = Line(i).Split("@")
+                            For j = 0 To Tmp.GetLongLength(0) - 1
+                                If i = 0 Then
+                                    If j = 0 Then
+                                        strSql = "CREATE TABLE " & tbname(0) & " ("
+                                    End If
+                                    If j <> Tmp.GetLongLength(0) - 1 Then
+                                        strSql = strSql & Tmp(j) & " text,"
+                                    Else
+                                        strSql = strSql & Tmp(j) & " text)"
+                                    End If
+                                Else
+                                    If j = 0 Then
+                                        strSql = "INSERT INTO " & tbname(0) & " VALUES('"
+                                    End If
+                                    If j <> Tmp.GetLongLength(0) - 1 Then
+                                        strSql = strSql & Tmp(j) & "','"
+                                    Else
+                                        strSql = strSql & Tmp(j) & "')"
+                                    End If
+                                End If
+                            Next
+                            MyOleDbCmd.CommandText = strSql
+                            MyOleDbCmd.ExecuteNonQuery()
+                        End If
+
+                    Next
+                Else
+                    Dim Line() As String = str.Split("|")
+                    Dim Tmp() As String
+                    Dim i, j As Integer
+                    For i = 0 To Line.GetLongLength(0) - 1
+                        If Line(i).Trim <> "" Then
+                            Tmp = Line(i).Split("@")
+                            For j = 0 To Tmp.GetLongLength(0) - 1
+                                If i = 0 Then
+                                    If j = 0 Then
+                                        strSql = "CREATE TABLE 导出数据" & c + 1 & " ("
+                                    End If
+                                    If j <> Tmp.GetLongLength(0) - 1 Then
+                                        strSql = strSql & Tmp(j) & " text,"
+                                    Else
+                                        strSql = strSql & Tmp(j) & " text)"
+                                    End If
+                                Else
+                                    If j = 0 Then
+                                        strSql = "INSERT INTO 导出数据" & c + 1 & " VALUES('"
+                                    End If
+                                    If j <> Tmp.GetLongLength(0) - 1 Then
+                                        strSql = strSql & Tmp(j) & "','"
+                                    Else
+                                        strSql = strSql & Tmp(j) & "')"
+                                    End If
+                                End If
+                            Next
+                            MyOleDbCmd.CommandText = strSql
+                            MyOleDbCmd.ExecuteNonQuery()
+                        End If
+                    Next
+                End If
+            End If
+            Return True
+        Catch ErrCode As Exception
+            Return False
+        Finally
+            MyOleDbCmd.Dispose()
+            MyOleDbCn.Close()
+            MyOleDbCn.Dispose()
+        End Try
+    End Function
+    Function SaveExcel(ByVal mytable As DataTable)
+        Dim MyOleDbCn As New OleDbConnection
+        Dim MyOleDbCmd As New OleDbCommand
+        Dim intRowsCnt, intColsCnt As Integer
+        Dim strSql As String
+
+        Try
+            MyOleDbCn.ConnectionString = dbconnstr
+            MyOleDbCn.Open()
+            MyOleDbCmd.Connection = MyOleDbCn
+            MyOleDbCmd.CommandType = CommandType.Text
+
+            '第一行插入列标题 
+            strSql = "CREATE TABLE 导出的数据("
+            For intColsCnt = 0 To mytable.Columns.Count - 1
+                If intColsCnt <> mytable.Columns.Count - 1 Then
+                    strSql = strSql & mytable.Columns(intColsCnt).Caption & " text,"
+                Else
+                    strSql = strSql & mytable.Columns(intColsCnt).Caption & " text)"
+                End If
+            Next
+            MyOleDbCmd.CommandText = strSql
+            MyOleDbCmd.ExecuteNonQuery()
+
+            '插入各行 
+            For intRowsCnt = 0 To mytable.Rows.Count - 1
+                strSql = "INSERT INTO 导出的数据 VALUES('"
+                For intColsCnt = 0 To mytable.Columns.Count - 1
+                    If intColsCnt <> mytable.Columns.Count - 1 Then
+                        strSql = strSql & mytable.Rows(intRowsCnt).Item(intColsCnt) & "','"
+                    Else
+                        strSql = strSql & mytable.Rows(intRowsCnt).Item(intColsCnt) & "')"
+                    End If
+                Next
+                MyOleDbCmd.CommandText = strSql
+                MyOleDbCmd.ExecuteNonQuery()
+            Next
+            Return True
+        Catch ErrCode As Exception
+            Return False
+        Finally
+            MyOleDbCmd.Dispose()
+            MyOleDbCn.Close()
+            MyOleDbCn.Dispose()
+        End Try
+    End Function
+
+End Class

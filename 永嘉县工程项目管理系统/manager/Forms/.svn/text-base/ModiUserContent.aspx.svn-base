@@ -1,0 +1,54 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ModiUserContent.aspx.vb" Inherits="manager_YGDM_ModiUserContent" ValidateRequest ="false" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>用户详细信息</title>
+     <script type="text/javascript" src="../../Pub/jquery-1.8.0.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {     //使用jquery的ready方法似的加载运行   
+            if (window.screen) {              //判断浏览器是否支持window.screen判断浏览器是否支持screen   
+                var myw = screen.availWidth;   //定义一个myw，接受到当前全屏的宽   
+                var myh = screen.availHeight;  //定义一个myw，接受到当前全屏的高   
+                window.moveTo(0, 0);           //把window放在左上脚   
+                window.resizeTo(myw, myh);     //把当前窗体的长宽跳转为myw和myh   
+            }
+        });
+        function doDownload() {
+            if (InfoJet_IsValid() == false) {
+                alert("请将必填项填完(带红星的输入框)!");
+                return false;
+            }
+            document.getElementsByName("xmlForm").item(0).action = "?Action=save";
+            document.getElementsByName("xmlForm").item(0).submit();
+        }
+    </script>
+
+    <link href="css/calendar-blue.css" type="text/css" rel="stylesheet" />
+    <script type="text/javascript" src="js/calendar.js"></script>
+    <script type="text/javascript" src="js/calendar-zh.js"></script>
+    <script type="text/javascript" src="js/calendar-setup.js"></script>
+    <script type="text/javascript" src="js/infojet.js"></script>
+    <script type="text/javascript" src="js/infojet.zh-cn.js"></script>
+
+</head>
+<body onload="InfoJet_Init();" style="margin:0; text-align:left">
+    <center>
+        <br />
+        <br />        
+        <span style="color: Red">*</span>
+        需要修改用户模版表单请至:表单库管理-->模板库管理进行覆盖上传。
+        <br />
+        <input type="submit" value=" 保 存 " onclick="doDownload()" />
+    </center>
+    <form name="xmlForm" action="ModiUserContent.aspx" method="post" id="form1" onsubmit="return doDownload();">
+        <br />
+        <input id="YGDM" type="hidden" name="YGDM" runat="server" />
+        <asp:Label ID="xDocContent" runat="server">xDocContent</asp:Label>
+        <span id="clientscript" runat="server"></span>
+    </form>
+</body>
+</html>
+
+
+
+

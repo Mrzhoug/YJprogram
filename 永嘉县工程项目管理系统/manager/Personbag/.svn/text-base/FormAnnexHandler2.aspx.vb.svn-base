@@ -1,0 +1,47 @@
+﻿
+Partial Class manager_Forms_FormAnnexHandler2
+    Inherits System.Web.UI.Page
+
+    Dim Base As New Base
+
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Response.ContentType = "text/plain"
+        Response.Charset = "utf-8"
+
+        Dim file As HttpPostedFile = Request.Files("Filedata")
+        Dim username As String
+        username = Base.GetWebUserName
+        Dim userid As Integer
+        userid = Base.GetUserID(username)
+        Dim Folder As String = Server.UrlDecode(Request("flpath"))
+        Dim TmpFolder As String = Server.MapPath("../../Submit_Temp") & "\" & username & "\"
+        Base.IO.CreateDir(TmpFolder)
+        Dim RootPath As String = Request.MapPath("../../") & "PersonalFolders\" & username & "\" & Folder & "\"
+
+        Base.IO.CreateDir(RootPath)
+
+
+
+        Dim filename As String = file.FileName
+        'Dim filenames() As String = filename.Split(".")
+        'If filenames.Length <> 2 Then
+        '    Response.Write("0")
+        '    Response.End()
+        'Else
+        '    filename = filenames(0) & Date.Now.ToString("yyyyMMddhhmmss") & "." & filenames(1)
+        'End If
+
+        Dim fileInfo As New IO.FileInfo(RootPath & filename)
+
+        If Not file Is Nothing Then
+            file.SaveAs(RootPath & filename)
+            Response.Write("1")
+        Else
+            Response.Write("0")
+        End If
+
+
+
+    End Sub
+End Class

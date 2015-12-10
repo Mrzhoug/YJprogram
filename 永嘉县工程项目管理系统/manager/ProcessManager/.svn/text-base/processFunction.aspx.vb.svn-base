@@ -1,0 +1,134 @@
+﻿
+Partial Class manager_ProcessManager_processFunction
+    Inherits System.Web.UI.Page
+
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim dt As New DataTable
+
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Dim type As Integer
+        Dim fid As Integer
+        Dim processName As String
+        Dim toUserList As String
+
+        Try
+            type = Convert.ToInt32(Request("type"))
+        Catch ex As Exception
+            Response.Write("非法参数")
+            Exit Sub
+        End Try
+
+        Try
+            fid = Convert.ToInt32(Request("fid"))
+        Catch ex As Exception
+            Response.Write("非法参数")
+            Exit Sub
+        End Try
+
+        If type <> 0 Then
+            Try
+                processName = Base.SqlFilter(Request("processName"))
+            Catch ex As Exception
+                Response.Write("非法参数")
+                Exit Sub
+            End Try
+
+            Try
+                toUserList = Base.SqlFilter(Request("toUserList"))
+            Catch ex As Exception
+                Response.Write("非法参数")
+                Exit Sub
+            End Try
+        End If
+
+        dt = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir,GY_MKXX.MKDM,XX_XMJC.XMDM,[View] FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & fid & ")", "XX_XMJC")
+        If dt.Rows.Count = 0 Then
+            Response.Write("非法访问")
+            Exit Sub
+        End If
+        Dim MKMC As String = dt.Rows(0).Item(1)
+        Dim XsnDir As String = dt.Rows(0).Item(2).ToString.Trim
+        Dim XMMC As String = dt.Rows(0).Item(1).ToString.Trim
+        Dim MKDM As Integer = dt.Rows(0).Item(3)
+        Dim XMDM As Integer = dt.Rows(0).Item(4)
+        Dim View As String = dt.Rows(0)(5).ToString.Trim
+
+        '流程名
+
+        Dim FileName As String = Server.MapPath("../../") & "\FormFolder\" & MKMC & "\" & fid & ".xml"
+
+        If type = 0 Then
+            Try
+                Base.XmlClass.GetXmlFile(FileName)
+                Base.XmlClass.FindNode("//my:备用6").InnerText = ""
+            Catch ex As Exception
+                Response.Write("流程状态清除失败")
+                Exit Sub
+            End Try
+
+            Try
+                Dim sqlstr As String
+
+                Base.insertProcessHistory(fid, "", "", "", "流程清空", "")
+                sqlstr = "update processHistory set isover ='true' where fid=  " & fid & " and isover = 'false'"
+                Base.DB.Query(sqlstr)
+            Catch ex As Exception
+                Response.Write("流程状态清除失败")
+                Exit Sub
+            End Try
+
+            Base.XmlClass.Save()
+            Response.Write("历史记录清除成功")
+
+        Else
+
+            Dim currentProcess As String
+            Try
+                Base.XmlClass.GetXmlFile(FileName)
+                currentProcess = Base.XmlClass.FindNode("//my:备用6").InnerText
+                Base.XmlClass.FindNode("//my:备用6").InnerText = processName
+                Base.XmlClass.Save()
+            Catch ex As Exception
+                Response.Write("流程状态更改失败")
+                Exit Sub
+            End Try
+
+            Dim sendContent As String
+            Dim attentionNode As String
+            Try
+                sendContent = Request("sendContent").ToString()
+            Catch ex As Exception
+                sendContent = "流程退回"
+            End Try
+
+            Try
+                attentionNode = Request("attentionNode").ToString()
+            Catch ex As Exception
+                attentionNode = ""
+            End Try
+
+
+            Try
+                Base.autoSend(toUserList, fid, sendContent)
+                Base.insertProcessHistory(fid, currentProcess, processName, toUserList, sendContent, attentionNode)
+            Catch ex As Exception
+                Response.Write("退回失败")
+                Response.End()
+            End Try
+
+
+            Response.Write("流程退回成功")
+        End If
+        FormInfo.SubmitForm(fid)
+        'Base.SynSubmit(fid, "提交")
+
+
+    End Sub
+End Class

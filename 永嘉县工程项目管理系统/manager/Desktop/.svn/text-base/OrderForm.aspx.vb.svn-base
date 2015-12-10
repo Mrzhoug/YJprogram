@@ -1,0 +1,143 @@
+﻿
+Partial Class manager_Desktop_OrderForm
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Int16
+        For i = 0 To GridView1.Rows.Count - 1
+            If GridView1.DataKeys(i).Item(1).ToString.Trim = "False" Then
+                CType(GridView1.Rows(i).Cells(2).Controls(0), LinkButton).Text = "选择"
+            Else
+                CType(GridView1.Rows(i).Cells(2).Controls(0), LinkButton).Text = "订阅"
+            End If
+        Next
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        Dim Index As Int16 = e.NewSelectedIndex
+        Dim LCDM As Int16 = GridView1.DataKeys(Index).Item(0)
+        Dim Tb As New DataTable
+        Gridview2Bind(LCDM)
+        If GridView1.DataKeys(Index).Item(1).ToString.Trim = "False" Then
+            '对有流程的进行显示流程中的功能
+        Else
+            '无流程的，则直接订阅
+            Tb = Base.DB.Table("select MKDM,MKMC from GY_MKXX where NOLCDM = " & LCDM, "GY_MKXX")
+            If Tb.Rows.Count = 0 Then
+                'Response.Write(LCDM)
+            Else
+                Dim MKDM As Int16 = Tb.Rows(0).Item(0)
+                Dim MKMC As String = Tb.Rows(0).Item(1)
+                Dim XMDM As Int16 = -1
+                Dim LCFlag As Int16 = 0
+                Dim sql As String
+                sql = "insert into Order_Form_Table(UserID,LCDM,XMDM,MKDM,OrderDate,OrderFlag,LCFlag) values(" & UserID & "," & LCDM & "," & XMDM & "," & MKDM & ",'" & Now() & "',1," & LCFlag & ")"
+                If Base.DB.Query(sql) > 0 Then
+                    Message.Text = MKMC & "->订阅成功"
+                Else
+                    Message.Text = MKMC & "->订阅失败"
+                End If
+            End If
+        End If
+        GridView1.SelectedIndex = -1
+        Gridview1Bind()
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        If Page.IsPostBack = False Then
+            Gridview1Bind()
+        End If
+    End Sub
+
+    Protected Sub GridView2_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView2.SelectedIndexChanging
+        Dim Index As Int16 = GridView1.SelectedIndex
+        Dim LCDM As Int16 = GridView1.DataKeys(Index).Item(0)
+        Dim MKDM As Int16 = GridView2.DataKeys(e.NewSelectedIndex).Item(0)
+        Dim XMDM As Int16 = -1
+        Dim LCFlag As Int16 = 1
+        Dim sql As String
+        sql = "insert into Order_Form_Table(UserID,LCDM,XMDM,MKDM,OrderDate,OrderFlag,LCFlag) values(" & UserID & "," & LCDM & "," & XMDM & "," & MKDM & ",'" & Now() & "',1," & LCFlag & ")"
+        If Base.DB.Query(sql) > 0 Then
+            Message.Text = GridView2.Rows(e.NewSelectedIndex).Cells(0).Text & "->订阅成功"
+        Else
+            Message.Text = GridView2.Rows(e.NewSelectedIndex).Cells(0).Text & "->订阅失败"
+        End If
+        Gridview1Bind()
+    End Sub
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        GridView1.SelectedIndex = -1
+        Gridview1Bind()
+        Gridview2Bind(-1)
+    End Sub
+
+    Sub Gridview1Bind()
+        Dim TempTb As New Data.DataTable
+        Dim Tb As New Data.DataTable
+        TempTb = Base.DB.Table("SELECT [LCDM], [LCMC], [LCSM], [Flag] FROM [GY_LCDM]  Where LCDM not In(select LCDM from Order_Form_Table where UserID = " & UserID & " and OrderFlag = 1 and LCFlag = 0) order by [Flag]", "a1231")
+
+        Dim i As Int16
+        For i = TempTb.Rows.Count - 1 To 0 Step -1
+            If TempTb.Rows(i).Item(3).ToString.Trim = "False" Then
+                'CType(GridView1.Rows(i).Cells(2).Controls(0), LinkButton).Text = "选择"
+            Else
+                '这里订阅时，马上做权限判断。
+                Dim LCDM As Integer = TempTb.Rows(i)(0)
+                Dim MKDM As Integer = 0
+                Tb = Base.DB.Table("select MKDM,MKMC from GY_MKXX where NOLCDM = " & LCDM, "GY_MKXX")
+                If Tb.Rows.Count = 0 Then
+                    '表示流程出错．
+                    'ObjTb.Rows.RemoveAt(i)
+                Else
+                    MKDM = Tb.Rows(0).Item(0)
+                End If
+                If Base.GetUserHaveQX(UserID, MKDM) > 0 Then
+                    '表示有权限，可以订阅
+                Else
+                    TempTb.Rows.RemoveAt(i)
+                End If
+            End If
+        Next
+
+
+        GridView1.DataSource = TempTb
+        GridView1.DataBind()
+
+        If Not GridView1.SelectedRow Is Nothing Then
+            Dim LCDM As Int16 = GridView1.DataKeys(GridView1.SelectedIndex).Item(0)
+            If GridView1.DataKeys(GridView1.SelectedIndex).Item(1).ToString.Trim = "False" Then
+                '对有流程的进行显示流程中的功能
+                Gridview2Bind(LCDM)
+            End If
+        End If
+
+    End Sub
+
+    Sub Gridview2Bind(ByVal LCDM As Integer)
+        Dim tb As New Data.DataTable
+        Dim i As Integer
+        tb = Base.DB.Table("select GY_MKXX.MKDM,GY_MKXX.MKMC from GY_ZTMX,GY_XMZT,GY_MKXX where GY_ZTMX.XMZT = GY_XMZT.XMZT and GY_MKXX.MKDM = GY_ZTMX.MKDM and GY_XMZT.LCDM = " & LCDM & " and GY_MKXX.MKDM not in (SELECT MKDM FROM Order_Form_Table where USerID = " & UserID & " and OrderFlag = 1 and LCFlag =1)", "GY_MKXX")
+        Dim MKDM As Integer
+        For i = tb.Rows.Count - 1 To 0 Step -1
+            MKDM = tb.Rows(i).Item(0)
+            If Base.GetUserHaveQX(UserID, MKDM) > 0 Then
+                'CType(GridView2.Rows(i).Cells(1).Controls(0), LinkButton).Text = "订阅"
+            Else
+                tb.Rows.RemoveAt(i)
+            End If
+        Next
+
+        GridView2.DataSource = tb
+        GridView2.DataBind()
+
+    End Sub
+
+End Class

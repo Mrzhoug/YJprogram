@@ -1,0 +1,151 @@
+﻿Imports System.IO
+Imports System.Xml
+Partial Class manager_lctmanage_addtemplate
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Dpath As String
+    Public mb As String = "yjxmgl.xml"
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        If FileUpload1.PostedFile.ContentLength = 0 Then Exit Sub
+        If FileUpload1.PostedFile.ContentType <> "text/xml" Then
+            Base.Js.alert(Me, "上传文件类型不正确！")
+            Exit Sub
+        End If
+        Base.IO.CreateDir(Dpath)
+        Try
+            FileUpload1.SaveAs(Dpath & "\\" & mb)
+        Catch ex As Exception
+            Base.Js.alert(Me, "上传失败，请重新上传")
+            Exit Sub
+        End Try
+        Base.Js.alert(Me, "上传成功")
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        If Not Base.CheckUserAuthentication() Then
+            Response.Write("非法访问！")
+            Response.End()
+        End If
+        Dpath = Request.MapPath("../../lct/lcmb")
+    End Sub
+
+
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+        Dim xmldoc As New XmlDocument
+        Try
+            xmldoc.Load(Server.MapPath("../../lct/lcmb") & "\\" & mb)
+        Catch ex As Exception
+            Base.Js.alert(Me, "模板加载失败")
+            Exit Sub
+        End Try
+        Dim xmllist As XmlNodeList = xmldoc.SelectNodes("//v:rect[v:textbox/w:txbxContent/w:p/w:r/w:t!='' or v:textbox/w:txbxContent/w:p/w:hyperlink/w:r/w:t!='']", Base.GetXmlNamespaceManager_lct(xmldoc))
+        Dim xmllist1 As XmlNodeList = xmldoc.SelectNodes("//v:oval[v:textbox/w:txbxContent/w:p/w:r/w:t!='' or v:textbox/w:txbxContent/w:p/w:hyperlink/w:r/w:t!='']", Base.GetXmlNamespaceManager_lct(xmldoc))
+        Dim xmllist2 As XmlNodeList = xmldoc.SelectNodes("//v:shape[v:textbox/w:txbxContent/w:p/w:r/w:t!='' or v:textbox/w:txbxContent/w:p/w:hyperlink/w:r/w:t!='']", Base.GetXmlNamespaceManager_lct(xmldoc))
+        Dim shapeid As String = ""
+        Dim shapenr As String = ""
+        Dim xmlnode As XmlNodeList
+        Dim xmltb As New DataTable
+        If xmllist.Count > 0 Then
+            Dim xn As System.Xml.XmlNode
+            Dim xn1 As System.Xml.XmlNode
+            For Each xn In xmllist '遍历所有子节点 
+                Dim xe As XmlElement = CType(xn, XmlElement) '将子节点类型转换为XmlElement类型                
+                shapenr = ""
+                shapeid = xe.GetAttribute("id")
+                xmlnode = xn.SelectNodes("v:textbox/w:txbxContent/w:p/w:r/w:t", Base.GetXmlNamespaceManager_lct(xmldoc))
+                If xmlnode.Count > 0 Then
+                    For Each xn1 In xmlnode
+                        shapenr += xn1.InnerXml
+                    Next
+                End If
+                If shapenr = "" Then
+                    xmlnode = xn.SelectNodes("v:textbox/w:txbxContent/w:p/w:hyperlink/w:r/w:t", Base.GetXmlNamespaceManager_lct(xmldoc))
+                    If xmlnode.Count > 0 Then
+                        For Each xn1 In xmlnode
+                            shapenr += xn1.InnerXml
+                        Next
+                    End If
+                End If
+                'Response.Write(shapeid & "//" & shapenr & "//")
+                'Response.Write("select id,lcname,shapeid from lc_order where shapeid='" & shapeid & "' and lcbs='" & DropDownList2.SelectedValue & "'")
+                '   Response.End()
+                If shapenr <> "N" And shapenr <> "Y" And shapenr <> "是" And shapenr <> "否" And shapenr <> "" Then
+                    xmltb = Base.DB.Table("select id,lcname,shapeid from lc_order where shapeid='" & shapeid & "' ", "aa")
+                    If xmltb.Rows.Count > 0 Then
+                        Base.DB.Query("update lc_order set lcname='" & shapenr & "' where shapeid='" & shapeid & "'")
+                    Else
+                        Base.DB.Query("insert into lc_order(lcname,shapeid) values('" & shapenr & "','" & shapeid & "')")
+                    End If
+                End If
+
+
+            Next xn
+        End If
+        If xmllist1.Count > 0 Then
+            Dim xn As System.Xml.XmlNode
+            Dim xn1 As System.Xml.XmlNode
+            For Each xn In xmllist1 '遍历所有子节点 
+                Dim xe As XmlElement = CType(xn, XmlElement) '将子节点类型转换为XmlElement类型                
+                shapenr = ""
+                shapeid = xe.GetAttribute("id")
+                xmlnode = xn.SelectNodes("v:textbox/w:txbxContent/w:p/w:r/w:t", Base.GetXmlNamespaceManager_lct(xmldoc))
+                If xmlnode.Count > 0 Then
+                    For Each xn1 In xmlnode
+                        shapenr += xn1.InnerXml
+                    Next
+                End If
+                If shapenr = "" Then
+                    xmlnode = xn.SelectNodes("v:textbox/w:txbxContent/w:p/w:hyperlink/w:r/w:t", Base.GetXmlNamespaceManager_lct(xmldoc))
+                    If xmlnode.Count > 0 Then
+                        For Each xn1 In xmlnode
+                            shapenr += xn1.InnerXml
+                        Next
+                    End If
+                End If
+                If shapenr <> "N" And shapenr <> "Y" And shapenr <> "是" And shapenr <> "否" Then
+                    xmltb = Base.DB.Table("select id,lcname,shapeid from lc_order where shapeid='" & shapeid & "'", "aa")
+                    If xmltb.Rows.Count > 0 Then
+                        Base.DB.Query("update lc_order set lcname='" & shapenr & "' where shapeid='" & shapeid & "' ")
+                    Else
+                        Base.DB.Query("insert into lc_order(lcname,shapeid) values('" & shapenr & "','" & shapeid & "')")
+                    End If
+                End If
+
+            Next xn
+        End If
+        If xmllist2.Count > 0 Then
+            Dim xn As System.Xml.XmlNode
+            Dim xn1 As System.Xml.XmlNode
+            For Each xn In xmllist2 '遍历所有子节点 
+                Dim xe As XmlElement = CType(xn, XmlElement) '将子节点类型转换为XmlElement类型                
+                shapenr = ""
+                shapeid = xe.GetAttribute("id")
+                xmlnode = xn.SelectNodes("v:textbox/w:txbxContent/w:p/w:r/w:t", Base.GetXmlNamespaceManager_lct(xmldoc))
+                If xmlnode.Count > 0 Then
+                    For Each xn1 In xmlnode
+                        shapenr += xn1.InnerXml
+                    Next
+                End If
+                If shapenr = "" Then
+                    xmlnode = xn.SelectNodes("v:textbox/w:txbxContent/w:p/w:hyperlink/w:r/w:t", Base.GetXmlNamespaceManager_lct(xmldoc))
+                    If xmlnode.Count > 0 Then
+                        For Each xn1 In xmlnode
+                            shapenr += xn1.InnerXml
+                        Next
+                    End If
+                End If
+                If shapenr <> "N" And shapenr <> "Y" And shapenr <> "是" And shapenr <> "否" Then
+                    xmltb = Base.DB.Table("select id,lcname,shapeid from lc_order where shapeid='" & shapeid & "'", "aa")
+                    If xmltb.Rows.Count > 0 Then
+                        Base.DB.Query("update lc_order set lcname='" & shapenr & "' where shapeid='" & shapeid & "'")
+                    Else
+                        Base.DB.Query("insert into lc_order(lcname,shapeid) values('" & shapenr & "','" & shapeid & "')")
+                    End If
+                End If
+
+            Next xn
+        End If
+        Base.Js.alert(Me, "更新成功")
+    End Sub
+End Class

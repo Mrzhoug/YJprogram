@@ -1,0 +1,230 @@
+﻿
+Partial Class manager_Notice_newNotice
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim dt As New DataTable
+    Dim i As Integer
+    Dim fid As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Try
+            fid = Request("ID")
+        Catch ex As Exception
+            fid = 0
+        End Try
+
+        If Not IsPostBack Then
+            dt = Base.DB.Table("select NoLcDM,XsnDir,MKMC,MKDM from [GY_MKXX] ", "GY_MKXX")
+            If dt.Rows.Count <= 0 Then
+                Base.Js.alert(Me, "功能模板有问题!")
+                Exit Sub
+            End If
+
+            For i = 0 To dt.Rows.Count - 1
+                DDLFormList.Items.Add(New ListItem(dt.Rows(i).Item("MKMC").ToString.Trim, dt.Rows(i).Item("MKDM").ToString.Trim))
+            Next
+        End If
+
+        If Not IsPostBack Then
+            If fid <> 0 Then
+                Dim sqlstr As String
+                sqlstr = "select * from noticeSetting where id = " & fid
+                dt = Base.DB.Table(sqlstr, "dd")
+                If dt.Rows.Count <> 0 Then
+                    Dim formID As String = dt.Rows(0).Item("formID").ToString()
+                    DDLFormList.SelectedIndex = DDLFormList.Items.IndexOf(DDLFormList.Items.FindByValue(formID))
+                    ResetFormNode(formID)
+
+                    ResetFormNode(DDLSendContentNodeName, formID)
+
+                    Dim nodeName As String = dt.Rows(0).Item("nodeName").ToString()
+                    DDLNodeList.SelectedIndex = DDLNodeList.Items.IndexOf(DDLNodeList.Items.FindByText(nodeName))
+
+                    Dim symbol As String = dt.Rows(0).Item("symbol").ToString()
+                    DDLSymbol.SelectedIndex = DDLSymbol.Items.IndexOf(DDLSymbol.Items.FindByValue(symbol))
+
+                    Dim condition As String = dt.Rows(0).Item("condition").ToString()
+                    TBCondition.Text = condition
+
+                    Dim msgcontent As String = dt.Rows(0).Item("msgcontent").ToString()
+                    LBSendContent.Text = msgcontent
+
+                    Dim touserlist As String = dt.Rows(0).Item("touserlist").ToString()
+                    TBToWhere.Text = touserlist
+
+                    Dim isEnable As Boolean = Convert.ToBoolean(dt.Rows(0).Item("enabled"))
+                    CKisEnable.Checked = isEnable
+
+                Else
+                    Response.Write("非法访问")
+                    Response.End()
+                End If
+            End If
+        End If
+    End Sub
+
+    Protected Sub DDLFormList_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles DDLFormList.SelectedIndexChanged
+        Dim mkdm As String
+        DDLNodeList.Items.Clear()
+        mkdm = DDLFormList.SelectedValue
+        ResetFormNode(mkdm)
+        ResetFormNode(DDLSendContentNodeName, mkdm)
+    End Sub
+
+    ''' <summary>
+    ''' 重设表单节点列表
+    ''' </summary>
+    ''' <remarks></remarks>
+    Sub ResetFormNode(ByVal MKDM As String)
+       Dim dt As New DataTable
+        dt = Base.DB.Table("SELECT distinct([MapExtName]) FROM [MapConfig] WHERE ([MKDM] = " & MKDM & ") ", "dd")
+
+        Dim ListNodeName As String()
+        ReDim ListNodeName(dt.Rows.Count - 1)
+        For i As Integer = 0 To dt.Rows.Count - 1
+            ListNodeName(i) = dt.Rows(i).Item("MapExtName").ToString()
+        Next
+
+
+        DDLNodeList.DataSource = ListNodeName
+        DDLNodeList.DataBind()
+    End Sub
+
+
+    Sub ResetFormNode(ByVal nodeName As DropDownList, ByVal MKDM As String)
+        Dim FormName As String
+        Dim Row As DataRow = Base.DB.Row("select XsnDir,MKMC,MKDM from [GY_MKXX] where MKDM = " & MKDM, "dd")
+        If Row Is Nothing Then
+            NodeName.Items.Clear()
+            Exit Sub
+        Else
+            FormName = Row.Item("XsnDir").ToString.Trim
+            Dim filename As String = Server.MapPath("../../") & "TemplateLibrary\" & FormName & "\template.xml"
+            If IO.File.Exists(filename) = False Then
+                Base.Js.showalert(Me, "模板存问题,请刷新模板!")
+                Exit Sub
+            End If
+            Dim node As System.Xml.XmlNode = Base.XmlClass.GetXmlFile(filename)
+            Dim ListNodeName As String()
+            Dim tempstr As String()
+            Try
+                tempstr = Base.XmlClass.GetNodeNameList(node.ChildNodes(0))
+                ReDim ListNodeName(tempstr.Length - 1)
+                Dim i As Integer = 0
+                For i = 0 To tempstr.Length - 1
+                    'ListNodeName(i) = tempstr(i).Replace("<", "").Replace(">", "")
+                    Dim item As New ListItem
+                    item.Text = tempstr(i).Replace("<", "").Replace(">", "")
+
+                    item.Value = tempstr(i).Replace("<", "").Replace(">", "")
+                    nodeName.Items.Add(item)
+                Next
+            Catch ex As Exception
+                Base.Js.alert(Me, "模板存在问题,请不要最外的重复节添加节点.请修改模板重,重新上传并重新建功能.")
+                Exit Sub
+            End Try
+            'NodeName.DataSource = ListNodeName
+            'NodeName.DataBind()
+        End If
+    End Sub
+
+
+    Protected Sub BtnConfirm_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles BtnConfirm.Click
+        Dim sqlstr As String
+
+        '表单ID
+        Dim formID As String
+        formID = DDLFormList.SelectedValue
+
+        '节点名称
+        Dim nodeName As String
+        nodeName = DDLNodeList.SelectedValue
+
+        '提醒类型
+        Dim noticeType As String
+        noticeType = DDLNoticeType.SelectedValue
+
+        '符号
+        Dim symbol As String
+        symbol = DDLSymbol.SelectedValue
+
+        Dim condition As String
+        condition = Base.SqlFilter(TBCondition.Text)
+
+        Dim msgContent As String
+        msgContent = Base.SqlFilter(LBSendContent.Text)
+
+        Dim toUserList As String
+        toUserList = Base.SqlFilter(TBToWhere.Text)
+
+        Dim isEnable As Boolean
+        isEnable = CKisEnable.Checked
+
+
+        If msgContent.Length = 0 Then
+            Base.Js.alert(Me, "发送内容不能为空")
+            Exit Sub
+        End If
+
+        If toUserList.Length = 0 Then
+            Base.Js.alert(Me, "接收人不能为空")
+            Exit Sub
+        End If
+
+        If fid <> 0 Then
+            sqlstr = "update NoticeSetting set formID= '" & formID & "',noticeType='" & noticeType & "', nodeName = '" & nodeName & "',symbol='" & symbol & "',condition='" & condition & "',msgcontent='" & msgContent & "',touserlist='" & toUserList & "',enabled=" & Convert.ToInt32(isEnable) & " where id=" & fid
+            Base.DB.Query(sqlstr)
+            Response.Write("<script>window.opener.location.href=window.opener.location.href</script>")
+            Base.Js.showalert(Me, "更新成功")
+        Else
+            sqlstr = "insert into NoticeSetting (formID,nodeName,noticeType,symbol,condition,msgcontent,touserlist,enabled) values ('" & formID & "','" & nodeName & "','" & noticeType & "','" & symbol & "','" & condition & "','" & msgContent & "','" & toUserList & "'," & Convert.ToInt32(isEnable) & ")"
+            Base.DB.Query(sqlstr)
+            Response.Write("<script>window.opener.location.href=window.opener.location.href</script>")
+            Base.Js.showalert(Me, "创建成功")
+        End If
+    End Sub
+
+    Protected Sub DDLNoticeType_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles DDLNoticeType.SelectedIndexChanged
+
+        If DDLNoticeType.SelectedValue = "typeDate" Then
+            Dim item As New ListItem
+            item.Value = "before"
+            item.Text = "提前(天)"
+            DDLSymbol.Items.Add(item)
+
+            Dim item1 As New ListItem
+            item1.Value = "after"
+            item1.Text = "延后(天)"
+            DDLSymbol.Items.Add(item1)
+
+        Else
+
+            DDLSymbol.Items().RemoveAt(DDLSymbol.Items.Count - 1)
+            DDLSymbol.Items().RemoveAt(DDLSymbol.Items.Count - 1)
+        End If
+    End Sub
+
+    Protected Sub btnContentAdd_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnContentAdd.Click
+        Dim strSendContent As String
+        If LBSendContent.Text = "空" Then
+            strSendContent = ""
+        Else
+            strSendContent = LBSendContent.Text
+        End If
+
+        If DDLSendContentNodeName.SelectedItem.Text <> "无" Then
+            strSendContent = strSendContent & "[node:" & DDLSendContentNodeName.SelectedItem.Text & "]"
+        End If
+
+        If TBSendContentText.Text <> "" Then
+            strSendContent = strSendContent & TBSendContentText.Text
+        End If
+
+        LBSendContent.Text = strSendContent
+    End Sub
+
+    Protected Sub btnContentClear_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnContentClear.Click
+        LBSendContent.Text = "空"
+    End Sub
+End Class

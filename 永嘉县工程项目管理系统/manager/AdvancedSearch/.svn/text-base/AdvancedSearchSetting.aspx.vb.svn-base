@@ -1,0 +1,286 @@
+﻿Imports System.Xml
+
+Partial Class manager_AdvancedSearch_AdvancedSearchSetting
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim MKDM As Integer
+    Dim sqlstr As String
+    Dim dt As New DataTable
+    Dim maxOrder As Integer
+
+
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Try
+            MKDM = Request.QueryString("mkdm").ToString()
+        Catch ex As Exception
+            MKDM = -1
+        End Try
+
+        If MKDM = -1 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+
+        Dim mkmc As String
+        mkmc = Base.GetMKMCByMKDM(MKDM)
+
+        If mkmc = "" Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+        If Page.IsPostBack = False Then
+            ResetFormNode(MKDM)
+        End If
+        LBmkmc.Text = mkmc
+
+        If Not IsPostBack Then
+            bind()
+        End If
+
+    End Sub
+
+
+
+
+    Sub bind()
+        sqlstr = "select * from AdvancedSearchSetting where mkdm = " & MKDM & " order by orderby"
+        dt = Base.DB.Table(sqlstr, "dd")
+        GridView1.DataSource = dt
+        GridView1.DataBind()
+        maxOrder = dt.Rows.Count
+    End Sub
+
+
+
+    ''' <summary>
+    ''' 重设表单节点列表
+    ''' </summary>
+    ''' <remarks></remarks>
+    Sub ResetFormNode(ByVal MKDM As String)
+
+        Dim dt As New DataTable
+        dt = Base.DB.Table("SELECT distinct([MapExtName]) FROM [MapConfig] WHERE ([MKDM] = " & MKDM & ") ", "dd")
+
+        Dim ListNodeName As String()
+        ReDim ListNodeName(dt.Rows.Count - 1)
+        For i As Integer = 0 To dt.Rows.Count - 1
+            ListNodeName(i) = dt.Rows(i).Item("MapExtName").ToString()
+        Next
+
+        
+        NodeName.DataSource = ListNodeName
+        NodeName.DataBind()
+
+    End Sub
+
+    Protected Sub ListAdd_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles ListAdd.Click
+
+        Dim searchTitle As String = Base.SqlFilter(LBsearchTitle.Text)
+        Dim searchNode As String = NodeName.SelectedValue()
+        Dim searchType As String = DDLsearchType.SelectedValue()
+        Dim conditonType As String = DDLconditionType.SelectedValue()
+
+        If searchTitle.Length = 0 Then
+            Base.Js.alert(Me, "请输入搜素字段名称")
+            Exit Sub
+        End If
+
+
+
+        sqlstr = "select * from AdvancedSearchSetting where searchTitle='" & searchTitle & "' and mkdm =" & MKDM
+        dt = Base.DB.Table(sqlstr, "dd")
+        If dt.Rows.Count > 0 Then
+            Base.Js.alert(Me, "已存在该搜素字段名称")
+            Exit Sub
+        End If
+
+
+        sqlstr = "select * from AdvancedSearchSetting where mkdm = " & MKDM & " order by orderby"
+        dt = Base.DB.Table(sqlstr, "dd")
+        maxOrder = dt.Rows.Count
+
+        sqlstr = "insert into AdvancedSearchSetting (mkdm,searchTitle,searchNode,searchType,conditionType,orderby) values (" & MKDM & ",'" & searchTitle & "','" & searchNode & "','" & searchType & "','" & conditonType & "'," & maxOrder + 1 & ")"
+        Base.DB.Query(sqlstr)
+        Base.Js.showalert(Me, "添加成功")
+        bind()
+    End Sub
+
+
+    Protected Sub GridView1_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs) Handles GridView1.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow And GridView1.EditIndex = -1 Then
+            '鼠标效果
+            e.Row.Attributes("style") = "Cursor:hand"
+            e.Row.Cells(1).Attributes.Add("Onclick", "javascript:__doPostBack('Gridview1','Select$" & e.Row.RowIndex & "')")
+            e.Row.Cells(3).Attributes.Add("Onclick", "javascript:__doPostBack('Gridview1','Select$" & e.Row.RowIndex & "')")
+        End If
+    End Sub
+
+    Protected Sub MoveDown_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles MoveDown.Click
+        Dim SelectIndex As Integer = GridView1.SelectedIndex
+        Dim selectInexOrder As Integer
+        Try
+            selectInexOrder = GridView1.DataKeys(SelectIndex).Values("orderby")
+        Catch ex As Exception
+            Base.Js.showalert(Me, "下移功能错误")
+            Exit Sub
+        End Try
+
+        Dim MoveItemOrder As Integer
+        MoveItemOrder = GridView1.DataKeys(SelectIndex).Values("orderby")
+
+        Dim dt1 As New DataTable '需要下移的功能模块
+        dt1 = Base.DB.Table("select ID from [AdvancedSearchSetting] where [orderby] =  " & MoveItemOrder & " and mkdm=" & MKDM, "dd")
+        Dim dt2 As New DataTable
+        dt2 = Base.DB.Table("select ID from [AdvancedSearchSetting] where [orderby] =  " & MoveItemOrder + 1 & " and mkdm=" & MKDM, "dd")
+
+        Dim i As Integer
+        For i = 0 To dt1.Rows.Count - 1
+            Base.DB.Query("update AdvancedSearchSetting set [orderby] = " & MoveItemOrder + 1 & " where id=" & dt1.Rows(i).Item(0))
+        Next
+        For i = 0 To dt2.Rows.Count - 1
+            Base.DB.Query("update AdvancedSearchSetting set [orderby] = " & MoveItemOrder & " where id=" & dt2.Rows(i).Item(0))
+        Next
+
+        GridView1.SelectedIndex = -1
+        MoveDown.Enabled = False
+        MoveUp.Enabled = False
+
+        bind()
+
+    End Sub
+
+    Protected Sub MoveUp_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles MoveUp.Click
+
+        Dim SelectIndex As Integer = GridView1.SelectedIndex
+        Dim selectInexOrder As Integer
+        Try
+            selectInexOrder = GridView1.DataKeys(SelectIndex).Values("orderby")
+        Catch ex As Exception
+            Base.Js.showalert(Me, "上移功能错误")
+            Exit Sub
+        End Try
+
+        Dim MoveItemOrder As Integer
+        MoveItemOrder = GridView1.DataKeys(SelectIndex).Values("orderby")
+
+        Dim dt1 As New DataTable '需要上移的功能模块
+        dt1 = Base.DB.Table("select ID from AdvancedSearchSetting where [orderby] =  " & MoveItemOrder & " and mkdm=" & MKDM, "dd")
+        Dim dt2 As New DataTable
+        dt2 = Base.DB.Table("select ID from AdvancedSearchSetting where [orderby] =  " & MoveItemOrder - 1 & " and mkdm=" & MKDM, "dd")
+
+        Dim i As Integer
+        For i = 0 To dt1.Rows.Count - 1
+            Base.DB.Query("update AdvancedSearchSetting set [orderby] = " & MoveItemOrder - 1 & " where id=" & dt1.Rows(i).Item(0))
+        Next
+        For i = 0 To dt2.Rows.Count - 1
+            Base.DB.Query("update AdvancedSearchSetting set [orderby] = " & MoveItemOrder & " where id=" & dt2.Rows(i).Item(0))
+        Next
+
+        GridView1.SelectedIndex = -1
+        MoveDown.Enabled = False
+        MoveUp.Enabled = False
+        bind()
+
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        GridView1.SelectedIndex = e.NewSelectedIndex
+        bind()
+
+        If GridView1.DataKeys(e.NewSelectedIndex).Values("orderby") > 1 Then
+            MoveUp.Enabled = True
+        Else
+            MoveUp.Enabled = False
+        End If
+
+        If GridView1.DataKeys(e.NewSelectedIndex).Values("orderby") < maxOrder Then
+            MoveDown.Enabled = True
+        Else
+            MoveDown.Enabled = False
+        End If
+    End Sub
+
+    Protected Sub BtnDel_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles BtnDel.Click
+        Dim i As Integer
+        Dim ck As CheckBox
+        Dim id As Integer
+        Dim delItemOrder As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                delItemOrder = GridView1.DataKeys(i).Values("orderby")
+                id = GridView1.DataKeys(i).Values("id")
+                Base.DB.Query("delete from AdvancedSearchSetting where id = " & id)
+            End If
+        Next
+
+        dt = Base.DB.Table("select distinct [orderby] from AdvancedSearchSetting where mkdm=" & MKDM, "dd")
+
+        For i = 0 To dt.Rows.Count - 1
+            sqlstr = "update AdvancedSearchSetting set [orderby] = " & i + 1 & " where [orderby] = " & dt.Rows(i).Item("orderby") & " and MKDM = " & MKDM
+            Base.DB.Query(sqlstr)
+        Next
+
+        bind()
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Cells(3).Text = selSearchType(GridView1.Rows(i).Cells(3).Text)
+
+
+            If GridView1.Rows(i).Cells(3).Text = "下拉型" Then
+                GridView1.Rows(i).Cells(4).Text = "<a href='#' onclick='editDropDownList(" & GridView1.DataKeys(i).Item("id") & ")'>编辑下拉内容</a>"
+            Else
+                GridView1.Rows(i).Cells(4).Text = selSearchConditionType(GridView1.Rows(i).Cells(4).Text)
+            End If
+
+
+        Next
+    End Sub
+
+    Function selSearchType(ByVal str As String) As String
+        Select Case str
+            Case "typeNumber"
+                Return "数值型"
+            Case "typeDate"
+                Return "日期型"
+            Case "typeString"
+                Return "字符串型"
+            Case "typeDropDown"
+                Return "下拉型"
+            Case Else
+                Return ""
+        End Select
+    End Function
+
+
+    Function selSearchConditionType(ByVal str As String) As String
+        Select str
+            Case "conditionInterval"
+                Return "区间"
+            Case "conditionLike"
+                Return "包含"
+            Case "conditionEqual"
+                Return "相等"
+            Case "conditionNotEqual"
+                Return "不相等"
+            Case Else
+                Return ""
+        End Select
+    End Function
+
+    Protected Sub DDLsearchType_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles DDLsearchType.SelectedIndexChanged
+        If DDLsearchType.SelectedValue = "typeDropDown" Then
+            DDLconditionType.ClearSelection()
+            DDLconditionType.Items.FindByValue("conditionEqual").Selected = True
+            DDLconditionType.Enabled = False
+        Else
+            DDLconditionType.Enabled = True
+        End If
+    End Sub
+End Class

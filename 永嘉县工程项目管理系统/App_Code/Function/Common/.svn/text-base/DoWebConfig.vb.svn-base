@@ -1,0 +1,20 @@
+﻿Imports Microsoft.VisualBasic
+Imports System.Xml
+
+Public Class DoWebConfig
+
+    ''' <summary>
+    ''' 获取用户配置信息
+    ''' </summary>
+    ''' <param name="names"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function GetWebConfig(ByVal names As String) As String
+        If System.Configuration.ConfigurationManager.AppSettings(names) Is Nothing Then
+            Return ""
+        Else
+            Return System.Configuration.ConfigurationManager.AppSettings(names)
+        End If
+    End Function
+
+End Class

@@ -1,0 +1,58 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="FormXd_NoLc.aspx.vb" Inherits="manager_Forms_FormXd_NoLc" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>修订功能</title>
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div align="center">
+            <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT * FROM [GY_YGDM]"></asp:SqlDataSource>
+        <table style="width: 413px">
+            <tr>
+                <td colspan="3" align="center">
+        <asp:Label ID="Title" runat="server" Height="41px" Text="标题" Width="600px" Font-Bold="True" Font-Size="14pt" Font-Names="幼圆"></asp:Label></td>
+            </tr>
+            <tr>
+                <td valign="top" colspan="3">
+        <asp:Panel ID="Panel2" runat="server" GroupingText="修订说明" Height="50px" Width="584px">
+            <asp:TextBox ID="TextBox1" runat="server" Height="48px" TextMode="MultiLine" Width="432px"></asp:TextBox>&nbsp;
+                    <asp:Button ID="Button1" runat="server" Text=" 确 定 " Height="48px" />
+                    <asp:Button ID="Button2" runat="server" Text=" 关 闭 " OnClientClick="window.close();return false;" Height="48px" /></asp:Panel>
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                    &nbsp; &nbsp; &nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</td>
+            </tr>
+            <tr>
+                <td valign="top">
+                    <asp:Panel ID="Panel3" runat="server" GroupingText="发送人员列表" Height="315px" HorizontalAlign="Left" Width="224px" ><asp:CheckBoxList ID="CheckBoxList2" runat="server" DataTextField="YGXM" DataValueField="YGDM" Height="1px" RepeatColumns="1" RepeatDirection="Horizontal" Width="224px" /><br />
+                    </asp:Panel>
+                </td>
+                <td valign="top"  width="100">
+                <br /><br />
+                <asp:Button ID="Button3" runat="server" Text="添加所选" OnClick="Button3_Click" /><br />
+                    <br />
+                        <asp:Button ID="Button4" runat="server" Text="添加全部" OnClick="Button4_Click" /><br />
+                    <br />
+                        <asp:Button ID="Button5" runat="server" Text="移除所选" OnClick="Button5_Click" /><br />
+                    <br />
+                    <asp:Button ID="Button6" runat="server" Text="移除全部" OnClick="Button6_Click" /></td>
+                <td style="width: 188px">
+                    <asp:Panel ID="Panel1" runat="server" GroupingText="待选人员列表" Height="315px" Width="224px" HorizontalAlign="Left">
+                        <asp:DropDownList ID="DropDownList1" runat="server" Width="240px" AutoPostBack="True" DataSourceID="UserGroup" DataTextField="KSMC" DataValueField="KSDM" OnSelectedIndexChanged="DropDownList1_SelectedIndexChanged">
+                        </asp:DropDownList><asp:SqlDataSource ID="UserGroup" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+                            SelectCommand="SELECT [KSDM], [KSMC] FROM [GY_KSDM]"></asp:SqlDataSource>
+                        <asp:CheckBoxList ID="CheckBoxList1" runat="server" DataSourceID="Conn" DataTextField="YGXM"
+                DataValueField="YGDM" RepeatColumns="1" RepeatDirection="Horizontal" Width="224px" Height="9px">
+                        </asp:CheckBoxList>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+                    </asp:Panel>
+                </td>
+            </tr>
+        </table>
+        </div>
+        
+    </form>
+</body>
+</html>

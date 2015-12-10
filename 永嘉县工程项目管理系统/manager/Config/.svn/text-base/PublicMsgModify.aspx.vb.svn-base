@@ -1,0 +1,52 @@
+﻿
+Partial Class manager_Config_PublicMsgModify
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim PID As Integer
+    Dim Login_User As String
+    Dim UserID As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Base.Checking("../manager/Config/PublicMsgManage.aspx")   '检测文件检测
+        Try
+            PID = Request("PID")
+        Catch ex As Exception
+            Base.Js.alert(Me, "非法调用，或是参数不正确！")
+            Exit Sub
+        End Try
+
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("select SendMessage.CID, SendMessage.Title,SendMessage.Content,SendMessage.SendDate,GY_YGDM.YGXM from SendMessage,GY_YGDM where SendMessage.FromID=GY_YGDM.YGDM and ToID=0 and SendMessage.CId=" & PID, "SendMessage")
+        If Tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "非法调用，或是参数不正确！")
+            Exit Sub
+        End If
+        If Page.IsPostBack = False Then
+            User.Text = Tb.Rows(0).Item(4)
+            Title.Text = Tb.Rows(0).Item(1)
+            Content.Text = Tb.Rows(0).Item(2)
+            PDate.Text = Tb.Rows(0).Item(3)
+        End If
+        Dim MessageId As Integer = Tb.Rows(0).Item(0)
+
+        Conn.SelectParameters("MessageID").DefaultValue = MessageId
+
+        Dim BackPage As String = Request.ServerVariables("HTTP_REFERER")
+        If BackPage Is Nothing Then
+            Base.Js.alert(Me, "非法调用")
+            Exit Sub
+        End If
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim base As New Base
+        Dim sql As String
+        sql = "update SendMessage set Title='" & Title.Text & "',Content='" & Content.Text & "',Senddate='" & PDate.Text & "' where cid=" & PID
+        base.DB.Query(sql)
+        base.Js.alert(Me, "保存成功！")
+    End Sub
+End Class

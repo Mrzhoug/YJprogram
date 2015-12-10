@@ -1,0 +1,13 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ShowAbout_XMXD_NoLc.aspx.vb" Inherits="manager_XJXM_ShowAbout_XMXD_NoLc" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>查看分发情况</title>
+    <link type="text/css" href="../../images/Styles.css" />
+</head>
+<body>
+    <form id="form1" runat="server">
+    </form>
+</body>
+</html>
+

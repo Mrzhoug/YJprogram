@@ -1,0 +1,45 @@
+﻿
+Partial Class manager_Desktop_DesktopConfig
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim UserName As String
+    Dim UserID As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        UserName = Base.GetWebUserName
+        UserID = Base.GetUserID(UserName)
+
+        If Page.IsPostBack = False Then
+            Dim DeskTopStyle As Integer = Base.GetOpenConfig("桌面布局", UserID, 0)
+            Select Case DeskTopStyle
+                Case 1
+                    RadioButton1.Checked = True
+                Case 2
+                    RadioButton2.Checked = True
+                Case Else
+                    RadioButton3.Checked = True
+            End Select
+        End If
+    End Sub
+
+    Sub UpdateConfig(ByVal Op As String, ByVal kind As Integer)
+        If Base.DB.GetRowCount("select value from Xconfig where Config='" & Op & "' and LCDM=0 and UserID=" & UserID, "Xconfig") > 0 Then
+            Base.DB.Query("update Xconfig set [value]='" & kind & "' where Config='" & Op & "' and LCDM=0 and UserID = " & UserID)
+        Else
+            Base.DB.Query("insert into Xconfig(Config,UserID,value,LCDM) values('" & Op & "'," & UserID & ",'" & kind & "',0)")
+        End If
+        Base.Js.alert(Me, "设置成功,请刷新信息中心页面")
+    End Sub
+
+    Protected Sub RadioButton1_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles RadioButton1.CheckedChanged
+        UpdateConfig("桌面布局", 1)
+    End Sub
+
+    Protected Sub RadioButton2_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles RadioButton2.CheckedChanged
+        UpdateConfig("桌面布局", 2)
+    End Sub
+
+    Protected Sub RadioButton3_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles RadioButton3.CheckedChanged
+        UpdateConfig("桌面布局", -1)
+    End Sub
+End Class

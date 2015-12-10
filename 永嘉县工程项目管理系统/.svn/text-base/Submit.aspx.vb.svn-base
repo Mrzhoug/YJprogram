@@ -1,0 +1,1184 @@
+﻿Imports System.IO
+Imports System.Xml
+
+Partial Class Submit
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim OpDir As String = Server.MapPath("./") & "FormFolder/"          '定义操作目录
+    Dim MKMC As String                                  '定义模块名称.因为根据模块名称来存数据
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim FirstFid, Fid As Integer      '得到第一条记录的节点值.用来判断他的流程    
+    Dim Fid_NodeName As String
+    Dim XMZT As Boolean               '项目状态.如果是无流程.此值为空<NULL>
+    Dim XMDM As String              '记着当然表单所属项目的ID
+    Dim MKDM As String              '入库时进行记录
+    Dim XMZT_Value As String
+    Dim QX As Integer               '用来记录当前用户的权限权值
+    Dim SubmitFlag As Boolean = False
+    Dim ManageSubmit As Boolean = False         '表示是管理系统内部提交的数据
+    Dim Row As DataRow                          '临时Row
+    Dim SaveFile As String
+    Dim isDraft As Boolean
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '设置输出编码为GB2312,不然INFOPATH不能正确的显示错误信息
+        Dim GB2312 As Encoding = Encoding.GetEncoding("gb2312")
+        Response.ContentEncoding = GB2312
+        Try
+            If Request.TotalBytes <= 0 Then Response.End() '如果没有接收到信息，就结束    
+        Catch ex As Exception
+            Response.Write("非法提交,请检测表单的内容!")
+            Response.End()
+        End Try
+        Try
+            isDraft = Request("isDraft")
+        Catch ex As Exception
+            isDraft = False
+        End Try
+        Dim TempOpDir As String = Server.MapPath("./") & "Submit_Temp"
+
+        Base.IO.CreateDir(TempOpDir)
+        '1.生成临时XML文件, 以前的用户名 + 时间来做为临时文件名
+        Dim TempFileName As String = Login_User & System.DateTime.Now.ToString("yyyyMMddHHmmssfff")
+
+        TempFileName = TempOpDir & "/" & TempFileName & ".xml"
+
+        Dim fileName As String = Context.Request.Params("FileName")
+        If fileName Is Nothing Then
+            '表示进INFOPATH提交的
+            Request.SaveAs(TempFileName, False)
+            SubmitFlag = False
+        Else
+            '表示是WEB提交的
+            Dim PublicUrl As String = Context.Request.Params("xdoc_param_xsn_uri")
+            Base.InfoJetRegister(PublicUrl, Server.MapPath("./"))
+            Dim form As InfoJetSoft.Service.InfoJetForm = InfoJetSoft.Service.InfoJetService.ReloadForm(Context, "")
+            Base.pub.Text_File_SaveAs(TempFileName, form.Xml.Trim(), Encoding.UTF8)
+            SubmitFlag = True
+        End If
+
+        '2.读取临时XML文件.并查找FormID节点
+        Dim Node1 As XmlNode = Nothing
+        Dim OpenNode As XmlNode
+        Dim tb As New Data.DataTable
+        Dim YZM As String       '验证码
+        Dim RootNodeName As String      '得到根节点
+        Dim Xpath As String
+        Try
+            '检测结构,判断合法性
+            OpenNode = Base.XmlClass.GetXmlFile(TempFileName)
+            RootNodeName = Base.XmlClass.GetRootNodeName
+            Fid_NodeName = Base.XmlClass.GetFormID
+
+
+            '判断表单号的合法性
+            Xpath = "//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "/" & Fid_NodeName
+            Node1 = Base.XmlClass.FindNode(Xpath)
+            If Node1.ChildNodes.Item(0) Is Nothing Then '判断第一条记录中是不有存在FormId,如果不存在,则表示不合法
+                ReturnErrMsg("表单结构不符合要求，<br>请联系管理员重新上传模板1")
+                Exit Sub
+            Else
+                FirstFid = Node1.ChildNodes.Item(0).Value
+            End If
+
+            '判断项目代码的合法性
+            Xpath = "//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "/" & Fid_NodeName.Replace("表单号", "项目代码")
+            Node1 = Base.XmlClass.FindNode(Xpath)
+            If Node1.ChildNodes.Item(0) Is Nothing Then '判断第一条记录中是不有存在FormId,如果不存在,则表示不合法
+                ReturnErrMsg("表单结构不符合要求，<br>请联系管理员重新上传模板2")
+                Exit Sub
+            Else
+                XMDM = Node1.ChildNodes.Item(0).Value
+            End If
+
+            '判断操作的合法性
+            Xpath = "//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "/" & Fid_NodeName.Replace("表单号", "操作者")
+            Node1 = Base.XmlClass.FindNode(Xpath)
+            If Node1.ChildNodes.Item(0) Is Nothing Then '判断第一条记录中是不有存在FormId,如果不存在,则表示不合法
+                ReturnErrMsg("表单结构不符合要求，<br>请联系管理员重新上传模板3")
+                Exit Sub
+            Else
+                Login_User = Node1.ChildNodes.Item(0).Value
+            End If
+
+            '判断填表时间的合法性
+            Dim FillsDate As String
+            Xpath = "//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "/" & Fid_NodeName.Replace("表单号", "填表时间")
+            Node1 = Base.XmlClass.FindNode(Xpath)
+            If Node1.ChildNodes.Item(0) Is Nothing Then '判断第一条记录中是不有存在FormId,如果不存在,则表示不合法
+                ReturnErrMsg("表单结构不符合要求，<br>请联系管理员重新上传模板4")
+                Exit Sub
+            Else
+                FillsDate = Node1.ChildNodes.Item(0).Value
+            End If
+
+            '判断视图的合法性
+            Dim View As String
+            Xpath = "//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "/" & Fid_NodeName.Replace("表单号", "视图")
+            Node1 = Base.XmlClass.FindNode(Xpath)
+            If Node1.ChildNodes.Item(0) Is Nothing Then '判断第一条记录中是不有存在FormId,如果不存在,则表示不合法
+                ReturnErrMsg("表单结构不符合要求，<br>请联系管理员重新上传模板5")
+                Exit Sub
+            Else
+                View = Node1.ChildNodes.Item(0).Value
+            End If
+
+            '判断验证码的合法性
+
+            Xpath = "//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "/" & Fid_NodeName.Replace("表单号", "验证码")
+            Node1 = Base.XmlClass.FindNode(Xpath)
+            If Node1.ChildNodes.Item(0) Is Nothing Then '判断第一条记录中是不有存在FormId,如果不存在,则表示不合法
+                ReturnErrMsg("表单结构不符合要求，<br>请联系管理员重新上传模板6")
+                Exit Sub
+            Else
+                YZM = Node1.ChildNodes.Item(0).Value
+            End If
+
+            If YZM = "000000000000000000000000000000" Then
+                ReturnErrMsg("您对此表单没有写的权限．<br>请联系管理员对此表单添加写权限！")
+                Exit Sub
+            End If
+            '比对验证码
+            If Base.EnCrypt.EnCryptUserName(FirstFid, Login_User, FillsDate) <> YZM Then
+                ReturnErrMsg("你提交的表单结构有误，<br>请不要保存在本地后，对表单进行修改，<br>如有问题，请联系管理员！")
+                Exit Sub
+            End If
+
+        Catch ex As Exception
+            ReturnErrMsg("读取临时文件出错，请与管理员联系！")
+            Exit Sub
+        End Try
+
+        UserID = Base.GetUserID(Login_User)
+
+        '得到表单的状态
+        Xpath = "//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "/" & Fid_NodeName.Replace("表单号", "状态")
+        Dim FormState As String = ""
+        Node1 = Base.XmlClass.FindNode(Xpath)
+        If Not Node1.ChildNodes.Item(0) Is Nothing Then '判断第一条记录中是不有存在FormId,如果不存在,则表示不合法
+            FormState = Node1.ChildNodes.Item(0).Value
+        End If
+
+        '根据表单ID,得到XMDM跟MKDM.
+
+        tb = Base.DB.Table("select MKDM,XMDM,XMZT from XX_XMJC where FID=" & FirstFid, "XX_XMJC")
+        If tb.Rows.Count = 0 Then
+            ReturnErrMsg("系统错误：系统中不存在此流程,请与管理员联系！")
+            Exit Sub
+        End If
+        XMDM = tb.Rows(0).Item(1)
+        If IsDBNull(tb.Rows(0).Item(2)) Then
+            XMZT = False
+        Else
+            XMZT = True '根据项目状态.得到是不是有流程
+            XMZT_Value = tb.Rows(0).Item(2)
+        End If
+
+        MKDM = tb.Rows(0).Item(0)
+
+
+        '无流程,再去得到当前表单的审批信息,找到发起人,判断当前人员是否是发起人.        
+        If XMZT = False Then
+            Row = Base.DB.Row("select FQR,ModifyFlag from GY_XMSP where MKDM=" & MKDM & " and XMDM=" & XMDM & " and FQR='" & Login_User.Trim & "'", "dd")
+            If Not Row Is Nothing Then          '表示是申请人重新提交，清除审批标志
+                '先去除审批信息
+                Dim SPnode As XmlNode
+                SPnode = Base.XmlClass.FindNode("//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "/" & Fid_NodeName.Replace("表单号", "审批信息"))
+                If Not SPnode Is Nothing Then
+                    SPnode.InnerXml = ""
+                    Base.XmlClass.Save()
+                End If
+                Base.DB.Query("delete GY_XMSP where mkdm=" & MKDM & "  and XMDM=" & XMDM)
+                Base.DB.Query("delete GY_XMSP_over where mkdm=" & MKDM & "  and XMDM=" & XMDM)
+            Else
+                Row = Base.DB.Row("select ModifyFlag from GY_XMSP where MKDM=" & MKDM & " and XMDM=" & XMDM & " and YGDM=" & UserID & " and ModifyFlag=1", "dd")
+                If Not Row Is Nothing Then          '表示是审批人，而且标志为可写状态
+                Else
+                    Row = Base.DB.Row("select ModifyFlag from GY_XMSP where MKDM=" & MKDM & " and XMDM=" & XMDM, "dd")
+                    If Not Row Is Nothing Then      '表示有审批记录，但不是审批人，也不是申请人
+                        ReturnErrMsg("此表单已经审批过或正在审批中，你无权提交")
+                        Exit Sub
+                    Else                            '当查找不到审批记录时,也做相应的删除标志
+                        Dim SPnode As XmlNode
+                        SPnode = Base.XmlClass.FindNode("//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "/" & Fid_NodeName.Replace("表单号", "审批信息"))
+                        If Not SPnode Is Nothing Then
+                            SPnode.InnerXml = ""
+                            Base.XmlClass.Save()
+                        End If
+                    End If
+                End If
+            End If
+
+            'tb = Base.DB.Table("select ModifyFlag from GY_XMSP where MKDM=" & MKDM & " and XMDM=" & XMDM, "GY_XMSP")
+            'If tb.Rows.Count > 0 Then
+            '    If tb.Rows(0)(0).ToString.Trim = Login_User.Trim Then
+            '    Else
+            '        '如果表单提起审批者不允许审批者修改的话,不能修改,否则可以修改
+            '        If IsDBNull(tb.Rows(0)(0)) = True Then
+            '            Response.Write("提交错误：此表单已经审批过或正在审批中，你无权提交")
+            '            Response.End()
+            '        Else
+            '            If tb.Rows(0)(1) <> 1 Then
+            '                Response.Write("提交错误：此表单已经审批过或正在审批中，你无权提交")
+            '                Response.End()
+            '            Else    '不是发起者，而发起又是允许审批人修改的情况。
+            '                tb = Base.DB.Table("select GY_XMSP.YGDM,SPNR,FQR,DLMC from GY_XMSP,GY_YGDM where GY_YGDM.YGDM=GY_XMSP.YGDM and xmdm = " & XMDM & " and mkdm=" & MKDM & " and DLMC='" & Login_User.Trim & "'", "GY_XMSP")
+            '                If tb.Rows.Count > 0 Then       '表示是审批人员列表
+            '                Else                            '表示不是审批人员列中的人员。不能提交。
+            '                    Response.Write("提交错误：此表单已经审批过或正在审批中，你无权提交")
+            '                    Response.End()
+            '                End If
+            '            End If
+            '        End If
+            '    End If
+            'Else        '当查找不到审批记录时,也做相应的删除标志
+            '    Dim SPnode As XmlNode
+            '    SPnode = Base.XmlClass.FindNode("//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "/" & Fid_NodeName.Replace("表单号", "审批信息"))
+            '    If Not SPnode Is Nothing Then
+            '        SPnode.InnerXml = ""
+            '        Base.XmlClass.Save()
+            '    End If
+            'End If
+        Else
+            '有流程的审批处理
+        End If
+        Dim PrvePage As String
+        Try
+            PrvePage = Request.ServerVariables("Http_Referer").ToString.ToLower
+        Catch ex As Exception
+            PrvePage = ""
+        End Try
+        If PrvePage.IndexOf("/manager/") > 0 Then           '表示是内管管理提交的.
+            ManageSubmit = True
+        End If
+
+        '---  对内网管理和外网企业用户的不同提交做不同的权限判断
+        tb = Base.DB.Table("Select IsWan ,IsStop,MKMC from GY_MKXX where MKDM = " & MKDM, "dd")
+        If tb.Rows.Count > 0 Then
+            If ManageSubmit = False Then
+                If tb.Rows(0).Item(0).ToString = "1" Then   '表示是ＷＥＢ的外网提交过来的,权限做另外的判断
+                    If tb.Rows(0).Item(1).ToString = "1" Then
+                        ReturnErrMsg("你要提交的表单已经停止提交，请与管理员联系")
+                        Exit Sub
+                    Else
+                        '表示是开放给外网用户的功能．并且未截止的表单．不做权限判断，直接提交
+                    End If
+                Else            '表示未对外网公开,有些可能是infopath提交过来的。但是没有前页的。
+                    'Response.Write("非法提交：请联系管理员")
+                    'Response.End()
+                    QX = Base.GetUserHaveQX(Base.GetUserID(Login_User), MKDM)
+                    '----------------------------------------------------------------------------------------------------------------
+                    '这一步做可写表单的判断，判断用户对此表单的是否有写权限
+
+                    If QX <= 1 Then
+                        ReturnErrMsg("你对此表单没有权限只有查看的权限．请联系管理员对此表单添加写权限！")
+                        Exit Sub
+                    End If
+
+                    '----------------------------------------------------------------------------------------------------------------
+                End If
+            Else
+                QX = Base.GetUserHaveQX(Base.GetUserID(Login_User), MKDM)
+                '----------------------------------------------------------------------------------------------------------------
+                '这一步做可写表单的判断，判断用户对此表单的是否有写权限
+
+                If QX <= 1 Then
+                    ReturnErrMsg("你对此表单没有权限只有查看的权限．<br>请联系管理员对此表单添加写权限！")
+                    Exit Sub
+                End If
+
+                '----------------------------------------------------------------------------------------------------------------
+            End If
+
+        Else
+            ReturnErrMsg("表单功能已经不存在")
+            Exit Sub
+        End If
+        MKMC = tb.Rows(0).Item(0).ToString.Trim     '得到模板名称MKMC.用来存储
+
+        '更新状态
+        Dim State As Integer
+        Try
+            If Request("state") = "" Then
+                State = -100
+            Else
+                State = Request("state")
+            End If
+        Catch ex As Exception
+            State = -100
+        End Try
+        If State > -2 Then Base.DB.Query("update XX_XMJC set state=" & State & " where fid=" & FirstFid)
+
+        '判断是否锁定表单
+        tb = Base.DB.Table("SELECT FID FROM XX_XMJC where Fid = " & FirstFid & " and [lock]=1", "GY_XMXX")
+        If tb.Rows.Count > 0 Then
+            ReturnErrMsg("该表单已经锁定, 不能进行修改，<br>你先解锁或是联系管理员！")
+            Exit Sub
+        End If
+        tb = Nothing
+
+
+        '判断操作的合法性
+        Dim FxNode1 As XmlNode
+        Try
+            FxNode1 = Base.XmlClass.FindNode("//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "/" & Fid_NodeName.Replace("表单号", "备用2"))
+        Catch ex As Exception
+        End Try
+
+        Dim FxState As Boolean = True
+        If Not FxNode1.ChildNodes.Item(0) Is Nothing Then '判断第一条记录中是不有存在FormId,如果不存在,则表示不合法
+            If FxNode1.InnerText.Trim.Length > 0 Then
+                Dim xmldoc As New XmlDocument
+                Dim FxNodelist As XmlNodeList
+                'Response.Write(FxNode1.InnerXml)
+                Try
+                    xmldoc.LoadXml(Server.HtmlDecode(FxNode1.InnerXml))
+                    FxNodelist = xmldoc.SelectNodes("/反写/记录")
+                Catch ex As Exception
+                    FxState = False
+                End Try
+                If FxState = True Then
+                    'Response.Write(Node1.InnerXml)
+                    'Response.Write(FxNodelist.Count)
+                    Dim fxi As Int16
+                    Dim FxNode As XmlNode
+                    For fxi = 0 To FxNodelist.Count - 1
+                        'Response.Write("*")
+                        FxNode = FxNodelist.Item(fxi)
+                        Dim _FID As String = FxNode.SelectSingleNode("FID").InnerText
+                        Dim _Xpath As String = FxNode.SelectSingleNode("XPATH").InnerText
+                        Dim _Xml As String = FxNode.SelectSingleNode("XML").InnerXml
+                        If _FID <> "" Then
+                            Dim Row As DataRow = Base.DB.Row("SELECT FID,MKMC FROM  XX_XMJC, GY_MKXX where  GY_MKXX.MKDM=XX_XMJC.MKDM and FID=" & _FID, "dd")
+                            Dim FXMKMC As String
+                            If Not Row Is Nothing Then
+                                'Response.Write("-")
+                                FXMKMC = Row.Item("MKMC").ToString
+                                Dim FXfile As String = Server.MapPath("./") & "/FormFolder/" & FXMKMC & "/" & _FID & ".xml"
+                                Try
+                                    Base.XmlClass.GetXmlFile(FXfile)
+                                    FxNode = Base.XmlClass.FindNode(_Xpath)
+                                    FxNode.InnerXml = _Xml
+                                    Base.XmlClass.Save()
+                                    If Base.SynSubmit(_FID, "提交") = False Then Base.Log(Login_User, "Submit.aspx", "SynSubmit表不存在或是表结构出错(反写)", _FID)
+                                Catch ex As Exception
+                                    ReturnErrMsg("备用2节点操作失败，请联系管理员")
+                                    Exit Sub
+                                End Try
+                            End If
+                        Else
+                            ReturnErrMsg("备用2节点操作失败，请联系管理员")
+                            Exit Sub
+                        End If
+                    Next
+                Else
+                    ReturnErrMsg("备用2节点内容非法，请联系管理员")
+                    Exit Sub
+                End If
+                Try
+                    Node1.InnerXml = ""
+                    Base.XmlClass.Save()
+                Catch ex As Exception
+                End Try
+
+                '由于借用Base类，导致读取的文件发生了变化。进行重新载入
+                OpenNode = Base.XmlClass.GetXmlFile(TempFileName)
+                RootNodeName = Base.XmlClass.GetRootNodeName
+                Fid_NodeName = Base.XmlClass.GetFormID
+            End If
+        End If
+
+
+        '备用3：草稿标志
+        Try
+            FxNode1 = Base.XmlClass.FindNode("//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "/" & Fid_NodeName.Replace("表单号", "备用3"))
+        Catch ex As Exception
+        End Try
+
+        FxState = True
+        If Not FxNode1 Is Nothing Then
+            Dim FxNode As XmlNode
+            FxNode = Base.XmlClass.FindNode("//my:备用3")
+            FxNode.InnerXml = isDraft.ToString()
+            Base.XmlClass.Save()
+        End If
+
+        '是否递交成功
+        Dim isSubmitSuccess As Boolean
+
+        Dim i As Integer
+        Dim RootNode As XmlNodeList = Base.XmlClass.GetRootNode
+        Dim SaveFlag As Boolean = True          '存档标志
+        Dim OpFid As String
+        Dim DelRootNodeName As String = String.Empty
+        If RootNode.Count >= 0 Then
+            DelRootNodeName = RootNode.Item(0).Name '得到第一个节点的根节点．
+        End If
+        For i = 0 To RootNode.Count - 1
+            Base.XmlClass.GetXmlFile(TempFileName)
+            Node1 = Base.XmlClass.FindNode("//" & Fid_NodeName)
+            Dim TempNode As XmlNode = RootNode.Item(i)
+            If TempNode.InnerXml <> "" Then
+
+
+
+                '===========================  检测是否有存档标志,如果不[否],则放弃保存 ========================
+                SaveFlag = True
+                Dim NodeTemp2 As XmlNode
+                NodeTemp2 = Base.XmlClass.FindNode("//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "/" & Fid_NodeName.Replace("表单号", "存档"))
+                If Not NodeTemp2 Is Nothing Then
+                    If Not NodeTemp2.ChildNodes.Item(0) Is Nothing Then '判断第一条记录中是不有存在[存档]节点,来决定是否保存
+                        If NodeTemp2.ChildNodes.Item(0).Value = "否" Then
+                            '不存档.直接删除当前节点.
+                            Base.XmlClass.DelNode("//" & RootNode.Item(i).Name)
+                            SaveFlag = False
+                        End If
+                    End If
+                End If
+                '==============================================================================================
+
+                If SaveFlag = True Then         '判断存档标志
+                    If Node1 Is Nothing Then        '表示没有找到FormID节点.此节点不在重复节点中.
+                        Dim SaveFile As String = OpDir & MKMC & "\" & OpFid & ".xml"
+                        If IO.File.Exists(SaveFile) = False Then
+                            Try
+                                File.Copy(Server.MapPath("./") & "\Submit_Temp\CreateTemp\" & OpFid & ".xml", SaveFile)
+                            Catch ex As Exception
+                                ReturnErrMsg("系统错误：目录无写权限,请与管理员联系！")
+                                Exit Sub
+                            End Try
+                            Try     '删除临时文件
+                                File.Delete(Server.MapPath("./") & "\Submit_Temp\CreateTemp\" & OpFid & ".xml")
+                            Catch ex As Exception
+                            End Try
+                        End If
+
+                        Base.XmlClass.GetXmlFile(SaveFile)
+                        Base.XmlClass.AddNode(TempNode)                     '添加新的结构
+                    Else
+                        If Not Node1.ChildNodes.Item(0) Is Nothing Then         '判断FormId是否为空,正常流程
+                            Fid = Node1.ChildNodes.Item(0).Value
+
+                            '取得模板名称,和模板路径
+                            tb = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & Fid & ")", "XX_XMJC")
+                            If tb.Rows.Count = 0 Then
+                                ReturnErrMsg("非法访问")
+                                Exit Sub
+                            End If
+                            Dim XsnDir As String = tb.Rows(0).Item(2).ToString.Trim
+                            MKMC = tb.Rows(0).Item(1)
+                            Fid = tb.Rows(0).Item(0)
+                            OpFid = Fid
+
+
+                            '4.要以项目FormId为文件名.来保存提交的文件,这里应该判断是否已经有文件存在,不存在,表示非法提交
+                            Dim SaveFile As String = OpDir & MKMC & "\" & OpFid & ".xml"
+                            If IO.File.Exists(SaveFile) = False Then
+                                Try
+                                    File.Copy(Server.MapPath("./") & "\Submit_Temp\CreateTemp\" & Fid & ".xml", SaveFile)
+                                Catch ex As Exception
+                                    ReturnErrMsg("系统错误：目录无写权限,请与管理员联系！")
+                                    Exit Sub
+                                End Try
+                                Try     '删除临时文件
+                                    File.Delete(Server.MapPath("./") & "\Submit_Temp\CreateTemp\" & Fid & ".xml")
+                                Catch ex As Exception
+                                End Try
+                            End If
+
+                            If File.Exists(SaveFile) = False Then  '表示没有文件存在.非法提交
+                                ReturnErrMsg("系统错误：要操作的文件不存在！" & OpFid)
+                                Exit Sub
+                            End If
+
+                            '这里更新XML文件,先将原来的节点移除,再添加新的内容
+                            Base.XmlClass.GetXmlFile(SaveFile)
+                            RootNodeName = Base.XmlClass.GetRootNodeName
+
+                            '-------------------------------------------------------------------------------------------------------
+                            '插入对权限的判断,主要判断当前表单是写入还是修改。
+                            If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+                                Dim row As DataRow = Base.DB.Row("Set ARITHABORT on select FID From XX_XMJC where Fid=" & Fid, "dd")
+                                If row Is Nothing Then      '表示数据库中已经存在,为修改表单,故判断改权限
+                                    If QX < 4 Then
+                                        ReturnErrMsg("你对此表单没有修改的权限，请联系管理员！")
+                                        Exit Sub
+                                    End If
+                                Else
+                                    '表示库没有此表单，为添加新表单,上面已经做写的判断。故不用判断
+                                End If
+                            Else
+                                Dim KuPath As String = OpDir & MKMC & ".库.xml"
+                                If IO.File.Exists(KuPath) = False Then  '当库不存时.进行生成
+                                    If IO.File.Exists(OpDir & MKMC & "\" & OpFid & ".xml") = False Then
+                                        File.Copy(Server.MapPath("./") & "\Submit_Temp\CreateTemp\" & Fid & ".xml", KuPath)
+                                    Else
+                                        File.Copy(OpDir & MKMC & "\" & Fid & ".xml", KuPath)
+                                    End If
+                                    Base.XmlClass.GetXmlFile(KuPath)
+                                    Base.XmlClass.ClearAllNode()
+                                End If
+                                Base.XmlClass.GetXmlFile(KuPath)
+
+                                Dim Node2 As XmlNode = Base.XmlClass.FindNode("//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "[" & Fid_NodeName & "='" & OpFid & "']")
+
+                                If Node2 Is Nothing Then
+                                    '表示库没有此表单，为添加新表单,上面已经做写的判断。故不用判断
+                                Else
+                                    If ManageSubmit = False Then        '表示是外网用户。在没有停止之前，都可以操作
+                                    Else
+                                        '表示库中有此表单，为修改表单，判断是否有改的权限
+                                        If QX < 4 Then
+                                            ReturnErrMsg("你对此表单没有修改的权限，请联系管理员！")
+                                            Exit Sub
+                                        End If
+                                    End If
+                                End If
+                            End If
+
+                            '------------------------------------------------------------------------------------------------------
+                            '打开目标文件，对表单号及一些基本的内容进行清理
+                            Base.XmlClass.GetXmlFile(SaveFile)
+                            Dim DelRootNode As XmlNodeList = Base.XmlClass.GetRootNode
+
+                            Base.XmlClass.ClearAllNode()
+                            Base.XmlClass.AddNode(TempNode)                     '添加新的结构
+
+                            Xpath = "//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "[" & Fid_NodeName & "='" & Fid & "']"
+                            If Base.XmlClass.UpdateNode(Xpath, Fid_NodeName, OpFid) = False Then
+                                ReturnErrMsg("数据模板错误,无法找到" & Fid_NodeName & "节点")
+                                Exit Sub
+                            End If
+                            Xpath = "//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "[" & Fid_NodeName.Replace("表单号", "验证码") & "='" & YZM & "']"
+                            If Base.XmlClass.UpdateNode(Xpath, Fid_NodeName.Replace("表单号", "验证码"), "00000000000000000000000000000000") = False Then
+                                ReturnErrMsg("数据模板错误,无法找到" & Fid_NodeName.Replace("表单号", "验证码") & "节点")
+                                Exit Sub
+                            End If
+
+                            '用来得到已经修改好的文件来提取信息，不用原始的信息
+                            SplitFormAnnex(Fid)                 '对附件进行分离保存
+                            Base.XmlClass.GetXmlFile(SaveFile)
+                            TempNode = Base.XmlClass.GetRootNode.Item(0)
+                        Else                                    '为空则添加一条.并更新XML文件,表示是多条信息
+                            If XMZT = False Then
+                                tb = Base.DB.Table("select GY_XMXX.LCDM from GY_XMXX, XX_XMJC where GY_XMXX.XMDM = XX_XMJC.XMDM and XX_XMJC.FID = " & FirstFid, "GY_XMXX")
+                                If tb.Rows.Count = 0 Then
+                                    ReturnErrMsg("系统错误：无法找到相应的流程")
+                                    Exit Sub
+                                End If
+                                Dim LCDM As Integer = tb.Rows(0).Item(0)
+                                Dim DfileName As String = Base.AutoAddProject_HasNoLC(LCDM, Login_User, "./")
+                                If DfileName Is Nothing Then
+                                    ReturnErrMsg("系统错误：自动生成文件失败")
+                                    Exit Sub
+                                End If
+                                Base.XmlClass.GetXmlFile(DfileName)
+                                Dim lsNode As XmlNodeList = Base.XmlClass.GetRootNode
+                                '因为有可能非法节点。或是在重复节点以外的节点在。去除所有的。                        
+                                'For k = 0 To lsNode.Count - 1
+                                '    Base.XmlClass.DelNode("//" & lsNode.Item(0).Name)       '因为多了一个节点.移除    
+                                'Next
+                                Base.XmlClass.ClearAllNode()
+                                Base.XmlClass.AddNode(TempNode)                     '添加新的结构
+
+                                '通过返回过来的文件名．得到表单ＩＤ
+                                Fid = DfileName.Substring(DfileName.LastIndexOf("\") + 1)
+                                Fid = Fid.ToString().Substring(0, Fid.ToString().IndexOf(".xml"))
+                                OpFid = Fid     '将两个标志同步
+                                '因为将新的架构放进去．导致表头没了．再一次进行表头的自动填写
+                                tb = Base.DB.Table("Select XMDM from XX_XMJC Where FID = " & Fid, "XX_XMJC")
+                                If tb.Rows.Count = 0 Then
+                                    ReturnErrMsg("系统错误：自动生成的表单有问题．")
+                                    Exit Sub
+                                End If
+                                XMDM = tb.Rows(0).Item(0)
+                                Dim Result As String = Base.AutoFillDate(DfileName, Fid, XMDM, Login_User, False, 0)
+                                If Not Result Is Nothing Then               '对自动生成的值进行相应的填写
+                                    ReturnErrMsg("自动填写表单错误:" & Result)
+                                    Exit Sub
+                                End If
+
+
+                                SaveFile = OpDir & MKMC & "\" & OpFid & ".xml"
+                                If IO.File.Exists(SaveFile) = False Then
+                                    Try
+                                        File.Copy(Server.MapPath("./") & "\Submit_Temp\CreateTemp\" & Fid & ".xml", SaveFile)
+                                    Catch ex As Exception
+                                        ReturnErrMsg("系统错误：目录无写权限,请与管理员联系！")
+                                        Exit Sub
+                                    End Try
+                                    Try     '删除临时文件
+                                        File.Delete(Server.MapPath("./") & "\Submit_Temp\CreateTemp\" & Fid & ".xml")
+                                    Catch ex As Exception
+                                    End Try
+                                End If
+                                SplitFormAnnex(Fid)                 '对附件进行分离保存
+
+
+                                '处理完附件后,重新得到TempNode 以便下面入库的时候做操作
+                                Dim RootNode1 As XmlNode = Base.XmlClass.GetXmlFile(SaveFile)
+                                RootNodeName = Base.XmlClass.GetRootNodeName
+                                Xpath = "//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题")
+                                TempNode = Base.XmlClass.GetRootNode.Item(0)
+                            End If
+                        End If
+
+
+                        '当不是二维映射时进行入库.不然由后台服务进行处理
+
+                        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLMapping").ToLower <> "true" And Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.Synchronization").ToLower <> "true" Then
+                            Base.XmlDataToDB(OpFid, OpDir)      '数据入库,进行查询之用
+                        End If
+
+
+                        isSubmitSuccess = DoingUpdate(OpFid, TempNode)        '调用入库操作
+
+                        '如果递交成功，继续下部操作
+                        If isSubmitSuccess Then
+                            Base.FormSynSQL(FormState, OpFid)   '同步表单状态到数据库状态
+                            Base.UpdateOrderFormLog(OpFid, Base.GetUserID(Login_User), Login_User)           '调用订阅功能
+                            '将此已经处理过的节点移除．这样子才能找到接下来的节点．
+                            Base.XmlClass.GetXmlFile(TempFileName)
+                            Base.XmlClass.DelNode("//" & RootNode.Item(i).Name)
+                        End If
+
+
+                        If isDraft = True Then
+                            Base.DB.Query("update xx_xmjc set state = -17 where xmdm = " & Fid)
+                        End If
+                    End If
+                End If
+            End If
+        Next
+
+
+        If isDraft = False And isSubmitSuccess Then
+
+            '判断流程状态条件并改变备用6内容
+            Try
+                Dim sqlstr As String = "select * from process where processForm = " & MKDM & " and enabled = 'true'"
+                tb = Base.DB.Table(sqlstr, "dd")
+                If tb.Rows.Count > 0 Then
+                    Dim processID As Integer = tb.Rows(0).Item("id")
+                    SaveFile = OpDir & MKMC & "\" & OpFid & ".xml"
+
+                    Base.XmlClass.GetXmlFile(SaveFile)
+                    Dim currentStatus As String
+                    currentStatus = Base.XmlClass.FindNode("//my:备用6").InnerText.Trim()
+
+                    Dim dt As New DataTable
+                    Dim currentOrder As Integer '获取当前状态的序号
+                    Dim currentStatusID As Integer '获取当前状态的ID
+
+
+
+                    '如果原先有状态，则通过sql语句找到状态
+                    If currentStatus <> "" Then
+                        sqlstr = "select * from processStatus where processID = " & processID & " and statusName='" & currentStatus & "' order by [Order]"
+                        dt = Base.DB.Table(sqlstr, "dd")
+
+                        If dt.Rows.Count > 0 Then
+                            '如果在数据库中有该状态名，那么得到状态序号与ID
+                            currentOrder = dt.Rows(0).Item("order")
+                            currentStatusID = dt.Rows(0).Item("ID")
+                        Else
+                            '如果没有则默认为流程第一个状态
+                            currentOrder = 1
+                            sqlstr = "select * from processStatus where processID = " & processID & " and  [order]=1 and processID = " & processID & " order by [order]"
+                            dt = Base.DB.Table(sqlstr, "dd")
+                            If dt.Rows.Count > 0 Then
+                                currentStatusID = dt.Rows(0).Item("ID")
+                                currentStatus = dt.Rows(0).Item("statusName")
+
+                                '保存状态
+                                Base.XmlClass.FindNode("//my:备用6").InnerText = currentStatus
+                                Base.XmlClass.Save()
+                            End If
+                        End If
+                    Else
+                        '如果没有状态，默认为第一个状态
+                        currentOrder = 1
+                        sqlstr = "select * from processStatus  where [order]=1 and processID = " & processID
+                        dt = Base.DB.Table(sqlstr, "dd")
+                        If dt.Rows.Count > 0 Then
+                            currentStatusID = dt.Rows(0).Item("ID")
+                            currentStatus = dt.Rows(0).Item("statusName")
+
+                            Base.XmlClass.FindNode("//my:备用6").InnerText = currentStatus
+                            Base.XmlClass.Save()
+
+                        End If
+                    End If
+
+                    sqlstr = "select * from processCondition where statusID=" & currentStatusID & " order by [order] "
+                    dt = Base.DB.Table(sqlstr, "dd")
+
+                    Dim confirmConditionID As Integer = 0
+
+                    If dt.Rows.Count > 0 Then
+
+                        Dim dtMaxOrderRule As New DataTable
+
+                        Dim conditionID As Integer
+                        Dim maxRuleOrder As Integer
+
+
+                        For i = 0 To dt.Rows.Count - 1
+                            conditionID = Convert.ToInt32(dt.Rows(i).Item("id"))
+
+
+                            sqlstr = "select max([order]) from processRule where conditionID = " & conditionID
+                            dtMaxOrderRule = Base.DB.Table(sqlstr, "dtMaxOrderRule")
+
+                            Dim result As Boolean = False
+                            If dtMaxOrderRule.Rows.Count > 0 Then
+
+                                If Not IsDBNull(dtMaxOrderRule.Rows(0).Item(0)) Then
+                                    maxRuleOrder = dtMaxOrderRule.Rows(0).Item(0).ToString()
+                                    Dim dtRule As New DataTable
+
+                                    Dim j As Integer
+                                    For j = 0 To maxRuleOrder - 1
+
+                                        sqlstr = "select * from processRule where conditionID = " & conditionID & " and [order]=" & j + 1
+                                        dtRule = Base.DB.Table(sqlstr, "dtRule")
+
+                                        Dim m As Integer
+                                        Dim orResult As Boolean = False
+
+                                        For m = 0 To dtRule.Rows.Count - 1
+                                            '节点名
+                                            Dim strNodeName As String = "//" & dtRule.Rows(m).Item("nodeName")
+                                            '符号
+                                            Dim strSymbol As String = dtRule.Rows(m).Item("symbol")
+                                            '条件
+                                            Dim strCondition As String = dtRule.Rows(m).Item("ruleContent")
+                                            '表单中的节点值
+                                            Dim strCurrentValue As String = Base.XmlClass.FindNode(strNodeName).InnerText
+
+
+                                            '判断条件更具ORDER来进行判断先后关系
+                                            Select Case strSymbol
+                                                Case "="
+                                                    If strCurrentValue = strCondition Then
+                                                        orResult = True
+                                                    End If
+                                                Case "!="
+                                                    If strCurrentValue <> strCondition Then
+                                                        orResult = True
+                                                    End If
+                                                Case "like"
+                                                    If strCurrentValue.IndexOf(strCondition) <> -1 Then
+                                                        orResult = True
+                                                    End If
+                                                Case ">"
+                                                    Try
+                                                        If Convert.ToInt32(strCurrentValue) > Convert.ToInt32(strCondition) Then
+                                                            orResult = True
+                                                        End If
+                                                    Catch ex As Exception
+                                                        If strCurrentValue > strCondition Then
+                                                            orResult = True
+                                                        End If
+                                                    End Try
+                                                Case "<"
+                                                    Try
+                                                        If Convert.ToInt32(strCurrentValue) < Convert.ToInt32(strCondition) Then
+                                                            orResult = True
+                                                        End If
+                                                    Catch ex As Exception
+                                                        If strCurrentValue < strCondition Then
+                                                            orResult = True
+                                                        End If
+                                                    End Try
+                                            End Select
+                                            result = orResult
+                                        Next
+                                        If result = False Then
+                                            Exit For
+                                        End If
+                                    Next
+                                Else
+                                    result = True
+                                End If
+                            Else
+                                result = True
+                            End If
+
+                            If result = True Then
+                                confirmConditionID = conditionID
+                                Exit For
+                            End If
+                        Next
+
+                        If confirmConditionID <> 0 Then
+                            sqlstr = "select * from processCondition where id=" & confirmConditionID
+                            dt = Base.DB.Table(sqlstr, "confirmConditionTable")
+
+                            If dt.Rows.Count > 0 Then
+
+                                Dim statusID As Integer
+                                Dim toUserList As String
+                                Dim sendContent As String
+                                Dim attentionNode As String
+                                Dim attentionNodeValue As String
+                                Dim nextStatusID As Integer
+                                Dim nextStatusName As String
+
+                                statusID = dt.Rows(0).Item("statusID")
+                                nextStatusID = dt.Rows(0).Item("nextStatusID")
+                                toUserList = dt.Rows(0).Item("toUserlist").ToString()
+                                sendContent = dt.Rows(0).Item("sendContent").ToString()
+                                attentionNode = dt.Rows(0).Item("attentionNode").ToString()
+
+                                If toUserList.IndexOf("[touser:表单创建者]") >= 0 Then
+                                    toUserList = toUserList.Replace("[touser:表单创建者]", Base.GetUserNameByDLMC(Base.getFormCreator(Fid)))
+                                End If
+
+                                If sendContent.IndexOf("[node:") >= 0 Then
+                                    Dim strs() As String
+                                    strs = sendContent.Split("[")
+
+                                    For i = 0 To strs.Length - 1
+                                        Dim tempStr As String
+                                        Dim tempNodeValue As String
+
+                                        If strs(i).Length > 0 Then
+                                            tempStr = strs(i).Substring(5, strs(i).IndexOf("]") - 5)
+                                            tempNodeValue = Base.XmlClass.FindNode("//" & tempStr).InnerText
+                                            sendContent = sendContent.Replace("[node:" & tempStr & "]", tempNodeValue)
+                                        End If
+                                    Next
+
+                                End If
+
+                                If nextStatusID = 0 Then
+                                    Dim tempDT As New DataTable
+                                    sqlstr = "select statusName,id from processStatus where processID = (select processID from processStatus where ID = " & statusID & ") and [order] = ((select [order] from processStatus where id= " & statusID & " ) + 1)"
+                                    tempDT = Base.DB.Table(sqlstr, "tempdt")
+                                    If tempDT.Rows.Count > 0 Then
+                                        nextStatusName = tempDT.Rows(0).Item("statusName")
+                                        nextStatusID = tempDT.Rows(0).Item("id")
+                                    Else
+                                        nextStatusName = "流程结束"
+                                    End If
+                                Else
+                                    nextStatusName = Base.getProcessStatusNameByID(nextStatusID)
+                                End If
+
+                                Base.XmlClass.FindNode("//my:备用6").InnerText = nextStatusName
+                                Base.XmlClass.Save()
+
+                                attentionNodeValue = Base.XmlClass.FindNode("//" & attentionNode).InnerText
+
+                                If nextStatusName = "流程结束" Then
+                                    Base.autoSend(toUserList, Fid, sendContent)
+                                    Base.insertProcessHistory(Fid, Base.getProcessStatusNameByID(currentStatusID), "流程结束", toUserList, sendContent, attentionNodeValue)
+                                    Base.processOver(Fid)
+                                Else
+
+                                    Base.autoSend(toUserList, Fid, sendContent)
+                                    Base.insertProcessHistory(Fid, currentStatusID, nextStatusID, toUserList, sendContent, attentionNodeValue)
+                                End If
+
+                            End If
+                        End If
+                    End If
+                End If
+            Catch ex As Exception
+
+            End Try
+
+        End If
+
+
+
+
+
+
+        '3.将新的文件复制到用户文件夹下，防止出现空数据的BUG
+        Dim TmpFileName As String = Server.MapPath(".") & "\Submit_Temp\" & Login_User & "\" & Fid & ".xml"
+        SaveFile = OpDir & MKMC & "\" & OpFid & ".xml"
+        If IO.File.Exists(SaveFile) = True Then
+            Try
+                File.Copy(SaveFile, TmpFileName, True)
+            Catch ex As Exception
+                ReturnErrMsg("系统错误：目录无写权限,请与管理员联系！")
+                Exit Sub
+            End Try
+        End If
+
+
+
+        '4.删除临时文件.因为下面已经用不到了
+        File.Delete(TempFileName)
+        If SubmitFlag = True Then
+            Dim PrevPage As String = Request.ServerVariables("HTTP_REFERER")
+            If PrevPage.Trim.Length > 0 Then
+                Dim WriteJS As String = String.Empty
+                'WriteJS += "try { opener.window.location.reload(); } catch(e) {};"
+                'WriteJS += "alert('提交成功');window.location.href='" & PrevPage.ToLower.Replace("/webinfopath.aspx", "/OpenInfoPath.aspx") & "';"
+                Dim LCDM As Integer
+                tb = Base.DB.Table("Select FID From XX_XMJC where XMZT is null and FID=" & Fid, "XMJC")
+                If tb.Rows.Count > 0 Then       '表示是无流程表单
+                    Try
+                        tb = Base.DB.Table("SELECT MK.MKMC, MK.XDLJ, MK.List_QX_LCDM, MK.NoLcDM, MK.MKDM, GI.ShowFunName FROM GY_MKXX AS MK INNER JOIN GY_GROUP_INFO AS GI ON MK.MKDM = GI.MKDM INNER JOIN XX_XMJC AS XX ON MK.MKDM = XX.MKDM where MK.mkdm = " & MKDM & " and FID=" & Fid, "dd")
+                        If tb.Rows.Count > 0 Then
+                            If tb.Rows(0)("ShowFunName").ToString.Trim.Length = 0 Then
+                                MKMC = tb.Rows(0)("MKMC").ToString.Trim
+                            Else
+                                MKMC = tb.Rows(0)("ShowFunName").ToString.Trim
+                            End If
+                            LCDM = tb.Rows(0)("NoLcDm").ToString.Trim     '得到流程代码  
+                        End If
+                        '多种情况,有菜单上的新建与列表上的新建
+                        WriteJS = "try {  if (parent.opener.location.href.indexOf('ShowList.aspx') == -1) {parent.opener.parent.MyDesktopRefresh(); }} catch(e) {};"
+                        WriteJS += "try { if (parent.opener.location.href.indexOf('ShowList.aspx') == -1) {parent.opener.parent.parent.MyDesktopRefresh(); }} catch(e) {};"
+                        WriteJS += "try { if (parent.opener.location.href.indexOf('ShowList.aspx') == -1) {parent.opener.parent.addTabRefresh('Menu/NavPage.aspx?LCDM=" & LCDM & "','" & MKMC & "','Menu_NOLC_" & MKDM & "'); }} catch(e) {};"
+                        WriteJS += "try { if (parent.opener.location.href.indexOf('ShowList.aspx') == -1) {parent.opener.parent.parent.addTabRefresh('Menu/NavPage.aspx?LCDM=" & LCDM & "','" & MKMC & "','Menu_NOLC_" & MKDM & "'); }} catch(e) {};"
+                        WriteJS += "try { if (parent.opener.location.href.indexOf('ShowList.aspx')!= -1) { parent.opener.windowfresh();}} catch(e) {};"
+                    Catch ex As Exception
+                        '正常情况刷新列表,如果出错,则直接关掉.
+                    End Try
+                End If
+                If PrevPage.ToString.ToLower.IndexOf("homepage/forms/questionnaire3.aspx") > 0 Then
+                    WriteJS += "alert('你填写的内容已经提交成功');window.location.href='homepage/Forms/questionnaire.aspx'"
+                    Response.Write("<script language='javascript'>" & WriteJS & "</script>")
+                Else
+                    If PrevPage.ToString.ToLower.IndexOf("homepage/forms/anonymousrp.aspx") > 0 Then
+                        WriteJS += "alert('你填写的内容已经提交成功,请点击表单上面的[导出Word打印]功能对表单打印并打印！');window.location.href='homepage/Forms/AnonymousFormPrint.aspx?" & Fid & "." & DateTime.Now.ToString("yyyyMMddHHmmssfff") & "'"
+                        Response.Write("<script language='javascript'>" & WriteJS & "</script>")
+                    Else
+
+                        If isSubmitSuccess Then
+                            Response.Write("<script language='javascript'>" & WriteJS & "</script>")
+                            ReturnErrMsg("提交成功")
+                        Else
+                            Response.Write("<script language='javascript'>" & WriteJS & "</script>")
+                            ReturnErrMsg("提交失败")
+                        End If
+
+
+
+                        Exit Sub
+                    End If
+                End If
+            Else
+
+                ReturnErrMsg("提交成功")
+                Exit Sub
+            End If
+        Else
+            Response.End()
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 对附件进行分离.保存在当前表单目录下的Annex
+    ''' </summary>
+    ''' <param name="Fid"></param>
+    ''' <remarks></remarks>
+    Sub SplitFormAnnex(ByVal Fid As Integer)
+        '取得模板名称,和模板路径
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & Fid & ")", "XX_XMJC")
+        If tb.Rows.Count = 0 Then
+            ReturnErrMsg("非法访问")
+            Exit Sub
+        End If
+        Dim XsnDir As String = tb.Rows(0).Item(2).ToString.Trim
+
+        Dim Opfile As String = Server.MapPath("./") & "\FormFolder\" & MKMC & "\" & Fid & ".xml"
+        Dim SchemaFile As String = Server.MapPath("./") & "\TemplateLibrary\" & XsnDir & "\myschema.xsd"
+        Dim SaveBase As String = Server.MapPath("./") & "\FormFolder\" & MKMC & "\Annex\"
+        Base.pub.CreateDir(SaveBase)
+        If IO.File.Exists(SchemaFile) = False Then
+            ReturnErrMsg("请更新模板")
+            Exit Sub
+        End If
+        Base.XmlClass.GetXmlFile(SchemaFile)
+        Dim NodeList As XmlNodeList = Base.XmlClass.FindNodes("/xsd:schema/xsd:element[@type='xsd:base64Binary']")
+        Dim NodeList1 As XmlNodeList
+        Dim AnnNodeName As String
+        Dim SaveFile As String
+        Dim i, j As Integer
+        For i = 0 To NodeList.Count - 1
+            AnnNodeName = NodeList.Item(i).Attributes("name").Value
+            Base.XmlClass.GetXmlFile(Opfile)
+            Try
+                NodeList1 = Base.XmlClass.FindNodes("//my:" & AnnNodeName)
+                For j = 0 To NodeList1.Count - 1
+                    SaveFile = Fid & "_" & i & "_" & j & ".txt"
+                    Base.pub.Text_File_SaveAs(SaveBase & SaveFile, NodeList1.Item(j).InnerText, Encoding.UTF8)
+                    NodeList1.Item(j).InnerText = SaveFile
+                Next
+            Catch ex As Exception
+                ReturnErrMsg(Base.XmlClass.ErrorMessage)
+                Exit Sub
+            End Try
+            Base.XmlClass.Save()
+        Next
+
+    End Sub
+
+
+
+    ''' <summary>
+    ''' 更新数据库表单
+    ''' </summary>
+    ''' <param name="Fid"></param>
+    ''' <param name="TempNode"></param>
+    ''' <remarks></remarks>
+    Sub UpdateForm_SQLXML(ByVal Fid As String, ByVal TempNode As XmlNode)
+        Base.DB.Query("Set ARITHABORT ON")      '因为要插入ＸＭＬ字段．所以必须先开起这个开关
+        Base.DB.Query("update XX_XMJC set FormContent='" & TempNode.OuterXml.Replace("'", "''") & "' where FID=" & Fid)
+        If Base.DB.ErrorMessage.ToString.Trim.Length > 0 Then
+            Response.Write("保存表单失败,请联系管理员！")
+            Response.Write(Base.DB.ErrorMessage)
+            Response.End()
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 入库更新,包括二维表格入库,SQL2005入库
+    ''' </summary>
+    ''' <param name="Fid1"></param>
+    ''' <param name="TempNode"></param>
+    ''' <remarks></remarks>
+    Function DoingUpdate(ByVal Fid1 As String, ByVal TempNode As XmlNode) As Boolean
+        Dim i As Integer
+        Dim Tb As New Data.DataTable
+
+        '是否为SQLXML库
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+            '是否后台同步？
+            If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.Synchronization").ToLower = "true" Then
+                Base.SynSubmit(Fid1, "提交")
+            Else
+                If Not SynchronizationService.Submit(Fid) Then
+                    Return False
+                End If
+            End If
+        Else
+            If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLMapping").ToLower = "true" Then
+                ''二维表映射 提交到后台服务进行同步,如果映射开起后，默认表示同步开启
+                If Base.SynSubmit(Fid1, "提交") = False Then Base.Log(Login_User, "Submit.aspx", "SynSubmit表不存在或是表结构出错", Fid)
+            Else
+                If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.Synchronization").ToLower = "true" Then
+                    '表示开启同步开关
+                    If Base.SynSubmit(Fid1, "提交") = False Then Base.Log(Login_User, "Submit.aspx", "SynSubmit表不存在或是表结构出错", Fid)
+                Else
+                    '入库操作,XML入库
+                    Dim RootNodeName As String = TempNode.Name  '得到源文件的要节点名称
+                    Dim KuPath As String = OpDir & MKMC & ".库.xml"
+                    If IO.File.Exists(KuPath) = False Then  '当库不存时.进行生成
+                        System.IO.File.Copy(OpDir & MKMC & "\" & Fid1 & ".xml", KuPath)
+                        Base.XmlClass.GetXmlFile(KuPath)
+                        Base.XmlClass.ClearAllNode()
+                    End If
+
+                    Base.XmlClass.GetXmlFile(KuPath)
+                    Dim Node2 As XmlNode = Base.XmlClass.FindNode("//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "[" & Fid_NodeName & "='" & Fid1 & "']")
+                    If Node2 Is Nothing Then
+                        '6.添加用户操作记录,添加新表单
+                        '这里对模板库中的空记录进行处理。防止在引用库时，出现空记录导致SUM不能用。
+                        Dim NodeNull As XmlNode = Base.XmlClass.FindNode("//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "[" & Fid_NodeName & "='']")
+                        If NodeNull Is Nothing Then
+                            Try
+                                Base.XmlClass.AddNode(TempNode)
+                            Catch ex As Exception
+                                Response.Write("系统错误：入库失败！")
+                                Base.Log(Login_User, "Submit.aspx", ex.Message.ToString(), Fid)
+                            End Try
+                        Else
+                            Try
+                                Base.XmlClass.UpdateNode("//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "[" & Fid_NodeName & "='']", TempNode)
+                            Catch ex As Exception
+                                Response.Write("系统错误：入库失败！")
+                                Base.Log(Login_User, "Submit.aspx", ex.Message.ToString(), Fid)
+                            End Try
+                        End If
+                    Else
+                        '6.添加用户操作记录,修改表单
+                        Try
+                            Base.XmlClass.UpdateNode("//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "[" & Fid_NodeName & "='" & Fid1 & "']", TempNode)
+                        Catch ex As Exception
+                            Response.Write("系统错误：入库失败！")
+                            Base.Log(Login_User, "Submit.aspx", ex.Message.ToString(), Fid)
+                        End Try
+                    End If
+                End If
+            End If
+        End If
+
+
+
+        '记录操作记录,并更新项目状态        
+        Try
+            Base.DB.Query("insert into Form_Modify_Log(UserName,xmdm,XMMC,FormName,ModiTime) values('" & Base.SqlFilter(Login_User) & "'," & XMDM & ",'" & MKMC & "','" & Fid1 & "','" & Now & "')")
+            If XMZT = False Then
+                Base.DB.Query("update GY_XMXX set xmjd='已完成' where xmdm=" & XMDM)
+            Else
+                Base.DB.Query("UPDATE XX_XMJC SET WCBZ = 1, WCSJ = GETDATE() where Fid = " & Fid1)
+            End If
+
+            Tb = Base.DB.Table("select CId,XMMC From Form_Modify_Log where Username = '" & Base.SqlFilter(Login_User) & "' and XMDM=" & XMDM & " and FormName=" & Fid1 & " order by Cid desc", "Form_Modify_Log")
+            If Tb.Rows.Count > 0 Then       '做历史记录
+                Dim Cid As Integer = Tb.Rows(0).Item(0)
+                Dim HistoryDir As String = OpDir.Replace("FormFolder", "History")
+                Base.IO.CreateDir(HistoryDir)       '如果历史文件夹不存在,则创建文件夹
+                Base.IO.CreateDir(HistoryDir & MKMC)       '创建文件夹,如果文件夹不存在的话
+                File.Copy(OpDir & MKMC & "\" & Fid1 & ".xml", HistoryDir & MKMC & "\" & Cid & ".xml")
+            End If
+        Catch ex As Exception
+            Response.Write("系统错误：写日志操作错误！")
+            Base.Log(Login_User, "Submit.aspx", ex.Message.ToString(), Fid1)
+        End Try
+
+        Dim Sql As String
+        '再列出项目的所有状态名,来找到当前功能的前一状态
+        Sql = "SELECT GY_XMZT.XMZT,GY_XMZT.ZTMC,GY_XMZT.OrderBy "
+        Sql += " FROM  XX_XMJC, GY_XMZT"
+        Sql += " where XX_XMJC.XMZT = GY_XMZT.XMZT"
+        Sql += " and XX_XMJC.XMDM= " & XMDM
+        Sql += " ORDER BY GY_XMZT.OrderBy, GY_XMZT.XMZT"
+        Tb = Base.DB.Table(Sql, "GY_XMZT")
+
+        Dim TempXMZT As String = ""
+        Dim TempBZ As Boolean = False
+        For i = 0 To Tb.Rows.Count - 1
+            If TempBZ = True And Tb.Rows(i).Item(0) <> XMZT_Value Then
+                TempXMZT += "," & Tb.Rows(i).Item(0)
+            End If
+            If Tb.Rows(i).Item(0) = XMZT_Value Then TempBZ = True
+        Next
+        If Trim(TempXMZT) <> "" Then
+            TempXMZT = TempXMZT.Substring(1)
+            '现在改为只清当前项目的后一项目的完成标志，如果是清当前项目的全部项目，则注释下面的语句
+            'If TempXMZT.IndexOf(",") > 0 Then TempXMZT = TempXMZT.Substring(0, TempXMZT.IndexOf(","))
+
+            '接下来对当前状态的以后状态，清除所有完成标志与审批标志
+            Base.DB.Query("Update XX_XMJC set SPBZ = 1,WCBZ = 0  where XMZT in (" & TempXMZT & ") and XMDM = " & XMDM & " and (WCBZ = 1 and ( SPBZ=2 or SPBZ=4 or SPBZ=3))")
+            Base.DB.Query("Update XX_XMJC set WCBZ = 0  where XMZT in (" & TempXMZT & ") and XMDM = " & XMDM & " and (WCBZ = 1)")
+        End If
+        Return True
+    End Function
+
+
+
+
+
+    Sub ReturnErrMsg(ByVal str As String)
+        If SubmitFlag = False Then      '表示是infopath提交的数据
+            Response.Write(str)
+            Response.End()
+        Else
+            Response.Write("<script language='javascript'>parent.ShowBox('" & str & "');</scr" & "ipt>")
+        End If
+
+    End Sub
+
+End Class
+
+

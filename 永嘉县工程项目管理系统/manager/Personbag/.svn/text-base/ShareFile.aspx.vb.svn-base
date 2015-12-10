@@ -1,0 +1,169 @@
+﻿
+Partial Class manager_Personbag_ShareFile
+    Inherits System.Web.UI.Page
+
+    Public decodeFolder As String
+    Public decodeShareFile As String
+    Public currentUserName As String
+    Dim folder As String
+    Dim sharefile As String
+    Dim filepath As String
+    Dim chks As String = ""
+    Dim Base As New Base
+    Dim dt As New Data.DataTable
+    Dim chk As New Web.UI.WebControls.CheckBox
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        decodeFolder = Request("folder")
+        decodeShareFile = Request("sharefilename")
+
+        folder = Server.UrlDecode(Request("folder"))
+        sharefile = Server.UrlDecode(Request("sharefilename"))
+        filepath = folder & "\" & sharefile
+        currentUserName = Base.GetWebUserName
+
+        bind()
+  
+    End Sub
+
+
+    Sub bind()
+        Dim al As New ArrayList
+        Dim dt As New DataTable
+
+        dt = Base.DB.Table("select * from sharefile where filepath ='" & filepath & "' and giveuserid='" & Base.GetWebUserName & "'", "sharefile")
+        If dt.Rows.Count > 0 Then
+            If dt.Rows(0)("GetUserID").ToString.Trim = "*" Then
+                selectALL.Attributes("checked") = "checked"
+            Else
+                Dim ischk() As String = Split(dt.Rows(0)("getuserid"), "|")
+                For i As Integer = 0 To ischk.Length - 1
+                    al.Add(ischk(i))
+                Next
+            End If
+        End If
+
+
+        '获取所有的部门
+        dt = Base.DB.Table("select * from gy_ksdm", "dd")
+
+        Dim str As String = String.Empty
+
+        If dt.Rows.Count > 0 Then
+
+            For i As Integer = 0 To dt.Rows.Count - 1
+                Dim ksdm As Integer = dt.Rows(i).Item("ksdm")
+                Dim ksmc As String = dt.Rows(i).Item("ksmc").ToString()
+
+
+                
+
+                Dim cb As New CheckBox
+                cb.Text = ksmc
+
+                str = str & "    <tr>" & vbCrLf
+                str = str & "        <th style='text-align:left' colspan='3'>" & vbCrLf
+                str = str & "            <input id='CB_KSDM_" & ksdm & "' type='checkbox' value='" & ksdm & "' class='KSDM' onclick=""selectBelongCB('CB_KSDM_" & ksdm & "','CLASS_KSDM_" & ksdm & "')""/><label for='CB_KSDM_" & ksdm & "'>" & ksmc & "</label>" & vbCrLf
+                str = str & "            <a href='#' onclick='javascript:opentest(" & i & ")'>展开</a>"
+                str = str & "        </th>" & vbCrLf
+                str = str & ""
+                str = str & "    </tr>" & vbCrLf
+
+
+                Dim dtUser As New DataTable
+
+
+
+                dtUser = Base.DB.Table("select * from gy_ygdm where ssks=" & ksdm, "dd")
+
+
+
+                For j As Integer = 0 To dtUser.Rows.Count - 1
+
+                    Dim userID As Integer
+                    Dim userName As String
+                    Dim userLoginName As String
+                    userID = Convert.ToInt32(dtUser.Rows(j).Item("ygdm"))
+                    userName = dtUser.Rows(j).Item("ygxm").ToString()
+                    userLoginName = dtUser.Rows(j).Item("dlmc").ToString()
+
+                    If j Mod 3 = 0 Then
+                        str = str & "    <tr class='test" & i & "'>" & vbCrLf
+                    End If
+
+
+                    str = str & "        <td>" & vbCrLf
+                    str = str & "        <div class='div" & i & "'>" & vbCrLf
+                    str = str & "           <input id='CB_YGDM_" & userID & "' class='CLASS_KSDM_" & ksdm & "' type='checkbox' value='" & userID & "' onclick=""unselectCB('CB_YGDM_" & userID & "','CB_KSDM_" & ksdm & "')"""
+
+                    If al.Contains(userLoginName) Then
+                        str = str & " checked='checked'"
+                    End If
+
+                    str = str & "            /><label for='CB_YGDM_" & userID & "'>" & userName & "</label>" & vbCrLf
+                    str = str & "        </div>"
+                    str = str & "        </td>" & vbCrLf
+
+
+                    If j Mod 3 = 2 Then
+                        str = str & "    </tr>" & vbCrLf
+                    End If
+                    If j Mod 3 <> 2 And j = dtUser.Rows.Count - 1 Then
+                        str = str & "    </tr>" & vbCrLf
+                    End If
+                Next
+
+            Next
+
+
+
+            str = str & "    <tr>" & vbCrLf
+            str = str & "        <th style='text-align:left' colspan='3'>" & vbCrLf
+            str = str & "            <input id='CB_KSDM_0' type='checkbox' value='0' class='KSDM' onclick=""selectBelongCB('CB_KSDM_0','CLASS_KSDM_0')"" /><label for='CB_KSDM_0'>未分组</label>" & vbCrLf
+            str = str & "        </th>" & vbCrLf
+            str = str & ""
+            str = str & "    </tr>" & vbCrLf
+
+
+            dt = Base.DB.Table("select * from gy_ygdm where ssks is null", "dd")
+
+
+            For i As Integer = 0 To dt.Rows.Count - 1
+                Dim userID As Integer
+                Dim userName As String
+                Dim userLoginName As String
+
+                userID = Convert.ToInt32(dt.Rows(i).Item("ygdm"))
+                userName = dt.Rows(i).Item("ygxm").ToString()
+                userLoginName = dt.Rows(i).Item("dlmc").ToString()
+
+                If i Mod 3 = 0 Then
+                    str = str & "    <tr>" & vbCrLf
+                End If
+
+
+                str = str & "        <td>" & vbCrLf
+                str = str & "           <input id='CB_YGDM_" & userID & "' class='CLASS_KSDM_0' type='checkbox' value='" & userID & "' onclick=""unselectCB('CB_YGDM_" & userID & "','CB_KSDM_0')"""
+
+                If al.Contains(userLoginName) Then
+                    str = str & " checked='checked'"
+                End If
+                str = str & "           /><label for='CB_YGDM_" & userID & "'>" & userName & "</label>" & vbCrLf
+                str = str & "        </td>" & vbCrLf
+
+
+                If i Mod 3 = 2 Then
+                    str = str & "    </tr>" & vbCrLf
+                End If
+            Next
+
+            If selectALL.Attributes("checked") = "checked" Then
+                str = str & ("<script>selectAllCB()</script>")
+            End If
+
+            tbody.InnerHtml = str
+
+        End If
+
+    End Sub
+
+End Class

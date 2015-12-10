@@ -1,0 +1,116 @@
+﻿
+Partial Class manager_Desktop_DesktopStyle2
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        If Login_User.Trim.Length = 0 Then
+            Response.Write("<b>得到不IIS用户.桌面无法显示!</b><br>")
+            Response.Write("<b><font color=red>解决办法</font></b>:将在IIS中,将站点设为集成windows登陆方式即可!")
+            Response.Write("Internet 信息服务->选中你的站点->右键属性->目录安全性->编辑->将[匿名访问]的钩去掉,并钩选[集成windows身份验证]->确定->确定")
+            Response.End()
+        End If
+
+        If UserID = -1 Then
+            Response.Write("<b>系统不允许此用户进入本系统,桌面无法显示!</b><br>")
+            Response.Write("<b><font color=red>解决办法</font></b>:通知管理员.在本系统中添加用户即可!")
+            Response.End()
+        End If
+
+        Dim DesktopStyle As Integer = Base.GetOpenConfig("桌面布局", UserID, 0)
+        If DesktopStyle = 1 Then Response.Redirect("DesktopStyle1.aspx")
+        If DesktopStyle = -1 Then Response.Redirect("MyDesktop.aspx")
+
+        ReviceMessage.SelectParameters("TOID").DefaultValue = UserID
+        SpMessage.SelectParameters("YGDM").DefaultValue = UserID
+
+        Dim tb As New Data.DataTable
+        '要连接多张表进行统计审批的条数.因为有些项目可能已经被删除.
+        Dim SpCount1 As Integer = Base.DB.ExeScalar("SELECT count(CID) FROM [GY_XMSP],Gy_XMXX,GY_MKXX WHERE  GY_XMSP.XMDM=GY_XMXX.XMDM and GY_XMSP.MKDM=GY_MKXX.MKDM and  ([YGDM] = " & UserID & ") AND (SPBZ = 0) and zfbz = 0")
+        Dim SpCount2 As Integer = Base.DB.ExeScalar("SELECT count(CID) FROM [GY_XMSP],Gy_XMXX,GY_MKXX WHERE  GY_XMSP.XMDM=GY_XMXX.XMDM and GY_XMSP.MKDM=GY_MKXX.MKDM and  ([YGDM] = " & UserID & ")")
+        SpCount.InnerHtml = "[" & SpCount1 & "/" & SpCount2 & "]"
+
+        '列出已经查看过的订阅条数与总条数
+        Dim NoLooked As Integer = Base.DB.GetRowCount("select Order_Form_Log.CID from Order_Form_log,GY_MKXX where GY_MKXX.MKDM = Order_Form_log.MKDM and Order_Form_log.USerID = " & UserID & " and Order_Form_log.LookFlag = 0 ", "Order_Form_Log")
+        Dim AllRecord As Integer = Base.DB.GetRowCount("select Order_Form_Log.CID from Order_Form_log,GY_MKXX where GY_MKXX.MKDM = Order_Form_log.MKDM and Order_Form_log.USerID = " & UserID, "Order_Form_Log")
+
+
+        '对公告进行显示
+        tb = Base.DB.Table("select top 5 Cid,Title,Pdate,YGXM from PublicMessage,GY_YGDM where PublicMessage.UserID=GY_YGDM.YGDM order by cid desc", "PublicMessage")
+        Dim i As Integer
+        Dim TempStr As String = String.Empty
+        If tb.Rows.Count = 0 Then
+            TempStr = "&nbsp;&nbsp;暂无公告"
+        Else
+            For i = 0 To tb.Rows.Count - 1
+                TempStr += "&nbsp;&nbsp;<a href='LookPublicMessage.aspx?PID=" & tb.Rows(i).Item(0) & "'>" & tb.Rows(i).Item(1) & "</a>&nbsp" & tb.Rows(i).Item(2) & "&nbsp" & tb.Rows(i).Item(3)
+                TempStr += "<br>"
+            Next
+
+        End If
+        PubMessage.InnerHtml = TempStr
+    End Sub
+
+    Protected Sub GridView2_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView2.DataBound
+        Dim i As Integer
+        For i = 0 To GridView2.Rows.Count - 1
+            If GridView2.Rows(i).Cells(1).Text.Length > 21 Then GridView2.Rows(i).Cells(1).Text = GridView2.Rows(i).Cells(1).Text.Substring(0, 21) & "..."
+            GridView2.Rows(i).Cells(2).Text = "<a href='javascript:void(0)' onclick=""window.open('WriteSendMessage.aspx?SID=" & GridView2.DataKeys(i).Item(0) & "','写短消息','height=280, width=650, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')"">回复</a>"
+            '添加TITLE效果
+            GridView2.Rows(i).Attributes.Add("Title", "标题：" & GridView2.DataKeys(i).Item(3) & " " & GridView2.DataKeys(i).Item(1) & " " & GridView2.DataKeys(i).Item(2))
+            '双击效果
+            GridView2.Rows(i).Attributes.Add("OnDblClick", "DbClickEventLookSendMessage(" & GridView2.DataKeys(i).Item(0) & ")")
+        Next
+    End Sub
+
+    Protected Sub GridView4_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs) Handles GridView4.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            '鼠标效果
+            e.Row.Attributes.Add("onmouseover", "OnMouseOver(this)")
+            e.Row.Attributes.Add("onmouseout", "OnMouseOut(this)")
+            e.Row.Attributes("style") = "Cursor:hand"
+            e.Row.Attributes.Add("OnDblClick", "DbClickEventXMSP(" & GridView4.DataKeys(e.Row.RowIndex).Item(0) & ")")
+        End If
+    End Sub
+
+    Protected Sub GridView2_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs) Handles GridView2.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            '鼠标效果
+            e.Row.Attributes.Add("onmouseover", "OnMouseOver(this)")
+            e.Row.Attributes.Add("onmouseout", "OnMouseOut(this)")
+            e.Row.Attributes("style") = "Cursor:hand"
+        End If
+    End Sub
+
+    Protected Sub GridView4_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView4.DataBound
+        Dim i As Int16
+        Dim dt As DataTable
+        Dim FQR As String
+        For i = 0 To GridView4.Rows.Count - 1
+            FQR = GridView4.Rows(i).Cells(0).Text
+            GridView4.Rows(i).Cells(0).Text = Base.DB.ExeScalar("SELECT YGXM FROM GY_YGDM where DLMC='" & FQR & "'") & "(" & FQR & ")"
+            dt = Base.GetShowFieldDate_NoLc(GridView4.DataKeys(i)(1), GridView4.DataKeys(i)(2), 5)
+            If dt Is Nothing Then
+                GridView4.Rows(i).Cells(3).Text = "记录不存在"
+            Else
+                '下面是显示自定义列的内容
+                Dim Str As String
+                Str = "<table border='1' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:98%;border-collapse:collapse;'>"
+                Str += "<tr><td width=60 align=center>" & dt.Columns(0).ColumnName.Trim & "</td><td>" & dt.Rows(0).Item(0) & "</td></tr></table>"
+                Str += "<table border='1' id='showrow" & i & "' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:98%;border-collapse:collapse;display:none;'>"
+                Str += "<tr><td width=60 align=center>" & dt.Columns(1).ColumnName.Trim & "</td><td>" & dt.Rows(0).Item(1) & "</td></tr>"
+                Str += "<tr><td width=60 align=center>" & dt.Columns(2).ColumnName.Trim & "</td><td>" & dt.Rows(0).Item(2) & "</td></tr>"
+                Str += "<tr><td width=60 align=center>" & dt.Columns(3).ColumnName.Trim & "</td><td>" & dt.Rows(0).Item(3) & "</td></tr>"
+                Str += "<tr><td width=60 align=center>" & dt.Columns(4).ColumnName.Trim & "</td><td>" & dt.Rows(0).Item(4) & "</td></tr>"
+                Str += "</table>"
+                GridView4.Rows(i).Cells(3).Attributes.Add("onclick", "javascript:show('showrow" & i & "');")
+                GridView4.Rows(i).Cells(3).Text = Str
+            End If
+        Next
+    End Sub
+End Class

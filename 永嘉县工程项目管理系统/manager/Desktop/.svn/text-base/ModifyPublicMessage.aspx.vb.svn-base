@@ -1,0 +1,106 @@
+﻿
+Partial Class manager_Desktop_ModifyPublicMessage
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim TempFolder As String
+    Dim PID As Integer
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click, Button5.Click
+        If TextBox1.Text.Trim.Length = 0 Then
+            Base.Js.alert(Me, "标题不能为空")
+            Exit Sub
+        End If
+        If TextBox2.Text.Trim.Length = 0 Then
+            Base.Js.alert(Me, "内容不能为空")
+            Exit Sub
+        End If
+        If TextBox2.Text.Length > 500 Then
+            Base.Js.alert(Me, "内容不能大于500字符")
+            Exit Sub
+        End If
+
+        Dim sql As String
+        'sql = "update SendMessage set Title='" & Base.SqlFilter(TextBox1.Text) & "',Content='" & Base.SqlFilter(TextBox2.Text) & "',sendDate='" & Base.SqlFilter(PDate.Text) & "' where cid=" & PID
+        sql = "update SendMessage set Title='" & Base.SqlFilter(TextBox1.Text) & "',Content='" & Base.SqlFilter(TextBox2.Text) & "' where cid=" & PID
+        Base.DB.Query(sql)
+        Base.Js.WriteScript(Me, "opener.window.parent.MessageBox('操作成功','你已经成功修改了公告!');var url = opener.window.location.href;opener.window.location.href=url;window.close();")
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Try
+            PID = Request("PID")
+        Catch ex As Exception
+            PID = 0
+        End Try
+
+        Dim Row As Data.DataRow = Base.DB.Row("select sm.CID, sm.Title,sm.Content,sm.SendDate,GY_YGDM.YGXM,sm.FromID from SendMessage as sm,GY_YGDM where sm.FromID=GY_YGDM.YGDM and sm.CId=" & PID, "PublicMessage")
+        If Row Is Nothing Then
+            Response.Write("公告不存在,或已经被删除！")
+            Response.End()
+        End If
+
+        TempFolder = Server.MapPath("../../") & "\PersonalFolders\MessageAttachment\" & PID & "\"
+        Base.IO.CreateDir(TempFolder)
+
+        If Login_User.Trim.Length = 0 Or UserID = -1 Then
+            Response.Redirect("../../Error.htm", True)
+        End If
+
+
+        If Page.IsPostBack = False Then
+            Dim PubUserID As String = Row("FromID").ToString
+            If Page.IsPostBack = False Then
+                TextBox1.Text = Row("Title").ToString
+                TextBox2.Text = Row("Content").ToString
+            End If
+
+            '删除附件
+            Try
+                Dim sel As String
+                sel = Base.SqlFilter(Request("Sel").ToString)
+                If sel.Length > 0 Then
+                    IO.File.Delete(TempFolder & "\" & sel)
+                End If
+            Catch ex As Exception
+            End Try
+        End If
+
+        ShowFileAttachment()            '当上次上传了文件，但是没有用掉，现在进行恢复。
+
+    End Sub
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+        '文件上传功能,大小为1M
+        Dim TempFolder As String = "../../" & "PersonalFolders/MessageAttachment/" & PID
+        Base.pub.CreateDir(Server.MapPath(TempFolder))
+
+        If FileUpload1.PostedFile.ContentLength = 0 Then Exit Sub
+        Base.Upload.Sizes = 1000 * 1024
+        Base.Upload.Path = TempFolder
+        Dim FileType As String = Base.GetSystemParameters("UpLoad_Filter")
+        If FileType Is Nothing Then FileType = "空"
+        Base.Upload.FileType = FileType
+        Base.Upload.ReWriteFlag = True
+        If Base.Upload.FileSaveAs(FileUpload1) = True Then
+            ShowFileAttachment()
+            'Base.Js.alert(Me, "上传成功")
+        Else
+            Base.Js.alert(Me, Base.Upload.ReturnMessage)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 显示临时附件
+    ''' </summary>
+    ''' <remarks></remarks>
+    Sub ShowFileAttachment()
+        Dim DelUrl As String = "?PID=" & PID & "&Sel="
+        filelist.InnerHtml = Base.ShowFileAttachment(TempFolder, DelUrl)
+    End Sub
+End Class

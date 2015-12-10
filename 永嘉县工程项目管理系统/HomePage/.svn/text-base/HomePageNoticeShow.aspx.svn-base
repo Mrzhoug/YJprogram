@@ -1,0 +1,36 @@
+﻿<%@ Page Language="VB" MasterPageFile="~/HomePage/MasterPage.master" AutoEventWireup="false" CodeFile="HomePageNoticeShow.aspx.vb" Inherits="HomePage_HomePageNoticeShow"  %>
+
+<%@ Register Src="DefinePart/UserLogined.ascx" TagName="UserLogined" TagPrefix="uc3" %>
+<%@ Register Src="DefinePart/HomePageNotice.ascx" TagName="HomePageNotice" TagPrefix="uc1" %>
+<%@ Register Src="DefinePart/UserLogin.ascx" TagName="UserLogin" TagPrefix="uc2" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+<table border="0" style="width: 100%" cellpadding=0 cellspacing=0>
+        <tr>
+            <td style="width: 259px" valign="top">
+                <uc1:HomePageNotice ID="HomePageNotice1" runat="server" />
+            </td>
+            <td valign="top">
+            
+            
+<table id="Table_01" width="580" border="0" cellpadding="0" cellspacing="0" height=445>
+	<tr>
+		<td height=32><img src="images/Notice_title.gif" alt=""></td>
+	</tr>
+	<tr>
+	<td style="background:url(images/页面2_12.gif);" align=center valign=top >
+<table id="Table2" width="560" border="0" cellpadding="0" cellspacing="0"><tr><td><span runat=server id=content></span>   </td></tr></table> 
+    </td>
+	</tr>
+	<tr><td height=7><img src="images/页面2_16.gif" alt="" /></td></tr>
+</table>     
+ 
+        
+        
+            </td>
+            <td>
+            </td>
+        </tr>
+        
+    </table>
+</asp:Content>
+

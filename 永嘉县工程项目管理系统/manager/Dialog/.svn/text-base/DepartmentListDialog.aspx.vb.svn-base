@@ -1,0 +1,122 @@
+﻿
+Partial Class manager_Dialog_DepartmentListDialog
+    Inherits System.Web.UI.Page
+
+    Dim Keys As String
+    Dim bm As String
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim Base As New Base()
+        Dim tb As New DataTable
+        Dim tb1 As New DataTable
+        Dim sqlstr As String
+        Dim i, j As Integer
+
+        Response.Expires = 0
+        Response.Clear()
+        Response.Buffer = False
+
+        'Dim Login_User As String = Base.GetWebUserName
+        'Dim UserID As Integer = Base.GetUserID(Login_User)
+
+        Dim userid As Integer = 1
+        Dim Ajax As Integer
+        Try
+            Ajax = Request("ajax")
+        Catch ex As Exception
+            Ajax = 0
+        End Try
+
+        Try
+            Keys = Request("Key").ToString
+        Catch ex As Exception
+            Keys = ""
+        End Try
+
+        Try
+            bm = Base.SqlFilter(Request("bm"))
+        Catch ex As Exception
+            bm = ""
+        End Try
+
+        Dim bms As String()
+        bms = bm.Split(",")
+
+        If bms.Length > 0 And bm <> "" Then
+            sqlstr = "SELECT [KSDM], [KSMC] FROM [GY_KSDM] where "
+            For i = 0 To bms.Length - 1
+                If i = 0 Then
+                    sqlstr = sqlstr & " ksmc = '" & bms(i) & "'"
+                Else
+                    sqlstr = sqlstr & " or ksmc = '" & bms(i) & "'"
+                End If
+            Next
+        Else
+            sqlstr = "SELECT [KSDM], [KSMC] FROM [GY_KSDM] "
+        End If
+
+        If Ajax = 1 Then
+            tb = Base.DB.Table(sqlstr, "dd")
+
+            Dim out As New StringBuilder
+            out.Append("<table border=0 width=100% cellpadding='0' cellspacing='0'>")
+            out.Append("<tr><td height=30 bgcolor='#ededed' onclick=""show('tabletr" & i & "')"">&nbsp;<img src='../../images/Ext.UI/icons/fam/user_add.gif'>&nbsp;搜索结果</td></tr>")
+            out.Append("<tr id='tabletr" & i & "'><td>")
+            tb1 = Base.DB.Table("SELECT [YGDM], [YGXM],[DLMC] FROM [GY_YGDM] WHERE (IsOut = 0 or IsOut is null)  and ([QYBZ] = 1) and (YGXM like '%" & Base.SqlFilter(Keys).Trim & "%' or DLMC like '%" & Base.SqlFilter(Keys).Trim & "%') and ygdm != " & UserID, "d1")
+            out.Append("<table  border='0' width='100%' cellpadding='2' cellspacing='2'>")
+            For j = 0 To tb1.Rows.Count - 1
+                out.Append("<tr><td height='20' style='background-Color:#FAFAFA;'  onmouseover='OnMouseOver(this)' onmouseout='OnMouseOut(this);' onclick='select1(""" & tb1.Rows(j).Item("YGXM").ToString.Trim & "<span style=color:#acacac>(" & tb1.Rows(j).Item("DLMC").ToString.Trim & ");</span>""," & tb1.Rows(j).Item("YGDM").ToString.Trim & ");'>&nbsp;&nbsp;" & tb1.Rows(j).Item(1) & "<span style=color:#acacac>(" & tb1.Rows(j).Item("DLMC").ToString.Trim & ")</span></td></tr>")
+            Next
+            out.Append("</table>")
+            out.Append("</td></tr>")
+            out.Append("</table>")
+            Response.Write(out.ToString())
+            Response.End()
+        Else
+            tb = Base.DB.Table(sqlstr, "dd")
+
+            Dim out As New StringBuilder
+            Dim Tmp As String = ""
+            Dim TmpOck As String = ""
+            out.Append("<table border=0 width=100% cellpadding='0' cellspacing='0'>")
+            For i = 0 To tb.Rows.Count - 1
+                out.Append("<tr><td height=30 bgcolor='#ededed' onclick=""show('tabletr" & i & "')"">&nbsp;<img src='../../images/Ext.UI/icons/fam/user_add.gif'>&nbsp;" & tb.Rows(i).Item(1) & "</td><td bgcolor='#ededed'>")
+
+                Tmp = "<tr id='tabletr" & i & "'><td colspan='2'>"
+                'tb1 = Base.DB.Table("SELECT [YGDM], [YGXM],[DLMC] FROM [GY_YGDM] WHERE (IsOut = 0 or IsOut is null) and ([QYBZ] = 1) and SSKS=" & tb.Rows(i).Item(0) & " and ygdm != " & UserID, "d1")
+                Tmp += "<table  border='0' width='100%' cellpadding='2' cellspacing='2'>"
+                TmpOck = ""
+                'For j = 0 To tb1.Rows.Count - 1
+                '    Tmp += "<tr><td height='20' style='background-Color:#FAFAFA;'  onmouseover='OnMouseOver(this)' onmouseout='OnMouseOut(this);' onclick='select1(""" & tb1.Rows(j).Item("YGXM").ToString.Trim & "<span style=color:#acacac>(" & tb1.Rows(j).Item("DLMC").ToString.Trim & ");</span>""," & tb1.Rows(j).Item("YGDM").ToString.Trim & ");'>&nbsp;&nbsp;" & tb1.Rows(j).Item(1) & "<span style=color:#acacac>(" & tb1.Rows(j).Item("DLMC").ToString.Trim & ")</span></td></tr>"
+                '    TmpOck += "select1(""" & tb1.Rows(j).Item("YGXM").ToString.Trim & "<span style=color:#acacac>(" & tb1.Rows(j).Item("DLMC").ToString.Trim & ");</span>""," & tb1.Rows(j).Item("YGDM").ToString.Trim & ");"
+                'Next
+                '选择所属科室
+                TmpOck += "selectKS(""" & tb.Rows(i).Item(1).ToString.Trim & "<span style=color:#acacac>;</span>""," & tb.Rows(i).Item(0).ToString.Trim & ");"
+                out.Append("[<a href='javascript:void(0)' onclick='" + TmpOck + "'>选择</a>]</td></tr>")
+                'out.Append("[<a href='javascript:void(0)' onclick='" + TmpOck + "'>全</a>]</td></tr>")
+                out.Append(Tmp)
+                out.Append("</table>")
+                out.Append("</td></tr>")
+            Next
+            'out.Append("<tr><td height=30 bgcolor='#ededed' onclick=""show('tabletr" & i & "')"">&nbsp;<img src='../../images/Ext.UI/icons/fam/user_add.gif'>&nbsp;未分组成员</td><td bgcolor='#ededed'>")
+            'Tmp = "<tr id='tabletr" & i & "'><td colspan='2'>"
+            'tb1 = Base.DB.Table("SELECT [YGDM], [YGXM],DLMC FROM [GY_YGDM] WHERE (IsOut = 0 or IsOut is null) and ([QYBZ] = 1) and (SSKS is null or SSKS=0)", "d1")
+            'Tmp += "<table  border='0' width='100%' cellpadding='2' cellspacing='2'>"
+            'TmpOck = ""
+            ''For j = 0 To tb1.Rows.Count - 1
+            ''    Tmp += "<tr><td height='20' style='background-Color:#FAFAFA;'  onmouseover='OnMouseOver(this)' onmouseout='OnMouseOut(this);' onclick='select1(""" & tb1.Rows(j).Item("YGXM").ToString.Trim & "<span style=color:#acacac>(" & tb1.Rows(j).Item("DLMC").ToString.Trim & ");</span>""," & tb1.Rows(j).Item("YGDM").ToString.Trim & ");'>&nbsp;&nbsp;" & tb1.Rows(j).Item(1) & "<span style=color:#acacac>(" & tb1.Rows(j).Item("DLMC").ToString.Trim & ")</span></td></tr>"
+            ''    TmpOck += "select1(""" & tb1.Rows(j).Item("YGXM").ToString.Trim & "<span style=color:#acacac>(" & tb1.Rows(j).Item("DLMC").ToString.Trim & ");</span>""," & tb1.Rows(j).Item("YGDM").ToString.Trim & ");"
+            ''Next
+            'out.Append("[<a href='javascript:void(0)' onclick='" + TmpOck + "'>全</a>]</td></tr>")
+            'out.Append(Tmp)
+            'out.Append("</table>")
+            out.Append("</td></tr>")
+            out.Append("</table>")
+            outstr.InnerHtml = out.ToString()
+        End If
+
+
+
+    End Sub
+End Class
+

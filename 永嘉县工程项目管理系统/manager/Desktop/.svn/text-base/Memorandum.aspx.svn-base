@@ -1,0 +1,47 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Memorandum.aspx.vb" Inherits="manager_Desktop_Memorandum" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>我的备忘录</title>
+    <link rel="Stylesheet" type="text/css" href="../../App_Themes/StyleSheet.css" />
+</head>
+<body>
+    <center>
+    <form id="form1" runat="server" style="width:600px; text-align:center">
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>我的备忘录</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+
+
+                    <tr>
+                        <td colspan="2" style="text-align:center;">
+                           <textarea id="Txtcom" runat="server" style="width: 472px; height: 344px"></textarea>
+        
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" colspan="2">
+                            <asp:Button ID="Button1" runat="server" Text="更 新" OnClick="Button1_Click" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+
+
+    <div>
+    </center>
+
+    </form>
+</body>
+</html>
+

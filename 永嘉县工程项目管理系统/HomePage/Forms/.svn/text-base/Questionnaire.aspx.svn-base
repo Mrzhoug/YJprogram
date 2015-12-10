@@ -1,0 +1,56 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Questionnaire.aspx.vb" Inherits="HomePage_Forms_Questionnaire" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>调查</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+    <table cellpadding="5" cellspacing="5" border="0">
+<tr><td style="width:100px;"></td><td>
+<table width="100%">
+<tr><td align="center" style="font-size:15pt; height:40px;">关于开展我市电子政务发展情况调查的通知</td></tr>
+<tr><td>各有关单位：</td></tr>
+<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;根据国家工业和信息化部信息化推进司《关于开展电子政务发展情况调查工作函》的要求，为更好地了解各部门电子政务发展情况，科学编制我市“十二五”电子政务发展规划，开展市直各部门电子政务发展情况调查工作。现将有关事项通知如下：</td></tr>
+<tr><td> 一、调查目的</td></tr>
+<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;结合当前电子政务发展形势，从发展的角度深度分析我市电子政务工作存在的主要问题；从区域信息化发展的角度，以满足政府履行管理职能、提供广泛的公共服务为出发点，提出“十二五”电子政务发展规划的建议。</td></tr>
+<tr><td>二、调查内容</td></tr>
+<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.基本情况：包括电子政务组织体系、电子政务规划编制、电子政务主要建设资金、电子政务运维等情况。</td></tr>
+<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.信息资源、业务系统和服务应用情况:包括相关部门的信息资源建设、业务信息系统建设、网上服务、网站建设、信息共享和业务协同实现等情况。</td></tr>
+<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.网络和基础设施建设情况:包括内部局域网建设、网络连接、与对应部门的网络连接、互联网接入、服务器应用、数据库管理系统、信息安全等级保护、安全设施建设等情况。</td></tr>
+<tr><td></td></tr>
+</table>
+
+</td><td style="width:100px;"></td></tr>    
+<tr><td></td><td align="center" style="font-size:15pt;"><a href="javascript:void(0)" onclick="window.open('Questionnaire1.aspx?LCDM=1334','温州市电子政务发展情况调查表','height=500, width=700, top=100, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');">点击填写调查表</a></td><td></td></tr>
+    <tr>
+        <td style="width:100px;"></td>
+        <td align="center">
+            请输入单号：<asp:TextBox ID="TextBox1" runat="server"></asp:TextBox>
+            <asp:Button ID="Button1" runat="server" Text=" 查询 " /></td>
+            <td style="width:100px;"></td>
+    </tr>
+    <tr><td colspan="3">&nbsp;</td></tr>
+        <tr>
+            <td style="width: 100px">
+            </td>
+            <td align="center"><b>本调查系统由温州圣火高科技有限公司的XMAN平台提供技术支持</b></td>
+            <td style="width: 100px">
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 100px">
+            </td>
+            <td align="center"><b>联系电话：0577-88324268 传真：0577-88324268</b></td>
+            <td style="width: 100px">
+            </td>
+        </tr>
+    </table>
+    
+    </div>
+    </form>
+</body>
+</html>

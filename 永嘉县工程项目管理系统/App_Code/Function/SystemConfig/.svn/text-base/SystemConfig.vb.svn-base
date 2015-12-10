@@ -1,0 +1,33 @@
+﻿Imports Microsoft.VisualBasic
+Imports System.Collections.Generic
+
+''' <summary>
+''' 获取配置操作函数
+''' </summary>
+''' <remarks></remarks>
+Public Class SystemConfig
+
+    ''' <summary>
+    ''' 根据流程代码与配置名称获取配置内容
+    ''' </summary>
+    ''' <param name="type">配置类型</param>
+    ''' <param name="LCDM">流程代码</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function ReadConfig(ByVal type As String, ByVal LCDM As Integer) As String
+        Dim sqlstr As String
+        sqlstr = "select value from XConfig Where Config ='" + type + "' and LCDM=" + LCDM.ToString()
+
+        Dim returnStr As String
+        Try
+            returnStr = SqlHelper.ExecuteScalar(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            returnStr = ""
+        End Try
+        Return returnStr
+    End Function
+
+
+    
+
+End Class

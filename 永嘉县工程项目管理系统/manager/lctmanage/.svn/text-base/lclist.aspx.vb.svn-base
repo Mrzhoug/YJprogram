@@ -1,0 +1,88 @@
+﻿
+Partial Class manager_lctmanage_lclist
+    Inherits System.Web.UI.Page
+    Dim base As New Base
+    Dim MaxPage As Integer
+    Dim pageindex As Integer
+    Dim Login_User As String
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        If Not base.CheckUserAuthentication() Then
+            Response.Write("非法访问！")
+            Response.End()
+        End If
+        If IsPostBack <> True Then
+            loadgv()
+        End If
+
+    End Sub
+
+    Protected Sub GridView1_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs) Handles GridView1.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            '鼠标效果
+            e.Row.Attributes.Add("onmouseover", "OnMouseOver(this)")
+            e.Row.Attributes.Add("onmouseout", "OnMouseOut(this)")
+            e.Row.Attributes("style") = "Cursor:hand"
+        End If
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            If (GridView1.Rows(i).Cells(7).Text = "ds") Then
+                GridView1.Rows(i).Cells(7).Text = "电室流程"
+            ElseIf GridView1.Rows(i).Cells(7).Text = "yw" Then
+                GridView1.Rows(i).Cells(7).Text = "施工变业务流程"
+            ElseIf GridView1.Rows(i).Cells(7).Text = "sg" Then
+                GridView1.Rows(i).Cells(7).Text = "施工变施工流程"
+            ElseIf GridView1.Rows(i).Cells(7).Text = "xg" Then
+                GridView1.Rows(i).Cells(7).Text = "线改流程"
+            ElseIf GridView1.Rows(i).Cells(7).Text = "qt" Then
+                GridView1.Rows(i).Cells(7).Text = "其他工程"
+            ElseIf GridView1.Rows(i).Cells(7).Text = "xt" Then
+                GridView1.Rows(i).Cells(7).Text = "系统内工程"
+            End If
+            GridView1.Rows(i).Cells(8).Text = "<a href='javascript:void(0)' onclick=""window.open('addlc.aspx?lcid=" & GridView1.DataKeys(i).Item(0) & "','修改','height=320, width=400, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')"">修改</a>"
+        Next
+    End Sub
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        loadgv()
+
+    End Sub
+
+    Private Sub loadgv()
+        Dim sqlstr As String = ""
+        If DropDownList1.SelectedIndex > 0 Then
+            sqlstr = " and lcbs='" & DropDownList1.SelectedValue & "'"
+        End If
+        If TextBox1.Text.Trim <> "" Then
+            sqlstr += " and lczt='" & base.SqlFilter(TextBox1.Text.Trim) & "'"
+        End If
+        Dim td As New DataTable
+        td = base.DB.Table("select id,lcname,shapeid,lczt,lcbs,days,(select KSMC from GY_KSDM where ksdm=lc_order.bm) as bm from lc_order where 1=1" & sqlstr, "tb")
+        GridView1.DataSource = td
+        GridView1.DataBind()
+        MaxPage = td.Rows.Count
+        PageBar.InnerHtml = base.pub.WritePage(GridView1, MaxPage)
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        loadgv()
+    End Sub
+
+    Protected Sub Button4_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button4.Click
+        Dim i As Integer
+        Dim lcid As String
+        Dim ck As CheckBox
+        For i = 0 To GridView1.Rows.Count - 1
+            lcid = GridView1.DataKeys(i).Item(0)
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                base.DB.Query("delete lc_order where id=" & lcid)
+            End If
+        Next
+        loadgv()
+    End Sub
+End Class

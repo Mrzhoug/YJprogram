@@ -1,0 +1,336 @@
+﻿Imports System.Xml
+Imports System.IO
+Partial Class HomePage_XJXM_ShowList
+    Inherits System.Web.UI.Page
+    Dim LCDM
+    Dim Base As New Base
+    Dim TempTable, sqlad, sqlqx As New Data.DataTable
+    Dim MaxTitle As Integer = 1
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim SelectSQL As String
+    Dim MaxPage As String
+    Dim FilterName As String = ""
+    Dim FilterValue As String = String.Empty
+    Dim zj As Boolean = False
+    Dim WebS As New Service
+
+    Dim SSKS As Integer
+
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        WebS.SetRootPath(Server.MapPath("../../FormFolder"))        '设置路径
+        FilterName = ""
+        Dim isad As Boolean = False
+        Login_User = System.Web.HttpContext.Current.Request.ServerVariables("LOGON_USER")
+        Dim Temp As String() = Login_User.Split("\")
+        Login_User = Temp(Temp.GetUpperBound(0))
+        UserID = Base.GetUserID(Base.SqlFilter(Login_User))
+        SSKS = Base.GetSSKS(UserID)
+
+        Dim tb As Data.DataTable
+        LCDM = 412
+
+        tb = Base.DB.Table("select * from GY_MKXX where mkmc='市软件项目2008'", "gy_mkxx1")
+        If (tb.Rows.Count > 0) Then
+            LCDM = tb.Rows(0)("NoLCDM")
+        End If
+
+
+
+        '做权限判断.是否有显示列表的权限
+
+
+        'SelectSQL = "SELECT  XX_XMJC.FID,GY_XMXX.XMDM,XX_XMJC.ssks FROM GY_XMXX,XX_XMJC where XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" & LCDM & " and (GY_XMXX.XMJD is not null) and SSKS=" & SSKS '专家组显示
+
+        SelectSQL = "SELECT  XX_XMJC.FID,GY_XMXX.XMDM,XX_XMJC.ssks FROM GY_XMXX,XX_XMJC where XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" & LCDM & " and (GY_XMXX.XMJD is not null) "
+
+        '查看专家组
+        If Page.IsPostBack = False Then
+            Try
+                MaxPage = Base.DataFromSearch_NoLC(GridView1, LCDM, TextBox1.Text.Trim, False, SelectSQL, FilterName, FilterValue).Rows.Count
+            Catch ex As Exception
+                Response.Write("此功能的模板已经不存在,请刷新菜单!")
+                'Response.End()
+                'Response.Write(ex.Message)
+            End Try
+            GridView1.DataBind()
+
+            ' Response.Write(FilterValue)
+        End If
+        Dim fi As Integer
+        For fi = 0 To GridView1.Columns.Count - 1
+            If GridView1.Columns.Item(fi).HeaderText.Trim = "申请单位" Then
+                GridView1.Columns(fi).Visible = True
+            ElseIf GridView1.Columns.Item(fi).HeaderText.Trim = "项目名称" Then
+                GridView1.Columns(fi).Visible = True
+            ElseIf GridView1.Columns.Item(fi).HeaderText.Trim = "申请时间" Then
+                GridView1.Columns(fi).Visible = True
+            Else
+                GridView1.Columns(fi).Visible = False
+            End If
+        Next
+    End Sub
+
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+
+        MaxPage = Base.DataFromSearch_NoLC(GridView1, LCDM, TextBox1.Text.Trim, True, SelectSQL, FilterName, FilterValue).Rows.Count
+        GridView1.DataBind()
+    End Sub
+
+    '新建表单功能
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        'Dim i As Integer
+        'For i = 0 To GridView1.Rows.Count - 1
+        '    GridView1.Rows(i).Attributes.Add("onmouseover", "OnMouseOver(this)")
+        '    GridView1.Rows(i).Attributes.Add("onmouseout", "OnMouseOut(this)")
+        '    GridView1.Rows(i).Attributes.Add("id", "gridview1_" & GridView1.DataKeys(i).Item(0))
+        '    GridView1.Rows(i).Attributes.Add("onmouseup", "gpc(" & GridView1.DataKeys(i).Item(0) & ",this)")
+        'Next
+        PageBar.InnerHtml = Base.pub.WritePage(GridView1, MaxPage)
+    End Sub
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        SortGridview()
+        'Base.DataFromSearch_NoLC(GridView1, LCDM, TextBox1.Text.Trim, True, SelectSQL)
+        'GridView1.DataBind()
+    End Sub
+
+    ' Protected Sub GridView1_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs) Handles GridView1.RowDataBound
+    'If e.Row.RowType = DataControlRowType.DataRow Then
+    '顺序为先更新架构,再申请审阅,接着再查看审阅
+    'If AutoUpdate.Checked = True Then
+    '    e.Row.Attributes.Add("OnDblClick", "DbClickEvent('" & GridView1.DataKeys(e.Row.RowIndex).Item(0) & "&AutoUpdate=1')")
+    'Else
+    '    If spbz.Checked = True Then
+    '        '选中申请审阅
+    '        e.Row.Attributes.Add("OnDblClick", "DbClickEventSP('" & GridView1.DataKeys(e.Row.RowIndex).Item(0) & "')")
+    '    Else
+    '        If LookSP.Checked = True Then
+    '            e.Row.Attributes.Add("OnDblClick", "DbClickEventLookSP('" & GridView1.DataKeys(e.Row.RowIndex).Item(0) & "')")
+    '        Else
+    'e.Row.Attributes.Add("OnDblClick", "DbClickEvent('" & GridView1.DataKeys(e.Row.RowIndex).Item(0) & "')")
+    '        End If
+    '    End If
+    'End If
+
+    'e.Row.Attributes.Add("OnDblClick", "DbClickEvent('" & GridView1.DataKeys(e.Row.RowIndex).Item(0) & "')")
+    'e.Row.Attributes("style") = "Cursor:hand"
+    ' End If
+    'End Sub
+
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        'Dim ShowTb As New Data.DataTable
+        'ShowTb = Base.DB.Table("Select ShowName,NodeName from ShowList_LCDM where LCDM = " & LCDM, "ShowList_LCDM")
+        'MaxTitle = ShowTb.Rows.Count
+
+        'Dim index As Integer = e.NewSelectedIndex
+        'Dim Fid As String = GridView1.Rows(index).Cells(MaxTitle + 1).Text
+        'Dim tb As New Data.DataTable
+        'tb = Base.DB.Table("SELECT LCMC FROM GY_LCDM where LCDM = " & LCDM, "GY_LCDM")
+        'If tb Is Nothing Then
+        '    Base.Js.alert(Me, "参数错误或非法访问")
+        '    Response.End()
+        'End If
+
+        ''从模板信息表中,得到当前模板的模板名
+        'tb = Base.DB.Table("select xsndir,MKMC,MKDM from GY_MKXX where NoLCDM = " & LCDM, "GY_MKXX")
+        'Dim XsnDir As String = tb.Rows(0).Item(0).ToString.Trim
+        'Dim XMMC As String = tb.Rows(0).Item(1).ToString.Trim
+        'Dim MKDM As Integer = tb.Rows(0).Item(2)
+        'Dim XmlFileName = Server.MapPath("../../") & "\模板库\" & XsnDir & "\template.xml"
+        'Dim DFileName = Server.MapPath("../../") & "\流程文件夹\" & XMMC & "\" & Fid & ".xml"
+        ''如果文件不存在，则生成
+        'If File.Exists(DFileName) = False Then
+        '    File.Copy(XmlFileName, DFileName)
+        'End If
+
+        'tb = Base.DB.Table("select XMDM from XX_XMJC where fid = " & Fid, "XX_XMJC")
+        'If tb.Rows.Count = 0 Then
+        '    Base.Js.alert(Me, "非法操作!")
+        'End If
+
+
+        'tb = Base.DB.Table("select XMDM from XX_XMJC where fid = " & Fid, "XX_XMJC")
+        'If tb.Rows.Count = 0 Then
+        '    Base.Js.alert(Me, "非法操作!")
+        'End If
+        'Dim XMDM As String = tb.Rows(0).Item(0)
+
+        'Dim WriteFlag As Boolean    '表单可写标志
+        ''这里对表单进行处理，判断表单是只读，或是可写的，或是没有权限的。
+        'Dim Qx As Integer = Base.GetUserHaveQX(UserID, MKDM)
+        ''这里对表单进行处理，判断表单是只读，或是可写的，或是没有权限的。
+        'If Qx <= 0 Then
+        '    Base.Js.alert(Me, "无权打开此表单，请联系管理员")
+        '    Exit Sub
+        'End If
+        'If Qx >= 2 Then
+        '    WriteFlag = True
+        'Else
+        '    WriteFlag = False
+        'End If
+
+        'Dim Result As String = Base.AutoFillDate(DFileName, Fid, XMDM, Login_User, WriteFlag)
+        'If Not Result Is Nothing Then               '对自动生成的值进行相应的填写
+        '    Base.Js.alert(Me, Result)
+        '    Exit Sub
+        'End If
+        ''新的打开方式，直接输出
+        'Response.Redirect("../Forms/OpenInfoPath.aspx?FID=" & Fid)
+
+        '复制一份到临时文件,进行操作
+        'tb = Nothing
+        'Try
+        '    File.Delete(Server.MapPath("../../") & "\流程文件夹\_sunfun-system-temp\" & XMMC & "-" & Fid & ".xml")
+        '    File.Copy(DFileName, Server.MapPath("../../") & "\流程文件夹\_sunfun-system-temp\" & XMMC & "-" & Fid & ".xml")
+        '    Response.Redirect("../../" & "\流程文件夹\_sunfun-system-temp\" & XMMC & "-" & Fid & ".xml")
+        'Catch ex As Exception
+        '    Base.Js.alert(Me, "已经有人打开了此表单")
+        'End Try
+    End Sub
+
+    Protected Sub GridView1_Sorting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSortEventArgs) Handles GridView1.Sorting
+        TempTable = Base.DataFromSearch_NoLC(GridView1, LCDM, TextBox1.Text.Trim, True, SelectSQL, FilterName, FilterValue)        '这里要做排序.但是得重新得到TempTable的值,所以不绑定
+        MaxPage = TempTable.Rows.Count
+        Dim Dv As New Data.DataView(TempTable)
+        Dim TempSort As String
+        TempSort = ViewState("sortDirection")
+        If TempSort = "" Then
+            Dv.Sort = e.SortExpression
+        Else
+            Dim ls As String()
+            ls = TempSort.Split(" ")
+            If ls(0) = e.SortExpression And ls.GetUpperBound(0) = 0 Then
+                Dv.Sort = e.SortExpression & " desc"
+            Else
+                Dv.Sort = e.SortExpression
+            End If
+        End If
+        ViewState("sortDirection") = Dv.Sort
+        GridView1.DataSource = Dv
+        GridView1.DataBind()
+    End Sub
+
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+        MaxPage = Base.DataFromSearch_NoLC(GridView1, LCDM, TextBox1.Text.Trim, True, SelectSQL, FilterName, FilterValue).Rows.Count
+        GridView1.DataBind()
+    End Sub
+
+    Sub SortGridview()
+        TempTable = Base.DataFromSearch_NoLC(GridView1, LCDM, TextBox1.Text.Trim, True, SelectSQL, FilterName, FilterValue)        '这里要做排序.但是得重新得到TempTable的值,所以不绑定
+        MaxPage = TempTable.Rows.Count
+        Dim Dv As New Data.DataView(TempTable)
+        Dim TempSort As String
+        TempSort = ViewState("sortDirection")
+        If TempSort <> "" Then
+            Dv.Sort = TempSort
+            ViewState("sortDirection") = Dv.Sort
+        End If
+        GridView1.DataSource = Dv
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub AutoUpdate_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles AutoUpdate.CheckedChanged
+        MaxPage = Base.DataFromSearch_NoLC(GridView1, LCDM, TextBox1.Text.Trim, True, SelectSQL, FilterName, FilterValue).Rows.Count
+        GridView1.DataBind()
+    End Sub
+
+    '新建相似功能
+    'Protected Sub Button4_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button4.Click
+    '    Response.Redirect("../Forms/FunctionNoLC.aspx?LCDM=" & LCDM & "&LikeNew=1")
+    'End Sub
+
+    Protected Sub CheckBox1_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles spbz.CheckedChanged
+        MaxPage = Base.DataFromSearch_NoLC(GridView1, LCDM, TextBox1.Text.Trim, True, SelectSQL, FilterName, FilterValue).Rows.Count
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub LookSP_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles LookSP.CheckedChanged
+        MaxPage = Base.DataFromSearch_NoLC(GridView1, LCDM, TextBox1.Text.Trim, True, SelectSQL, FilterName, FilterValue).Rows.Count
+        GridView1.DataBind()
+    End Sub
+
+
+
+    'Protected Sub Button6_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button6.Click
+
+    '    Dim ck As CheckBox
+    '    Dim i As Integer
+    '    Dim sql As String
+    '    Dim ta As New Data.DataTable
+    '    ta = Base.DB.Table("SELECT [KSDM], [KSMC], [KS_About], [KS_Date] FROM [GY_KSDM] where [ksmc]='" + DropDownList1.Text.Trim() + "'", "GY_KSDM")
+    '    If (ta.Rows.Count > 0) Then
+
+
+    '        For i = 0 To Me.GridView1.Rows.Count - 1
+    '            ck = GridView1.Rows(i).Cells(0).Controls(1)
+    '            If ck.Checked = True Then
+    '                If Base.Zh.GetRowCount("SELECT XX_XMJC.FID,GY_XMXX.XMDM FROM GY_XMXX,XX_XMJC,GY_KSDM where XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" & LCDM & " and (GY_XMXX.XMJD is not null) and XX_XMJC.SSKS=GY_KSDM.KSDM and GY_KSDM.KSMC='" + DropDownList1.Text.Trim() + "'") < 1 Then
+    '                    ' sql = " insert into XX_XMJC(xmdm,ssks)values('"
+    '                    'sql = sql & GridView1.DataKeys(i)(1) & "','"
+    '                    'sql = sql & ta.Rows(0)("KSDM").ToString().Trim() & "')"
+    '                    'Response.Write(sql)
+    '                    Try
+    '                        ' Base.DB.Query(sql)
+    '                        'Response.Write("update XX_XMJC set ssks='" + ta.Rows(0)("KSDM").ToString().Trim() + "' where fid=" + GridView1.DataKeys(i)(0))
+    '                        Base.DB.Query("update XX_XMJC set ssks='" + ta.Rows(0)("KSDM").ToString().Trim() + "' where fid=" + GridView1.DataKeys(i)(0))
+    '                    Catch ex As Exception
+
+    '                        Exit Sub
+    '                    End Try
+    '                    'Else
+    '                    '  Response.Write("update XX_XMJC set ssks='" + ta.Rows(0)("KSDM").ToString().Trim() + "' where fid=" + GridView1.DataKeys(i)(0))
+    '                    '  Base.DB.Query("update XX_XMJC set ssks='" + ta.Rows(0)("KSDM").ToString().Trim() + "' where fid=" + GridView1.DataKeys(i)(0))
+    '                End If
+    '            Else
+    '                'Response.Write("update XX_XMJC set ssks='' where fid=" + GridView1.DataKeys(i)(0) + " and ssks=" + ta.Rows(0)("ksdm").ToString().Trim())
+    '                Try
+
+    '                    Base.DB.Query("update XX_XMJC set ssks='' where fid=" + GridView1.DataKeys(i)(0) + " and ssks=" + ta.Rows(0)("ksdm").ToString().Trim())
+
+    '                Catch ex As Exception
+
+    '                    Exit Sub
+    '                End Try
+    '            End If
+    '        Next
+    '    End If
+    'End Sub
+
+
+
+    'Protected Sub Button4_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button4.Click
+    '    Dim ck As CheckBox
+    '    Dim i As Integer
+    '    For i = 0 To Me.GridView1.Rows.Count - 1
+    '        ck = GridView1.Rows(i).Cells(0).Controls(1)
+    '        If ck.Checked = True Then
+    '            Base.DB.Query("update XX_XMJC set cs='true' where fid=" + GridView1.DataKeys(i)(0))
+    '        End If
+    '    Next
+
+    'End Sub
+
+    'Protected Sub Button5_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button5.Click
+    '    Dim ck As CheckBox
+    '    Dim i As Integer
+    '    For i = 0 To Me.GridView1.Rows.Count - 1
+    '        ck = GridView1.Rows(i).Cells(0).Controls(1)
+    '        If ck.Checked = True Then
+    '            Base.DB.Query("update XX_XMJC set ps='true' where fid=" + GridView1.DataKeys(i)(0) + "and cs='true'")
+    '        End If
+    '    Next
+    'End Sub
+
+
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+
+    End Sub
+End Class

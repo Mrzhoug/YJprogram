@@ -1,0 +1,37 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ShowAbout_XMSP_NoLc.aspx.vb" Inherits="manager_XJXM_ShowAbout_XMSP_NoLc" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>查看审阅情况</title>
+    <link type="text/css" href="../../images/Styles.css" />
+</head>
+<body>
+    <form id="form1" runat="server">
+    <asp:GridView ID="GridView1" runat="server" BackColor="White" BorderColor="#DEDFDE" HorizontalAlign="Center"  SkinID="GridViewSkin1"
+            BorderStyle="None" BorderWidth="1px" CellPadding="4" ForeColor="Black" Width="500px" AutoGenerateColumns="False" DataSourceID="Conn" Font-Size="9pt" DataKeyNames="Cid">
+            <FooterStyle BackColor="#CCCC99" />
+            <RowStyle BackColor="White" />
+            <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+            <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Center" />
+            <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" />
+            <AlternatingRowStyle BackColor="White" />
+        <Columns>
+            <asp:BoundField DataField="KSDM" HeaderText="审阅科室" SortExpression="KSDM" />
+            <asp:BoundField DataField="YGDM" HeaderText="审阅人" SortExpression="YGDM" />
+            <asp:BoundField DataField="SPYJ" HeaderText="审阅意见" SortExpression="SPYJ" />
+            <asp:TemplateField HeaderText="审阅结果"></asp:TemplateField>
+        </Columns>
+        </asp:GridView>
+        <br />
+        <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="select GY_XMSP.Cid,GY_XMSP.YGDM,GY_XMSP.FQR,GY_XMSP.SPNR,GY_XMSP.SPYJ,GY_XMSP.KSDM,GY_KSDM.KSDM From GY_XMSP,GY_KSDM Where GY_XMSP.KSDM = GY_KSDM.KSDM and GY_XMSP.XMDM=@XMDM  and GY_XMSP.MKDM = @MKDM">
+            <SelectParameters>
+                <asp:Parameter Name="XMDM" Type="Decimal" />
+                <asp:Parameter Name="MKDM" Type="Decimal"  />
+            </SelectParameters>
+        </asp:SqlDataSource>
+    
+
+    </form>
+</body>
+</html>

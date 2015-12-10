@@ -1,0 +1,39 @@
+﻿
+Partial Class manager_HomePageManage_HomePageNoticeList
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        Dim Date1 As String
+        For i = 0 To GridView1.Rows.Count - 1
+            CType(GridView1.Rows(i).Cells(3).Controls(0), LinkButton).Attributes.Add("onclick", "return confirm('你确定要删除此公告吗？');")
+            GridView1.Rows(i).Cells(1).Text = "<a title='单击编辑该公告' href='HomePageNoticeAdd.aspx?Cid=" & GridView1.DataKeys(i).Item(0) & "'>" & GridView1.Rows(i).Cells(1).Text & "</a>"
+            Date1 = GridView1.Rows(i).Cells(2).Text.Trim
+            If Date1.Length = 0 Then
+                GridView1.Rows(i).Cells(2).Text = "未知"
+            Else
+                Try
+                    GridView1.Rows(i).Cells(2).Text = CDate(GridView1.Rows(i).Cells(2).Text).Date
+                Catch ex As Exception
+                    GridView1.Rows(i).Cells(2).Text = "非法时间"
+                End Try
+            End If
+        Next
+        Dim MaxPageCount As Integer
+        MaxPageCount = GridView1.Rows.Count
+        GridView1.AllowPaging = True
+        PageBar.InnerHtml = Base.pub.WritePage(GridView1, MaxPageCount)
+    End Sub
+
+    Protected Sub GridView1_RowDeleting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs) Handles GridView1.RowDeleting
+        SqlDataSource1.DeleteCommand = "delete EP_HomePageNotice where cid=" & GridView1.DataKeys(e.RowIndex).Item(0)
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking()
+    End Sub
+End Class

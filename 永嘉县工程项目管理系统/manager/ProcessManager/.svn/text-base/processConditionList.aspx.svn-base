@@ -1,0 +1,92 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="processConditionList.aspx.vb" Inherits="manager_ProcessManager_processConditionList" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>流程条件设置</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+    <script type="text/javascript" language="javascript">
+
+        function goEidt(statusID,condition) {
+            window.open("processConditionSetting.aspx?statusID=" + statusID + "&conditionID=" + condition, "编辑流程条件", "height=500, width=550, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes")
+        }
+        function goEidtRule(condition) {
+            window.open("processRuleList.aspx?conditionID=" + condition, "编辑流转规则", "height=500, width=550, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes")
+        }
+        function chk(chk, id) {
+            var oEvent = document.all(id);
+            var chks = oEvent.getElementsByTagName("INPUT");
+            for (var i = 0; i < chks.length; i++) {
+                if (chks[i].type == "checkbox")
+                    chks[i].checked = chk.checked;
+            }
+        }
+        function goAddCondition(statusID) {
+            window.open("processConditionSetting.aspx.aspx?statusID=" + statusID, "流程条件", "height=500, width=550, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes")
+        }
+    
+    </script>
+</head>
+<body>
+    <center>
+    <form id="form1" runat="server" style="width:800px;">
+
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>流程条件设置</span></a></li>
+            </ul>
+        </div>
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">                    
+
+                    <tr>
+                        <td colspan="2" style="text-align:center">
+                            <asp:Button ID="btnAdd" runat="server" Text="添加条件" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2" style="text-align:center">
+                            <asp:Button id="MoveUp" runat="server" Enabled="False" Text="条件上移" CssClass="btnsubmit"></asp:Button>
+        		            <asp:Button id="BtnDel" runat="server" Enabled="true" Text="条件删除" CssClass="btnsubmit"></asp:Button>
+        		            <asp:Button id="MoveDown" runat="server" Enabled="False" Text="条件下移" CssClass="btnsubmit"></asp:Button> 
+                            <br />
+                            <br />
+                            <asp:GridView id="GridView1" runat="server" PageSize="11" DataKeyNames="id,order" 
+                                AutoGenerateColumns="False" EnableModelValidation="True" SkinID="GVSkin_CoolTable" >
+                                
+                                <Columns>
+                                    <asp:TemplateField HeaderText="选择">
+                                        <HeaderTemplate>
+                                            <asp:CheckBox ID="CheckBox3" runat="server" onclick="chk(this,'GridView1')" />
+                                        </HeaderTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox1" runat="server"   />
+                                        </ItemTemplate>
+                                                                                
+                                        <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                        <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" Width="40px" />
+                                    </asp:TemplateField>
+                                    <asp:BoundField DataField="statusName" HeaderText="流程状态名" SortExpression="processStatusName" ReadOnly="True" />
+                                    <asp:BoundField DataField="nextStatusID" HeaderText="下一流程状态名" />
+                                    <asp:BoundField DataField="toUserList" HeaderText="发送列表" SortExpression="toUserList"  />
+                                    <asp:BoundField HeaderText="发送内容" DataField="sendContent" />
+                                    <asp:BoundField DataField="attentionNode" HeaderText="关键历史字段" />
+                                    <asp:BoundField DataField="order" HeaderText="条件序列" SortExpression="Order" ReadOnly="True" ></asp:BoundField>
+                                    <asp:BoundField HeaderText="编辑流转规则" />
+                                    <asp:BoundField HeaderText="编辑流程条件" />
+                                    <asp:CommandField ShowSelectButton="True" Visible="False" />
+                                </Columns>                                
+                            </asp:GridView>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+    </center>
+</body>
+</html>

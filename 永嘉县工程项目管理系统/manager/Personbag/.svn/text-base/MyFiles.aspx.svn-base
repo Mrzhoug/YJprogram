@@ -1,0 +1,248 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="MyFiles.aspx.vb" Inherits="manager_Personbag_MyFiles" Theme="SkinFile" %>
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<script language="javascript" type="text/javascript" >
+<!--
+
+function retheurl(folder) 
+{ 
+    //新建文件夹
+	var msgvalue = prompt("请输入新的文件夹名称","新建文件夹"); 
+	if(msgvalue=="") 
+	{ 
+		alert('您没有输入文件夹的名称,请再试一次'); 
+	} 
+	else if(msgvalue==null) { } 
+	else 
+	{ 
+		//window.location.href = "MyFiles.aspx?Folder=" + escape(folder) + "&NewFolder=" + escape(msgvalue);
+	    window.navigate("?Folder=" + escape(folder) + "&NewFolder=" + escape(msgvalue));
+	    //window.navigate("?Folder=" + escape(folder));
+	} 
+}
+
+function refilename(folder,oldfilename) 
+{ 
+    //文件重命名
+	var msgvalue = prompt("请输入要改名的文件名称",oldfilename); 
+	if(msgvalue=="") 
+	{ 
+		alert('要改名的文件名不能为空,请再试一次'); 
+	} 
+	else if(msgvalue==null) { } 
+	else 
+	{ 
+		window.navigate("?Folder=" + escape(folder) + "&OldFileName=" + escape(oldfilename) + "&NewFileName=" + escape(msgvalue)); 
+	} 
+}
+
+function refoldername(folder,oldfoldername) 
+{ 
+    //目录重命名
+	var msgvalue = prompt("请输入要改名的文件夹名称",oldfoldername); 
+	if(msgvalue=="") 
+	{ 
+		alert('要改名的文件夹名不能为空,请再试一次'); 
+	} 
+	else if(msgvalue==null) { } 
+	else 
+	{ 
+		window.navigate("?Folder=" + escape(folder) + "&OldFolderName=" + escape(oldfoldername) + "&NewFolderName=" + escape(msgvalue)); 
+	} 
+}
+
+function delfile(folder,delfile)
+{
+	if (confirm('你确认删除文件:' + delfile + '吗?')==true)
+	{
+	    window.navigate("?DelFileName=" + escape(delfile) + "&Folder=" + escape(folder));
+	   // window.navigate("?Folder=" + escape(folder));
+    }
+}
+function movefile(folder,movefile)
+{
+    window.open ('FileOption.aspx?action=movefile&FileName=' + escape(movefile) + '&Folder=' + escape(folder),'newwindow','height=290,width=480,top=160,left=220,toolbar=no,menubar=no,scrollbars=yes,location=no, status=no'); 
+}
+
+function copyfile(folder,copyfile)
+{
+    window.open ('FileOption.aspx?action=copyfile&FileName=' + escape(copyfile) + '&Folder=' + escape(folder),'newwindow','height=290,width=480,top=160,left=220,toolbar=no,menubar=no,scrollbars=yes,location=no, status=no'); 
+}
+
+function movefolder(folder,movefolder)
+{
+    window.open ('FileOption.aspx?action=movefolder&FileName=' + escape(movefolder) + '&Folder=' + escape(folder),'newwindow','height=290,width=480,top=160,left=220,toolbar=no,menubar=no,scrollbars=yes,location=no, status=no'); 
+}
+
+function copyfolder(folder,copyfolder)
+{
+    window.open ('FileOption.aspx?action=copyfolder&FileName=' + escape(copyfolder) + '&Folder=' + escape(folder),'newwindow','height=290,width=480,top=160,left=220,toolbar=no,menubar=no,scrollbars=yes,location=no, status=no'); 
+}
+
+function sharefile(folder,sharefile)
+{
+	if (confirm('你确认共享文件夹：' + sharefile + '吗?')==true)
+	{   
+        window.open ('sharefile.aspx?shareFileName=' + escape(sharefile) + '&Folder=' + escape(folder),'newwindow','height=500,width=533,top=160,left=220,toolbar=no,menubar=no,scrollbars=yes,location=no, status=no');
+    }
+}
+
+function sharefile1(folder,sharefile)
+{  
+        window.open ('sharefile.aspx?shareFileName=' + escape(sharefile) + '&Folder=' + escape(folder),'newwindow','height=500,width=533,top=160,left=220,toolbar=no,menubar=no,scrollbars=yes,location=no, status=no');
+}
+
+function delfolder(folder,delfolder)
+{
+	if (confirm('你确认删除文件夹:' + delfolder + '吗?')==true)
+	{
+	    window.navigate("?DelFolder=" + escape(delfolder) + "&Folder=" + escape(folder));
+	  //  window.navigate("?Folder=" + escape(folder));
+    }
+}
+
+
+-->
+</script>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head><title>文件管理</title>
+    
+    
+    <link rel="Stylesheet" type="text/css" href="../../App_Themes/StyleSheet.css" />
+    <script language="javascript" src="../../Pub/function.js" type="text/javascript"></script>
+    <script language="javascript" type="text/javascript">       
+         function fileOnchage() {
+           //document.getElementById("fileLocation").value= document.getElementById("FileUpload1").value;
+        }   
+    </script>
+     
+     <style type="text/css">
+
+         .addfileI {
+        cursor:hand;
+        position:relative;
+       
+        left:0px;
+        width:70px;
+        height:22px; 
+        opacity:0;
+        filter:alpha(opacity=0);
+             top: 0px;
+         }   
+
+
+
+    .btnsubmit
+    {
+     z-index:100;
+    }
+</style>
+</head>
+
+<body>
+    <form id="form1" runat="server">
+&nbsp;&nbsp;&nbsp;<%--<input type="text" name="fileLocation" id="fileLocation" style="width:200px;" />  
+<a class="btnll" id="btnlla" style="position:absolute;"></a>--%>
+ 
+
+<%--<input type="file" id="FileUpload1" name="FileUpload1" runat="server" 
+        onchange="fileOnchage();" visible="False"/>--%>
+<%--<script type="text/javascript" language="javascript" event="onclick" for="<% =Button1.ClientID %>">
+       showProgress();
+</script>--%>
+    <span id="message" runat="server" ></span> 
+        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="名称,类型"
+            HorizontalAlign="Center" Width="98%" SkinID="GridViewSkin1" CellPadding="0" BorderWidth="1px">
+            <Columns>
+                <asp:TemplateField HeaderText="选择">
+                    <ItemTemplate>
+                        <asp:CheckBox ID="CheckBox1" runat="server" Enabled="false" />
+                    </ItemTemplate>
+                    <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" Width="20px" />
+                    
+                </asp:TemplateField>
+                <asp:BoundField DataField="序号" HeaderText="序号" >
+                    <ItemStyle HorizontalAlign="Center" Width="30px" />
+                </asp:BoundField>
+                <asp:BoundField DataField="名称" HeaderText="名称" SortExpression="名称" >
+                </asp:BoundField>
+                <asp:BoundField DataField="大小" HeaderText="大小(K)" >
+                    <ItemStyle HorizontalAlign="Center" Width="60px" />
+                </asp:BoundField>
+                <asp:BoundField DataField="类型" HeaderText="类型" >
+                    <ItemStyle HorizontalAlign="Center" Width="50px" />
+                </asp:BoundField>
+                <asp:BoundField DataField="最后修改时间" HeaderText="最后修改时间" >
+                    <ItemStyle HorizontalAlign="Center" Width="120px" />
+                </asp:BoundField>
+                <asp:TemplateField HeaderText="更名">
+                    <ItemStyle HorizontalAlign="Center" Width="35px" />
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="删除">
+                    <ItemStyle HorizontalAlign="Center" Width="35px" />                
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="移动">
+                    <ItemStyle HorizontalAlign="Center" Width="35px" />                
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="复制">
+                    <ItemStyle HorizontalAlign="Center" Width="35px" />                
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="共享">
+                    <ItemStyle HorizontalAlign="Center" Width="60px" />                
+                </asp:TemplateField>
+            </Columns>
+        </asp:GridView>
+        <asp:GridView ID="GridView2" runat="server" AutoGenerateColumns="False" DataKeyNames="名称,类型"
+            HorizontalAlign="Center" Width="98%" SkinID="GridViewSkin1" CellPadding="0" ShowHeader="False" AllowPaging="True">
+            <Columns>
+                <asp:TemplateField HeaderText="选择">
+                    <ItemTemplate>
+                        <asp:CheckBox ID="CheckBox1" runat="server" />
+                    </ItemTemplate>
+                    <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" Width="20px" />
+                    
+                </asp:TemplateField>
+                <asp:BoundField DataField="序号" HeaderText="序号" >
+                    <ItemStyle HorizontalAlign="Center" Width="30px" />                    
+                </asp:BoundField>
+                <asp:BoundField DataField="名称" HeaderText="名称" SortExpression="名称" >
+                </asp:BoundField>
+                <asp:BoundField DataField="大小" HeaderText="大小(K)" >
+                    <ItemStyle HorizontalAlign="Center" Width="60px" />
+                </asp:BoundField>
+                <asp:BoundField DataField="类型" HeaderText="类型" >
+                    <ItemStyle HorizontalAlign="Center" Width="50px" />
+                </asp:BoundField>
+                <asp:BoundField DataField="最后修改时间" HeaderText="最后修改时间" >
+                    <ItemStyle HorizontalAlign="Center" Width="120px" />
+                </asp:BoundField>
+                <asp:TemplateField HeaderText="更名">
+                    <ItemStyle HorizontalAlign="Center" Width="35px" />
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="删除">
+                    <ItemStyle HorizontalAlign="Center" Width="35px" />                
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="移动">
+                    <ItemStyle HorizontalAlign="Center" Width="35px" />                
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="复制">
+                    <ItemStyle HorizontalAlign="Center" Width="35px" />                
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="共享">
+                    <ItemStyle HorizontalAlign="Center" Width="60px" />                
+                </asp:TemplateField>
+                <asp:CommandField ShowSelectButton="True" Visible = "false" />                
+            </Columns>
+            <PagerSettings Visible="False" />
+        </asp:GridView>        
+        <table align="center" bgcolor="#ebecee" height="26" valign="middle" width="98%">
+            <tr>
+                <td id="PageBar" runat="server" align="center">
+                </td>
+            </tr>
+        </table>
+        <br />
+    </form>
+</body>
+</html>

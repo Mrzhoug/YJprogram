@@ -1,0 +1,305 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="PublicFolderPermissionsSetting.aspx.vb"
+    Inherits="manager_FileManager_PublicFolderPermissionsSetting" Theme="SkinFile" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>权限管理</title>
+    <link rel="Stylesheet" type="text/css" href="../../App_Themes/StyleSheet.css" />
+    <link rel="stylesheet" type="text/css" href="../../App_Themes/colorbox.css" />
+    <script type="text/javascript" src="../../Pub/jquery-1.8.0.js"></script>
+    <script type="text/javascript">
+        function CheckALLRow(cb) {
+            var cbID = cb.id;
+            if ($("#" + cbID).attr("checked")) {
+                for (var i = 1; i < 9; i++) {
+                    var tempCBID = cbID.replace("9", i + 1);
+                    var tempcb = $("#" + tempCBID).attr("checked");
+                    if (tempcb != "checked") {
+                        $("#" + tempCBID).attr("checked", "true");
+                    }
+                }
+            }
+            else {
+                for (var i = 1; i < 9; i++) {
+                    var tempCBID = cbID.replace("9", i + 1);
+                    var tempcb = $("#" + tempCBID).attr("checked");
+                    if (tempcb == "checked") {
+                        $("#" + tempCBID).removeAttr("checked");
+                    }
+                }
+            }
+        }
+
+        function CheckRow(cb) {
+            var cbid = cb.id;
+
+            var array = cbid.split("_");
+            //获取行数
+            var rowCount = array[array.length-1];
+            var columnCount = array[array.length-2].replace("CheckBox","");
+            //alert(columnCount);
+            if (cb.checked == false) {
+                $("#<%= GridView1.ClientID%>_CheckBox7_" + rowCount).removeAttr("checked");
+            }
+            else
+            {
+                CheckRowAllSelect(rowCount,columnCount);
+            }
+        }
+
+        function CheckRowAllSelect(rowCount,columnCount) {
+            var isALL = true;
+            for (var j = 2; j <= 6; j++) {
+                if (j != columnCount) {
+                    var cb = "<%= GridView1.ClientID%>_CheckBox" + j + "_" + rowCount;
+                        if ($("#"+cb).attr("checked")!= "checked") {
+                            isALL =false;
+                            break;
+                        }
+                    }
+                }
+                if (isALL==true) {
+                    $("#<%= GridView1.ClientID%>_CheckBox7_" + rowCount).attr("checked","true");
+                }
+                else
+                {
+                    $("#<%= GridView1.ClientID%>_CheckBox7_" + rowCount).removeAttr("checked");
+                }
+        }
+
+        function CheckAllColumn(cb,columnCount) {
+            for (var i = 0; i < <%= GridView1.Rows.Count%>; i++) {
+                if (cb.checked == true) {
+                    $("#<%= GridView1.ClientID%>_CheckBox"+ columnCount +"_" + i).attr("checked","true");
+                    CheckRowAllSelect(i,-1);
+                }
+                else {
+                    $("#<%= GridView1.ClientID%>_CheckBox"+ columnCount +"_" + i).removeAttr("checked");
+                    CheckRowAllSelect(i,-1);
+                }
+            }
+        }
+
+        function SelectAllCheckbox(chk, id) {
+            var chkid = chk.id.replace("1", "");
+
+            var oEvent = document.all(id);
+            var chks = oEvent.getElementsByTagName("INPUT");
+            for (var i = 0; i < chks.length; i++) {
+                if (chks[i].type == "checkbox" && chks[i].id.indexOf("CheckBox1") > -1)
+                    chks[i].checked = chk.checked;
+            }
+        }
+
+        
+        $(document).ready(function () {
+            for (var i = 0; i < <%=GridView1.Rows.Count%>; i++) {
+                var isAll = true;
+                for (var j = 2; j <= 6; j++) {
+                    var cb = "<%= GridView1.ClientID%>_CheckBox" + j + "_" + i;
+
+                    if ($("#cb").attr("checked")!= "checked" || $("#cb").attr("checked")!= "true") {
+                        isAll =false;
+                        break;
+                    }
+                }
+                if (isAll == false) {
+                    $("#<%= GridView1.ClientID%>_CheckBox" + j + "_7" ).removeAttr("checked");
+                }
+            }
+        });
+
+
+    </script>
+    <style type="text/css">
+        .style1
+        {
+            width: 56%;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <form id="form1" runat="server" style="width: 900px">
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);"><span>
+                    权限组功能管理</span></a></li>
+            </ul>
+        </div>
+        <div class="main" style="border: none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td colspan="3" style="text-align: center">
+                            <span id="span_GroupName" runat="server" style="font-size: 15pt; font-weight: bold;">
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th align="left" style="text-align: center; " class="style1">
+                            现有用户
+                        </th>
+                        <td style="width: 10%">
+                        </td>
+                        <th align="left" style="text-align: center; width: 45%;">
+                            所有用户
+                        </th>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right" class="style1">
+                            <asp:Button ID="btn_SetPower" runat="server" Text="应用权限" CssClass="btnsubmit"></asp:Button>
+                        </td>
+                        <td>
+                        </td>
+                        <td style="text-align: right;">
+                            &nbsp;所属部门：
+                        </td>
+                    </tr>
+                    <tr style="height: 350px;">
+                        <td style="vertical-align: top; text-align: center;" class="style1">
+                            <center>
+                                <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="id,userID"
+                                    SkinID="GVSkin_CoolTable" AllowPaging="True" OnPageIndexChanging="GridView1_PageIndexChanging">
+                                    <Columns>
+                                        <asp:TemplateField>
+                                            <HeaderStyle HorizontalAlign="Center" Width="30px" />
+                                            <ItemStyle HorizontalAlign="Center" Width="30px" />
+                                            <HeaderTemplate>
+                                                <asp:CheckBox ID="CheckBox1" runat="server" onclick="SelectAllCheckbox(this,'GridView1');" />
+                                            </HeaderTemplate>
+                                            <ItemTemplate>
+                                                <asp:CheckBox ID="CheckBox1" runat="server" />
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:BoundField DataField="UserID" HeaderText="用户名">
+                                            <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" Width="25%" />
+                                            <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                        </asp:BoundField>
+                                        <asp:TemplateField HeaderText="创建文件夹">
+                                            <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <ItemTemplate>
+                                                <asp:CheckBox ID="CheckBox2" runat="server" Checked='<%# Bind("CanCreateFolder") %>'
+                                                    onclick="CheckRow(this);" />
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="上传文件">
+                                            <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <ItemTemplate>
+                                                <asp:CheckBox ID="CheckBox3" runat="server" Checked='<%# Bind("CanUpload") %>' onclick="CheckRow(this);" />
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="删除文件">
+                                            <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <ItemTemplate>
+                                                <asp:CheckBox ID="CheckBox4" runat="server" Checked='<%# Bind("CanDelete") %>' onclick="CheckRow(this);" />
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+
+                                        <asp:TemplateField HeaderText="重命名">
+                                            <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <ItemTemplate>
+                                                <asp:CheckBox ID="CheckBox5" runat="server" Checked='<%# Bind("CanRename") %>' onclick="CheckRow(this);" />
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+
+                                        <asp:TemplateField HeaderText="移动">
+                                            <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <ItemTemplate>
+                                                <asp:CheckBox ID="CheckBox6" runat="server" Checked='<%# Bind("CanMove") %>' onclick="CheckRow(this);" />
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+
+                                        <asp:TemplateField HeaderText="拷贝">
+                                            <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <ItemTemplate>
+                                                <asp:CheckBox ID="CheckBox7" runat="server" Checked='<%# Bind("CanCopy") %>' onclick="CheckRow(this);" />
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+
+                                        <asp:TemplateField HeaderText="权限">
+                                            <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <ItemTemplate>
+                                                <asp:CheckBox ID="CheckBox8" runat="server" Checked='<%# Bind("CanSetPower") %>' onclick="CheckRow(this);" />
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+
+                                        <asp:TemplateField HeaderText="全">
+                                            <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <ItemTemplate>
+                                                <asp:CheckBox ID="CheckBox9" runat="server" Checked='false' onclick="CheckALLRow(this);" />
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:CommandField ShowSelectButton="True" Visible="False" />
+                                    </Columns>
+                                    <PagerSettings Visible="False" />
+                                </asp:GridView>
+                                <table style="width: 98%; height: 26px; text-align: center; vertical-align: middle;
+                                    background-color: #EBECEE;">
+                                    <tr>
+                                        <td id="PageBarGridView1" runat="server" align="center">
+                                        </td>
+                                    </tr>
+                                </table>
+                            </center>
+                        </td>
+                        <td style="vertical-align: middle">
+                            <asp:Button ID="btn_add" runat="server" Text="<<添加" CssClass="btnsubmit" OnClick="btn_add_Click" />
+                            <br />
+                            <br />
+                            <asp:Button ID="btn_del" runat="server" Text="移除>>" CssClass="btnsubmit" OnClick="btn_del_Click" />
+                        </td>
+                        <td style="vertical-align: top; text-align: center;">
+                            <center>
+                                <asp:GridView ID="GridView2" runat="server" AutoGenerateColumns="False" DataKeyNames="userID"
+                                    SkinID="GVSkin_CoolTable" AllowPaging="True" OnPageIndexChanging="GridView2_PageIndexChanging">
+                                    <Columns>
+                                        <asp:TemplateField>
+                                            <HeaderStyle HorizontalAlign="Center" Width="30px" />
+                                            <ItemStyle HorizontalAlign="Center" Width="30px" />
+                                            <HeaderTemplate>
+                                                <asp:CheckBox ID="CheckBox1" runat="server" onclick="SelectAllCheckbox(this,'GridView2');" />
+                                            </HeaderTemplate>
+                                            <ItemTemplate>
+                                                <asp:CheckBox ID="CheckBox1" runat="server" />
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:BoundField DataField="RealName" HeaderText="用户名" ReadOnly="True">
+                                            <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                        </asp:BoundField>
+                                        <asp:BoundField DataField="DepartmentID" HeaderText="所属部门" ReadOnly="True">
+                                            <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                            <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                        </asp:BoundField>
+                                        <asp:CommandField ShowSelectButton="True" Visible="False" />
+                                    </Columns>
+                                    <PagerSettings Visible="False" />
+                                </asp:GridView>
+                                <table style="width: 98%; height: 26px; text-align: center; vertical-align: middle;
+                                    background-color: #EBECEE;">
+                                    <tr>
+                                        <td id="PageBarGridView2" runat="server" align="center">
+                                        </td>
+                                    </tr>
+                                </table>
+                            </center>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        </form>
+    </center>
+</body>
+</html>

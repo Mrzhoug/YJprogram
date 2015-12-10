@@ -1,0 +1,180 @@
+﻿<%@ Control Language="VB" AutoEventWireup="false" CodeFile="HomePageLinks.ascx.vb" Inherits="HomePage_DefinePart_HomePageLinks" %>
+<table id="Table_01" width="848" style="height:180px;" border="0" cellpadding="0" cellspacing="0">
+	<tr style="height:32px;">
+		<td><img src="images/bmlink.gif"  alt=""></td>
+	</tr>
+	<tr>
+	<td style="background:url(images/bmclink.gif);">
+<table cellspacing=0 cellpadding=0 width="800" align="center" border="0" style="font-size:9pt; text-decoration:none;">
+                    <TR>
+                      <td width=132 height=18><a href=http://wzjw.zei.gov.cn/ target=_blank>市发展和改革委员会 
+                        </a></td>
+                      <td width=132 height=18><a href=http://www.wzjmw.gov.cn target=_blank>市经贸委 
+                        </a></td>
+                      <td width=132 height=18><a href=http://www.wzer.net/ target=_blank>市教育局 
+                        </a></td>
+                      <td width=132 height=18><a href=http://www.wzinfo.net.cn/ target=_blank>市科技局 
+                        </a></td>
+                      <td width=132 height=18><a href=http://www.wzga.gov.cn/  target=_blank>市公安局 
+                        </a></td></tr><tr>
+                      <td width=132 height=18><a href=http://www.wzmz.gov.cn/ target=_blank>市民政局 
+                        </a></td>
+                      <td width=132 height=18><a href=http://www.sifa.gov.cn/htdocs/index.asp target=_blank>市司法局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wztax.gov.cn/ target=_blank>市财政地税局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzrc.net/ target=_blank>市人事局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wz12333.com/ target=_blank>市劳动和社会保障局 
+                        </a></td></tr><tr>
+                      <td width=132 height=18><a
+                        href=http://www.wzsafety.gov.cn target=_blank>市安全生产监督管理局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzgt.gov.cn/ target=_blank>市国土资源局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzup.gov.cn/ target=_blank>市规划局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzcb.gov.cn/ target=_blank>市建设局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzszyl.cn/  target=_blank>市园林局 
+                        </a></td></tr><tr>
+                      <td width=132 height=18><a
+                        href=http://www.wzfg.com target=_blank>市房管局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzjt.gov.cn/ target=_blank>市交通局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzgh.gov.cn/ target=_blank>市港航局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzsl.gov.cn/ target=_blank>市水利局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzagri.gov.cn/ target=_blank>市农业局 
+                        </a></td></tr><tr>
+                      <td width=132 height=18><a
+                        href=http://www.wzforestry.gov.cn  target=_blank>市林业局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://scj.wenzhou.gov.cn/ target=_blank>市海洋与渔业局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzwh.com/ target=_blank>市文化广电新闻出版局  
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wztyj.com target=_blank>市体育局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzwsj.gov.cn/main/index.asp target=_blank>市卫生局 
+                        </a></td></tr><tr>
+                      <td width=132 height=18><a
+                        href=http://rkjsw.wenzhou.gov.cn target=_blank>市人口计生委 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://audit.wenzhou.gov.cn target=_blank>市审计局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzstats.gov.cn target=_blank>市统计局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzepb.gov.cn/ target=_blank>市环保局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzxzzfj.gov.cn target=_blank>市城市管理行政执法局 
+                        </a></td></tr><tr>
+                      <td width=132 height=18><a
+                        href=http://www.51wl.com target=_blank>市粮食局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://tour.66wz.com/ target=_blank>市旅游局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzfao.gov.cn/ target=_blank>市外办 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzqw.com/ target=_blank>市侨办 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzfzb.gov.cn/ target=_blank>市法制办 
+                        </a></td></tr><tr>
+                      <td width=132 height=18><a
+                        href=http://www.wzxf.gov.cn target=_blank>市信访局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzgs.gov.cn/ target=_blank>市国税局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzhd.com/ target=_blank>市工商局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzit.gov.cn/ target=_blank>市信息办 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzzl.cn target=_blank>温州质量监督局 
+                        </a></td></tr><tr>
+                      <td width=132 height=18><a
+                        href=http://www.wzfda.gov.cn/ target=_blank>市食品药品监督管理局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzae.gov.cn/ target=_blank>市行政审批服务中心 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://jhb.wenzhou.gov.cn target=_blank>市协作办 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://wzciq.wenzhou.gov.cn target=_blank>温州出入境检验检疫局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://wzbjz.wenzhou.gov.cn target=_blank>温州边防检查站 
+                        </a></td></tr><tr>
+                      <td width=132 height=18><a
+                        href=http://www.wzzbtb.com target=_blank>市招管办(招投标中心) 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wetdz.gov.cn target=_blank>温州经济技术开发区 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzsty.gov.cn target=_blank>市生态园管委会 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wzjc.com target=_blank>市旧城改建指挥部 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wrth.com.cn target=_blank>温瑞塘河指挥部 
+                        </a></td></tr><tr>
+                      <td width=132 height=18><a
+                        href=http://wz.cnzjmsa.gov.cn/ target=_blank>市海事局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://ftec.wenzhou.gov.cn target=_blank>市外经贸局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wz121.com target=_blank>市气象局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://wzdl.wenzhou.gov.cn target=_blank>温州电业局 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://wzjcbj.wenzhou.gov.cn target=_blank>温州机场边防检查站 
+                        </a></td></tr><tr>
+                      <td width=132 height=18><a
+                        href=http://wzrf.wenzhou.gov.cn target=_blank>温州人防 
+                        </a></td>
+                      <td width=132 height=18><a
+                        href=http://www.wztb.org target=_blank>市台办 
+                        </a></td></tr>
+</table>
+</td>
+	</tr>
+	<tr><td style="height:7px;"><img src="images/bmdlink.gif" alt="" /></td></tr>
+</table>
+
+

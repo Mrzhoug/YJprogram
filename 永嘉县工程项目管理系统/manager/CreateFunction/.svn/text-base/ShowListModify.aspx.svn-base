@@ -1,0 +1,280 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ShowListModify.aspx.vb" Inherits="manager_CreateFunction_ShowListModify" ValidateRequest="false" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>显示列表配置</title>        
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+</head>
+<body>
+    <center>
+    <form id="form1" runat="server" style="width:500px">
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>显示列表配置</span></a></li>
+            </ul>
+        </div>        
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="Ul3">
+                <li class="topmenu"><a class="top_link" id="A3" href="javascript:void(0);">
+                <span>显示列设置 </span></a></li>
+            </ul>
+        </div>
+            
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            表单名称：
+                        </th>
+                        <td width="75%" style="text-align:left">
+                            <asp:DropDownList ID="FormList" runat="server" Width="176px" 
+                                AutoPostBack="True">
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            表单列名：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:DropDownList ID="NodeName" runat="server" Width="176px">
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            显示名称：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:TextBox ID="ShowName" runat="server" Width="176px"></asp:TextBox>&nbsp;
+                            <asp:Button ID="ListAdd" runat="server" Text=" 添 加 " CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td  style="text-align:center" colspan="2">
+                            <asp:Button ID="Button1" runat="server" Text="所选向上" CssClass="btnsubmit" />&nbsp;
+                            <asp:Button ID="Button2" runat="server" Text="所选向下" CssClass="btnsubmit" />&nbsp;
+                            <asp:Button ID="Button3" runat="server" Text="删除所选" CssClass="btnsubmit" />&nbsp;
+                            <asp:Button ID="Button4" runat="server" Text="保存结果" CssClass="btnsubmit" />&nbsp;
+                            <br />
+                            <asp:ListBox ID="ListBox1" runat="server" Height="136px" SelectionMode="Multiple" Width="304px"></asp:ListBox>
+                        </td>
+                    </tr>
+                    <tr> <td  style="text-align:center" colspan="2" > <ul id="Ul6">
+                <li class="topmenu"><a class="top_link" id="A6" href="javascript:void(0);">
+                <span>附件显示列连接</span></a></li>
+            </ul></td></tr>
+                      <tr>
+                        <th>
+                            表单名称：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:DropDownList ID="DropDownList5" runat="server" Width="176px">
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            显示列名称：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:TextBox ID="txtshowcol" runat="server" Width="176px"></asp:TextBox>                       
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            连接显示名称：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:TextBox ID="txtfjname" runat="server" Width="176px"></asp:TextBox>&nbsp;
+                            <asp:Button ID="btnfjadd" runat="server" Text=" 添 加 " CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td  style="text-align:center" colspan="2">
+                            <asp:Button ID="btnup" runat="server" Text="所选向上" CssClass="btnsubmit" />&nbsp;
+                            <asp:Button ID="btndown" runat="server" Text="所选向下" CssClass="btnsubmit" />&nbsp;
+                            <asp:Button ID="btndel" runat="server" Text="删除所选" CssClass="btnsubmit" />&nbsp;
+                            <asp:Button ID="btnsave" runat="server" Text="保存结果" CssClass="btnsubmit" />&nbsp;
+                            <br />
+                            <asp:ListBox ID="ListBox2" runat="server" Height="136px" SelectionMode="Multiple" Width="304px"></asp:ListBox>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="Ul1">
+                <li class="topmenu"><a class="top_link" id="A1" href="javascript:void(0);">
+                <span>扩展节点设置 </span></a></li>
+            </ul>
+        </div>
+            
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            扩展节点设置:
+                        </th>
+                        <td width="75%" style="text-align:left">
+                            <asp:DropDownList ID="DropDownList1" runat="server" Width="168px">
+                            </asp:DropDownList>
+                            <asp:Button ID="Button5" runat="server" Text="添加节点" CssClass="btnsubmit" />
+                          
+                        </td>
+                         
+                    </tr>
+                    <tr><td colspan =2> <asp:Button ID="Button9" runat="server" Text="同步显示列" CssClass="btnsubmit" />
+                            <asp:Button ID="Button10" runat="server" Text="同步Xml库" CssClass="btnsubmit" />
+                            <asp:Button ID="Button11" runat="server" Text="同步Sql库" CssClass="btnsubmit" />
+                            <asp:Button ID="Button12" runat="server" Text="同步查询数据" 
+                            CssClass="btnsubmit" /></td></tr>
+                    <tr>
+                        <td  style="text-align:center" colspan="2">
+                            <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="AID,MapExtName"
+                                DataSourceID="Conn" CssClass="cooltable" EnableModelValidation="True" Width="98%">                                
+                                <Columns>
+                                    <asp:BoundField DataField="MapExtName" HeaderText="映射节点名" SortExpression="MapExtName">                                        
+                                    </asp:BoundField>
+                                    <asp:BoundField DataField="dates" HeaderText="添加日期" SortExpression="dates">                                        
+                                    </asp:BoundField>
+                                    <asp:TemplateField ShowHeader="False">
+                                        
+                                        <ItemTemplate>
+                                            <asp:LinkButton ID="LinkButton2" runat="server" CausesValidation="False" CommandName="Delete"
+                                                OnClientClick="return confirm('你确定要删除此表单吗？');" Text="删除"></asp:LinkButton>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                </Columns>
+                                <RowStyle CssClass="cooltableRowStyle" />
+                                <AlternatingRowStyle CssClass="cooltableAlternatingRowStyle" />
+                                <RowStyle HorizontalAlign="Center" />
+                            </asp:GridView>
+
+                            <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+                                SelectCommand="SELECT [AID], [MKDM], [MapExtName], [dates] FROM [MapConfig] WHERE ([MKDM] = @MKDM) and (IsTotal = 0 or IsTotal is null)">
+                                <SelectParameters>
+                                    <asp:Parameter DefaultValue="-1" Name="MKDM" Type="Decimal" />
+                                </SelectParameters>
+                            </asp:SqlDataSource>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="Ul2">
+                <li class="topmenu"><a class="top_link" id="A2" href="javascript:void(0);">
+                <span>二维映射表设置 </span></a></li>
+            </ul>
+        </div>
+            
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            映射节点:
+                        </th>
+                        <td width="75%" style="text-align:left">
+                            <asp:DropDownList ID="DropDownList4" runat="server" Width="168px">
+                            </asp:DropDownList>
+                            <asp:Button ID="Button6" runat="server" Text="确 定" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="Ul4">
+                <li class="topmenu"><a class="top_link" id="A4" href="javascript:void(0);">
+                <span>统计节点设置 </span></a></li>
+            </ul>
+        </div>
+            
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            统计节点:
+                        </th>
+                        <td width="75%" style="text-align:left">
+                            <asp:DropDownList ID="DropDownList3" runat="server" Width="168px"></asp:DropDownList>
+                            <asp:Button ID="Button7" runat="server" Text="确 定" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="Ul5">
+                <li class="topmenu"><a class="top_link" id="A5" href="javascript:void(0);">
+                <span>统计条件设置 </span></a></li>
+            </ul>
+        </div>
+            
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            统计节点:
+                        </th>
+                        <td width="75%" style="text-align:left">
+                            <asp:DropDownList ID="DropDownList2" runat="server" Width="168px"></asp:DropDownList>
+                            <asp:Button ID="Button8" runat="server" Text="添加节点" CssClass="btnsubmit"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:center" colspan="2">
+                            <asp:GridView ID="GridView2" runat="server" AutoGenerateColumns="False" DataKeyNames="AID,MapExtName"
+                                DataSourceID="SqlDataSource1"  Width="98%" CssClass="cooltable">                                
+                                <Columns>
+                                    <asp:BoundField DataField="MapExtName" HeaderText="映射节点名" SortExpression="MapExtName"></asp:BoundField>
+                                    <asp:BoundField DataField="dates" HeaderText="添加日期" SortExpression="dates"></asp:BoundField>
+                                    <asp:TemplateField ShowHeader="False">
+                                        <ItemTemplate>
+                                            <asp:LinkButton ID="LinkButton1" runat="server" CausesValidation="False" CommandName="Delete"
+                                                OnClientClick="return confirm('你确定要删除此表单吗？');" Text="删除"></asp:LinkButton>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                </Columns>
+                                <RowStyle CssClass="cooltableRowStyle" />
+                                <AlternatingRowStyle CssClass="cooltableAlternatingRowStyle" />
+                                <RowStyle HorizontalAlign="Center" />
+                            </asp:GridView>
+
+                            <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+                                SelectCommand="SELECT [AID], [MKDM], [MapExtName], [dates] FROM [MapConfig] WHERE ([MKDM] = @MKDM) and (IsTotal = 1)">
+                                <SelectParameters>
+                                    <asp:Parameter DefaultValue="-1" Name="MKDM" Type="Decimal" />
+                                </SelectParameters>
+                            </asp:SqlDataSource>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+    </center>
+</body>
+</html>

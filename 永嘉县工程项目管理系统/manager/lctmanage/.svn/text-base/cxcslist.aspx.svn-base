@@ -1,0 +1,61 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="cxcslist.aspx.vb" Inherits="manager_lctmanage_cxcslist"  Theme="SkinFile"%>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title></title>
+       <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>  
+           <link rel="Stylesheet" type="text/css" href="../../App_Themes/colorbox.css" />
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>          
+    <script src="../../Pub/datepicker/WdatePicker.js" type="text/javascript"></script>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+       &nbsp;&nbsp;&nbsp; 项目名称： 
+        <asp:TextBox ID="txtxmmc" runat="server"  style="width:100px;"></asp:TextBox>
+          &nbsp;合同编号： 
+        <asp:TextBox ID="txtht" runat="server" style="width:100px;"></asp:TextBox>       
+
+        <%-- &nbsp;类型：<asp:DropDownList ID="DropDownList1" runat="server">
+            <asp:ListItem Value="0">全部</asp:ListItem>
+            <asp:ListItem Value="1" Selected="True">超时</asp:ListItem>
+            <asp:ListItem Value="2">正常</asp:ListItem>
+        </asp:DropDownList>--%>
+         <fmt:formatDate value="${af.map.end_date}" pattern="yyyy-MM-dd" var="_end_date" />
+      
+      
+        &nbsp;<%--<input id="Button1" type="button" value="修改记录" class ="btnsubmit" onclick="window.open('xgcslist.aspx','修改记录','height=600, width=850, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')" />--%>
+      创建时间：<asp:TextBox ID="txtssj" runat="server" property="end_date" 
+            styleId="end_date" size="10" maxlength="10"  
+            onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})" style="width:100px;" value="" 
+            Visible="true"></asp:TextBox>-
+         <asp:TextBox ID="txtesj" runat="server" property="end_date" styleId="end_date" 
+            size="10" maxlength="10"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})" 
+            style="width:100px;" value="" Visible="true"></asp:TextBox>&nbsp;&nbsp;
+              <asp:Button ID="Button1" runat="server" Text="查 询"  CssClass="btnsubmit" />
+        <asp:GridView ID="GridView1" runat="server" AllowPaging="True" 
+            AutoGenerateColumns="False" DataKeyNames="my项目编号" EnableModelValidation="True" 
+            SkinID="GridViewSkin1" PageSize="15">
+            <Columns>
+                <asp:CommandField ShowSelectButton="True" />
+                <asp:BoundField DataField="my合同编号" HeaderText="合同编号" />
+                <asp:BoundField DataField="my项目名称" HeaderText="项目名称" />
+                <asp:BoundField DataField="my业主单位" HeaderText="业主单位" />
+                <asp:BoundField HeaderText="部门" />
+                <asp:BoundField HeaderText="流程图" />
+            </Columns>
+              <PagerSettings Visible="false" />
+        </asp:GridView>
+         <table align="center" width="98%" height="26" valign="middle" bgcolor="#EBECEE" ><tr><td id="PageBar" runat="server" align="center"></td></tr></table>     
+    </div>
+    </form>
+     <script language ="javascript" type ="text/javascript">
+           function openlct(xmbh) {
+               url = "default.aspx?xmbh=" + xmbh;
+               window.open(url, "流程图", "height=700, width=1024, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes");
+           }
+    </script>
+</body>
+</html>

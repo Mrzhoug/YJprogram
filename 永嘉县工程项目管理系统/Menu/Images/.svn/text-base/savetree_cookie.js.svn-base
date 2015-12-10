@@ -1,0 +1,118 @@
+<!-- Hide this script from old browsers --
+
+// java script to save tree state
+
+var _fgtCookieName = null;
+var _fgtCookieValue = null;
+
+function BeginSetCookie(cookieName) {
+  var prefix = "SAVETREE";
+  
+  _fgtCookieName = prefix + "/" + cookieName;
+
+  _fgtCookieValue = new String( );
+}
+
+function AddCookieValue(value) {
+  var escValue = new String( );
+  var i;
+
+  for (var i = 0; i < value.length; i++) {
+    var oneChar = value.substring(i, i + 1);
+
+    if (oneChar == " " || oneChar == '\\')
+      escValue += '\\';
+
+      escValue += oneChar;
+  }
+
+  _fgtCookieValue += escValue + " ";
+}
+
+function EndSetCookie( ) {
+  pathname = location.pathname;
+  pathname = pathname.substring(0, pathname.lastIndexOf('/')) +'/';
+
+  // set expiry date to 1 year from now.
+  var expireDate = new Date( );
+  expireDate.setTime(expireDate.getTime() + (365 * 24 * 3600 * 1000));
+
+  document.cookie = _fgtCookieName + "=" + escape(_fgtCookieValue) +
+    "; expires=" + expireDate.toGMTString( ) +
+    "; path=" + pathname;
+}
+
+function getCookieVal (offset) {
+   var endstr = document.cookie.indexOf (";", offset);
+   if (endstr == -1)
+      endstr = document.cookie.length;
+   return unescape(document.cookie.substring(offset, endstr));
+}
+
+function GetCookie (name) {
+  var arg = "FortiGate" + name + "=";
+  var alen = arg.length;
+  var clen = document.cookie.length;
+  var i = 0;
+  while (i < clen) {
+    var j = i + alen;
+    if (document.cookie.substring(i, j) == arg)
+      return getCookieVal (j);
+    i = document.cookie.indexOf(" ", i) + 1;
+    if (i == 0)
+      break;
+  }
+
+  return null;
+}
+
+/*
+alert("here");
+var pathname = location.pathname;
+//document.write("<p>pathname=" + pathname + "</p>");
+var cookieStr = GetCookie(pathname);
+
+if (cookieStr == null) {
+  alert("cookie " + pathname + " is not found. A new cookie will be created");
+
+  BeginSetCookie( );
+
+  //AddCookieValue("12 3");
+  //AddCookieValue("45\\ 6");
+  //AddCookieValue("789");
+
+  EndSetCookie( );
+}
+
+//document.write("<p>cookieStr=" + cookieStr + "</p>");
+*/
+function save_tree_state(cname)
+{
+    var i, img_obj, txt_obj;
+    var strArr, imgsrc;
+    trees = document.getElementsByName('tree');
+    BeginSetCookie(cname);
+
+    for(i=0; i<trees.length; i++)
+    {
+        if (ie4)
+        {
+            img_obj = trees.item(i).firstChild.firstChild;
+            txt_obj = trees.item(i).firstChild.firstChild.nextSibling.nextSibling.innerHTML;
+        }
+        else
+        {
+            img_obj = trees.item(i).firstChild.nextSibling.firstChild.nextSibling;
+            txt_obj = trees.item(i).firstChild.nextSibling.firstChild.nextSibling.nextSibling.nextSibling.innerHTML;
+        }
+        strArr = img_obj.src.split("/");
+        imgsrc = strArr[strArr.length-1];
+        if (imgsrc == "twistie_expanded.gif"){
+            AddCookieValue(txt_obj);
+        }
+    }
+    EndSetCookie();
+}
+
+
+// -- End Hiding Here -->

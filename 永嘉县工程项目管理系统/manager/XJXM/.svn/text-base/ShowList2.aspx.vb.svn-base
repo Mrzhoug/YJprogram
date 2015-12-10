@@ -1,0 +1,233 @@
+﻿Imports System.Collections.Generic
+
+Partial Class manager_XJXM_ShowList2
+    Inherits System.Web.UI.Page
+
+    '流程代码
+    Dim LCDM As Integer
+    Public MKDM As Integer
+
+    Dim UserInfo As New UserInfo
+    Dim ShowList As New ShowList
+
+    Dim LoginUserInfo As New MUserInfo
+    Dim LoginUserRights As New MRights
+    
+
+    Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
+        Try
+            LCDM = Request("lcdm")
+        Catch ex As Exception
+            Response.Write("非法访问")
+            Response.End()
+        End Try
+
+        LCDM = 437
+        LoginUserInfo = UserInfo.GetUserInfoByUserName("admin")
+        Dim rights As New Rights
+        LoginUserRights = rights.GetUserRightsByLCDM(LoginUserInfo.UserID, LCDM)
+
+        '如果没有读权限，或则没有显示列表权限，那么该用户无法访问显示列
+        If Not LoginUserRights.CanRead Or Not LoginUserRights.CanListForm Then
+            Response.Write("您没有权限访问该页面")
+            Response.End()
+        End If
+
+
+        MKDM = Modules.GetMKDMByLCDM(LCDM)
+
+
+        If Not IsPostBack Then
+
+
+            '列表按钮配置
+            Dim buttonList As New List(Of MShowListButtonConfig)
+            buttonList = ShowList.ShowListConfig.GetShowListButtonConfig(LCDM)
+            If buttonList.Count <> 0 Then
+                For Each item As MShowListButtonConfig In buttonList
+                    FindControl(item.ControlID).Visible = item.CanShow
+                Next
+            End If
+
+
+            '获取列表类型
+            Dim showListTypeItems As New List(Of ListItem)
+            showListTypeItems = ShowList.GetShowListTypeList(LoginUserInfo.UserID, LCDM)
+            For Each item As ListItem In showListTypeItems
+                ddl_showListType.Items.Add(item)
+            Next
+
+
+            ShowList.CreateGridView(GridView1, LCDM)
+            bind(1)
+        End If
+
+
+
+    End Sub
+
+    ''' <summary>
+    ''' 重新绑定数据
+    ''' </summary>
+    ''' <remarks></remarks>
+    Sub bind()
+        If Not String.IsNullOrEmpty(tb_pageIndex.Text) Then
+            bind(Convert.ToInt32(tb_pageIndex.Text) + 1)
+        Else
+            bind(1)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 绑定GRIDVIEW内容
+    ''' </summary>
+    ''' <param name="pageIndex">第几页</param>
+    ''' <remarks></remarks>
+    Sub bind(ByVal pageIndex As Integer)
+        bind(pageIndex, String.Empty, True)
+    End Sub
+
+    ''' <summary>
+    ''' 绑定GRIDVIEW内容
+    ''' </summary>
+    ''' <param name="pageIndex">第几页</param>
+    ''' <param name="sortExpression">排序关键字</param>
+    ''' <param name="Direction">顺序（true:asc,false:desc）</param>
+    ''' <remarks></remarks>
+    Sub bind(ByVal pageIndex As Integer, ByVal sortExpression As String, ByVal Direction As Boolean)
+        Dim total As Integer
+        GridView1.DataSource = ShowList.GetShowListByPaging(LCDM, LoginUserInfo, pageIndex, 15, total, sortExpression, Direction, tb_searchText.Text, HttpUtility.UrlDecode(tb_advancedSearch.Text), ddl_showListType.SelectedValue, 0)
+        GridView1.DataBind()
+        PageBar.InnerHtml = DoJS.WriteGridViewFootWithSQLPaging(GridView1.ID, pageIndex, 15, total)
+    End Sub
+
+    
+
+    Protected Sub btn_search_Click(sender As Object, e As EventArgs) Handles btn_search.Click
+        bind(1)
+    End Sub
+
+
+    Protected Sub GridView1_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        bind(e.NewPageIndex + 1)
+        tb_pageIndex.Text = e.NewPageIndex
+    End Sub
+
+    Protected Sub ddl_operations_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddl_operations.SelectedIndexChanged
+
+    End Sub
+
+    Protected Sub ddl_showListType_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddl_showListType.SelectedIndexChanged
+        bind(1)
+    End Sub
+
+    Protected Sub btn_resetAdvanceSearch_Click(sender As Object, e As EventArgs) Handles btn_resetAdvanceSearch.Click
+        bind(1)
+    End Sub
+
+    Protected Sub btn_refresh_Click(sender As Object, e As EventArgs) Handles btn_refresh.Click
+        bind()
+    End Sub
+
+    Protected Sub btn_setTop_Click(sender As Object, e As EventArgs) Handles btn_setTop.Click
+        If Not LoginUserRights.CanWrite Then
+            DoJS.alert(Me, "权限不足，你必须拥有写表单的权限才能使用此功能！")
+            Exit Sub
+        End If
+
+
+        Dim ck As CheckBox
+        Dim formID As Integer
+        For i As Integer = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+
+            If ck.Checked = True Then
+                formID = GridView1.DataKeys(i).Item(0)
+                ShowList.SetTop(LCDM, formID)
+            End If
+        Next
+
+        bind()
+
+    End Sub
+
+    Protected Sub btn_send_Click(sender As Object, e As EventArgs) Handles btn_send.Click
+
+        If Not LoginUserRights.CanWrite Then
+            DoJS.alert(Me, "权限不够.你必须拥有写表单的权限才能使用此功能!")
+            Exit Sub
+        End If
+
+        Dim tmpstr As String = ""
+        Dim ck As CheckBox
+        Dim formID As Integer
+        For i As Integer = 0 To GridView1.Rows.Count - 1
+
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                formID = GridView1.DataKeys(i).Item("formID")
+                tmpstr = tmpstr & GridView1.DataKeys(i).Item(0).ToString & ","
+            End If
+        Next
+        DoJS.openWindow(Me, "../desktop/WriteSendMessage.aspx?Kind=1&FID=" & tmpstr, "分发表单", "height=500, width=820, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes")
+    End Sub
+
+    Protected Sub btn_lock_Click(sender As Object, e As EventArgs) Handles btn_lock.Click
+        If Not LoginUserRights.CanDelete Then
+            DoJS.alert(Me, "权限不够.你必须拥有删除表单的权限才能使用此功能!")
+            Exit Sub
+        End If
+
+        Dim ck As CheckBox
+        Dim formID As Integer
+        For i As Integer = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+
+            If ck.Checked = True Then
+                formID = GridView1.DataKeys(i).Item(0)
+                ShowList.Lock(LCDM, formID)
+            End If
+        Next
+
+        bind()
+
+    End Sub
+
+
+    Protected Sub GridView1_DataBound(sender As Object, e As EventArgs) Handles GridView1.DataBound
+        Dim formID As Integer
+        Dim isLock As Integer
+        Dim topNum As Integer
+        For i As Integer = 0 To GridView1.Rows.Count - 1
+            '获取表单ID
+            formID = GridView1.DataKeys(i).Item("formID")
+
+            '检测是否锁定
+            If IsDBNull(GridView1.DataKeys(i).Item("isLock")) Then
+                isLock = 0
+            Else
+                isLock = GridView1.DataKeys(i).Item("isLock")
+            End If
+            '添加锁定图标
+            If isLock > 0 Then
+                GridView1.Rows(i).Cells(1).Text = "<img src='../../images/Ext.UI/resources/images/default/grid/hmenu-lock.gif'>" & GridView1.Rows(i).Cells(1).Text
+            End If
+
+            '检测是否置顶
+            If IsDBNull(GridView1.DataKeys(i).Item("topNum")) Then
+                topNum = 0
+            Else
+                topNum = GridView1.DataKeys(i).Item("topNum")
+            End If
+            '添加置顶图标
+            If topNum > 0 Then
+                GridView1.Rows(i).Cells(1).Text = "<img src='../../images/Ext.UI/resources/images/default/grid/col-move-bottom.gif'>&nbsp;" & GridView1.Rows(i).Cells(1).Text
+            End If
+
+        Next
+
+    End Sub
+
+    
+    
+End Class

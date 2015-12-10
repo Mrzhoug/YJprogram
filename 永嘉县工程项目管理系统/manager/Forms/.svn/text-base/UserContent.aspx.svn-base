@@ -1,0 +1,87 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="UserContent.aspx.vb" Inherits="manager_Forms_UserContent" ValidateRequest ="false" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>用户详细信息</title>
+    <link rel="stylesheet" type="text/css" href="../../images/Ext.UI/resources/css/ext-all.css" />
+    <script type="text/javascript" src="../../images/Ext.UI/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="../../images/Ext.UI/ext-all.js"></script>
+    <script type="text/javascript" src="../../images/Ext.UI/TabCloseMenu.js"></script>
+    <script type="text/javascript" src="../../pub/function.js"></script>
+    
+    <style type="text/css">
+        TD { FONT-SIZE: 8.5pt; LINE-HEIGHT: 180%; FONT-FAMILY: "verdana", "Helvetica", "sans-serif" }
+	    A:link { FONT-SIZE: 8.5pt; COLOR: #000000; FONT-FAMILY: "verdana", "Helvetica", "sans-serif"; TEXT-DECORATION: none }
+	    A:hover { FONT-SIZE: 8.5pt; COLOR: #b84e07; FONT-FAMILY: "verdana", "Helvetica", "sans-serif"; TEXT-DECORATION: underline }
+	    A:visited { FONT-SIZE: 8.5pt; COLOR: #000000; FONT-FAMILY: "verdana", "Helvetica", "sans-serif"; TEXT-DECORATION: none }
+	</style>
+    <link rel="stylesheet" type="text/css" media="all" href="js/calendar-win2k-cold-1.css"	title="win2k-cold-1" />
+    <script type="text/javascript" src="js/calendar.js"></script>
+	<script type="text/javascript" src="js/calendar-en.js"></script>
+	<script type="text/javascript" src="js/calendar-setup.js"></script>
+	<script src="js/infojet.js" type="text/javascript"></script>
+</head>
+<body onload="InfoJet_Init();" style="margin:0; text-align:left">
+<form name="xmlForm" action="ModiUserContent.aspx" method="post" id="form1" onsubmit="return doDownload();">
+    <br /><center><input type="submit" value=" 保 存 " /></center>
+    <input id="YGDM" type="hidden" name="YGDM" runat="server" />
+        <asp:Label id="xDocContent" runat="server">xDocContent</asp:Label>
+        <span id="clientscript" runat="server"></span>
+    </form>
+
+
+<script type="text/javascript">
+<!-- 
+var winWidth = 0;
+   var winHeight = 0;
+   function findDimensions() //函数：获取尺寸
+   {
+   //获取窗口宽度
+   if (window.innerWidth)
+   winWidth = window.innerWidth;
+   else if ((document.body) && (document.body.clientWidth))
+   winWidth = document.body.clientWidth;
+   //获取窗口高度
+   if (window.innerHeight)
+   winHeight = window.innerHeight;
+   else if ((document.body) && (document.body.clientHeight))
+   winHeight = document.body.clientHeight;
+   //通过深入Document内部对body进行检测，获取窗口大小
+   if (document.documentElement && document.documentElement.clientHeight && document.documentElement.clientWidth)
+   {
+   winHeight = document.documentElement.clientHeight;
+   winWidth = document.documentElement.clientWidth;
+   }
+        //结果输出至两个文本框
+        //document.form1.availHeight.value= winHeight;
+        //document.form1.availWidth.value= winWidth;
+        //alert(obj.clientWidth);
+        window.moveTo(1,1);
+        window.resizeTo(800,600);
+   }
+   findDimensions();
+   //调用函数，获取数值
+   //window.onresize=findDimensions;
+
+//-->
+</script>
+</body>
+</html>
+
+
+
+<script type="text/javascript" language="javascript">
+    function doDownload()
+    {
+        if (InfoJet_IsValid()==false)
+        {
+            alert("请将必填项填完(带红星的输入框)!");
+            return false;
+        }
+        document.forms( "xmlForm" ).action = "?Action=save"
+        document.forms( "xmlForm" ).submit();
+        
+    }
+    
+  
+</script>

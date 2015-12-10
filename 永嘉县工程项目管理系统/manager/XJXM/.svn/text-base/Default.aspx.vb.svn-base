@@ -1,0 +1,452 @@
+﻿Imports System.Xml
+
+Partial Class manager_XJXM_Default
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim XMZT, LCDM As Integer
+    Dim Login_User As String
+    Dim UserID As String
+    Dim TempTable As New Data.DataTable
+    Dim SelectSQL As String
+    Dim MaxPage As Integer
+
+    Dim BaseUrl As String
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Try
+            LCDM = Request("lcdm")
+        Catch ex As Exception
+            Base.Js.alert(Me, "非法访问！")
+            Exit Sub
+        End Try
+        Try
+            XMZT = XmztList1.SelectedItem.Value
+        Catch ex As Exception
+            XMZT = 0
+        End Try
+
+        BaseUrl = Server.MapPath("../../") & "FormFolder/"
+
+        '检测流程代码的有效性        
+        If Base.DB.Table("select LCDM from GY_LCDM where LCDM=" & LCDM, "LCDM").Rows.Count <= 0 Then
+            Base.Js.alert(Me, "非法访问！")
+            Exit Sub
+        End If
+        '检测流程代码是否为无流程的．
+        If Base.DB.Table("select NoLCDM from GY_MKXX where NoLCDM = " & LCDM, "LCDM").Rows.Count > 0 Then
+            Base.Js.alert(Me, "非法访问！")
+            Exit Sub
+        End If
+        Button3.Attributes.Add("onclick", "CreateXMXX(" & LCDM & ");")
+
+        Dim MKDM As Integer
+        Dim tb2 As New Data.DataTable
+        Dim MKMC As String
+        If Page.IsPostBack = False Then
+            '绑定一下过滤条件的下拉框
+            '先绑定固定的.
+            XmztList1.Items.Clear()
+
+
+            ReadMyDocument("/系统配置/有流程/分类显示/", "全部显示", -3)
+            ReadMyDocument("/系统配置/有流程/分类显示/", "未完成", 0)
+            ReadMyDocument("/系统配置/有流程/分类显示/", "已完成", -1)
+            ReadMyDocument("/系统配置/有流程/分类显示/", "与我相关", -2)
+
+            Dim sql As String
+            Dim tb1 As New Data.DataTable
+            Dim j As Integer
+            sql = "SELECT XMZT, ZTMC FROM GY_XMZT WHERE (LCDM = " & LCDM & ") ORDER BY OrderBy"
+            tb1 = Base.DB.Table(sql, "GY_ZTMX")
+            For j = 0 To tb1.Rows.Count - 1
+                Dim TempItem As New System.Web.UI.WebControls.ListItem(tb1.Rows(j).Item(1).ToString(), tb1.Rows(j).Item(0).ToString)
+                XmztList1.Items.Add(TempItem)
+            Next
+            Try
+                XmztList1.SelectedValue = -3    '默认未完成
+            Catch ex As Exception
+            End Try
+            MKDM = 0
+        End If
+
+
+
+        Update_XMXX_JD(LCDM)
+        Select Case XmztList1.SelectedItem.Value
+            Case 0      '未完成
+                SelectSQL = "SELECT [XMDM], [XMMC], [XMSM], [XMLX],[xmjd] FROM [GY_XMXX] where (xmjd<>'已完成' or xmjd is null)  And  lcdm = " & LCDM
+            Case -1      '已完成
+                SelectSQL = "SELECT [XMDM], [XMMC], [XMSM], [XMLX],[xmjd] FROM [GY_XMXX] where xmjd='已完成' And  lcdm = " & LCDM
+            Case -2      '与我相关   
+                SelectSQL = "SELECT  [XMDM], [XMMC], [XMSM], [XMLX],[xmjd] FROM GY_XMXX WHERE (XMDM IN (SELECT XMDM FROM Form_Modify_log  WHERE UserName = '" & Login_User & "') or  xmdm in(select XMDM from GY_XMXX where XMSM='" & Login_User & "')) and lcdm = " & LCDM
+            Case -3     '全部显示
+                SelectSQL = "SELECT [XMDM], [XMMC], [XMSM], [XMLX],[xmjd] FROM [GY_XMXX] where lcdm = " & LCDM
+            Case Else   '默认未完成
+                Dim ZTMC As String = XmztList1.SelectedItem.Text
+                XMZT = XmztList1.SelectedItem.Value
+                SelectSQL = "SELECT [XMDM], [XMMC], [XMSM], [XMLX],[xmjd] FROM [GY_XMXX] where XMJD<>'已完成' and lcdm = " & LCDM & "  and (xmjd  = '" & ZTMC & "')"
+        End Select
+
+        If Page.IsPostBack = False Then
+            Try
+                Base.CreateGridviewTitle(GridView1, LCDM, True)
+                TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", True)
+                MaxPage = TempTable.Rows.Count
+            Catch ex As Exception
+                Response.Write("此功能的模板已经不存在,请刷新菜单!")
+                Response.End()
+            End Try
+            GridView1.DataBind()
+        Else
+            TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", True)
+            MaxPage = TempTable.Rows.Count
+        End If
+
+    End Sub
+
+    Sub Update_XMXX_JD(ByVal LCDM As Integer)
+        '更新项目信息表中的项目进度
+        Dim Xm_Ds As New DataSet
+        Dim i, XMDM As Integer
+        Dim Tb As New Data.DataTable
+        Dim SPBZ As Integer
+        Try
+            Xm_Ds = Base.DB.ds("SELECT [XMDM], [XMMC], [XMSM], [XMLX] FROM [GY_XMXX] where  ((XMJD<>'已删除' and XMJD <>'已完成') or XMJD is null) and  lcdm = " & LCDM, "GY_XMXX")
+        Catch ex As Exception
+        End Try
+
+        For i = 0 To Xm_Ds.Tables(0).Rows.Count - 1
+            XMDM = Xm_Ds.Tables(0).Rows(i).Item(0).ToString
+            Tb = Base.DB.Table("SELECT Cid,XMDM,MKDM FROM GY_XMSP where xmdm = " & XMDM & " and spbz = -1 and zfbz = 0", "GY_XMSP")
+            If Tb.Rows.Count > 0 Then   '表示审批中,有人选了不通过.则该项目的功能,就审批不通过
+                Base.DB.Query("Update XX_XMJC Set SPBZ = 3 where XMDM = " & Tb.Rows(0).Item(1) & " and MKDM = " & Tb.Rows(0).Item(2))
+            End If
+            Tb = Base.DB.Table("SELECT Cid,XMDM,MKDM FROM GY_XMSP where xmdm = " & XMDM & " and spbz <> -1 and spbz<>0 and zfbz = 0", "GY_XMSP")
+            If Tb.Rows.Count > 0 Then   '表示审批中,没有人选了不通过,而且所有人都做了审批.则该项目的功能,就审批通过
+                Base.DB.Query("Update XX_XMJC Set SPBZ = 2 where XMDM = " & Tb.Rows(0).Item(1) & " and MKDM = " & Tb.Rows(0).Item(2))
+            End If
+
+
+            Tb = Base.DB.Table("SELECT top 1 GY_MKXX.MKMC,XX_XMJC.SPBZ FROM XX_XMJC,GY_MKXX where XX_XMJC.MKDM = GY_MKXX.MKDM and (XX_XMJC.WCBZ=1) and XX_XMJC.XMDM=" & XMDM & " and XX_XMJC.SPBZ<>2 and XX_XMJC.SPBZ<>0", "XX_XMJC")
+            '审批标志,1表示正在审批,2表示审批通过,3表示审批不通过,4表示个人发起的审批
+            If Tb.Rows.Count > 0 Then
+                SPBZ = Tb.Rows(0).Item(1)
+                If SPBZ = 1 Then
+                    Base.DB.Query("Update GY_XMXX set XMJD = '" & Tb.Rows(0).Item(0) & "-未发起审批' where XMDM=" & XMDM)
+                Else
+                    If SPBZ = 4 Then
+                        Base.DB.Query("Update GY_XMXX set XMJD = '" & Tb.Rows(0).Item(0) & "-正在审批中' where XMDM=" & XMDM)
+                    Else
+                        Base.DB.Query("Update GY_XMXX set XMJD = '" & Tb.Rows(0).Item(0) & "-审批不通过' where XMDM=" & XMDM)
+                    End If
+                End If
+            Else
+                Tb = Base.DB.Table("Select FID From XX_XMJC where xmdm=" & XMDM & " and wcbz=1", "ddd")
+                If Tb.Rows.Count > 0 Then
+                    Tb = Base.DB.Table("SELECT top 1 GY_XMZT.ZTMC FROM XX_XMJC,GY_XMZT where XX_XMJC.XMZT = GY_XMZT.XMZT and (XX_XMJC.state<>-1 or state is null) and XX_XMJC.XMDM=" & XMDM & " ORDER BY GY_XMZT.OrderBy, GY_XMZT.XMZT", "XX_XMJC")
+                    If Tb.Rows.Count > 0 Then
+                        Base.DB.Query("Update GY_XMXX set XMJD = '" & Tb.Rows(0).Item(0) & "' where XMDM=" & XMDM)
+                    Else
+                        Base.DB.Query("Update GY_XMXX set XMJD = '已完成' where XMDM=" & XMDM)
+                    End If
+                Else    '当查询所对应的表单中，不存在一张表单提交完成时，就判断为删除表单，即此流程只是建立，并未提交。
+                    Base.DB.Query("Update GY_XMXX set XMJD = '未提交' where XMDM=" & XMDM)
+                End If
+            End If
+
+
+        Next
+    End Sub
+
+
+    Sub SortGridview()
+        Dim ls As String()
+        Try
+            ls = ViewState("sortDirection").ToString.Split(" ")
+            TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSql, ls(0), True)
+        Catch ex As Exception
+            TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSql, "", True)
+        End Try
+        MaxPage = TempTable.Rows.Count
+        Dim Dv As New Data.DataView(TempTable)
+        Dim TempSort As String
+        TempSort = ViewState("sortDirection")
+        If TempSort <> "" Then
+            Dv.Sort = TempSort
+            ViewState("sortDirection") = Dv.Sort
+        End If
+        GridView1.DataSource = Dv
+        GridView1.DataBind()
+    End Sub
+
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged1(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+        'GridView1.DataBind()
+        'Response.Redirect("ProjectMap.aspx?XMDM=" & GridView1.DataKeys(GridView1.SelectedIndex).Item(0))
+
+        ''添加审批查看功能的事件
+        'If GridView1.SelectedRow Is Nothing Then
+        '    LinkButton1.Attributes.Clear()
+        '    LinkButton1.Attributes.Add("onclick", "alert('请选择要查看的项目');return false")
+        'Else
+        '    LinkButton1.Attributes.Clear()
+        '    LinkButton1.Attributes.Add("onclick", "window.open('ShowAbout_XMSP.aspx?XMDM=" & GridView1.DataKeys(GridView1.SelectedIndex).Item(0) & "','查看审批情况','height=300, width=550, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=no');return false")
+        'End If
+    End Sub
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        SortGridview()
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+
+    End Sub
+
+    Protected Sub GridView1_Sorting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSortEventArgs) Handles GridView1.Sorting
+        TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, e.SortExpression, True)
+        MaxPage = TempTable.Rows.Count
+        '这里不用绑定.因为只用来排序.
+        Dim Dv As New Data.DataView(TempTable)
+        Dim TempSort As String
+        TempSort = ViewState("sortDirection")
+        If TempSort = "" Then
+            Dv.Sort = e.SortExpression
+        Else
+            Dim ls As String()
+            ls = TempSort.Split(" ")
+            If ls(0) = e.SortExpression And ls.GetUpperBound(0) = 0 Then
+                Dv.Sort = e.SortExpression & " desc"
+            Else
+                Dv.Sort = e.SortExpression
+            End If
+        End If
+        ViewState("sortDirection") = Dv.Sort
+        GridView1.DataSource = Dv
+        GridView1.DataBind()
+    End Sub
+
+    'Protected Sub LinkButton1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles LinkButton1.Click
+    '    If GridView1.SelectedRow Is Nothing Then
+    '        Base.Js.alert(Me, "请选择要查看的项目！")
+    '        Exit Sub
+    '    End If
+    '    Response.Redirect("ShowAbout_XMSP.aspx?XMDM=" & GridView1.DataKeys(GridView1.SelectedIndex).Item(0))
+    'End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i, j, XMDM, MKDM As Integer
+        Dim FileName As String
+        Dim TempTb As New Data.DataTable
+        Dim ShowTb As New Data.DataTable
+        ShowTb = Base.DB.Table("Select ShowName,NodeName,FormName from ShowList_LCDM where LCDM = " & LCDM & " order by ID", "ShowList_LCDM")
+
+        For i = 0 To GridView1.Rows.Count - 1
+            XMDM = GridView1.DataKeys(i).Item(0)
+            GridView1.Rows(i).Attributes.Add("OnDblClick", "DbClickEventLCMAP('" & XMDM & "')")
+            For j = 0 To ShowTb.Rows.Count - 1
+                Try
+                    MKDM = ShowTb.Rows(j).Item("FormName")
+                Catch ex As Exception
+                    MKDM = 0
+                End Try
+                If MKDM = 0 Then            '如果为空，则表示。
+                    TempTb = Base.DB.Table("SELECT GY_MKXX.MKMC,XX_XMJC.Fid FROM XX_XMJC,GY_MKXX where GY_MKXX.MKDM=XX_XMJC.MKDM and XX_XMJC.XMDM=" & XMDM, "GY_MKXX")
+                Else            '表示来自不同表单的。
+                    TempTb = Base.DB.Table("SELECT GY_MKXX.MKMC,XX_XMJC.Fid FROM XX_XMJC,GY_MKXX where GY_MKXX.MKDM=XX_XMJC.MKDM and XX_XMJC.XMDM=" & XMDM & " and XX_XMJC.MKDM=" & MKDM, "GY_MKXX")
+                End If
+                If TempTb.Rows.Count > 0 Then
+                    FileName = BaseUrl & TempTb.Rows(0).Item(0) & "/" & TempTb.Rows(0).Item(1) & ".xml"
+                    If Base.XmlClass.GetXmlFile(FileName) Is Nothing Then
+                        GridView1.Rows(i).Cells(j + 1).Text = "空1"
+                    Else
+                        Dim dd As System.Xml.XmlNode = Base.XmlClass.FindNode("//" & ShowTb.Rows(j).Item(1).ToString.Replace("<", "").Replace(">", ""))
+                        If dd Is Nothing Then
+                            GridView1.Rows(i).Cells(j + 1).Text = "空"
+                        Else
+                            If dd.ChildNodes.Item(0) Is Nothing Then
+                                GridView1.Rows(i).Cells(j + 1).Text = "空"
+                            Else
+                                If dd.ChildNodes.Item(0).Value Is Nothing Then
+                                    If dd.HasChildNodes = True Then     '当是父节点.但是存在子节点时.则显示子节点的内容(或是超文本框)
+                                        Dim TempOut As String = dd.ChildNodes.Item(0).OuterXml.ToString.Trim
+                                        If TempOut.Length >= 100 Then
+                                            GridView1.Rows(i).Cells(j + 1).Text = Server.HtmlEncode(TempOut.Substring(0, 98)) & "..."
+                                        Else
+                                            GridView1.Rows(i).Cells(j + 1).Text = Server.HtmlEncode(TempOut)
+                                        End If
+                                    Else
+                                        GridView1.Rows(i).Cells(j + 1).Text = "空"
+                                    End If
+                                Else
+                                    If dd.ChildNodes.Item(0).Value.ToString.Trim.Length >= 100 Then
+                                        GridView1.Rows(i).Cells(j + 1).Text = Server.HtmlEncode(dd.ChildNodes.Item(0).Value.ToString.Substring(0, 98)) & "..."
+                                    Else
+                                        GridView1.Rows(i).Cells(j + 1).Text = Server.HtmlEncode(dd.ChildNodes.Item(0).Value)
+                                    End If
+                                End If
+                            End If
+                        End If
+                    End If
+                Else
+                    GridView1.Rows(i).Cells(j + 1).Text = "空2"
+                End If
+            Next
+
+        Next
+        GridView1.Columns(GridView1.Columns.Count - 1).Visible = False
+        PageBar.InnerHtml = Base.pub.WritePage(GridView1, MaxPage)
+    End Sub
+
+    Protected Sub GridView1_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs) Handles GridView1.RowDataBound
+        '对第一行的选择行进行隐藏，如果去掉的话，点击事件会无效。所以只能隐藏。
+        e.Row.Cells(0).Attributes.Add("style", "display:none")
+        '如果是选中的行，不进行处理。       
+        If e.Row.RowType = DataControlRowType.DataRow And e.Row.RowIndex <> GridView1.SelectedIndex Then
+            e.Row.Attributes.Add("onmouseover", "OnMouseOver(this)")
+            e.Row.Attributes.Add("onmouseout", "OnMouseOut(this)")
+            'e.Row.Attributes.Add("Onclick", "javascript:__doPostBack('Gridview1','Select$" & e.Row.RowIndex & "')")
+            e.Row.Attributes("style") = "Cursor:hand"
+        End If
+    End Sub
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+        GridView1.SelectedIndex = -1
+        GridView1.DataBind()
+    End Sub
+
+    '申请审批
+    'Protected Sub CheckBox1_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles Flag.CheckedChanged
+    '    If Not GridView1.SelectedRow Is Nothing Then
+    '        Label1.Enabled = True
+    '        Label1.Text = ShowMenu(GridView1.DataKeys(GridView1.SelectedIndex).Item(0))
+    '    End If
+    'End Sub
+
+    Protected Sub DropDownList1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles XmztList1.SelectedIndexChanged
+        GridView1.SelectedIndex = -1
+        GridView1.DataBind()
+    End Sub
+
+    'Protected Sub LinkButton2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles LinkButton2.Click
+
+    '    '流程存在.判断用户是否有权限创建
+    '    '后面的ORDER BY 语句,用来显示状态的顺序
+    '    Dim MKDM As Integer
+    '    Dim Tb As New DataTable
+    '    Tb = Base.DB.Table("SELECT GY_ZTMX.XMZT,GY_ZTMX.MKDM, GY_ZTMX.SPBZ, GY_ZTMX.TimeBZ, GY_ZTMX.RuleTime  FROM GY_ZTMX,GY_XMZT where GY_XMZT.XMZT = GY_ZTMX.XMZT and gy_XMZT.LCDM =" & LCDM & "  ORDER BY GY_XMZT.OrderBy, GY_XMZT.XMZT", "GY_ZTMX")
+    '    If Tb.Rows.Count > 0 Then
+    '        MKDM = Tb.Rows(0)(1)
+    '    Else
+    '        Response.Write("流程存在问题，请与管理员联系")
+    '        Response.End()
+    '    End If
+    '    Dim Qx As Integer = Base.GetUserHaveQX(UserID, MKDM)
+    '    '判断能力权限,1读,2写,4改,8删除
+    '    If Qx < 8 Then
+    '        Base.Js.alert(Me, "你无删除项目的权力,有问题请与管理员联系!")
+    '        Exit Sub
+    '    End If
+
+    '    If GridView1.SelectedRow Is Nothing Then
+    '        Base.Js.alert(Me, "请选择要删除的项目！")
+    '        Exit Sub
+    '    End If
+
+    '    Dim XMDM As Integer = GridView1.DataKeys(GridView1.SelectedIndex).Item(0)
+    '    Dim i As Integer
+    '    Dim DFileName As String         '表示表单所存在的文件路径
+    '    Dim TempFileName As String      '表示表单库的文件路径
+    '    Dim XMMC As String              '表示模块的真实名称
+    '    Dim FID As Integer              '表单的真实表单ID
+    '    Tb = Base.DB.Table("SELECT GY_MKXX.MKMC, GY_MKXX.XDLJ, GY_MKXX.MKDM, GY_XMZT.XMZT, XX_XMJC.FID FROM XX_XMJC INNER JOIN GY_MKXX ON XX_XMJC.MKDM = GY_MKXX.MKDM INNER JOIN GY_XMZT ON XX_XMJC.XMZT = GY_XMZT.XMZT  WHERE(XX_XMJC.XMDM = " & XMDM & ")", "MKXX")
+    '    For i = 0 To Tb.Rows.Count - 1
+    '        XMMC = Tb.Rows(i).Item(0)
+    '        FID = Tb.Rows(i).Item(4)
+    '        DFileName = Server.MapPath("../../") & "\FormFolder\" & XMMC & "\" & FID & ".xml"
+    '        TempFileName = Server.MapPath("../../") & "\FormFolder\" & XMMC & ".库.xml"
+    '        Try
+    '            Dim Node As System.Xml.XmlNode = Base.XmlClass.GetXmlFile(TempFileName).ChildNodes(0)
+    '            Dim Fid_NodeName As String = Base.XmlClass.GetFormID
+    '            '先删除库中的记录
+    '            Base.XmlClass.DelNode("//" & Node.Name & "/" & Fid_NodeName.Replace("表单号", "标题") & "[" & Fid_NodeName & "='" & FID & "']")
+    '            '再删除文件
+    '            If IO.File.Exists(DFileName) = True Then
+    '                IO.File.Delete(DFileName)
+    '            End If
+    '        Catch ex As Exception
+    '        End Try
+    '    Next
+    '    '再删除数据库信息        
+    '    Base.DB.Query("Delete GY_XMXX where XMDM =" & XMDM)
+    '    Base.DB.Query("Delete GY_XMSP Where XMDM =" & XMDM)
+
+    '    '刷新列表
+    '    TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", True)
+    '    MaxPage = TempTable.Rows.Count
+    '    GridView1.SelectedIndex = -1
+    '    GridView1.DataBind()
+    'End Sub
+
+    'Protected Sub LinkButton3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles LinkButton3.Click
+    '    '流程存在.判断用户是否有权限创建
+    '    '后面的ORDER BY 语句,用来显示状态的顺序
+    '    Dim MKDM As Integer
+    '    Dim Tb As New DataTable
+    '    Tb = Base.DB.Table("SELECT GY_ZTMX.XMZT,GY_ZTMX.MKDM, GY_ZTMX.SPBZ, GY_ZTMX.TimeBZ, GY_ZTMX.RuleTime  FROM GY_ZTMX,GY_XMZT where GY_XMZT.XMZT = GY_ZTMX.XMZT and gy_XMZT.LCDM =" & LCDM & "  ORDER BY GY_XMZT.OrderBy, GY_XMZT.XMZT", "GY_ZTMX")
+    '    If Tb.Rows.Count > 0 Then
+    '        MKDM = Tb.Rows(0)(1)
+    '    Else
+    '        Response.Write("流程存在问题，请与管理员联系")
+    '        Response.End()
+    '    End If
+    '    Dim Qx As Integer = Base.GetUserHaveQX(UserID, MKDM)
+    '    '判断能力权限,1读,2写,4改,8删除
+    '    If Qx < 8 Then
+    '        Base.Js.alert(Me, "你无重发项目的权力,有问题请与管理员联系!")
+    '        Exit Sub
+    '    End If
+
+    '    If GridView1.SelectedRow Is Nothing Then
+    '        Base.Js.alert(Me, "请选择要重发的项目！")
+    '        Exit Sub
+    '    End If
+
+    '    Base.DB.Query("Update GY_XMXX set xmjd='' where XMDM=" & GridView1.DataKeys(GridView1.SelectedIndex).Item(0))
+    '    Base.DB.Query("update XX_XMJC set SPBZ=0,WCBZ = 0 where XMDM =" & GridView1.DataKeys(GridView1.SelectedIndex).Item(0))
+    '    '刷新列表
+    '    TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", True)
+    '    MaxPage = TempTable.Rows.Count
+    '    GridView1.SelectedIndex = -1
+    '    GridView1.DataBind()
+    'End Sub
+
+
+    ''' <summary>
+    ''' 根据配置表,读取我的文件夹的各个状态
+    ''' </summary>
+    ''' <param name="Fcg"></param>
+    ''' <param name="MenuName"></param>
+    ''' <param name="KindID"></param>
+    ''' <remarks></remarks>
+    Sub ReadMyDocument(ByVal Fcg As String, ByVal MenuName As String, ByVal KindID As Integer)
+        Dim ShowTitle As String = String.Empty      '临时标题
+        If Base.GetXmanConfigEnabled(Fcg & MenuName, "../../") = True Then
+            ShowTitle = Base.GetXmanConfigName(Fcg & MenuName, "../../")
+            If ShowTitle = "" Then ShowTitle = MenuName
+            Dim TempItem As New System.Web.UI.WebControls.ListItem(ShowTitle, KindID)
+            XmztList1.Items.Add(TempItem)
+        End If
+    End Sub
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+        GridView1.DataBind()
+    End Sub
+End Class

@@ -1,0 +1,165 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="FormListConfig.aspx.vb" Inherits="manager_Forms_FormListConfig" ValidateRequest="false" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>个人配置</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+</head>
+<body>
+    <center>
+    <form id="form1" runat="server" style="width:580px;" >
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>个人配置 </span></a></li>
+            </ul>
+        </div>
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="Ul3">
+                <li class="topmenu"><a class="top_link" id="A3" href="javascript:void(0);">
+                <span>默认列表与每页行数设置 </span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            默认打开列表设置：
+                        </th>
+                        <td width="75%" style="text-align:left">
+                            <asp:DropDownList ID="filterlist" runat="server" Width="136px"></asp:DropDownList>
+                            <asp:Button ID="Button1" runat="server" Text="确定设置" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            每页显示行数：
+                        </th>
+                        <td  style="text-align:left">
+				            <asp:TextBox ID="TextBox2" runat="server" Width="35px"></asp:TextBox>
+                            <asp:Button ID="Button2" runat="server" Text="确定设置" CssClass="btnsubmit" />
+                        </td>
+                    </tr>                    
+                </table>
+            </div>
+        </div>
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="Ul1">
+                <li class="topmenu"><a class="top_link" id="A1" href="javascript:void(0);">
+                <span>列表过滤条件设置 </span></a></li>
+            </ul>
+        </div>
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            条件选择：
+                        </th>
+                        <td width="75%" style="text-align:left">
+                            <asp:DropDownList ID="NodeName" runat="server" Width="70px"></asp:DropDownList>
+                            <asp:DropDownList ID="TypeName" runat="server" AutoPostBack="True">
+                                <asp:ListItem>排序方式</asp:ListItem>
+                                <asp:ListItem>过滤方式</asp:ListItem>
+                            </asp:DropDownList>
+                            <asp:DropDownList ID="sortType" runat="server">
+                                <asp:ListItem Value="asc">升序</asp:ListItem>
+                                <asp:ListItem Value="desc">降序</asp:ListItem>
+                            </asp:DropDownList>
+                            <asp:DropDownList ID="DropDownList1" runat="server">
+                                <asp:ListItem Value="&gt;">大于</asp:ListItem>
+                                <asp:ListItem Value="&lt;">小于</asp:ListItem>
+                                <asp:ListItem Value="=">等于</asp:ListItem>
+                                <asp:ListItem Value="!=">不等于</asp:ListItem>            
+                                <asp:ListItem Value="like">包含</asp:ListItem>            
+                            </asp:DropDownList>
+                            <asp:TextBox ID="TextBox1" runat="server"></asp:TextBox>
+                            <asp:Button ID="ListAdd" runat="server" Text="添 加"  CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"  style="text-align:center">
+                            <asp:Button ID="Button3" runat="server" Text="所选向上" CssClass="btnsubmit" />&nbsp;
+                            <asp:Button ID="Button4" runat="server" Text="所选向下" CssClass="btnsubmit" />&nbsp;
+                            <asp:Button ID="Button5" runat="server" Text="删除所选" CssClass="btnsubmit" /><br />
+                            <asp:ListBox ID="ListBox1" runat="server" Height="136px" SelectionMode="Multiple" Width="304px"></asp:ListBox>
+				        </td>
+                    </tr>                    
+                </table>
+            </div>
+        </div>
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="Ul2">
+                <li class="topmenu"><a class="top_link" id="A2" href="javascript:void(0);">
+                <span>字段颜色设置 </span></a></li>
+            </ul>
+        </div>
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            条件选择：
+                        </th>
+                        <td width="75%" style="text-align:left">
+                            <asp:DropDownList ID="NodeName2" runat="server" Width="120px">
+                            </asp:DropDownList>
+                            <asp:DropDownList ID="DropDownList2" runat="server">
+                                <asp:ListItem Value="大于">大于</asp:ListItem>
+                                <asp:ListItem Value="小于">小于</asp:ListItem>
+                                <asp:ListItem Value="等于" Selected="True">等于</asp:ListItem>
+                                <asp:ListItem Value="不等于">不等于</asp:ListItem>
+                                <asp:ListItem Value="包含">包含</asp:ListItem>
+                                <asp:ListItem Value="不包含">不包含</asp:ListItem>
+                                <asp:ListItem Value="超过天数">超过天数</asp:ListItem>
+                            </asp:DropDownList>
+                            <asp:TextBox ID="TextBox3" runat="server"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th align="right">
+                            显示颜色：
+                        </th>
+                        <td width="75%" style="text-align:left">
+                             <asp:RadioButtonList ID="RadioButtonList1" runat="server" 
+                                RepeatDirection="Horizontal">
+                                <asp:ListItem Selected="True" Value="红色">&lt;font color=red&gt;红色&lt;/font&gt;</asp:ListItem>
+                                <asp:ListItem Value="粉色">&lt;font color=Pink&gt;粉色&lt;/font&gt;</asp:ListItem>
+                                <asp:ListItem Value="蓝色">&lt;font color=Blue&gt;蓝色&lt;/font&gt;</asp:ListItem>
+                                <asp:ListItem Value="绿色">&lt;font color=Green&gt;绿色&lt;/font&gt;</asp:ListItem>
+                                <asp:ListItem Value="紫色">&lt;font color=Purple&gt;紫色&lt;/font&gt;</asp:ListItem>
+                                <asp:ListItem Value="灰色">&lt;font color=Gray&gt;灰色&lt;/font&gt;</asp:ListItem>
+                            </asp:RadioButtonList>
+                            
+                        </td>                    
+                    </tr>
+                    <tr>
+                        <td colspan="2"  style="text-align:center">
+                            <asp:Button ID="Button6" runat="server" Text="添 加"  CssClass="btnsubmit" />
+                            <asp:Button ID="Button7" runat="server" Text="删 除"  CssClass="btnsubmit" />
+                            <br />
+                            <font color="red">*注：“大于”、“小于”只对数值或日期型有效。“超过天数”只对日期型有效。</font>
+				        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"  style="text-align:center">
+                            <asp:ListBox ID="ListBox2" runat="server" Height="136px" SelectionMode="Multiple" Width="304px"></asp:ListBox>
+				        </td>
+                    </tr>                    
+                </table>
+            </div>
+        </div>
+
+    </form>
+    </center>
+</body>
+</html>

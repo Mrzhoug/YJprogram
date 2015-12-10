@@ -1,0 +1,93 @@
+﻿Imports System.IO
+Partial Class manager_lctmanage_xgcslist
+    Inherits System.Web.UI.Page
+    Dim base As New Base
+    Dim MaxPage As Integer
+    Dim pageindex As Integer
+    Dim Login_User As String
+    Dim userid As String
+    Dim xmbh As String
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+          Login_User = Base.GetWebUserName
+        userid = base.GetUserID(Login_User)
+
+        If Not base.CheckUserAuthentication() Then
+            Response.Write("非法访问！")
+            Response.End()
+        End If
+        If Page.IsPostBack = False Then
+            loadgv()
+        End If
+
+    End Sub
+
+    Private Sub loadgv()
+        Dim sqlstr As String = ""
+        Dim stime As String
+        Dim etime As String
+        Dim astr As String = ""
+        stime = base.SqlFilter(txtssj.Text.Trim)
+        etime = base.SqlFilter(txtesj.Text.Trim)
+        If stime <> "" Then
+            astr = astr + " and xgtime>='" & stime & " 00:00:00'"
+        End If
+        If etime <> "" Then
+            astr = astr + " and xgtime<='" & etime & " 23:59:59'"
+        End If
+
+        sqlstr = "select id,xmbh,note,(select my项目名称 from 项目基本信息_MapExt where my项目编号=lc_lczt.xmbh) as xmmc, xmzt,(select YGXM  from GY_YGDM where dlmc=lc_lczt.xgr) as yhmc,xgtime from lc_lczt where cstype=1" & astr & ""
+        'Response.Write(sqlstr)
+        'Response.End()
+        Dim tdxm As New DataTable
+        tdxm = base.DB.Table(sqlstr, "tb")
+        If tdxm.Rows.Count = 0 Then
+            base.Js.alert(Me, "没有修改记录！")
+            ' Return
+        End If
+        GridView1.DataSource = tdxm
+        GridView1.DataBind()
+        MaxPage = tdxm.Rows.Count
+        PageBar.InnerHtml = base.pub.WritePage(GridView1, MaxPage)
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        Dim xmbh As String
+        Dim k As Integer
+        Dim tb As New DataTable
+        For i = 0 To GridView1.Rows.Count - 1
+            xmbh = GridView1.DataKeys(i).Item(0)
+            tb = base.DB.Table("select (select KSMC from GY_KSDM where ksdm=lc_order.bm) as bm from lc_lczt,lc_order where lc_lczt.xmbh='" & xmbh & "' and lc_lczt.bz=0 and lc_order.lczt=lc_lczt.xmzt and lc_order.lcbs='" & xmbh.Substring(0, 2).ToLower & "' and lc_lczt.xmzt='" & GridView1.DataKeys(i).Item(2) & "'", "tb")
+            If tb.Rows.Count > 0 Then
+                For k = 0 To tb.Rows.Count - 1
+                    If k = 0 Then
+                        GridView1.Rows(i).Cells(4).Text = tb.Rows(k)("bm").ToString
+
+                    End If
+                Next
+            End If
+            'GridView1.Rows(i).Cells(5).Text = "<a href='javascript:void(0)' onclick=""window.open('xglczt.aspx?xmbh=" & GridView1.DataKeys(i).Item(0) & "','修改','height=320, width=400, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')"">修改</a>"
+        Next
+        GridView1.Columns(0).Visible = False
+        If Login_User <> "admin" And Login_User <> "lixiaoxue" Then
+            GridView1.Columns(7).Visible = False
+        End If
+    End Sub
+    Protected Sub GridView1_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs) Handles GridView1.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            'e.Row.Attributes.Add("OnDblClick", "openlct('" & GridView1.DataKeys(e.Row.RowIndex).Item(0) & "')")
+        End If
+    End Sub
+
+
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        loadgv()
+    End Sub
+
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        loadgv()
+    End Sub
+End Class

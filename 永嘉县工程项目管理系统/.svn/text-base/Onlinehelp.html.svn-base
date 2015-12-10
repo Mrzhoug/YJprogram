@@ -1,0 +1,204 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>在线帮助</title>
+</head>
+<body>
+<table border="0" align="center" cellpadding="0" cellspacing="0" width="97%">
+                                                                    <tr>
+                                                                        <td>
+                                                                            <div id="htmlbox" style="width: 100%; height: 100%"><P class=MsoNormal style="MARGIN: 0cm 0cm 0pt 42pt; TEXT-INDENT: -18pt; tab-stops: list 41.95pt; mso-list: l0 level1 lfo3"><FONT size=3><SPAN dir=ltr><SPAN style="FONT-SIZE: 12pt; FONT-FAMILY: 宋体"><SPAN lang=EN-US><?xml:namespace prefix = o ns = "urn:schemas-microsoft-com:office:office" /><o:p></o:p></SPAN></SPAN></SPAN></FONT></P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">2.1登陆界面：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp; 输入用户名和密码，根据用户名所拥有的权限进入SunFunSoft X-MAN的主页，在左边菜单栏列出该用户的文件夹以及能对其进行操作的项目菜单。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt"><BR>&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">2.2 初始菜单</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">初始菜单如下：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">超级用户：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 一般用户:</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">一、我的文件夹：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 一、我的文件夹：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 1、应用模版列表：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1、应用模版列表:</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 2、我的文件：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2、我的文件:</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 3、我的桌面：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3、我的桌面:</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">二、用户权限管理：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;二、具体应用：</P>
+<DIV>&nbsp;&nbsp;&nbsp; 1、显示菜单组设置：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1、菜单1</DIV>
+<DIV>&nbsp;&nbsp;&nbsp;&nbsp;2、系统模块管理：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2、菜单2</DIV>
+<DIV>&nbsp;&nbsp;&nbsp; 3、模块分组管理：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3、菜单3</DIV>
+<DIV>&nbsp;&nbsp;&nbsp; 4、用户帐号管理：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4、菜单4</DIV>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">三、流程管理组：</P>
+<P class=MsoNormal dir=ltr style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 1、流程及状态管理：</P>
+<P class=MsoNormal dir=ltr style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 2、添加功能表单:</P>
+<P class=MsoNormal dir=ltr style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 3、表单模版库：</P>
+<P class=MsoNormal dir=ltr style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 4、删除功能表单：</P>
+<P class=MsoNormal dir=ltr style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 5、流程权限管理：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">四、表单库管理：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 1、新增表单库：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 2、表单模版库：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 3、删除表单库：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 4、应用模版库：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt"></P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">3.1 用户管理</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt"><BR>&nbsp;&nbsp;&nbsp;&nbsp; 主页——点击左边菜单栏的用户权限管理——点击用户帐号管理，右边显示如下内容：<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">3.1.1添加：点击“添加用户”， 进入用户注册窗口。<BR>&nbsp;&nbsp;&nbsp; 输入用户名称，比如：aa&nbsp;&nbsp;&nbsp;&nbsp; 输入登陆名称，比如：aa</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 单击确定，稍后弹出“xx用户新建成功”的提示，请按确定，回到用户帐号管理界面，此时该界面上有了我们刚才添加的用户信息，如下：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt"><BR>此时用户aa还不能登陆，因为用户aa只完成了第一步，还没有分配该用户。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">分配用户的步骤：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp; 1、单击编辑，使之处于编辑状态</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp; 2、选中启用</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp; 3、单击“更新”<BR>&nbsp;&nbsp; 4、单击“分配用户”，进入如下窗口：<BR>&nbsp;&nbsp; 5、单击“设置”，此时添加用户aa完成。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt"><BR>3.1.2修改：包括修改用户名称和登陆名称，还有修改密码。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;1、修改用户名称和登陆名称：单击编辑，使之处于编辑状态，即可对其进行修改，然后单击“更新”，完成修改。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp; 2、修改密码：单击“修改密码”，比如：修改用户aa的密码</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 输入新密码和确认密码，然后单击“设置”，稍后提示“帐号：aa密码修改成功”</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">3.1.3删除：单击“删除”，提示“你确定要删除此用户吗”，如果不确定，</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 请按“取消”，则不进行删除操作；如果按了“确定”，删除此用户。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">3.1.4分配权限：主页——点击左边菜单栏的用户权限管理——点击模块分组管理，右边显示如下内容：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 1、单击“编辑组内用户”</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">要使某一用户或者多个用户拥有某一组的权限，在右边的“系统所有用户”中选中这些用户，单击“添加用户”，把这些用户添加到左边的“现组内用户”中来；反之，取消某一用户或者多个用户拥有的某一组权限，在左边的“现组内用户”中选中这些用户，单击“删除用户”，使这些用户从左边的“现组内用户”中脱离出来。最后“关闭页面”。<BR>&nbsp;&nbsp;&nbsp; 2、单击“编辑”，使之处于编辑状态，可更改“读，写，改，删，全”的权限，然后“更新”，即可对其进行这几个权限的修改。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">3.2 组管理</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 在XMAN的系统设置的“用户权限管理/模块分组管理”里面有以下几类组：第一类，菜单组；第二类，权限组；第一类，流程组。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">3.2.1 菜单组 </P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp; 用来显示在左边工具栏上的菜单组，可以向里面添加其他功能，如超链，系统功能（ASPX）,应用模板（EXECL,WORD）,表单库功能等。菜单组的各功能还可以通过权限组来细分控制。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">主页——点击左边菜单栏的用户权限管理——显示菜单组设置，</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">右边显示如下内容：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp; 1、新建：输入新建组名，比如：电子政务；单击“新建”</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp; 2、添加组内模块：单击“组内菜单”，进入如下窗口：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp; </P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 现在看到左边的“现组内功能”是空的，我们可以选中右边的“系统所有功能”中的模块，按&nbsp; 把选中的模块添加到左边的“现组内模块”即添加到组“电子政务”；如果从左边的“现组内模块”中去掉不需要的模块，请选中，然后按 ，即可移出来。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">在“现组内功能”中可单击“编辑”，对对应的显示名进行编辑，默认显示名为功能名。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt"><BR>模块添加完成后,单击“关闭页面”，回到“ 显示菜单组设置”页面,我们可看到“电子政务”对应的组内模块显示我们刚刚添加进来的模块。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt"><BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3、修改：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp; (1) 单击“编辑”，使之处于编辑状态,可修改组名称,然后单击“更新”,完成修改,或者单击“取消”,放弃所做的修改;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (2) 单击“组内菜单”,对其组内的模块进行修改,即添加或删除。（操作步骤同“添加组内模块”）</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4、删除：单击“删除”， 弹出提示窗口“你确定删除此组名吗？”，如果不确定，请按“取消”，则不进行删除操作；如果按了“确定”，删除此组。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5、显示：就是菜单组名以及组内的模块在主页左边的菜单栏中的显示。通过“组名上移”和“组名下移”来调整菜单组名在菜单栏中的显示顺序。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp; 选中需要调整顺序的组记录，单击对应的组即可。比如选中“电子政务”<BR>此时按纽“组名上移”激活，因为“电子政务”是最后一组名，所以组名不能下移，也没必要下移。单击“组名上移”，组名“电子政务”，往上移了，同时按纽“组名下移”也被激活了。此时的“电子政务”，可以继续单击“组名上移”往上移 ，也可以单击“组名下移”往下移，直到调整到你想要的位置。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">同理，你如果选中的是第一个组名,则只有按纽“组名下移”被激活。随着选中的组名下移，“组名上移”才被激活。如果选中的不是首尾的组名，则“组名上移”和“组名下移”同时被激活。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;6、权限：该组的权限由该组内的每一模块的权限决定。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 具体见“用户管理”</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;3.2.2 权限组：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 权限组的名称不会用来显示，只是用来控制权限，在一个权&nbsp; 限组内可以有多个用户和多个可以操作的模块。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt"></P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">目前XMAN权限只有以下几种：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 1、无权限：不能做任何操作，包括显示菜单。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">操作：在相应组内的用户里不包括该用户。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 2、只读权限：能够显示功能菜单，也可以打开相应功能，但递交无效。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">操作：在相应组内的用户里包括该用户，但是通过将可写标志去除。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 3、读写权限：能够显示功能菜单，也可以操作相应功能。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">操作：在相应组内的用户里包括该用户，默认是该权限。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 4、删除权限：对于表单库，创建者默认是可以删除的，其他人不行。对于流程，每新建一个流程时都会自动产生一个删除该流程中项目的功能，如果要某人可以删除项目，可以添加该功能给他。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 总之，我们可以通过创建不同的权限组来实现不同用户的权限管理。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">3.2.3 流程组：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 它是由创建流程的功能产生的，新建了一个流程以后就默认产生一个组，在组里面可以添加各种功能，功能可以由表单模版产生。流程组产生以后并不可见，要使之可见还要建立一个权限组，权限组的名称不会用来显示，只是用来控制权限，在一个权限组内可以有多个用户和多个可以操作的模块。这些用户登陆后将会显示他们具有的权限的流程组名称和相应功能。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp; 总之，流程组和菜单组是用来显示在左边工具栏上的，前者内部功能是在流程管理设置，后者可以在模块分组里面设置。然后，通过权限组来控制用户和功能，具备该功能权限的用户将会显示功能所属的流程组或菜单组名称及功能。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">3.3 模块管理</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 模块往往和功能对应，在XMAN中最主要的模块是INFOPATH模版产生的模块，每个模版可以产生多个相同功能不同名称的模块，在流程中还可以利用同一模版的不同视图来产生功能模块。INFOPATH模块在建立表单库或流程功能时产生（注意：流程中产生的模块只能在流程组中使用，不能在其他组使用）。还有其他几类模块：URL连接，直接到其他地方去完成相应功能；OFFICE 模版，使用ECECL,WORD等产生的模块；利用代码完成的模块，这些模块都可以在模块管理里添加管理。除了流程模块只能在流程中使用外，其他模块均可以自由分组管理设置权限。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt"><BR>输入新建组名： 电子政务&nbsp;&nbsp; 单击“新建”，则会增加如下记录。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt"><BR>单击“编辑”，可进行组名称的修改，以及读，写，改，删，全设置；</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">单击“删除”，删除该组；</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">单击“编辑组内模块”，可以添加，修改，删除模块；</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">单击“编辑组内用户”，可以添加，修改，删除用户。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">3.4 表单库管理 </P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp; 主要是用于创建一些无流程的功能模块。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">3.4.1 添加和修改：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">建立一个无流程的功能模块的步骤：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp; 第一步，我们要创建好Infopath模版，然后打开表单模版库，界面如下，模版名自定义，文件路径指向做好的模版，以下便是所上传的模板库，用户可以根据自己需要制作不同的模版进行上传。模版第一次上传请单击“上传模版“，此后该模版进行修改后再次上传，请单击“覆盖上传”。为了确保模版的更新，请单击相应的“更新模版”。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt"><BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;第二步：打开 新增表单库 用传上去的模版创建相应的功能。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp; 输入表单库名或者不输入即默认，然后单击相应模版名称后面的“添加表单库”&nbsp; </P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">按确定后，显示如下界面：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt"><BR>在该界面上，通过编辑显示列就可以把xml库里记录按自己想显示的选项显示出来。然后保存即可。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">3.4.2 删除：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">通用上面的操作 删除表单库 里就多了一条新加的记录，可以通过“删除表单”删除该功能。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">为了使添加的功能在左边的菜单栏里显示出来，请结合菜单组和权限组的相关说明进行操作。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; </P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">3.5 流程管理</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">用于创建有流程的管理系统</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">包括：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp; 1、功能添加、修改、删除；</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp; 2、流程添加、修改、删除；</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp; 3、状态添加、修改、删除；</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp; 4、强制条件设置；</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;5、审批。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp; 操作步骤如下：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 第一步：上传模板操作方法和表单库管理功能模块一样（模板库和无流程的表单库管理是共用一个的）</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;第二步：添加和删除功能表单，方法与表单库管理里的新增表单库一样，只是多了一种视图选择的功能，熟悉Infopath的视图功能后就会觉得很容易，如下图所示，建设功能是新上传的一个模板，里面包含了多个视图，我们可以选择它根据不同的视图创建不同的功能，依次创建了这些功能<BR>&nbsp;&nbsp;&nbsp;&nbsp;第三步：进入“流程及状态管理”选项里创建一个新的流程，示例为 建设项目然后选择对应的流程的状态维护<BR>输入流程名称：建设项目&nbsp;&nbsp;&nbsp; 流程说明：建设项目&nbsp;&nbsp;&nbsp; </P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 单击“添加流程” ，便可看到流程代码为“318”的记录，就是我们添加的流程——建设项目。<BR>&nbsp;&nbsp;&nbsp;&nbsp;单击“编辑”，可对流程名称和流程说明进行修改；</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;单击“删除”，可删除该流程；</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;单击“编辑列”，编辑显示列把xml库里记录按自己想显示的选项显示出来。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;单击“状态维护”，可进行对该流程的状态添加，修改，删除；</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp; <BR>输入状态名称：录入&nbsp; 单击“添加”</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 单击“编辑”，可对状态名称进行修改，以及设定是否关联；</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 单击“删除”，可删除该状态；</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 单击“维护功能”，可进行对该状态功能添加，修改，删除；</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 选中右边的功能，单击“添加功能”；</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">对于左边的功能，单击“编辑”，可进行设置是否需要审批，是否设定时间，如果设定时间，则需要输入规则时间。设定后，单击“更新”。单击“删除”，则删除此功能，即该状态下不再有此功能。功能设置完成后，单击“关闭返回”。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">继续添加状态（步骤同上），把该流程的所有状态添加完毕。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp; 第四步：也是最关键的一步，到用户管理权限里把刚刚添加的那些功能，参照菜单组和权限组的相关操作进行设置，然后按F5刷新一下。左边的菜单栏目里就多了一项我们刚刚建立的流程选项。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">3.6 OFFICE 模版设计</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">3.6.1 如何获取辅助数据：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">比如：在一张成绩管理的表单中，输入班级列表中的数据从另一张表单学校基本信息维护中的获取，对于成绩管理的表单而言，获取的班级数据就是辅助数据。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 1、工具——数据连接&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 2、 单击添加，&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 3、选择如何使用此数据连接，这里选择第二项“仅接收数据”，单击“下一步”</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;4、选择希望从如处接收数据，这里选择第三项“web服务”，单击“下一步”</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;输入要用作数据连接的web服务器位置，</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 比如：<A href="http://www.contosou.com/service.asmx?WSDL">http://www.contosou.com/service.asmx?WSDL</A>&nbsp;&nbsp; </P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 单击“下一步”</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 5、选择操作，这里选择“GetData”,单击“下一步”</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 单击“设置示例值”， </P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 输入“学生基本信息”，然后“确定”</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 6、单击“下一步”</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 单击“设置示例值”， </P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 输入“学生基本信息”，然后“确定”</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 7、单击“下一步”</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 输入“学生基本信息”</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 8、单击“完成”&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp; 9、单击“关闭”</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 这样，辅助数据的获取就完成了，在主表单需要的地方可以加以引用操作。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">3.6.2 引用XML数据：</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">3.6.3 上传模版：比较简单，前文已有相关介绍，请参考前文。</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">4.1 关于xman的打开方式概念</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;</P>
+<P class=MsoNormal style="MARGIN: 0cm 0cm 0pt">&nbsp;&nbsp;&nbsp; 在默认情况下，XMAN以列表方式在右边罗列项目，当鼠标选中后双击会打开。因为，XML文件是非WEB解析的文件，如果要操作必须在客户机上安装INFOPATH软件，这样，在打开时会出现提示框，影响操作方便性。为此，我们考虑了几种情况： 打开方式一 (直接以文件流方式，原文件不会暴露，较安全。) 打开方式二 (直接HTTP打开数据文件，原文件要匿名可访问，不安全) 打开方式三 (通过JS角本在本地打开，不会出现提示框，但需将此站点加为信任站点，有时会被反病毒软件检测为病毒。) 打开方式四 (无需安装Infopath，直接以WEB方式打开，但只能察看数据，不能操作。) 打开选项 手工操作 (关闭自动打开功能，默认，比较麻烦。) 自动新建 (当单击功能时，自动新建表单，比如按借书，立即打开借书功能表单。) 自动打开 (当单击功能时，自动打开该功能第一张表单，适用于像配置文件之类的表单，不需要增加，只要修改。)<BR><A name=_Toc149733010></A></P></div>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+</body>
+</html>

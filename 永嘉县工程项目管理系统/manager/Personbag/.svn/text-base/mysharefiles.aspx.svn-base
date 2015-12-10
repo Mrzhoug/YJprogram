@@ -1,0 +1,14 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="MyShareFiles.aspx.vb" Inherits="manager_Personbag_mysharefiles" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head><title>共享文件</title>
+    
+    <link rel="Stylesheet" type="text/css" href="../../App_Themes/StyleSheet.css" />
+
+</head>
+<body>
+<form id="form1" runat="server">
+    <span id="message" runat="server" ></span>
+    </form>
+</body>
+</html>

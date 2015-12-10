@@ -1,0 +1,638 @@
+   
+//	utility functions to verify the field entry.
+function alertWinIP(IP,errmsg)
+{
+	//window.alert(IP+"  is not a valid IP address.");
+	window.alert(IP+" "+errmsg);
+}
+  
+function alertWinMask(mask,errmsg)
+{
+	//window.alert(mask+ "  is not a valid netmask.");
+	window.alert(mask+ "  "+errmsg);
+}
+  
+function alertWinF(falseNews)
+{
+	window.alert(falseNews);
+}
+
+function toNumber(str, start, end)
+{
+	var tempVal = 0;
+    	
+	for (i=start; i < end; i++) 
+    	{
+    		c = str.charAt(i);
+    		if (c < '0' || c > '9')
+    			return -1;
+    
+    		tempVal = tempVal * 10 + (c - '0');
+    	}
+    
+    	return tempVal;
+}
+
+function isInt(numStr) {
+	for (var i=0; i<numStr.length; i++) {
+		c = numStr.charAt(i);
+		if (c < '0' || c > '9') {
+			return false;
+		}
+	}
+ 	return true;
+}
+    
+
+function isIP(ip_str) {
+	ipArray = ip_str.split(".");
+
+	if(ipArray.length == 4) {
+		for(var i=0; i<4; i++) {
+			if(isInt(ipArray[i])) {
+				octetInt = parseInt(ipArray[i]);
+				if(octetInt < 0 || octetInt > 255) {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
+		if(ipArray[0]=="0") {
+			return false;
+		}		
+	} else {
+		return false;
+	}
+	return true;
+}
+
+function log2(num) {
+	return (Math.log(num) / Math.LN2);
+}
+
+function ipStrToNum(ip_str) {
+		ipValue = 0;
+		ipArray = ip_str.split(".");
+		for(var i=0; i<4; i++) {
+			ipValue = ipValue << 8;
+			ipValue += parseInt(ipArray[i]);
+		}
+		return ipValue;
+}
+
+function isMask(mask_str) {
+	if(isIP(mask_str)) {
+		mask = ipStrToNum(mask_str);
+		if (mask == 0)
+			return true;
+
+		for (test_mask = 0xffffffff; test_mask != 0x0; test_mask >>>= 1) {
+			if (~mask == test_mask)
+				return true;
+		}
+	}
+	return false;
+}
+
+function isBlank(str) {
+	if (str == "") {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function hasSpace(str) {
+	if (str.indexOf(" ") >= 0) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function isValid(fieldValue, checkType) {
+	switch(checkType) {
+		case 0 :
+			if(isIP(fieldValue)) {
+				return true;
+			} break;
+		case 1 :
+			if(isMask(fieldValue)) {
+				return true;
+			} break;
+		case 2 :
+			if(!isBlank(fieldValue)) {
+				return true;
+			} break;
+		case 3 :
+			if(!hasSpace(fieldValue)) {
+				return true;
+			} break;
+		default : return true; // if mode is not found
+	}
+	return false;	// if break; occurs (test fails)
+}
+
+function checkField(fieldObj, errmsg, checkMode) {
+	if(!isValid(fieldObj.value, checkMode)) {
+		alert(errmsg);
+		fieldObj.select();
+		return false;
+	} else {
+		return true;
+	}
+}
+
+function isSameSubnet(ip1, ip2, mask) {
+	if((ipStrToNum(ip1)&ipStrToNum(mask)) == (ipStrToNum(ip2)&ipStrToNum(mask))) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function verifyIP(cntrl,errmsg) {
+    
+  	var	val = new Array();
+  	var	i = index =longIPVal= 0;
+            ip_str = cntrl.value;
+    
+    	while (index < ip_str.lastIndexOf("."))	{
+    		k = index;
+    		index = ip_str.indexOf(".", index);
+  		val[i] = toNumber(ip_str, k, index);
+    
+  		if (val[i] < 0 || val[i] > 255)
+                    	break;
+                    i++; index++;
+    	}
+    	if (val[0] == 127)	 
+	{
+		i = 0;
+	}
+  	if (i == 3) {  if (ip_str.length > index){	
+  	              	val[i] = toNumber(ip_str,index, ip_str.length);
+  	        	if (val[i] < 0 || val[i] > 255) 
+                                        i = 2
+                          else { val[0]=val[0]<<24;
+                                 val[1]=val[1]<<16;     
+                                 val[2]=val[2]<<8;
+                                 longIPVal=val[0]+val[1]+val[2]+val[3];
+                                 return(longIPVal); 
+                                 }
+  
+                          }
+                            else
+                             i=2; 
+                         }
+                                                       
+           
+            if (i != 3) {  
+                         alertWinIP(cntrl.value,errmsg);
+              	        //cntrl.value = cntrl.defaultValue;
+			cntrl.select();
+			return 999999;
+                      }
+	return true;
+  
+  }
+  
+  function verifyNetmask(cntrl,errmsg) {
+  	val = new Array();
+  	var	i = index =longMaskVal= 0;
+  	ip_str = cntrl.value;
+  
+  	while (index < ip_str.lastIndexOf("."))	{
+    		k = index;
+  		index = ip_str.indexOf(".", index);
+  		val[i] = toNumber(ip_str, k, index);
+  
+  		if (val[i] < 0 || val[i] > 255){
+                          break;
+                             }
+                    i++; index++;
+    	}    
+  	if (i == 3) {	if (ip_str.length > index){
+  	              	val[i] = toNumber(ip_str,index, ip_str.length);
+  	        	if (val[i] < 0 || val[i] > 255) 
+                                        i = 2	
+  	                else { val[0]=val[0]<<24;
+                                 val[1]=val[1]<<16;     
+                                 val[2]=val[2]<<8;
+                                 longMaskVal=val[0]+val[1]+val[2]+val[3];
+                                 if ((longMaskVal&(~longMaskVal+1))==(~longMaskVal+1))
+                                     return (longMaskVal);  
+                                 else 
+                                     i=2;
+                                  }
+                             }
+                             else
+                               i=2;
+                         }
+    	if (i != 3) {
+                       alertWinMask(cntrl.value, errmsg);
+                        //cntrl.value = cntrl.defaultValue;
+			cntrl.select();
+		return 999999;
+  	}
+  return true;
+  }
+
+
+function stringToNumber(str)
+{
+    var len = str.length;
+    return toNumber(str, 0, len);
+}
+
+function verifyIPAndMask(cntrl,errmsg)
+{   
+    var i;
+    var tokens = new Array();
+    var ip_mask_str = cntrl.value;
+    tokens = ip_mask_str.split(".");
+     
+    if (tokens.length < 4) {
+        alertWinIP(cntrl.value,errmsg);
+        return false;
+    }
+    
+    for (i = 0; i < 3; i++) { // check the x.x.x... prefix
+        if ((stringToNumber(tokens[i]) < 0) || (stringToNumber(tokens[i]) > 255)) {
+            alertWinIP(cntrl.value,errmsg);
+            return false;
+        }
+    }
+    
+    if (tokens.length == 4) {
+        if ((stringToNumber(tokens[3]) >= 0) && (stringToNumber(tokens[i]) <= 255)) { //x.x.x.x
+            return true;
+        }
+        
+        if (tokens[3].indexOf("*")==0) { //x.x.x.*
+            return true;
+        }
+        
+        var parts = new Array();
+        parts = tokens[3].split("/");
+        if (parts.length == 2) { //x.x.x.x/x
+            if ((stringToNumber(parts[0]) < 0) || (stringToNumber(parts[0]) > 255)) {
+                alertWinIP(cntrl.value,errmsg);
+                return false;
+            }
+            if ((stringToNumber(parts[1]) < 0) || (stringToNumber(parts[1]) > 32)) {
+                alertWinIP(cntrl.value,errmsg);
+                return false;
+            }
+            return true;
+        }
+        
+        parts = tokens[3].split("-");
+        if (parts.length == 2) { //x.x.x.[x-x]
+                var first = stringToNumber(parts[0].substring(1, parts[0].length));
+                var second = stringToNumber(parts[1].substring(0, parts[1].length-1));        
+            if ((parts[0].indexOf("[") == 0) && 
+                (first >= 0) && (first <= 255) &&
+                (parts[1].indexOf("]") == parts[1].length-1) && 
+                (second >= 0) && (second <= 255) && 
+                (first <= second)) {
+                return true;
+            }
+        }
+    }
+
+    if (tokens.length == 7) {
+        for (i = 0; i < 7; i++) {
+            if (i != 3) {
+                if ((stringToNumber(tokens[i]) < 0) || 
+                    (stringToNumber(tokens[i]) > 255)) {
+                    alertWinIP(cntrl.value,errmsg);
+                    return false;
+                }
+            }
+        }
+        
+        var parts = new Array();
+        parts = tokens[3].split("/");
+        if (parts.length == 2) { //x.x.x.x/x.x.x.x
+            if ((stringToNumber(parts[0]) < 0) || (stringToNumber(parts[0]) > 255)) {
+                alertWinIP(cntrl.value,errmsg);
+                return false;
+            }
+            if ((stringToNumber(parts[1]) < 0) || (stringToNumber(parts[1]) > 255)) {
+                alertWinIP(cntrl.value,errmsg);
+                return false;
+            }
+            return true;
+        }
+        parts = tokens[3].split("-");
+        if (parts.length == 2) { //x.x.x.x-x.x.x.x
+                var first = stringToNumber(parts[0].substring(0, parts[0].length));
+                var second = stringToNumber(parts[1].substring(0, parts[1].length));        
+            if ((first >= 0) && (first <= 255) &&
+                (second >= 0) && (second <= 255)) {
+                return true;
+            }
+        }                
+    }
+    
+    alertWinIP(cntrl.value,errmsg);
+    return false; 
+}
+
+ 
+//check whether IP and network match or not
+//return: ture(if match), false(if no match)
+function verifyIPMask(IP_str,mask_str,err_ip,err_mask)
+{
+ var longIPVal,longMaskVal
+ 
+ longIPVal = verifyIP(IP_str,err_ip);
+ longMaskVal = verifyNetmask(mask_str,err_mask);
+ if ((longIPVal == 999999) || (longMaskVal == 999999)) return false;
+ if( (!(longIPVal & longMaskVal))||(!(longIPVal & ( ~longMaskVal))) 
+                   ||((longIPVal & longMaskVal)==longMaskVal)
+                   ||((longIPVal & (~longMaskVal))==(~longMaskVal)) )
+                {
+                    return false;
+  	      }
+
+ return true; 
+}
+
+function verifyCombination(int_IP_str,int_mask_str,ext_IP_str,ext_mask_str,DMZ_IP_str,DMZ_mask_str,dft_gw_str)
+  {
+        var longIPVal = new Array();
+        var longMaskVal= new Array(); 
+        var IPandMaskID=new Array();
+        var GWandExtID,IntandExtID, IntandDMZID, ExtandDMZID;
+        var falseNews=new String( "");
+        var m=1;
+  
+        longIPVal[1]=verifyIP(int_IP_str);
+        longMaskVal[1]=verifyNetmask(int_mask_str);
+        longIPVal[2]=verifyIP(DMZ_IP_str);
+        longMaskVal[2]=verifyNetmask(DMZ_mask_str);
+        longIPVal[3]=verifyIP(ext_IP_str);
+        longMaskVal[3]=verifyNetmask(ext_mask_str);
+        longIPVal[4]=verifyIP(dft_gw_str);
+        longMaskVal[4]=verifyNetmask(ext_mask_str);
+        
+        for (m=1;m<4;m++){
+    
+            if( (!(longIPVal[m] & longMaskVal[m]))||(!(longIPVal[m] & ( ~longMaskVal[m]))) 
+                   ||((longIPVal[m] & longMaskVal[m])==longMaskVal[m])
+                   ||((longIPVal[m] & (~longMaskVal[m]))==(~longMaskVal[m])) )
+                {
+                    IPandMaskID[m]=false;
+  	      }
+        }              
+         
+        if ((longIPVal[4]&longMaskVal[4])!=(longIPVal[3]&longMaskVal[3]))
+             GWandExtID=false;
+            /* default gateway and external must be in the same subnet*/
+ 
+         if ((longIPVal[1]&longMaskVal[1])==(longIPVal[3]&longMaskVal[3])||
+            (longIPVal[1]&longMaskVal[3])==(longIPVal[3]&longMaskVal[3])||
+            (longIPVal[1]&longMaskVal[1])==(longIPVal[3]&longMaskVal[1]))
+              IntandExtID=false;
+             /* internal and external can't be in the same subnet.*/
+  
+         if ((longIPVal[1]&longMaskVal[1])==(longIPVal[2]&longMaskVal[2])||
+            (longIPVal[1]&longMaskVal[2])==(longIPVal[2]&longMaskVal[2])||
+            (longIPVal[1]&longMaskVal[1])==(longIPVal[2]&longMaskVal[1]))
+              IntandDMZID=false;
+             /* internal and DMZ can't be in the same subnet.*/
+
+         if ((longIPVal[3]&longMaskVal[3])==(longIPVal[2]&longMaskVal[2])||
+            (longIPVal[3]&longMaskVal[2])==(longIPVal[2]&longMaskVal[2])||
+            (longIPVal[3]&longMaskVal[3])==(longIPVal[2]&longMaskVal[3]))
+              ExtandDMZID=false;
+             /* external and DMZ can't be in the same subnet.*/
+         
+         if (falseNews==""){
+             if (IPandMaskID[1]==false)
+                falseNews=falseNews+"The internal IP address and netmask don't match.\n";
+             if (IPandMaskID[2]==false)
+                falseNews=falseNews+"The DMZ IP address and netmask don't match.\n";
+             if (IPandMaskID[3]==false)
+                falseNews=falseNews+"The external address and netmask don't match.\n";
+         }
+           
+         if (falseNews==""){
+             if (GWandExtID==false)
+                falseNews=falseNews+"The default gateway and external are not in the same subnet.\n";
+             if (IntandExtID==false)
+                falseNews=falseNews+"The internal and external are in the same subnet.\n";
+             if (IntandDMZID==false)
+                falseNews=falseNews+"The internal and DMZ are in the same subnet.\n";
+	     if (ExtandDMZID==false)
+                falseNews=falseNews+"The external and DMZ are in the same subnet.\n";
+	    
+          }
+        
+         if (falseNews!="")
+         {
+             alertWinF(falseNews);
+             return(false);
+         }
+         return(true);
+    }
+  
+function verifyIntExt(int_IP_str,int_mask_str,ext_IP_str,ext_mask_str,err_ip,err_mask,err_int,err_ext,err_subnet)
+  {
+        var longIPVal = new Array();
+        var longMaskVal= new Array(); 
+        var IPandMaskID=new Array();
+        var GWandExtID,IntandExtID;
+        var falseNews=new String( "");
+        var m=1;
+  
+        longIPVal[1]=verifyIP(int_IP_str,err_ip);
+        longMaskVal[1]=verifyNetmask(int_mask_str,err_mask);
+        longIPVal[2]=verifyIP(ext_IP_str,err_ip);
+        longMaskVal[2]=verifyNetmask(ext_mask_str,err_mask);
+        
+        for (m=1;m<3;m++){
+	    if((longIPVal[m] == 999999)||(longMaskVal[m] == 999999)) return false;
+    
+            if( (!(longIPVal[m] & longMaskVal[m]))||(!(longIPVal[m] & ( ~longMaskVal[m]))) 
+                   ||((longIPVal[m] & longMaskVal[m])==longMaskVal[m])
+                   ||((longIPVal[m] & (~longMaskVal[m]))==(~longMaskVal[m])) )
+                {
+                    IPandMaskID[m]=false;
+  	      }
+        }              
+         
+         if ((longIPVal[1]&longMaskVal[1])==(longIPVal[2]&longMaskVal[2])||
+            (longIPVal[1]&longMaskVal[2])==(longIPVal[2]&longMaskVal[2])||
+            (longIPVal[1]&longMaskVal[1])==(longIPVal[2]&longMaskVal[1]))
+              IntandExtID=false;
+             /* internal and external can't be in the same subnet.*/
+  
+         if (falseNews==""){
+             if (IPandMaskID[1]==false)
+                //falseNews=falseNews+"The internal IP address and netmask don't match.\n";
+                falseNews=falseNews + err_int + "\n";
+             if (IPandMaskID[2]==false)
+                //falseNews=falseNews+"The external address and netmask don't match.\n";
+                falseNews=falseNews + err_ext + "\n";
+         }
+           
+         if (falseNews==""){
+             if (GWandExtID==false)
+                falseNews=falseNews+"The default gateway and external are not in the same subnet.\n";
+             if (IntandExtID==false)
+                //falseNews=falseNews+"The internal and external are in the same subnet.\n";
+                falseNews=falseNews + err_subnet + "\n";
+             	    
+          }
+        
+         if (falseNews!="")
+         {
+             alertWinF(falseNews);
+             return(false);
+         }
+         return(true);
+    }
+
+ function verifyIntExtDMZ(int_IP_str,int_mask_str,ext_IP_str,ext_mask_str,DMZ_IP_str,DMZ_mask_str)
+  {
+        var longIPVal = new Array();
+        var longMaskVal= new Array(); 
+        var IPandMaskID=new Array();
+        var IntandExtID, IntandDMZID, ExtandDMZID;
+        var falseNews=new String( "");
+        var m=1;
+  
+        longIPVal[1]=verifyIP(int_IP_str);
+        longMaskVal[1]=verifyNetmask(int_mask_str);
+        longIPVal[2]=verifyIP(DMZ_IP_str);
+        longMaskVal[2]=verifyNetmask(DMZ_mask_str);
+        longIPVal[3]=verifyIP(ext_IP_str);
+        longMaskVal[3]=verifyNetmask(ext_mask_str);
+        
+        for (m=1;m<4;m++){
+    
+            if( (!(longIPVal[m] & longMaskVal[m]))||(!(longIPVal[m] & ( ~longMaskVal[m]))) 
+                   ||((longIPVal[m] & longMaskVal[m])==longMaskVal[m])
+                   ||((longIPVal[m] & (~longMaskVal[m]))==(~longMaskVal[m])) )
+                {
+                    IPandMaskID[m]=false;
+  	      }
+        }              
+         
+ 
+         if ((longIPVal[1]&longMaskVal[1])==(longIPVal[3]&longMaskVal[3])||
+            (longIPVal[1]&longMaskVal[3])==(longIPVal[3]&longMaskVal[3])||
+            (longIPVal[1]&longMaskVal[1])==(longIPVal[3]&longMaskVal[1]))
+              IntandExtID=false;
+             /* internal and external can't be in the same subnet.*/
+  
+         if ((longIPVal[1]&longMaskVal[1])==(longIPVal[2]&longMaskVal[2])||
+            (longIPVal[1]&longMaskVal[2])==(longIPVal[2]&longMaskVal[2])||
+            (longIPVal[1]&longMaskVal[1])==(longIPVal[2]&longMaskVal[1]))
+              IntandDMZID=false;
+             /* internal and DMZ can't be in the same subnet.*/
+
+         if ((longIPVal[3]&longMaskVal[3])==(longIPVal[2]&longMaskVal[2])||
+            (longIPVal[3]&longMaskVal[2])==(longIPVal[2]&longMaskVal[2])||
+            (longIPVal[3]&longMaskVal[3])==(longIPVal[2]&longMaskVal[3]))
+              ExtandDMZID=false;
+             /* external and DMZ can't be in the same subnet.*/
+         
+         if (falseNews==""){
+             if (IPandMaskID[1]==false)
+                falseNews=falseNews+"The internal IP address and netmask don't match.\n";
+             if (IPandMaskID[2]==false)
+                falseNews=falseNews+"The DMZ IP address and netmask don't match.\n";
+             if (IPandMaskID[3]==false)
+                falseNews=falseNews+"The external address and netmask don't match.\n";
+         }
+           
+         if (falseNews==""){
+             if (IntandExtID==false)
+                falseNews=falseNews+"The internal and external are in the same subnet.\n";
+             if (IntandDMZID==false)
+                falseNews=falseNews+"The internal and DMZ are in the same subnet.\n";
+	     if (ExtandDMZID==false)
+                falseNews=falseNews+"The external and DMZ are in the same subnet.\n";
+	    
+          }
+        
+         if (falseNews!="")
+         {
+             alertWinF(falseNews);
+             return(false);
+         }
+         return(true);
+    }
+ 
+function  checkBlank(str) {
+    if(str.length==0)  {  
+      alert("Input is blank, please re-input.");  
+      return false;  
+    }  
+    return true;   
+}
+
+function verify2IP(int_IP_str,int_mask_str,ext_IP_str,ext_mask_str,err_ip,err_mask)
+  {
+        var longIPVal = new Array();
+        var longMaskVal= new Array(); 
+        var IntandExtID;
+  
+        longIPVal[1]=verifyIP(int_IP_str,err_ip);
+        longMaskVal[1]=verifyNetmask(int_mask_str,err_mask);
+        longIPVal[2]=verifyIP(ext_IP_str,err_ip);
+        longMaskVal[2]=verifyNetmask(ext_mask_str,err_mask);
+         
+        if ((longIPVal[1]&longMaskVal[1])==(longIPVal[2]&longMaskVal[2])||
+            (longIPVal[1]&longMaskVal[2])==(longIPVal[2]&longMaskVal[2])||
+            (longIPVal[1]&longMaskVal[1])==(longIPVal[2]&longMaskVal[1]))
+              IntandExtID=false;
+
+             /* in the same subnet.*/
+             if (IntandExtID==false)
+             	   return(true); 
+        
+         return(false);
+}
+
+function isxdigit(theDigit){
+	digitArray= new Array('0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f','A','B','C','D','E','F');
+	for(var j=0;j<digitArray.length;j++)
+		if(theDigit==digitArray[j]) return true;
+	return false;
+}
+
+function ismacok(theString,errmsg)
+{
+   	var i;
+	var buf = theString.value;
+
+	if (buf.length != 17) {
+		//window.alert(buf + "  is not a valid MAC");
+		window.alert(buf + " "+errmsg);
+		return false;
+	}
+ 	for(i=0;i<buf.length;i+=3){
+		if((!isxdigit(buf.charAt(i)))||(!isxdigit(buf.charAt(i+1)))){
+		//	window.alert(buf +"  is not a valid MAC");
+		window.alert(buf + " "+errmsg);
+			return false;
+		}
+	}
+
+ 	for(i=2;i<buf.length;i+=3){
+		if((buf.charAt(i)!=':') && (buf.charAt(i)!='-')){ 
+		//	window.alert(buf +"  is not a valid MAC");
+		window.alert(buf + " "+errmsg);
+			return false;
+		}
+	}
+ 	return true;
+}
+				
+				

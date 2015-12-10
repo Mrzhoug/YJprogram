@@ -1,0 +1,75 @@
+﻿
+Partial Class manager_HomePageManage_HomePageNews
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim CId As Integer
+    Dim UserName As String
+    Dim UserID As Integer
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim sql As String
+        If TextBox1.Text.Trim.Length = 0 Then
+            Base.Js.alert(Me, "标题不能为空@")
+            Exit Sub
+        End If
+        If TextBox2.Text.Trim.Length = 0 Then
+            Base.Js.alert(Me, "新闻显示的图片为空!")
+        End If
+        If cid > 0 Then
+            sql = "update HomePageNews set title='" & TextBox1.Text.Replace("'", "''") & "',imageUrl='" & TextBox2.Text.Replace("'", "''") & "',content='" & Content.Text.Replace("'", "''") & "' where cid=" & CId
+            Base.DB.Query(sql)
+        Else
+            sql = "insert into HomePageNews (title,imageUrl,[UPdate],content,UserID) values ('" & TextBox1.Text.Replace("'", "''") & "','" & TextBox2.Text.Replace("'", "''") & "','" & Now() & "','" & Content.Text.Replace("'", "''") & "'," & UserID & ")"
+            Base.DB.Query(sql)
+        End If
+        If Base.DB.ErrorMessage Is Nothing Then
+            Response.Redirect("HomePageNewsList.aspx")
+        Else
+            Base.Js.alert(Me, "添加/修改失败,请联系管理员")
+        End If
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Base.Checking("../manager/HomePageManage/HomePageNewsList.aspx")
+
+        UserName = Base.GetWebUserName
+        UserID = Base.GetUserID(UserName)
+
+        Try
+            CId = Request("cid")
+        Catch ex As Exception
+            CId = 0
+        End Try
+
+        If CId > 0 And Page.IsPostBack = False Then
+            Dim tb As New Data.DataTable
+            tb = Base.DB.Table("select * from HomePageNews where cid=" & CId, "home_news")
+            If tb.Rows.Count > 0 Then
+                TextBox1.Text = tb.Rows(0)("title")
+                TextBox2.Text = tb.Rows(0)("imageUrl").ToString
+                Content.Text = tb.Rows(0)("content").ToString
+            End If
+            tb = Nothing
+        End If
+
+    End Sub
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+
+        If FileUpload1.PostedFile.ContentLength > 0 Then      '文件上传
+            Try
+                Base.Upload.Sizes = 1000 * 1024
+                Base.Upload.Path = "../../images"
+                Base.Upload.FileType = "pjpeg|gif|bmp|jpg"
+                Base.Upload.AutoCreateFileName = True   '自动生成文件名
+                If Base.Upload.FileSaveAs(FileUpload1) = True Then
+                    TextBox2.Text = Base.Upload.ReturnFileName
+                Else
+                    TextBox2.Text = "上传失败!" & Base.Upload.ReturnMessage
+                End If
+            Catch exc As Exception
+                Base.Js.alert(Me, "上传失败!")
+            End Try
+        End If
+    End Sub
+End Class

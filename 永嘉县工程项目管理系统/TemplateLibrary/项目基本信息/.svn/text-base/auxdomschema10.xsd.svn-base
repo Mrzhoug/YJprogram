@@ -1,0 +1,930 @@
+<?xml version="1.0"?>
+<s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/">
+	<s:element name="FirstLoginLog">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="UserName" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="TmpDate" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="FirstLoginLogResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="FirstLoginLogResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="AddNewInfos">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="formName" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="content" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="username" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="password" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="yzm" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="AddNewInfosResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="AddNewInfosResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="SetRead">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="msgID" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="userLoginName" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="SetReadResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="SetReadResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="Ku2LCDM">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="KuName" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="Ku2LCDMResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Ku2LCDMResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="Xpath2Select">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="Xpath2SelectResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath2SelectResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="getProcessHistory">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="fid" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="getProcessHistoryResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="getProcessHistoryResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="Get_KS_List">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="KsKind" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="Get_KS_ListResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Get_KS_ListResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetUserInfo">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetUserInfoResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetUserInfoResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="AddNewForm_GetFormTemplate">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="formName" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="yzm" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="AddNewForm_GetFormTemplateResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="AddNewForm_GetFormTemplateResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="AddNewForm_Add">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="formName" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="content" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="username" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="yzm" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="AddNewForm_AddResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="AddNewForm_AddResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="FX_ChangeContent">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="1" maxOccurs="1" name="formID" type="s:int"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="content" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="yzm" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="FX_ChangeContentResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="FX_ChangeContentResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="FX_ChangeContent2">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="formID" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="condition" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Bywriting" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="content" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="yzm" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="FX_ChangeContent2Response">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="FX_ChangeContent2Result">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetNodePerm">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="FormID" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="UserName" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetNodePermResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetNodePermResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetFunctionName">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="XMDM" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetFunctionNameResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetFunctionNameResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetProjectName">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="XMDM" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetProjectNameResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetProjectNameResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="Annex2FileName">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Base64String" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="Annex2FileNameResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Annex2FileNameResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetAnnex">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetAnnexResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetAnnexResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetFormAnnexList">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="1" maxOccurs="1" name="FormID" type="s:int"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetFormAnnexListResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetFormAnnexListResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetFromAnnexListNew">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="1" maxOccurs="1" name="formID" type="s:int"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="annexType" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetFromAnnexListNewResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetFromAnnexListNewResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetFormTitle">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="OpUser" type="s:string"></s:element>
+				<s:element minOccurs="1" maxOccurs="1" name="XMDM" type="s:int"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetFormTitleResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetFormTitleResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetFormStateList">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="1" maxOccurs="1" name="MKDM" type="s:int"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetFormStateListResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetFormStateListResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetFormState">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="1" maxOccurs="1" name="FID" type="s:int"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetFormStateResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetFormStateResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetProjectStatus">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="1" maxOccurs="1" name="XMDM" type="s:int"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetProjectStatusResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetProjectStatusResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetSerialNumber">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="KindName" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetSerialNumberResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetSerialNumberResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetData">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetDataResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetDataResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetLastData">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetLastDataResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetLastDataResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetSum">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetSumResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetSumResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetDataOneToMore">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="keyName1" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="mkmc1" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="xpath1" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="keyName2" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="mkmc2" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="xpath2" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetDataOneToMoreResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetDataOneToMoreResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetDataBySql">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetDataBySqlResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetDataBySqlResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetDateUionBySQL">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="keyName" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="name1" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="condition1" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="searchResultNodes1" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="name2" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="condition2" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="searchResultNodes2" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetDateUionBySQLResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetDateUionBySQLResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetData_Mapping">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetData_MappingResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetData_MappingResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetData_MapTotal">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetData_MapTotalResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetData_MapTotalResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetData_MapExt">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Nodes" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetData_MapExtResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetData_MapExtResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="Filtration_Width_Different_Forms2">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="SourceKu" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath1" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="FilterKu" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath2" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="SourceNode" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="FilterNode" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="SourceNode2" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="FilterNode2" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="Filtration_Width_Different_Forms2Response">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Filtration_Width_Different_Forms2Result">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="Filtration_Width_Different_Forms">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="SourceKu" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath1" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="FilterKu" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath2" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="SourceNode" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="FilterNode" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="Filtration_Width_Different_FormsResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Filtration_Width_Different_FormsResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetSums">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="KuName1" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath1" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="KuName2" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath2" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="KuName3" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath3" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="KuName4" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath4" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="KuName5" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath5" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="KuName6" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath6" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="KuName7" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath7" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="KuName8" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath8" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="KuName9" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath9" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="KuName10" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath10" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="KuName11" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath11" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetSumsResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetSumsResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetCount">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetCountResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetCountResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetDataByOrder">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="OrderKind" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetDataByOrderResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetDataByOrderResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetDataByOrder1">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="OrderKind" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetDataByOrder1Response">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetDataByOrder1Result">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetDataPublicFun">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="GetDataPublicFunResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="GetDataPublicFunResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="UionQuery">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="SourceKu" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="JoinKu1" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath1" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="SourceNode1" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="JoinKu2" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath2" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="SourceNode2" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="JoinKu3" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath3" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="SourceNode3" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="JoinKu4" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath4" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="SourceNode4" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="JoinKu5" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath5" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="SourceNode5" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="JoinKu6" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath6" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="SourceNode6" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="JoinKu7" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath7" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="SourceNode7" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="JoinKu8" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath8" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="SourceNode8" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="JoinKu9" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="Xpath9" type="s:string"></s:element>
+				<s:element minOccurs="0" maxOccurs="1" name="SourceNode9" type="s:string"></s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+	<s:element name="UionQueryResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element minOccurs="0" maxOccurs="1" name="UionQueryResult">
+					<s:complexType mixed="true">
+						<s:sequence>
+							<s:any></s:any>
+						</s:sequence>
+					</s:complexType>
+				</s:element>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+</s:schema>

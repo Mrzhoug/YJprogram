@@ -1,0 +1,1663 @@
+GO
+/****** Object:  Table [dbo].[AdvancedSearchDropDownListSetting]    Script Date: 2014/1/6 14:41:38 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[AdvancedSearchDropDownListSetting](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[SearchSettingID] [int] NULL,
+	[SourceFormID] [int] NULL,
+	[SourceNodeName] [varchar](50) NULL,
+	[SourceNodeSelect] [varchar](100) NULL,
+	[SourceNodeParentName] [varchar](100) NULL,
+	[CustomSoruceText] [varchar](100) NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[AdvancedSearchSetting]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[AdvancedSearchSetting](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[MKDM] [int] NULL,
+	[searchTitle] [varchar](50) NULL,
+	[searchNode] [varchar](50) NULL,
+	[searchType] [varchar](50) NULL,
+	[conditionType] [varchar](50) NULL,
+	[orderby] [int] NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[AdvancedShowListSetting]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[AdvancedShowListSetting](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[MKDM] [int] NULL,
+	[conditionNode] [varchar](50) NULL,
+	[conditionType] [varchar](50) NULL,
+	[conditionSymbol] [varchar](50) NULL,
+	[conditionText] [varchar](50) NULL,
+	[numCount] [bit] NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[AnnexUpload]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[AnnexUpload](
+	[cid] [int] IDENTITY(1,1) NOT NULL,
+	[fid] [int] NULL,
+	[userid] [int] NULL,
+	[FileName] [varchar](100) NULL,
+	[FileSize] [varchar](50) NULL,
+	[filetype] [varchar](50) NULL,
+	[path] [varchar](100) NULL,
+	[uploadtime] [datetime] NULL,
+	[remarks] [varchar](50) NULL,
+	[isDel] [bit] NULL,
+	[delUserID] [int] NULL,
+	[delTime] [datetime] NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[AnnexUploadType]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[AnnexUploadType](
+	[cid] [int] IDENTITY(1,1) NOT NULL,
+	[mkdm] [int] NULL,
+	[typename] [varchar](50) NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[AutoCreateDataSource]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[AutoCreateDataSource](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[projectID] [int] NOT NULL,
+	[dataSourceMKDM] [int] NOT NULL,
+	[dataSourceType] [varchar](200) NOT NULL,
+	[dataSourceNode] [varchar](200) NOT NULL,
+ CONSTRAINT [PK_AutoCreateDataSource] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[AutoCreatePoject]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[AutoCreatePoject](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[MKDM] [int] NOT NULL,
+	[CreateTimeSpan] [varchar](200) NOT NULL,
+	[StartTime] [datetime] NOT NULL,
+	[IsFillingPastData] [bit] NULL,
+ CONSTRAINT [PK_AutoCreatePoject] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[DesktopMessage]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[DesktopMessage](
+	[DID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[YGDM] [numeric](18, 0) NULL,
+	[DTitle] [nvarchar](200) NULL,
+	[DDate] [datetime] NULL,
+	[Dkind] [nvarchar](50) NULL,
+	[DKID] [numeric](18, 0) NULL,
+	[Looked] [int] NULL,
+ CONSTRAINT [PK_DesktopMessage] PRIMARY KEY CLUSTERED 
+(
+	[DID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[EnterprisesTable]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[EnterprisesTable](
+	[Cid] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[UserName] [nvarchar](200) NULL,
+	[PassWord] [nvarchar](50) NULL,
+	[CompanyName] [nvarchar](300) NULL,
+	[EPCode] [nvarchar](50) NULL,
+	[Address] [nvarchar](500) NULL,
+	[Email] [nvarchar](200) NULL,
+	[Tel] [nvarchar](100) NULL,
+	[ZIP] [nvarchar](50) NULL,
+	[SSdq] [nvarchar](50) NULL,
+	[SHSSDQ] [varchar](50) NULL,
+	[Corporate] [nvarchar](100) NULL,
+	[CorporatreTel] [nvarchar](100) NULL,
+	[CompanyAbout] [nvarchar](500) NULL,
+	[JoinDate] [datetime] NULL,
+	[UseFlag] [int] NULL,
+	[Demo] [nvarchar](4000) NULL,
+	[Issue] [varchar](200) NULL,
+	[Answer] [varchar](100) NULL,
+ CONSTRAINT [PK_EnterprisesTable] PRIMARY KEY CLUSTERED 
+(
+	[Cid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[EP_Annex]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[EP_Annex](
+	[Uid] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[CompanyID] [numeric](18, 0) NULL,
+	[AnnexName] [nvarchar](50) NULL,
+	[AnnexPath] [nvarchar](500) NULL,
+	[UpTime] [datetime] NULL,
+ CONSTRAINT [PK_CompanyAnnex1] PRIMARY KEY CLUSTERED 
+(
+	[Uid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[EP_HomePageNews]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[EP_HomePageNews](
+	[CId] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[Title] [nvarchar](200) NULL,
+	[Content] [ntext] NULL,
+	[ImageUrl] [nvarchar](500) NULL,
+	[CheckNum] [numeric](18, 0) NULL,
+	[UpDate] [datetime] NULL,
+	[UserId] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_HomePageNews1] PRIMARY KEY CLUSTERED 
+(
+	[CId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[EP_HomePageNotice]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[EP_HomePageNotice](
+	[cid] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[Title] [nvarchar](200) NULL,
+	[Content] [ntext] NULL,
+	[UpTime] [datetime] NULL,
+	[CheckNum] [numeric](18, 0) NULL,
+	[UserId] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_HomePageNotice1] PRIMARY KEY CLUSTERED 
+(
+	[cid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[EP_HomePagePublicFun]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[EP_HomePagePublicFun](
+	[AID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[Fun_Id] [numeric](18, 0) NULL,
+	[Fun_Title] [nvarchar](100) NULL,
+	[Fun_Content] [ntext] NULL,
+	[Update1] [datetime] NULL,
+ CONSTRAINT [PK_HomePagePublicFun1] PRIMARY KEY CLUSTERED 
+(
+	[AID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[ErrLog]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ErrLog](
+	[Cid] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[UserName] [varchar](50) NULL,
+	[Path] [varchar](500) NULL,
+	[ErrMessage] [text] NULL,
+	[Dates] [datetime] NULL,
+	[meno] [varchar](500) NULL,
+	[Staute] [varchar](50) NULL,
+ CONSTRAINT [PK_ErrLog] PRIMARY KEY CLUSTERED 
+(
+	[Cid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[Form_Modify_Log]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Form_Modify_Log](
+	[CID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[UserName] [varchar](50) NULL,
+	[XMDM] [numeric](18, 0) NULL,
+	[XMMC] [varchar](50) NULL,
+	[FormName] [varchar](50) NULL,
+	[ModiTime] [datetime] NULL,
+ CONSTRAINT [PK_Form_Modify_Log] PRIMARY KEY CLUSTERED 
+(
+	[CID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[Form_Tags]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Form_Tags](
+	[FTID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[UserID] [numeric](18, 0) NULL,
+	[FID] [numeric](18, 0) NULL,
+	[TagID] [numeric](18, 0) NULL,
+	[dates] [datetime] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Form_Tags_List]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Form_Tags_List](
+	[TID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[UserID] [numeric](18, 0) NULL,
+	[LCDM] [numeric](18, 0) NULL,
+	[TagName] [varchar](50) NULL,
+	[dates] [datetime] NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[FormSearchData]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[FormSearchData](
+	[CID] [bigint] IDENTITY(1,1) NOT NULL,
+	[FormID] [int] NULL,
+	[XMDM] [int] NULL,
+	[MKDM] [int] NULL,
+	[FormData] [varchar](500) NULL,
+ CONSTRAINT [PK_FormSearchData] PRIMARY KEY CLUSTERED 
+(
+	[CID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[GY_DMZD]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[GY_DMZD](
+	[DMXH] [numeric](18, 0) NOT NULL,
+	[DMSB] [int] NULL,
+	[SSDM] [numeric](18, 0) NULL,
+	[DMMC] [varchar](40) NULL,
+ CONSTRAINT [PK_GY_DMZD] PRIMARY KEY CLUSTERED 
+(
+	[DMXH] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[GY_GROUP]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[GY_GROUP](
+	[GROUP_ID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[GROUP_NAME] [varchar](40) NULL,
+	[Group_Kind] [int] NULL,
+	[LcFlag] [bit] NULL,
+	[NoLcDM] [numeric](18, 0) NULL,
+	[LCDM] [numeric](18, 0) NULL,
+	[FormWriteFlag] [bit] NULL,
+	[OrderBy] [int] NULL,
+	[IsSysGroup] [int] NULL,
+	[IsSpGroup] [int] NULL,
+ CONSTRAINT [PK_GROUP] PRIMARY KEY CLUSTERED 
+(
+	[GROUP_ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[GY_GROUP_INFO]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[GY_GROUP_INFO](
+	[Cid] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[GROUP_ID] [numeric](18, 0) NOT NULL,
+	[MKDM] [numeric](18, 0) NOT NULL,
+	[ShowFunName] [varchar](50) NULL,
+	[OrderBy] [int] NULL,
+	[CanRead] [bit] NULL,
+	[CanWrite] [bit] NULL,
+	[CanModify] [bit] NULL,
+	[CanDelete] [bit] NULL,
+	[CanAll] [bit] NULL,
+	[CanListForm] [bit] NULL,
+	[CanShowItem] [bit] NULL,
+ CONSTRAINT [PK_GROUP_INFO] PRIMARY KEY CLUSTERED 
+(
+	[Cid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[GY_KSDM]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[GY_KSDM](
+	[KSDM] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[KSMC] [varchar](20) NULL,
+	[UPKS] [numeric](18, 0) NULL,
+	[BZ] [varchar](100) NULL,
+	[orderBy] [int] NULL,
+ CONSTRAINT [PK_GY_KSDM] PRIMARY KEY CLUSTERED 
+(
+	[KSDM] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[GY_LCDM]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[GY_LCDM](
+	[LCDM] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[LCMC] [varchar](50) NULL,
+	[LCSM] [varchar](200) NULL,
+	[Flag] [bit] NULL,
+	[PublicForm] [bit] NULL,
+	[PublicList] [bit] NULL,
+	[PublicArea] [varchar](100) NULL,
+ CONSTRAINT [PK_GY_LCDM] PRIMARY KEY CLUSTERED 
+(
+	[LCDM] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[GY_LCQX]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[GY_LCQX](
+	[Cid] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[YGDM] [numeric](18, 0) NULL,
+	[Group_Id] [numeric](18, 0) NULL,
+	[CanNew] [bit] NULL,
+	[WithMe] [bit] NULL,
+	[Finish] [bit] NULL,
+	[Finished] [bit] NULL,
+	[CanDel] [bit] NULL,
+ CONSTRAINT [PK_GY_LCQX] PRIMARY KEY CLUSTERED 
+(
+	[Cid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[GY_MKXX]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[GY_MKXX](
+	[MKDM] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[MKMC] [varchar](40) NULL,
+	[WLLJ] [varchar](150) NULL,
+	[XDLJ] [varchar](150) NULL,
+	[DisplayOrder] [int] NULL,
+	[RuleTime] [datetime] NULL,
+	[RuleFlag] [int] NULL,
+	[NoLcDM] [numeric](18, 0) NULL,
+	[XsnDir] [varchar](50) NULL,
+	[View] [varchar](50) NULL,
+	[List_QX_LCDM] [varchar](50) NULL,
+	[MapXpath] [varchar](200) NULL,
+	[IsWan] [int] NULL,
+	[IsStop] [int] NULL,
+	[buttonbar] [int] NULL,
+ CONSTRAINT [PK_GY_MKXX] PRIMARY KEY CLUSTERED 
+(
+	[MKDM] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[GY_UserInfo]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[GY_UserInfo](
+	[CID] [int] IDENTITY(1,1) NOT NULL,
+	[YGDM] [numeric](18, 0) NULL,
+	[CSNY] [datetime] NULL,
+	[SFZH] [varchar](40) NULL,
+	[YGXB] [char](2) NULL,
+	[KSDM] [varchar](6) NULL,
+	[YGZW] [int] NULL,
+	[YGZT] [int] NULL,
+ CONSTRAINT [PK_GY_UserInfo] PRIMARY KEY CLUSTERED 
+(
+	[CID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[GY_XMSP]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[GY_XMSP](
+	[CID] [numeric](18, 0) IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[XMDM] [numeric](18, 0) NULL,
+	[MKDM] [numeric](18, 0) NULL,
+	[YGDM] [numeric](18, 0) NULL,
+	[KSDM] [numeric](18, 0) NULL,
+	[SPNR] [varchar](200) NULL,
+	[SPYJ] [varchar](200) NULL,
+	[FQR] [varchar](20) NULL,
+	[FQKS] [numeric](18, 0) NULL,
+	[SPBZ] [int] NULL,
+	[ZFBZ] [int] NULL,
+	[FQtime] [datetime] NULL,
+	[ModifyFlag] [int] NULL,
+	[msgid] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_GY_XMSP] PRIMARY KEY CLUSTERED 
+(
+	[CID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[GY_XMSP_Over]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[GY_XMSP_Over](
+	[CID] [numeric](18, 0) IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[XMDM] [numeric](18, 0) NULL,
+	[MKDM] [numeric](18, 0) NULL,
+	[YGDM] [numeric](18, 0) NULL,
+	[KSDM] [numeric](18, 0) NULL,
+	[About] [nvarchar](1000) NULL,
+	[OverDate] [datetime] NULL,
+ CONSTRAINT [PK_GY_XMSP_Over] PRIMARY KEY CLUSTERED 
+(
+	[CID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Gy_XmXd]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Gy_XmXd](
+	[CID] [numeric](18, 0) IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[Fid] [numeric](18, 0) NULL,
+	[XMDM] [numeric](18, 0) NULL,
+	[YGDM] [numeric](18, 0) NULL,
+	[KSDM] [numeric](18, 0) NULL,
+	[XdText] [varchar](5000) NULL,
+	[FQR] [numeric](18, 0) NULL,
+	[FQKS] [numeric](18, 0) NULL,
+	[XdBZ] [int] NULL,
+	[MsgID] [numeric](18, 0) NULL,
+	[dotime] [datetime] NULL,
+	[RcTime] [datetime] NULL,
+	[msrepl_tran_version] [uniqueidentifier] NOT NULL,
+ CONSTRAINT [PK_Gy_XmXd] PRIMARY KEY CLUSTERED 
+(
+	[CID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[GY_XMXX]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[GY_XMXX](
+	[XMDM] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[XMMC] [varchar](50) NULL,
+	[XMSM] [varchar](200) NULL,
+	[XMLX] [varchar](50) NULL,
+	[LCDM] [numeric](18, 0) NULL,
+	[XMJD] [varchar](50) NULL,
+	[isDel] [int] NULL,
+ CONSTRAINT [PK_GY_XMXX] PRIMARY KEY CLUSTERED 
+(
+	[XMDM] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[GY_XMZT]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[GY_XMZT](
+	[XMZT] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[LCDM] [numeric](18, 0) NULL,
+	[ZTMC] [varchar](40) NULL,
+	[SJJT] [numeric](18, 0) NULL,
+	[GLBZ] [bit] NULL,
+	[AllShow] [bit] NULL,
+	[OrderBy] [int] NULL,
+ CONSTRAINT [PK_GY_XMZT] PRIMARY KEY CLUSTERED 
+(
+	[XMZT] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[GY_XTCS]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[GY_XTCS](
+	[CSXH] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[CSM] [varchar](200) NULL,
+	[CSZ] [varchar](200) NULL,
+	[BZ] [varchar](200) NULL,
+ CONSTRAINT [PK_GY_XTCS] PRIMARY KEY CLUSTERED 
+(
+	[CSXH] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[GY_YGDM]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[GY_YGDM](
+	[YGDM] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[YGXM] [varchar](50) NULL,
+	[DLMC] [varchar](20) NULL,
+	[DLPWD] [varchar](40) NULL,
+	[QYBZ] [int] NULL,
+	[SSKS] [numeric](18, 0) NULL,
+	[Notes] [varchar](200) NULL,
+	[Mobile] [varchar](50) NULL,
+	[Email] [varchar](300) NULL,
+	[IsOut] [int] NULL,
+ CONSTRAINT [PK_GY_YGDM] PRIMARY KEY CLUSTERED 
+(
+	[YGDM] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[GY_YGQX]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[GY_YGQX](
+	[YGDM] [numeric](18, 0) NOT NULL,
+	[GROUP_ID] [numeric](18, 0) NOT NULL,
+ CONSTRAINT [PK_GY_YGQX] PRIMARY KEY CLUSTERED 
+(
+	[YGDM] ASC,
+	[GROUP_ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[GY_ZTMX]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[GY_ZTMX](
+	[Cid] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[ShowName] [varchar](50) NULL,
+	[XMZT] [numeric](18, 0) NOT NULL,
+	[MKDM] [numeric](18, 0) NOT NULL,
+	[SPBZ] [int] NULL,
+	[TimeBZ] [int] NULL,
+	[RuleTime] [datetime] NULL,
+	[Outlc] [int] NULL,
+ CONSTRAINT [PK_GY_ZTMX] PRIMARY KEY CLUSTERED 
+(
+	[Cid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[ImeSetting]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ImeSetting](
+	[Cid] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[KuName] [nvarchar](200) NULL,
+	[NodeName] [nvarchar](200) NULL,
+	[AddTime] [datetime] NULL,
+ CONSTRAINT [PK_ImeSetting] PRIMARY KEY CLUSTERED 
+(
+	[Cid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[MapConfig]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[MapConfig](
+	[AID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[MKDM] [numeric](18, 0) NOT NULL,
+	[MapExtName] [nvarchar](200) NOT NULL,
+	[dates] [datetime] NOT NULL,
+	[IsTotal] [int] NULL,
+ CONSTRAINT [PK_MapConfig] PRIMARY KEY CLUSTERED 
+(
+	[AID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Memorandum]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Memorandum](
+	[Cid] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[UserID] [numeric](18, 0) NULL,
+	[Content] [text] NULL,
+ CONSTRAINT [PK_Memorandum] PRIMARY KEY CLUSTERED 
+(
+	[Cid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[MessageAttachment]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[MessageAttachment](
+	[Cid] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[msgid] [numeric](18, 0) NULL,
+	[filepath] [nvarchar](500) NULL,
+	[times] [datetime] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[NodePermList]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[NodePermList](
+	[AID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[GROUP_ID] [numeric](18, 0) NULL,
+	[MKDM] [numeric](18, 0) NULL,
+	[NodeName] [nvarchar](150) NULL,
+	[AddTime] [datetime] NULL,
+ CONSTRAINT [PK_NodePermList] PRIMARY KEY CLUSTERED 
+(
+	[AID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[NoticeSetting]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[NoticeSetting](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[formID] [int] NULL,
+	[nodeName] [varchar](50) NULL,
+	[noticeType] [varchar](50) NULL,
+	[symbol] [varchar](50) NULL,
+	[condition] [varchar](50) NULL,
+	[msgcontent] [varchar](50) NULL,
+	[toUserList] [varchar](100) NULL,
+	[enabled] [bit] NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[Online_User]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Online_User](
+	[CID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[SessionID] [varchar](50) NULL,
+	[UserID] [numeric](18, 0) NULL,
+	[YZM] [varchar](50) NULL,
+	[Date1] [datetime] NULL,
+ CONSTRAINT [PK_Online_User] PRIMARY KEY CLUSTERED 
+(
+	[CID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[Op_History]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Op_History](
+	[AID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[UserID] [numeric](18, 0) NULL,
+	[OpContent] [varchar](5000) NULL,
+	[OpIP] [varchar](50) NULL,
+	[OpDate] [datetime] NULL,
+ CONSTRAINT [PK_Op_History] PRIMARY KEY CLUSTERED 
+(
+	[AID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[Order_Form_Log]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Order_Form_Log](
+	[CID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[UserID] [numeric](18, 0) NULL,
+	[LCDM] [numeric](18, 0) NULL,
+	[XMDM] [numeric](18, 0) NULL,
+	[MKDM] [numeric](18, 0) NULL,
+	[OpDate] [datetime] NULL,
+	[OpUserID] [numeric](18, 0) NULL,
+	[LookFlag] [char](10) NULL,
+	[msgid] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_Order_Form_Log] PRIMARY KEY CLUSTERED 
+(
+	[CID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[Order_Form_Table]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Order_Form_Table](
+	[CID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[UserID] [numeric](18, 0) NULL,
+	[LCDM] [numeric](18, 0) NULL,
+	[LCFlag] [int] NULL,
+	[XMDM] [numeric](18, 0) NULL,
+	[MKDM] [numeric](18, 0) NULL,
+	[OrderDate] [datetime] NULL,
+	[OrderFlag] [int] NULL,
+ CONSTRAINT [PK_Order_Form_Table] PRIMARY KEY CLUSTERED 
+(
+	[CID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[process]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[process](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[processName] [varchar](100) NULL,
+	[processForm] [varchar](100) NULL,
+	[enabled] [bit] NULL,
+ CONSTRAINT [PK_processList] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[processCondition]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[processCondition](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[StatusID] [int] NOT NULL,
+	[nextStatusID] [int] NULL,
+	[toUserList] [varchar](100) NULL,
+	[sendContent] [varchar](100) NULL,
+	[attentionNode] [varchar](50) NULL,
+	[Order] [int] NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[processHistory]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[processHistory](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[fid] [int] NULL,
+	[currentProcess] [varchar](50) NULL,
+	[nextProcess] [varchar](50) NULL,
+	[fromUserName] [varchar](50) NULL,
+	[toUserName] [varchar](100) NULL,
+	[sendMessageContent] [varchar](100) NULL,
+	[sendTime] [datetime] NULL,
+	[remark] [varchar](100) NULL,
+	[attentionNodeValue] [varchar](100) NULL,
+	[isOver] [bit] NOT NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[processRule]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[processRule](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[conditionID] [int] NOT NULL,
+	[NodeName] [varchar](50) NULL,
+	[symbol] [varchar](10) NULL,
+	[ruleContent] [varchar](50) NULL,
+	[order] [int] NOT NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[processStatus]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[processStatus](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[processID] [int] NOT NULL,
+	[statusName] [varchar](50) NULL,
+	[Order] [int] NULL,
+ CONSTRAINT [PK_processStatusList] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[Public_Config]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Public_Config](
+	[LID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[LCDM] [numeric](18, 0) NULL,
+	[MKDM] [numeric](18, 0) NULL,
+	[PublicList] [bit] NULL,
+	[PublicForm] [bit] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[PublicMessage]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[PublicMessage](
+	[Cid] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[UserID] [numeric](18, 0) NULL,
+	[Title] [varchar](200) NULL,
+	[Content] [varchar](2000) NULL,
+	[Pdate] [datetime] NULL,
+ CONSTRAINT [PK_PublicMessage] PRIMARY KEY CLUSTERED 
+(
+	[Cid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[PublicMessageLookLog]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[PublicMessageLookLog](
+	[Cid] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[UserID] [numeric](18, 0) NULL,
+	[MessageId] [numeric](18, 0) NULL,
+	[LookDate] [datetime] NULL,
+ CONSTRAINT [PK_PublicMessageLookLog] PRIMARY KEY CLUSTERED 
+(
+	[Cid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[RegisterCompanyInfo]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[RegisterCompanyInfo](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[UserLoginName] [varchar](50) NULL,
+	[Password] [varchar](50) NULL,
+	[RegisterTime] [datetime] NULL,
+	[Fid] [int] NULL,
+	[IsEnable] [bit] NULL,
+	[IsDel] [bit] NOT NULL,
+	[CompanyName] [varchar](100) NULL,
+	[CompanyNo] [varchar](100) NULL,
+	[CompanyCreateTime] [varchar](100) NULL,
+	[CompanyOwner] [varchar](100) NULL,
+	[IsFinishRegister] [bit] NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[RegisterUserInfo]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[RegisterUserInfo](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[UserName] [varchar](50) NULL,
+	[Password] [varchar](50) NULL,
+	[CompanyName] [varchar](100) NULL,
+	[CompanyNo] [varchar](100) NULL,
+	[CompanyCreateTime] [varchar](50) NULL,
+	[CompanyOwner] [varchar](100) NULL,
+	[CompanyOwnerTel] [varchar](100) NULL,
+	[CompanyContacts] [varchar](100) NULL,
+	[CompanyContactsTel] [varchar](100) NULL,
+	[CompanyAddress] [varchar](100) NULL,
+	[CompanyType] [varchar](100) NULL,
+	[CompanyMoney] [varchar](100) NULL,
+	[PeopleNum] [int] NULL,
+	[PeopleNum1] [int] NULL,
+	[PeopleNum2] [int] NULL,
+	[PeopleNum3] [int] NULL,
+	[ImgUrl] [varchar](100) NULL,
+	[RegisterTime] [datetime] NULL,
+	[IsEnable] [bit] NULL,
+	[IsDel] [bit] NULL
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[ReportsList_LCDM]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ReportsList_LCDM](
+	[ID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[LCDM] [numeric](18, 0) NULL,
+	[ShowName] [nvarchar](50) NULL,
+	[NodeName] [nvarchar](100) NULL,
+	[MaxLength] [int] NULL,
+ CONSTRAINT [PK_ReportsList_LCDM] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[SendMessage]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[SendMessage](
+	[Cid] [numeric](18, 0) IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[FromID] [numeric](18, 0) NULL,
+	[FromKSDM] [numeric](18, 0) NULL,
+	[Title] [varchar](500) NULL,
+	[Content] [varchar](5000) NULL,
+	[ToID] [numeric](18, 0) NULL,
+	[ToIDList] [varchar](500) NULL,
+	[ToKSDM] [numeric](18, 0) NULL,
+	[UpID] [numeric](18, 0) NULL,
+	[SendDate] [datetime] NULL,
+	[LookFlag] [int] NULL,
+	[IsDel] [int] NULL,
+	[Msgkind] [int] NULL,
+	[msrepl_tran_version] [uniqueidentifier] NOT NULL,
+	[BZ] [ntext] NULL,
+	[Isgroup] [bit] NULL,
+	[IsNotice] [bit] NOT NULL,
+ CONSTRAINT [PK_SendMessage] PRIMARY KEY CLUSTERED 
+(
+	[Cid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[Serial_Kind]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Serial_Kind](
+	[KindID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[KindName] [varchar](200) NULL,
+	[KindAbout] [varchar](500) NULL,
+	[TopNo] [nvarchar](20) NULL,
+	[ButtonNo] [nvarchar](20) NULL,
+	[StartNO] [numeric](18, 0) NULL,
+	[DateFlag] [bit] NULL,
+	[AddDate] [datetime] NULL,
+ CONSTRAINT [PK_Serical_Kind] PRIMARY KEY CLUSTERED 
+(
+	[KindID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[Serial_Number]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Serial_Number](
+	[AutoID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[CenterNO] [numeric](18, 0) NULL,
+	[KindID] [numeric](18, 0) NULL,
+	[AddDate] [datetime] NULL,
+ CONSTRAINT [PK_Serial_Number] PRIMARY KEY CLUSTERED 
+(
+	[AutoID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[ShareFile]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ShareFile](
+	[id] [decimal](18, 0) IDENTITY(1,1) NOT NULL,
+	[GiveUserId] [varchar](100) NULL,
+	[GetUserId] [varchar](1000) NULL,
+	[FilePath] [varchar](200) NULL,
+	[ShareTime] [datetime] NULL,
+	[ShareAbout] [varchar](1000) NULL,
+ CONSTRAINT [PK_ShareFile] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[ShowList_LCDM]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ShowList_LCDM](
+	[ID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[LCDM] [numeric](18, 0) NULL,
+	[FormName] [varchar](100) NULL,
+	[ShowName] [nvarchar](50) NULL,
+	[NodeName] [nvarchar](100) NULL,
+ CONSTRAINT [PK_ShowList_LCDM] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[SynSubmit]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[SynSubmit](
+	[AID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[FID] [numeric](18, 0) NULL,
+	[Ftype] [nvarchar](50) NULL,
+	[AddTime] [datetime] NULL,
+	[SynTime] [datetime] NULL,
+	[SynResult] [varchar](100) NULL,
+	[IsSyn] [int] NULL,
+	[SynNum] [int] NULL,
+ CONSTRAINT [PK_SynSubmit] PRIMARY KEY CLUSTERED 
+(
+	[AID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[TelephoneCall]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[TelephoneCall](
+	[CID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[UserID] [numeric](18, 0) NULL,
+	[Tel] [varchar](50) NULL,
+	[FID] [numeric](18, 0) NULL,
+	[Dates] [datetime] NULL,
+	[Looked] [int] NULL,
+ CONSTRAINT [PK_TelephoneCall] PRIMARY KEY CLUSTERED 
+(
+	[CID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[TelephoneConfig]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TelephoneConfig](
+	[Cid] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[TelNum] [nvarchar](50) NULL,
+	[UserID] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_TelephoneConfig] PRIMARY KEY CLUSTERED 
+(
+	[Cid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[User_Login_Log]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[User_Login_Log](
+	[Aid] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[LoginName] [nvarchar](100) NULL,
+	[LoginIP] [nvarchar](50) NULL,
+	[LoginTime] [datetime] NULL
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[WebInfoPath_MenuConfig]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[WebInfoPath_MenuConfig](
+	[AID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[MKDM] [numeric](18, 0) NULL,
+	[Config1] [bit] NULL,
+	[Config2] [bit] NULL,
+	[Config3] [bit] NULL,
+	[Config4] [bit] NULL,
+	[Config5] [bit] NULL,
+	[Config6] [bit] NULL,
+	[Config7] [bit] NULL,
+	[Config8] [bit] NULL,
+	[Config9] [bit] NULL,
+ CONSTRAINT [PK_WebInfoPath_MenuConfig] PRIMARY KEY CLUSTERED 
+(
+	[AID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Xconfig]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Xconfig](
+	[CID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[UserID] [numeric](18, 0) NULL,
+	[Config] [varchar](50) NULL,
+	[value] [varchar](50) NULL,
+	[LCDM] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_Xconfig] PRIMARY KEY CLUSTERED 
+(
+	[CID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[XX_XMJC]    Script Date: 2014/1/6 14:41:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[XX_XMJC](
+	[FID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[XMDM] [numeric](18, 0) NOT NULL,
+	[XMZT] [numeric](18, 0) NULL,
+	[MKDM] [numeric](18, 0) NULL,
+	[WCSJ] [datetime] NULL,
+	[WCBZ] [int] NULL,
+	[SPBZ] [int] NULL,
+	[TimeBz] [int] NULL,
+	[RuleTime] [datetime] NULL,
+	[TopNum] [numeric](18, 0) NULL,
+	[Lock] [int] NULL,
+	[State] [int] NULL,
+ CONSTRAINT [PK_XX_XMJC] PRIMARY KEY CLUSTERED 
+(
+	[FID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+ALTER TABLE [dbo].[DesktopMessage] ADD  CONSTRAINT [DF_DesktopMessage_DDate]  DEFAULT (getdate()) FOR [DDate]
+GO
+ALTER TABLE [dbo].[DesktopMessage] ADD  CONSTRAINT [DF_DesktopMessage_Looked]  DEFAULT ((0)) FOR [Looked]
+GO
+ALTER TABLE [dbo].[EP_Annex] ADD  CONSTRAINT [DF_CompanyAnnex_UpTime1]  DEFAULT (getdate()) FOR [UpTime]
+GO
+ALTER TABLE [dbo].[Form_Tags] ADD  CONSTRAINT [DF_Form_Tags_dates]  DEFAULT (getdate()) FOR [dates]
+GO
+ALTER TABLE [dbo].[Form_Tags_List] ADD  CONSTRAINT [DF_Form_Tags_List_dates]  DEFAULT (getdate()) FOR [dates]
+GO
+ALTER TABLE [dbo].[GY_GROUP] ADD  CONSTRAINT [DF_GY_GROUP_LcFlag]  DEFAULT ((0)) FOR [LcFlag]
+GO
+ALTER TABLE [dbo].[GY_GROUP_INFO] ADD  CONSTRAINT [DF_GY_GROUP_INFO_CanRead]  DEFAULT ((-1)) FOR [CanRead]
+GO
+ALTER TABLE [dbo].[GY_GROUP_INFO] ADD  CONSTRAINT [DF_GY_GROUP_INFO_CanWrite]  DEFAULT ((-1)) FOR [CanWrite]
+GO
+ALTER TABLE [dbo].[GY_GROUP_INFO] ADD  CONSTRAINT [DF_GY_GROUP_INFO_CanModify]  DEFAULT ((-1)) FOR [CanModify]
+GO
+ALTER TABLE [dbo].[GY_GROUP_INFO] ADD  CONSTRAINT [DF_GY_GROUP_INFO_CanDelete]  DEFAULT ((-1)) FOR [CanDelete]
+GO
+ALTER TABLE [dbo].[GY_GROUP_INFO] ADD  CONSTRAINT [DF_GY_GROUP_INFO_CanAll]  DEFAULT ((-1)) FOR [CanAll]
+GO
+ALTER TABLE [dbo].[GY_GROUP_INFO] ADD  CONSTRAINT [DF_GY_GROUP_INFO_CanListForm]  DEFAULT ((-1)) FOR [CanListForm]
+GO
+ALTER TABLE [dbo].[GY_GROUP_INFO] ADD  CONSTRAINT [DF_GY_GROUP_INFO_CanShowItem]  DEFAULT ((-1)) FOR [CanShowItem]
+GO
+ALTER TABLE [dbo].[GY_LCDM] ADD  CONSTRAINT [DF_GY_LCDM_Flag]  DEFAULT ((0)) FOR [Flag]
+GO
+ALTER TABLE [dbo].[GY_LCDM] ADD  CONSTRAINT [DF_GY_LCDM_PublicForm]  DEFAULT ((0)) FOR [PublicForm]
+GO
+ALTER TABLE [dbo].[GY_LCDM] ADD  CONSTRAINT [DF_GY_LCDM_PublicList]  DEFAULT ((0)) FOR [PublicList]
+GO
+ALTER TABLE [dbo].[GY_MKXX] ADD  CONSTRAINT [DF_GY_MKXX_IsWan]  DEFAULT ((0)) FOR [IsWan]
+GO
+ALTER TABLE [dbo].[GY_MKXX] ADD  CONSTRAINT [DF_GY_MKXX_IsStop]  DEFAULT ((0)) FOR [IsStop]
+GO
+ALTER TABLE [dbo].[GY_XMSP] ADD  CONSTRAINT [DF_GY_XMSP_FQtime]  DEFAULT (getdate()) FOR [FQtime]
+GO
+ALTER TABLE [dbo].[GY_XMSP] ADD  CONSTRAINT [DF_GY_XMSP_ModifyFlag]  DEFAULT ((0)) FOR [ModifyFlag]
+GO
+ALTER TABLE [dbo].[Gy_XmXd] ADD  CONSTRAINT [MSrepl_tran_version_default_953C24EC_534D_4AD7_A0A1_3A2CFE5A3334_171147655]  DEFAULT (newid()) FOR [msrepl_tran_version]
+GO
+ALTER TABLE [dbo].[GY_YGDM] ADD  CONSTRAINT [DF_GY_YGDM_IsOut]  DEFAULT ((0)) FOR [IsOut]
+GO
+ALTER TABLE [dbo].[GY_ZTMX] ADD  CONSTRAINT [DF_GY_ZTMX_SPBZ]  DEFAULT ((0)) FOR [SPBZ]
+GO
+ALTER TABLE [dbo].[GY_ZTMX] ADD  CONSTRAINT [DF_GY_ZTMX_TimeBZ]  DEFAULT ((0)) FOR [TimeBZ]
+GO
+ALTER TABLE [dbo].[GY_ZTMX] ADD  CONSTRAINT [DF_GY_ZTMX_Outlc]  DEFAULT ((0)) FOR [Outlc]
+GO
+ALTER TABLE [dbo].[ImeSetting] ADD  CONSTRAINT [DF_ImeSetting_AddTime]  DEFAULT (getdate()) FOR [AddTime]
+GO
+ALTER TABLE [dbo].[MapConfig] ADD  CONSTRAINT [DF_MapConfig_dates]  DEFAULT (getdate()) FOR [dates]
+GO
+ALTER TABLE [dbo].[MapConfig] ADD  CONSTRAINT [DF_MapConfig_IsTotal]  DEFAULT ((0)) FOR [IsTotal]
+GO
+ALTER TABLE [dbo].[MessageAttachment] ADD  CONSTRAINT [DF_MessageAttachment_times]  DEFAULT (getdate()) FOR [times]
+GO
+ALTER TABLE [dbo].[NodePermList] ADD  CONSTRAINT [DF_NodePermList_AddTime]  DEFAULT (getdate()) FOR [AddTime]
+GO
+ALTER TABLE [dbo].[Op_History] ADD  CONSTRAINT [DF_Op_History_OpDate]  DEFAULT (getdate()) FOR [OpDate]
+GO
+ALTER TABLE [dbo].[processHistory] ADD  CONSTRAINT [DF_processHistory_isOver]  DEFAULT ((0)) FOR [isOver]
+GO
+ALTER TABLE [dbo].[RegisterCompanyInfo] ADD  CONSTRAINT [DF_RegisterCompanyInfo_isEnable]  DEFAULT ((0)) FOR [IsEnable]
+GO
+ALTER TABLE [dbo].[RegisterCompanyInfo] ADD  CONSTRAINT [DF_RegisterCompanyInfo_isDel]  DEFAULT ((0)) FOR [IsDel]
+GO
+ALTER TABLE [dbo].[RegisterUserInfo] ADD  CONSTRAINT [DF_RegisterUserInfo_RegisterTime]  DEFAULT (getdate()) FOR [RegisterTime]
+GO
+ALTER TABLE [dbo].[RegisterUserInfo] ADD  CONSTRAINT [DF_RegisterUserInfo_IsEnable]  DEFAULT ((0)) FOR [IsEnable]
+GO
+ALTER TABLE [dbo].[RegisterUserInfo] ADD  CONSTRAINT [DF_RegisterUserInfo_IsDel]  DEFAULT ((0)) FOR [IsDel]
+GO
+ALTER TABLE [dbo].[ReportsList_LCDM] ADD  CONSTRAINT [DF_ReportsList_LCDM_MaxLength]  DEFAULT ((0)) FOR [MaxLength]
+GO
+ALTER TABLE [dbo].[SendMessage] ADD  CONSTRAINT [DF_SendMessage_LookFlag]  DEFAULT ((0)) FOR [LookFlag]
+GO
+ALTER TABLE [dbo].[SendMessage] ADD  CONSTRAINT [DF_SendMessage_IsDel]  DEFAULT ((0)) FOR [IsDel]
+GO
+ALTER TABLE [dbo].[SendMessage] ADD  CONSTRAINT [MSrepl_tran_version_default_C01ACF40_06C0_4B96_B75B_B48741951B11_587149137]  DEFAULT (newid()) FOR [msrepl_tran_version]
+GO
+ALTER TABLE [dbo].[SendMessage] ADD  CONSTRAINT [DF_SendMessage_Isgrout]  DEFAULT ((0)) FOR [Isgroup]
+GO
+ALTER TABLE [dbo].[SendMessage] ADD  CONSTRAINT [DF_SendMessage_IsNotice]  DEFAULT ((0)) FOR [IsNotice]
+GO
+ALTER TABLE [dbo].[Serial_Kind] ADD  CONSTRAINT [DF_Serial_Kind_AddDate]  DEFAULT (getdate()) FOR [AddDate]
+GO
+ALTER TABLE [dbo].[Serial_Number] ADD  CONSTRAINT [DF_Serial_Number_AddDate]  DEFAULT (getdate()) FOR [AddDate]
+GO
+ALTER TABLE [dbo].[SynSubmit] ADD  CONSTRAINT [DF_SynSubmit_AddTime]  DEFAULT (getdate()) FOR [AddTime]
+GO
+ALTER TABLE [dbo].[SynSubmit] ADD  CONSTRAINT [DF_SynSubmit_IsSyn]  DEFAULT ((0)) FOR [IsSyn]
+GO
+ALTER TABLE [dbo].[SynSubmit] ADD  CONSTRAINT [DF_SynSubmit_SynNum]  DEFAULT ((0)) FOR [SynNum]
+GO
+ALTER TABLE [dbo].[TelephoneCall] ADD  CONSTRAINT [DF_TelephoneCall_FID]  DEFAULT ((0)) FOR [FID]
+GO
+ALTER TABLE [dbo].[TelephoneCall] ADD  CONSTRAINT [DF_TelephoneCall_Dates]  DEFAULT (getdate()) FOR [Dates]
+GO
+ALTER TABLE [dbo].[TelephoneCall] ADD  CONSTRAINT [DF_TelephoneCall_Looked]  DEFAULT ((0)) FOR [Looked]
+GO
+ALTER TABLE [dbo].[User_Login_Log] ADD  CONSTRAINT [DF_User_Login_Log_LoginTime]  DEFAULT (getdate()) FOR [LoginTime]
+GO
+ALTER TABLE [dbo].[XX_XMJC] ADD  CONSTRAINT [DF_XX_XMJC_SPBZ]  DEFAULT ((0)) FOR [SPBZ]
+GO
+ALTER TABLE [dbo].[XX_XMJC] ADD  CONSTRAINT [DF_XX_XMJC_Lock]  DEFAULT ((0)) FOR [Lock]
+GO
+ALTER TABLE [dbo].[processStatus]  WITH CHECK ADD  CONSTRAINT [FK_processStatusList_processList] FOREIGN KEY([processID])
+REFERENCES [dbo].[process] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[processStatus] CHECK CONSTRAINT [FK_processStatusList_processList]
+GO
+
+
+
+ SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+SET ANSI_PADDING ON
+GO
+
+CREATE TABLE [dbo].[MapConfig_link](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[mkdm] [int] NULL,
+	[lcdm_link] [int] NULL,
+	[showname] [varchar](50) NULL,
+	[ColumnName] [varchar](50) NULL,
+	[IsTotal] [int] NULL
+) ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO
+
+ALTER TABLE [dbo].[MapConfig_link] ADD  CONSTRAINT [DF_MapConfig_link_IsTotal]  DEFAULT ((0)) FOR [IsTotal]
+GO
+
+/****** Object:  Table [dbo].[homepage]    Script Date: 09/22/2014 10:56:16 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+SET ANSI_PADDING ON
+GO
+
+CREATE TABLE [dbo].[homepage](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[mkdm] [int] NULL,
+	[mktype] [int] NULL,
+	[mkmc] [varchar](50) NULL,
+	[url] [varchar](300) NULL
+) ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO
+
+  

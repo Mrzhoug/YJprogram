@@ -1,0 +1,121 @@
+﻿Imports Microsoft.VisualBasic
+''' <summary>
+''' 实体类：用户权限
+''' </summary>
+''' <remarks></remarks>
+Public Class MRights
+
+    Private _UserID As Integer
+    ''' <summary>
+    ''' 用户ID
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property UserID() As Integer
+        Get
+            Return _UserID
+        End Get
+        Set(ByVal value As Integer)
+            _UserID = value
+        End Set
+    End Property
+
+    Private _MKDM As Integer
+    ''' <summary>
+    ''' 模块代码
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property MKDM() As Integer
+        Get
+            Return _MKDM
+        End Get
+        Set(ByVal value As Integer)
+            _MKDM = value
+        End Set
+    End Property
+
+    Private _CanRead As Boolean = False
+    ''' <summary>
+    ''' 可读
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property CanRead() As Boolean
+        Get
+            Return _CanRead
+        End Get
+        Set(ByVal value As Boolean)
+            _CanRead = value
+        End Set
+    End Property
+
+    Private _CanWrite As Boolean = False
+    ''' <summary>
+    ''' 可写
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property CanWrite() As Boolean
+        Get
+            Return _CanWrite
+        End Get
+        Set(ByVal value As Boolean)
+            _CanWrite = value
+        End Set
+    End Property
+
+    Private _CanModify As Boolean = False
+    ''' <summary>
+    ''' 可修改
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property CanModify() As String
+        Get
+            Return _CanModify
+        End Get
+        Set(ByVal value As String)
+            _CanModify = value
+        End Set
+    End Property
+
+    Private _CanDelete As Boolean = False
+    ''' <summary>
+    ''' 可删除
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property CanDelete() As Boolean
+        Get
+            Return _CanDelete
+        End Get
+        Set(ByVal value As Boolean)
+            _CanDelete = value
+        End Set
+    End Property
+
+    Private _CanListForm As Boolean = False
+    ''' <summary>
+    ''' 可现实所有列表
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property CanListForm() As Boolean
+        Get
+            Return _CanListForm
+        End Get
+        Set(ByVal value As Boolean)
+            _CanListForm = value
+        End Set
+    End Property
+
+
+End Class

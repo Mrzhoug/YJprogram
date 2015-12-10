@@ -1,0 +1,67 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="CreateFolder.aspx.vb" Inherits="manager_FileManager_CreateFolder" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>创建文件夹</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet" />
+    <script type="text/javascript" src="../../Pub/function.js"></script>
+    <script type="text/javascript" src="../../Pub/jquery-1.8.0.js"></script>
+    <script type="text/javascript">
+        function confirmInfo() {
+            var folderName = $("#tb_folderName");
+            if (folderName.val() == "") {
+                alert("请输入文件夹名称！");
+                folderName.focus();
+                return false;
+            }
+            var isPublicFolder = "<%=isPublicFolder %>";
+            if (isPublicFolder=="True") {
+                alert("检测到所建文件夹在公共文件夹下，系统将自动套用上级文件夹权限！")
+            }
+
+        }
+        function resetInfo() {
+            $("#tb_folderName").val("");
+            return false;
+        }
+
+        function close() {
+            parent.$.fn.colorbox.close();
+        }
+    </script>
+</head>
+<body>
+    <center>
+        <form id="form1" runat="server" style="width: 350px">
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);"><span>
+                    创建文件夹</span></a></li>
+            </ul>
+        </div>
+        <div class="main" style="border: none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            文件夹名称：
+                        </th>
+                        <td align="left" width="65%">
+                            <asp:TextBox ID="tb_folderName" runat="server"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" colspan="2">
+                            <asp:Button ID="Button1" runat="server" Text="确定" CssClass="btnsubmit" OnClientClick="return confirmInfo();"/>&nbsp;
+                            <asp:Button ID="Button2" runat="server" Text="重置" CssClass="btnsubmit" OnClientClick="return resetInfo();" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        </form>
+    </center>
+</body>
+</html>

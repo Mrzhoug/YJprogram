@@ -1,0 +1,217 @@
+﻿
+Partial Class manager_YGDM_Default
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim MaxPage As Integer
+    Dim pageindex As Integer
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim AdminID As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+        Base.Checking()        '这里对文件进行权限限制
+        '得到用户信息
+
+        AdminID = Base.GetUserID("admin")
+
+        Try
+            pageindex = Request("page")
+        Catch ex As Exception
+            pageindex = 0
+        End Try
+
+        Dim SearchStr As String = TextBox1.Text.Trim
+        Dim sqlstr As String
+        sqlstr = "SELECT distinct [YGDM], [YGXM], [DLMC], [QYBZ], SSKS,Notes,mobile,IsOut FROM GY_YGDM where 1 = 1"
+
+        If SearchStr.Length > 0 Then
+            sqlstr = sqlstr & " and (YGXM like '%" & SearchStr & "%' or DLMC like '%" & SearchStr & "%')"
+        End If
+        If DropDownList1.SelectedValue <> "0" Then
+            sqlstr = sqlstr & " and  ssks='" & DropDownList1.SelectedValue & "'"
+        End If
+
+        Conn.SelectCommand = sqlstr
+
+        If Not IsPostBack Then
+            Dim dt As New DataTable
+            dt = Base.DB.Table("select KSDM,KSMC from GY_KSDM", "dd")
+            If dt.Rows.Count <> 0 Then
+                Dim i As Integer = 0
+                For i = 0 To dt.Rows.Count - 1
+                    DropDownList1.Items.Add(New ListItem(dt.Rows(i)(1).ToString(), dt.Rows(i)(0).ToString()))
+                Next
+            End If
+        End If
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+        GridView1.SelectedIndex = -1
+    End Sub
+
+    Protected Sub GridView1_RowUpdating(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewUpdateEventArgs) Handles GridView1.RowUpdating
+    End Sub
+
+    Protected Sub GridView1_RowDeleting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs) Handles GridView1.RowDeleting
+    End Sub
+
+
+    Protected Sub GridView1_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs) Handles GridView1.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            '鼠标效果
+            e.Row.Attributes.Add("onmouseover", "OnMouseOver(this)")
+            e.Row.Attributes.Add("onmouseout", "OnMouseOut(this)")
+            e.Row.Attributes("style") = "Cursor:hand"
+        End If
+
+        '------------------------------------------------------
+        '只为得到总记录数
+        Dim GV As New GridView
+        GV.DataSource = Conn
+        GV.DataBind()
+        MaxPage = GV.Rows.Count
+        PageBar.InnerHtml = Base.pub.WritePage(GridView1, MaxPage)
+        '-------------------------------------------------------
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        GridView1.DataBind()
+    End Sub
+
+
+    Protected Sub GridView1_DataBound1(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        If pageindex <= GridView1.PageCount And pageindex > 0 Then GridView1.PageIndex = pageindex
+        Dim KSDM As Integer = 0
+        Dim KSMC As String = String.Empty
+        Dim YGDM As Integer
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            YGDM = GridView1.DataKeys(i).Item(0)
+            If IsDBNull(GridView1.DataKeys(i).Item(1)) = True Then
+                KSDM = -1
+            Else
+                KSDM = GridView1.DataKeys(i).Item(1)
+            End If
+            KSMC = Base.DB.ExeScalar("select KSMC from GY_KSDM where KSDM=" & KSDM)
+            If KSMC Is Nothing Then
+                GridView1.Rows(i).Cells(4).Text = "<center><a href='javascript:void(0)' onclick=""window.open('UserKS.aspx?UserID=" & GridView1.DataKeys(i).Item(0) & "','分配科室','height=500, width=350, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')"">分配科室</a></center>"
+            Else
+                GridView1.Rows(i).Cells(4).Text = "<center><a href='javascript:void(0)' onclick=""window.open('UserKS.aspx?UserID=" & GridView1.DataKeys(i).Item(0) & "','分配科室','height=500, width=350, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')"">" & KSMC & "</a></center>"
+            End If
+
+            If GridView1.DataKeys(i).Item(3) = 1 Then
+                CType(GridView1.Rows(i).Cells(2).Controls(1), Label).Text = "<img src='../../images/user.gif'>" & CType(GridView1.Rows(i).Cells(2).Controls(1), Label).Text
+            Else
+                CType(GridView1.Rows(i).Cells(2).Controls(1), Label).Text = "<img src='../../images/nouser.gif'>" & CType(GridView1.Rows(i).Cells(2).Controls(1), Label).Text
+            End If
+
+            If Base.pub.GetWebConfig("SunfunSoft.Xman.ADUserAuthentication").ToLower = "true" Then
+                Try
+                    Dim NetCmd As New netcommand.net
+                    Dim NetResult As String
+                    NetResult = NetCmd.Cmd
+                    NetResult = NetCmd.FindUser(GridView1.DataKeys(i).Item(2).ToString.Trim)
+                    If NetResult.IndexOf("命令成功完成") > 0 Then
+                        GridView1.Rows(i).Cells(6).Text = "<a href='javascript:void(0)' onclick=""window.open('ModiPassWord.aspx?Page=" & GridView1.PageIndex & "&UserID=" & GridView1.DataKeys(i).Item(0) & "','修改','height=250, width=400, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')"">修改密码</a>"
+                    Else
+                        GridView1.Rows(i).Cells(6).Text = "<a href='javascript:void(0)' onclick=""window.open('System_User.aspx?UserID=" & GridView1.DataKeys(i).Item(0) & "','添加账号','height=160, width=300, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')"">开通账号</a>"
+                    End If
+                Catch ex As Exception
+                    GridView1.Rows(i).Cells(6).Text = "未知状态"
+                    Base.IO.Text_File_SaveAs(Server.MapPath("./") & "\Log.txt", ex.ToString, Encoding.UTF8)
+                End Try
+            Else            '数据库验证方式
+                GridView1.Rows(i).Cells(6).Text = "<a href='javascript:void(0)' onclick=""window.open('ModiPassWord.aspx?Page=" & GridView1.PageIndex & "&UserID=" & GridView1.DataKeys(i).Item(0) & "','修改密码','height=250, width=400, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')"">修改密码</a>"
+            End If
+
+            Dim IsOut As String = GridView1.DataKeys(i).Item(4).ToString
+            If IsOut = "1" Then
+                CType(GridView1.Rows(i).Cells(2).Controls(1), Label).Text += "&nbsp;[外]"
+            End If
+
+            '修改详细信息
+            GridView1.Rows(i).Cells(5).Text = "<a href='javascript:void(0)' onclick=""window.open('../Forms/ModiUserContent.aspx?YGDM=" & GridView1.DataKeys(i).Item(0) & "','详细信息','height=550, width=500, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes')"">详细信息</a>"
+
+            '查看用户权限
+            GridView1.Rows(i).Cells(7).Text = "<a href='javascript:void(0)' onclick=""window.open('UserPowerList.aspx?UserID=" & GridView1.DataKeys(i).Item(0) & "','查看权限','height=550, width=850, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes')"">查看权限</a>"
+
+            '启用禁用
+            Dim isEnable As Boolean = GridView1.DataKeys(i).Item("QYBZ")
+            If isEnable = True Then
+                GridView1.Rows(i).Cells(8).Text = "<a href='javascript:void(0)' onclick='disable(" & YGDM & ")'>禁用</a>"
+            Else
+                GridView1.Rows(i).Cells(8).Text = "<a href='javascript:void(0)' onclick='enable(" & YGDM & ")'>启用</a>"
+            End If
+
+
+
+
+
+            If UserID <> AdminID And YGDM = AdminID Then          '表示是超管，其他人不能修改内容
+                GridView1.Rows(i).Cells(4).Text = "--"
+                GridView1.Rows(i).Cells(5).Text = "--"
+                GridView1.Rows(i).Cells(6).Text = "--"
+                GridView1.Rows(i).Cells(7).Text = "--"
+            End If
+
+            If YGDM = AdminID Then
+                GridView1.Rows(i).Cells(8).Text = "--"
+            End If
+
+        Next
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging1(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        Dim Index As Integer = e.NewSelectedIndex
+        Dim BZ As Integer = GridView1.DataKeys(Index).Item(3)
+        Dim Sql As String = String.Empty
+        Dim Stoping As String = String.Empty
+        If BZ = 1 Then
+            Sql = "update GY_YGDM set QYBZ=0 where YGDM=" & GridView1.DataKeys(Index).Item(0)
+            Stoping = "no"
+        Else
+            Sql = "update GY_YGDM set QYBZ=1 where YGDM=" & GridView1.DataKeys(Index).Item(0)
+            Stoping = "yes"
+        End If
+        Base.DB.Query(Sql)
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.ADUserAuthentication").ToLower = "true" Then
+            Try
+                Dim NetCmd As New netcommand.net
+                NetCmd.activeuser(GridView1.DataKeys(Index).Item(2), Stoping)
+            Catch ex As Exception
+                '对AD模块进行容错
+                Base.Js.alert(Me, "操作系统用户失败!")
+            End Try
+        End If
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub Button4_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button4.Click
+        Dim i As Integer
+        Dim ck As CheckBox
+        Dim YGDM As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            YGDM = GridView1.DataKeys(i).Item(0)
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                '再删除库中的记录
+                Dim TempFileName As String = Server.MapPath("../../") & "FormFolder\XMAN-YGDM.库.xml"
+                If IO.File.Exists(TempFileName) = True Then
+                    Try
+                        Dim Node As System.Xml.XmlNode = Base.XmlClass.GetXmlFile(TempFileName).ChildNodes(0)
+                        Dim Fid_NodeName As String = Base.XmlClass.GetFormID
+                        Base.XmlClass.DelNode("//" & Node.Name & "/" & Fid_NodeName.Replace("表单号", "标题") & "[" & Fid_NodeName & "='" & YGDM & "']")
+                    Catch ex As Exception
+                    End Try
+                End If
+                Conn.DeleteCommand = "delete GY_YGQX where YGDM=" & YGDM
+                Conn.Delete()
+                Conn.DeleteCommand = "delete GY_YGDM where YGDm=" & YGDM
+                Conn.Delete()
+            End If
+        Next
+        GridView1.DataBind()
+    End Sub
+End Class

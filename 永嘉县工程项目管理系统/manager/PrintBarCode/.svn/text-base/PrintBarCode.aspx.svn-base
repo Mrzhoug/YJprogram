@@ -1,0 +1,35 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="PrintBarCode.aspx.cs" Inherits="Manage_PrintBarCode_PrintBarCode" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>打印条码</title>
+   <%-- <link href="../../App_Themes/Default/StyleSheet.css" rel="stylesheet" type="text/css" />--%>
+    <script language="JavaScript" type ="text/javascript" >
+        function preview() {
+            bdhtml = window.document.body.innerHTML;
+            sprnstr = "<!--startprint-->";
+            eprnstr = "<!--endprint-->";
+            prnhtml = bdhtml.substr(bdhtml.indexOf(sprnstr) + 17);
+            prnhtml = prnhtml.substring(0, prnhtml.indexOf(eprnstr));
+            window.document.body.innerHTML = prnhtml;
+            factory.printing.Print(false);
+            //  window.print();
+           // window.opener = 'anyone';
+            window.close();
+        }
+    </script>
+    <object classid="clsid:1663ed61-23eb-11d2-b92f-008048fdd814"   id="factory" codebase="smsx.cab#Version=6,6,440,26"></object>
+</head>
+<body>
+    <form id="form1" runat="server">
+    
+    <!--startprint-->
+    <asp:Image ID="Image1" runat="server" />
+    <!--endprint-->
+    <br />
+    <span id="printbc" runat ="server"></span>    
+    </form>
+</body>
+</html>

@@ -1,0 +1,227 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+	<head>
+		<title>InfoJet Service</title>
+		<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+		<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
+		<META HTTP-EQUIV="Expires" CONTENT="0">
+		<META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
+		<style>
+		    div{font-size:11px;font-family:verdana;}
+		    td{font-size:11px;font-family:verdana;}
+		    input{font-size:11px;font-family:verdana;}
+		</style>
+		<base target="_self">
+		<!-- //CID //0749 //2010.8.30 //Init -->
+	</head>
+	<body style='padding: 0; margin: 0;' onload="DoLoad()">
+		<script>
+		var PictureWidth = 0;
+		var PictureHeight = 0;
+		//CID 0641 //2010.11.06 //Begin
+		var opener = null;
+		//CID 0641 //2010.11.06 //End
+		var dsigData = null;
+		var dSign = null;
+		var usedCert = null;
+		var browser = null;
+		function DoLoad() {
+		    document.title = "Digital Signature";
+		    var parent = window.dialogArguments[0];
+			parent.InfoJet_CurrentDialog = window;
+			//CID 0641 //2010.11.06 //Begin
+			opener = parent;
+			//CID 0641 //2010.11.06 //End
+			var toSign = window.dialogArguments[2];
+			if (toSign) {
+			    browser = "Microsoft Internet Explorer";
+			    dsigData = window.dialogArguments[1];
+			    dSign = document.getElementById("DSign");
+			    var output = dSign.ExchangeData(dsigData.Name, dsigData.Data, dsigData.Location, dsigData.Mode, dsigData.Message, dsigData.Xml, dsigData.Fingerprint, dsigData.ViewName, browser);
+			    var params = output.split("\n");
+			    document.getElementById("DataName").innerHTML = params[0];
+			    document.getElementById("DateTime").innerHTML = params[1];
+			    document.getElementById("Fingerprint").innerHTML = dsigData.Fingerprint;
+			    document.getElementById("ViewName").innerHTML = dsigData.ViewName;
+			    document.getElementById("OS").innerHTML = params[2];
+			    document.getElementById("Browser").innerHTML = browser;
+			    document.getElementById("NrOfMonitors").innerHTML = params[3];
+			    document.getElementById("PrimaryMonitor").innerHTML = params[4];
+
+			    var htmlElement = parent.InfoJet_SignatureHtmlElement;
+			    //CID 1036 //2012.01.07 //Begin
+			    var width = htmlElement.offsetWidth;
+			    var height = htmlElement.offsetHeight;
+			    //CID 1036 //2012.01.07 //End
+			    dSign.width = width;
+			    dSign.height = height;
+			    dSign.CaptureHtmlElement(htmlElement, width, height);
+			}
+			else {
+			    document.getElementById("SignPart").style.display = "none";
+			    document.getElementById("CommentTr").style.display = "";
+			    document.getElementById("DataPart").style.marginLeft = "22px";
+
+			    signedData = window.dialogArguments[1];
+			    //CID 1021 //2011.11.18 //Begin
+			    if (signedData.Status == "Valid") {
+			        document.getElementById("DataLabel").innerHTML = "This signature is valid.";
+			    } else if (signedData.Status == "Invalid") {
+			        document.getElementById("DataLabel").innerHTML = "This signature is invalid.";
+			    } else if (signedData.Status == "Error") {
+			        document.getElementById("DataLabel").innerHTML = "There are errors in this signature.";
+			    } else if (signedData.Status == "Revoked") {
+			        document.getElementById("DataLabel").innerHTML = "This signature is revoked.";
+			    } else if (signedData.Status == "NotTrusted") {
+			        document.getElementById("DataLabel").innerHTML = "This signature is untrusted.";
+			    } else if (signedData.Status == "Expired") {
+			        document.getElementById("DataLabel").innerHTML = "This signature is expired.";
+			    }
+			    //CID 1021 //2011.11.18 //End
+			    document.getElementById("DataName").innerHTML = signedData.DataName;
+			    document.getElementById("Comment").innerHTML = signedData.Comment;
+			    document.getElementById("DateTime").innerHTML = signedData.DateTime;
+			    document.getElementById("Fingerprint").innerHTML = signedData.Fingerprint;
+			    document.getElementById("ViewName").innerHTML = signedData.ViewName;
+			    document.getElementById("OS").innerHTML = signedData.OS;
+			    document.getElementById("Browser").innerHTML = signedData.Browser; ;
+			    document.getElementById("NrOfMonitors").innerHTML = signedData.NrOfMonitors;
+			    document.getElementById("PrimaryMonitor").innerHTML = signedData.PrimaryMonitor;
+
+			    document.getElementById("CertPart").style.display = "";
+
+			    dSign = document.getElementById("DSign");
+			    dSign.SetScreenshot(signedData.Screenshot);
+			    dSign.SetCert(signedData.Cert);
+			}
+        }
+        function SelectCert() {
+            dSign = document.getElementById("DSign");
+            cert = dSign.SelectCert();
+            if (cert != null) {
+                var names = cert.split("\n");
+                var selectedCert = document.getElementById("SelectedCert");
+                var html = "Issued to " + names[0] + "<br>";
+                html = html + "Issued by " + names[1] + "<br><br>";
+                selectedCert.innerHTML = html;
+                selectedCert.style.display = "";
+                usedCert = cert;
+                var signButton = document.getElementById("SignButton");
+                signButton.disabled = false;
+            }
+            if (usedCert != null) {
+                var selectCertButton = document.getElementById("SelectCertButton");
+                selectCertButton.value = "Change certificate";
+            }
+        }
+        function Sign() {
+            var commentInput = document.getElementById("CommentInput").value;
+            dSign = document.getElementById("DSign");
+            var xml = dSign.Sign(commentInput);
+            if (xml != null) {
+                opener.InfoJet_OnSigned(dsigData.Name, xml);
+                window.close();
+            }
+        }
+        function ViewCert() {
+            dSign.ShowCert();
+        }
+        function Cancel() {
+            window.close();
+        }
+		</script>
+		<div id="DataPart" style="margin-left:15px;margin-top:15px;margin-right:15px">
+		    <div id="DataLabel" style="font-weight:bold">
+		    1. Verify the data that you will be signing
+		    </div>
+            <div>
+                &nbsp;
+            </div>
+            <table>
+                <tr>
+                    <td>Signed data name</td><td><div id="DataName"></div></td>
+                </tr>
+                <tr id="CommentTr" style="display:none;">
+                    <td>Comment</td><td><div id="Comment"></div></td>
+                </tr>
+                <tr>
+                    <td>System date/time</td><td><div id="DateTime"></div></td>
+                </tr>
+                <tr>
+                    <td>Form template fingerprint</td><td><div id="Fingerprint"></div></td>
+                </tr>
+                <tr>
+                    <td>View name</td><td><div id="ViewName"></div></td>
+                </tr>
+                <tr>
+                    <td>Windows version</td><td><div id="OS"></div></td>
+                </tr>
+                <tr>
+                    <td>Browser</td><td><div id="Browser"></div></td>
+                </tr>
+                <tr>
+                    <td>Number of monitors</td><td><div id="NrOfMonitors"></div></td>
+                </tr>
+                <tr>
+                    <td>Primary monitor</td><td><div id="PrimaryMonitor"></div></td>
+                </tr>
+            </table>
+            <div>
+                &nbsp;
+            </div>
+            <div>
+                Screenshot:
+            </div>
+		    <div style="overflow-x:scroll;overflow-y:scroll;width:400;height:200;border:1px solid gray">
+                <object id="DSign" height="1" width="1" classid="clsid:{081B36FB-C9A9-49b5-BF98-FE5307C8FF9C}"
+						codebase="InfoJetSoft.DigitalSignature.cab" VIEWASTEXT>
+                </object>
+            </div>
+            <div>
+                &nbsp;
+            </div>
+            <div id="CertPart" style="display:none;">
+		        <input type="button" value="View Certificate" style="width:130px;" onclick="ViewCert();">
+		        <input type="button" value="Close" style="width:70px;" onclick="Cancel();">
+		        <br>
+		        &nbsp;
+            </div>
+        </div>
+        <div id="SignPart"  style="margin-left:15px;margin-bottom:15px;margin-right:15px">
+            <div style="font-weight:bold">
+		    2. Select a certificate
+            </div>
+            <div>
+                &nbsp;
+            </div>
+            <div id="SelectedCert" style="display:none;">
+            </div>
+            <div>
+		        <input type="button" id="SelectCertButton" value="Select certificate" onclick="SelectCert();">
+		    </div>
+		    <div>
+                &nbsp;
+            </div>
+            <div style="font-weight:bold">
+		    3. Sign
+            </div>
+            <div>
+                &nbsp;
+            </div>
+            <div>
+                Comments to include with your signature(optional):<br>
+                <input type="text" id="CommentInput" value="" style="width:400px;"/>
+		    </div>
+            <div>
+                &nbsp;
+            </div>
+            <div>
+		        <input type="button" value="Sign" id="SignButton" disabled="true" style="width:70px;" onclick="Sign();">
+		        <input type="button" value="Cancel" style="width:70px;" onclick="Cancel();">
+		    </div>
+		    <div>
+                &nbsp;
+            </div>
+        </div>
+	</body>
+</html>

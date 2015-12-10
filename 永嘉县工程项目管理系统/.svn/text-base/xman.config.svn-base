@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<系统配置>
+	<我的文件夹 Enabled='True'>
+		<信息中心 Enabled='True' />
+ 		<内部信息 Enabled='True' />
+ 		<内部公告 Enabled='True' />
+ 		<备忘录 Enabled='True' />
+ 		<订阅信息 Enabled='True' />
+ 		<审阅信息 Enabled='True' />
+ 		<Office模板 Enabled='True' />
+ 		<我的文件 Enabled='True' />
+ 		<共享列表 Enabled='True' />
+ 		<登陆日志 Enabled='True' />
+ 		<修改密码 Enabled='True' />
+    <修改用户信息 Enabled='True' />'
+	</我的文件夹>
+	<WEB打开菜单 Enabled='True'>
+		<申请审阅 Enabled='false' />
+		<审阅意见 Enabled='false' />
+		<分发表单 Enabled='false' />
+		<查看回复 Enabled='false' />
+		<打印表单 Enabled='false' />
+		<设置状态 Enabled='false' />
+		<附件管理 Enabled='true' />
+	</WEB打开菜单>
+	<无流程>
+	</无流程>
+	<有流程>
+		<项目列表 Enabled='true' Name='项目管理'></项目列表>
+		<项目导航图>
+			<查看审批信息 Enabled='false'></查看审批信息>
+			<分发项目 Enabled='false'></分发项目>
+		</项目导航图>
+		<分类显示>
+			<全部显示 Enabled='true'></全部显示>
+			<未完成 Enabled='True'></未完成>
+			<已完成 Enabled='True'></已完成>
+			<与我相关 Enabled='True'></与我相关>
+		</分类显示>
+	</有流程>
+</系统配置>

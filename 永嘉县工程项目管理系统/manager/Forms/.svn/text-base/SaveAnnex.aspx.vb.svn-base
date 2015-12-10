@@ -1,0 +1,68 @@
+﻿
+Partial Class manager_Forms_SaveAnnex
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim filename As String
+        Dim txtname As String
+        Dim filepath As String
+        filename = Request("filename").ToString
+        txtname = Request("txtname").ToString
+        filepath = Server.MapPath("~/") & "\FormFolder\" & filename & "\Annex\" & txtname & ".txt" '得到附件位置
+
+        Dim AnnContent As String = Base.pub.Text_File_Read(filepath)
+
+        If System.IO.File.Exists(filepath) = False Then
+            Response.End()
+        End If
+        AnnContent = AnnContent.Replace(Chr(13), "").Replace(Chr(10), "")
+        If AnnContent.Length = 0 Then
+            Response.End()
+        End If
+        Dim FileTempName() As Byte    '临时的文件名字节位
+        Dim BodyData() As Byte      '用来存储转换后的内容
+
+        BodyData = System.Convert.FromBase64String(AnnContent)
+        '头24个位置为INFOPATH添加上去的内容.
+        '查找文件名的位置
+        Dim Zcount As Int16 = 0
+        Dim BodyIndex As Integer = 0
+        Dim j As Integer
+        For j = 0 To BodyData.Length - 1
+            If j >= 24 Then
+                If BodyData.GetValue(j) = 0 Then
+                    Zcount += 1
+                Else
+                    Zcount = 0
+                End If
+                If Zcount = 3 Then
+                    BodyIndex = j
+                    Exit For
+                End If
+            End If
+        Next
+
+        '得到文件名.
+        Dim FileTempName1 As New IO.MemoryStream()
+        Dim SaveFileName As String
+        FileTempName1.Write(BodyData, 24, BodyIndex - 24)
+        FileTempName = FileTempName1.ToArray
+        SaveFileName = Encoding.Unicode.GetString(FileTempName)
+        SaveFileName = SaveFileName.Substring(0, SaveFileName.Length - 1)
+
+        '得到文件的内容
+        Dim stream As New IO.MemoryStream()
+        stream.Write(BodyData, BodyIndex + 1, BodyData.Length - BodyIndex - 1)
+        BodyData = stream.ToArray()
+        stream.Close()
+
+        '保存为附件
+        SaveFileName = HttpUtility.UrlEncode(System.Text.UTF8Encoding.UTF8.GetBytes(SaveFileName)) '需要编码，否则会产生乱码
+        Response.AddHeader("content-type", "application/x-msdownload;")
+        Response.AddHeader("content-disposition", "attachment; filename=" + SaveFileName)
+        Response.ContentType = "Application/octet-stream"
+        Response.BinaryWrite(BodyData)
+        Response.End()
+    End Sub
+End Class

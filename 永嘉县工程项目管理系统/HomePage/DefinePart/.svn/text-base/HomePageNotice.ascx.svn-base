@@ -1,0 +1,18 @@
+﻿<%@ Control Language="VB" AutoEventWireup="false" CodeFile="HomePageNotice.ascx.vb" Inherits="HomePage_DefinePart_HomePageNotice" %>
+<table id="Table_01" width="250" style="height:195px;" border="0" cellpadding="0" cellspacing="0">
+	<tr style="height:32px;">
+		<td style="background-image:url(images/页面2_07.gif);">
+		<table height="18" border="0" cellpadding="0" cellspacing="0"><tr><td width=186></td><td width=40 onclick="window.location.href='HomePageNotice.aspx'" style="cursor:hand"></td></tr></table>
+		</td>
+	</tr>
+	<tr>
+	<td style="background:url(images/页面2_11.gif); font-size:9pt;">
+  <marquee direction="up" scrollamount="2" height="150" onMouseOver="this.stop()" onMouseOut="this.start()"> 
+        <TABLE style="WIDTH: 100%" cellSpacing=0 cellPadding=0 border=0  >
+            <tbody id="conte" runat=server style="font-size:9pt;"></tbody>
+        </TABLE>
+ </marquee> 
+    </td>
+	</tr>
+	<tr><td><img src="images/页面2_15.gif" /></td></tr>
+</table>

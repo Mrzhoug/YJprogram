@@ -1,0 +1,222 @@
+.title {
+	COLOR: red; FONT-SIZE: 9pt; LINE-HEIGHT: normal; TEXT-DECORATION: none
+}
+.notes {
+	COLOR: red; FONT-SIZE: 9pt; LINE-HEIGHT: normal; TEXT-DECORATION: none
+}
+.detail {
+	COLOR: gray; FONT-SIZE: 9pt; LINE-HEIGHT: normal; TEXT-DECORATION: none
+}
+.contents {
+	COLOR: #162d85; FONT-WEIGHT: normal; TEXT-DECORATION: none
+}
+.status0 {
+	COLOR: green; FONT-SIZE: 9pt; LINE-HEIGHT: normal; TEXT-DECORATION: none
+}
+.status1 {
+	COLOR: blue; FONT-SIZE: 9pt; LINE-HEIGHT: normal; TEXT-DECORATION: none
+}
+.status2 {
+	COLOR: red; FONT-SIZE: 9pt; LINE-HEIGHT: normal; TEXT-DECORATION: none
+}
+.hover1 {
+	COLOR: #ffffff; FONT-SIZE: 9pt; LINE-HEIGHT: normal; TEXT-DECORATION: none
+}
+.hover1:hover {
+	COLOR: #ff6666; TEXT-DECORATION: none
+}
+.hover2 {
+	COLOR: #ffffff; FONT-SIZE: 9pt; TEXT-DECORATION: none
+}
+.hover2:hover {
+	COLOR: #ff6666; TEXT-DECORATION: none
+}
+DIV {
+	FONT-SIZE: 9pt
+}
+.clsUL {
+	BACKGROUND-COLOR: #fef7ed; FONT-SIZE: 9pt; MARGIN-BOTTOM: 0px; MARGIN-LEFT: 20px; MARGIN-TOP: 0px
+}
+.clsLI {
+	FONT-SIZE: 9pt; MARGIN-LEFT: -40px; MARGIN-TOP: 0.1em
+}
+.clsNoExpand {
+	
+}
+.clsItemShow {
+	CURSOR: hand
+}
+.clsItemHide {
+	CURSOR: hand
+}
+.cls1 {
+	CURSOR: hand; LIST-STYLE: none
+}
+UL.clsItemsShow {
+	FONT-SIZE: 9pt; LIST-STYLE: none
+}
+UL.clsItemsHide {
+	DISPLAY: none
+}
+.clsTD {
+	BACKGROUND-COLOR: #fef7ed
+}
+SELECT {
+	FONT-FAMILY: Courier,Monospace,Verdana,Arial,Helvetica,sans-serif; FONT-SIZE: 9pt
+}
+BODY {
+	BACKGROUND: none transparent scroll repeat 0% 0%; FONT-FAMILY: ËÎÌו; FONT-SIZE: 9pt
+}
+TD {
+	FONT-SIZE: 9pt
+}
+LI {
+	FONT-SIZE: 9pt
+}
+UL {
+	FONT-SIZE: 9pt
+}
+OL {
+	FONT-SIZE: 9pt
+}
+P {
+	FONT-SIZE: 9pt
+}
+H1 {
+	FONT-SIZE: 18pt
+}
+H2 {
+	FONT-SIZE: 16pt
+}
+H3 {
+	FONT-SIZE: 14pt
+}
+H4 {
+	FONT-SIZE: 12pt
+}
+H5 {
+	FONT-SIZE: 9pt
+}
+TD.ibm {
+	FONT-SIZE: 9pt
+}
+TD.linuxcare {
+	FONT-SIZE: 9pt
+}
+A:link {
+	COLOR: #162d85; FONT-WEIGHT: normal; TEXT-DECORATION: none
+}
+A {
+	COLOR: darkgray; FONT-SIZE: 9pt; FONT-STYLE: normal; FONT-WEIGHT: normal; TEXT-DECORATION: none
+}
+A.home {
+	COLOR: #ffff00; FONT-SIZE: 9pt
+}
+A.home:hover {
+	COLOR: #ffffcc; FONT-SIZE: 9pt
+}
+A.home:visited {
+	COLOR: darkgray; FONT-SIZE: 9pt
+}
+A.homenav {
+	COLOR: #ffff00; FONT-SIZE: 9pt
+}
+A.homenav:hover {
+	COLOR: #99ff99; FONT-SIZE: 9pt
+}
+A.homenav:visited {
+	COLOR: #bbbb00; FONT-SIZE: 9pt
+}
+A:hover {
+	COLOR: red; FONT-STYLE: normal; FONT-WEIGHT: normal; TEXT-DECORATION: underline
+}
+A:visited {
+	COLOR: gray; FONT-STYLE: normal; FONT-WEIGHT: normal; TEXT-DECORATION: none
+}
+A:active {
+	COLOR: red; FONT-STYLE: normal; FONT-WEIGHT: normal; TEXT-DECORATION: none
+}
+A.privacy {
+	COLOR: yellow; FONT-SIZE: 9pt
+}
+A.tab {
+	COLOR: #ffffdd; FONT-SIZE: 9pt
+}
+P.tab {
+	COLOR: #ffffdd; FONT-SIZE: 9pt
+}
+P.activetab {
+	COLOR: white; FONT-SIZE: 9pt
+}
+BIG {
+	FONT-SIZE: 10pt
+}
+A.s {
+	FONT-SIZE: 9pt
+}
+P.s {
+	FONT-SIZE: 9pt
+}
+TD.s {
+	FONT-SIZE: 9pt
+}
+P.11pt {
+	FONT-SIZE: 9pt
+}
+TD.11pt {
+	FONT-SIZE: 9pt
+}
+FONT.s {
+	FONT-SIZE: 9pt
+}
+A.supersmall {
+	FONT-FAMILY: Verdana,Arial,Helvetica,sans-serif; FONT-SIZE: 9pt
+}
+P.supersmall {
+	FONT-FAMILY: Verdana,Arial,Helvetica,sans-serif; FONT-SIZE: 9pt
+}
+TD.supersmall {
+	FONT-FAMILY: Verdana,Arial,Helvetica,sans-serif; FONT-SIZE: 9pt
+}
+FONT.supersmall {
+	FONT-FAMILY: Verdana,Arial,Helvetica,sans-serif; FONT-SIZE: 9pt
+}
+.article {
+	BORDER-BOTTOM: black 1px solid; BORDER-LEFT: black 1px solid; BORDER-RIGHT: black 1px solid; BORDER-TOP: black 1px solid; FILTER: revealTrans(transition=23,duration=0.5) blendTrans(duration=0.5); POSITION: absolute; VISIBILITY: hidden
+}
+.search {
+	BACKGROUND-COLOR: #572e24; COLOR: white
+}
+.search1 {
+	BACKGROUND-COLOR: #ffc68c; COLOR: white
+}
+.forumHead {
+	BORDER-BOTTOM-COLOR: #003333; BORDER-LEFT-COLOR: black; BORDER-RIGHT-COLOR: black; BORDER-TOP-COLOR: black; FONT-SIZE: 10pt
+}
+.titlebar {
+	COLOR: #ffffff; FONT-SIZE: 10pt; FONT-WEIGHT: normal
+}
+HR {
+	LEFT: 30px
+}
+.toolbar {
+	FONT-SIZE: 10pt
+}
+.jumpBox {
+	HEIGHT: 16px; WIDTH: 25px
+}
+.bulletin {
+	FONT-SIZE: 10pt
+}
+SELECT {
+	HEIGHT: 13px
+}
+.search {
+	WIDTH: 130px
+}
+.titleFont {
+	COLOR: #ffffff; FONT-SIZE: 9pt
+}
+.forumTitle {
+	COLOR: #ffffff; FONT-SIZE: 9pt; FONT-WEIGHT: normal
+}

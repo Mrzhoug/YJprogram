@@ -1,0 +1,218 @@
+﻿Imports System.IO
+Partial Class manager_Personbag_MyShareFilesList
+    Inherits System.Web.UI.Page
+    Dim RootPath As String
+    Dim Base As New Base
+    Dim OpFolder As String = ""
+    Dim OpFolder1 As String = ""
+    Dim OpFolder2 As String = ""
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim i As Integer
+        Dim dt As New Data.DataTable
+        Dim dt1 As New Data.DataTable
+        Dim OutStr As String = ""
+        Dim Cid As Integer 'sharefile表中主键id为数值型
+        Dim GiveUser As String '共享文件提供者
+        Dim GetUser As String '共享文件接受者
+        Try
+            Cid = Request("id")
+        Catch ex As Exception
+            Base.Js.alert(Me, "非法参数!")
+            Exit Sub
+        End Try
+        dt = Base.DB.Table("select * from sharefile where id=" & Cid, "sharefile")
+        If dt.Rows.Count <= 0 Then
+            Base.Js.alert(Me, "非法参数!")
+            Exit Sub
+        End If
+        If dt.Rows(0)("giveuserid") = "" Or IsDBNull(dt.Rows(0)("giveuserid")) Then
+            Base.Js.alert(Me, "非法参数!")
+            Exit Sub
+        End If
+        If dt.Rows(0)("getuserid") = "" Or IsDBNull(dt.Rows(0)("getuserid")) Then
+            Base.Js.alert(Me, "非法参数!")
+            Exit Sub
+        End If
+        If dt.Rows(0)("filepath") = "" Or IsDBNull(dt.Rows(0)("filepath")) Then
+            Base.Js.alert(Me, "非法参数!")
+            Exit Sub
+        End If
+
+        GiveUser = dt.Rows(0)("giveuserid")
+        GetUser = dt.Rows(0)("getuserid")
+        OpFolder1 = dt.Rows(0)("filepath")
+        OpFolder2 = OpFolder1.Substring(OpFolder1.LastIndexOf("\") + 1) '取出路径中的最后一个目录名
+
+        Dim RootPath As String = Request.MapPath("../../") & "PersonalFolders\" & GiveUser & "\" & OpFolder1 & "\" '根目录是提供者的目录
+
+        Dim FileName As String = Server.UrlDecode(Request("FileName"))
+
+        If GetUser.ToLower.IndexOf("|" & Base.GetWebUserName.ToLower) < 0 And GetUser <> "*" Then '判断当前用户是否被提供共享了
+            Base.Js.alert(Me, "非法参数!")
+            Exit Sub
+        End If
+        If Not FileName Is Nothing Then
+            If File.Exists(RootPath & FileName) = True Then     '关判断文件是否存在
+                If GetUser.ToLower.IndexOf("|" & Base.GetWebUserName.ToLower) >= 0 Or GetUser = "*" Then '判断当前用户是否被提供共享了
+                    PrintContent(RootPath & FileName)
+                Else
+                    Base.Js.alert(Me, "非法参数!")
+                    Exit Sub
+                End If
+
+            Else
+                Base.Js.alert(Me, "非法参数!")
+                Exit Sub
+            End If
+        End If
+
+        '得到操作目录        
+        Dim Folder As String = Server.UrlDecode(Request("Folder")) '根目录下的子路径
+        If Directory.Exists(RootPath & Folder) = False Then '检查文件是否存在
+            Base.Js.alert(Me, "文件不存在!")
+            Exit Sub
+        End If
+        dt1 = Base.DB.Table("select ygxm from gy_ygdm where dlmc ='" & GiveUser & "'", "gy_ygdm") '查出用户的姓名
+        If dt1.Rows(0)("ygxm") = "" Or IsDBNull(dt1.Rows(0)("ygxm")) Then
+            Base.Js.alert(Me, "非法参数!")
+            Exit Sub
+        End If
+        Dim getusername As String = dt1.Rows(0)("ygxm")
+        OutStr += "<hr width=100%><b>&nbsp;当前路径:</b>[<a href='MyshareFiles.aspx" & "'>" & "共享文件夹" & "</a>\\<a href='MyshareFileslist.aspx?id=" & Cid & "'>" & getusername & "(" & OpFolder2 & ")" & "</a>\"
+        If Not Folder Is Nothing Then
+            If Directory.Exists(RootPath & Folder) = True And Folder.Trim.Length > 0 Then
+                OpFolder = Folder       '得到操作目录
+                '这里进行制作目录导航条
+                Dim Temp As String() = Folder.Split("\")
+                Dim TempStr As String = ""
+                For i = 0 To Temp.GetUpperBound(0)
+                    If TempStr = "" Then
+                        TempStr = Temp(i)
+                    Else
+                        TempStr += "\" & Temp(i)
+                    End If
+                    OutStr += "<a href='MyshareFileslist.aspx?id=" & Cid & "&Folder=" & Server.UrlEncode(TempStr) & "'>" & Temp(i) & "</a>\"
+                Next
+            End If
+        End If
+        OutStr += "]<br>"
+
+        Dim Values As New ArrayList
+        Dim MyFiles, MyDirs As String()
+        MyDirs = Directory.GetDirectories(RootPath & OpFolder)         '//得到该目录下所有目录
+        Values.AddRange(MyDirs)                             '//加入目录
+        MyFiles = Directory.GetFiles(RootPath & OpFolder)          '//得到该目录下所有文件
+        Values.AddRange(MyFiles)                            '//加入文件
+
+        OutStr += "<table width=100% ><tr bgcolor='#eeccee' align=center><td width=40>序号</td><td>名称</td><td>大小(K)</td><td>类型</td><td width=160>最后修改时间</td></tr>"
+        If OpFolder <> "" Then      '当操作目录不是根目录,显示返回上一级目录
+            OutStr += "<tr><td align=center>0</td>"
+            OutStr += "<td><img src='../../images/FileManage/FOLDER.GIF'> "
+            Dim TempIndex As Integer = OpFolder.LastIndexOf("\")
+            If TempIndex > 0 Then
+                OutStr += "<a href='MyshareFileslist.aspx?id=" & Cid & "&Folder=" & Server.UrlEncode(OpFolder.Substring(0, TempIndex)) & "'>返回上一级目录</a></td>"
+            Else
+                OutStr += "<a href='MyshareFileslist.aspx?id=" & Cid & "'>返回上一级目录</a></td>"
+            End If
+            OutStr += "<td>&nbsp;</td>"
+            OutStr += "<td align=center>文件夹</td>"
+            OutStr += "<td>&nbsp;</td>"
+        End If
+
+        If Values.Count = 0 Then
+            OutStr += "<tr><td colspan=5 align=center>暂时没有文件</td></tr>"
+        Else
+            For i = 0 To Values.Count - 1
+                OutStr += "<tr align=center><td>" & i + 1 & "</td>"
+                Dim FileInfo As New System.IO.FileInfo(Values(i))
+
+                If i <= MyDirs.GetUpperBound(0) Then
+                    OutStr += "<td align=left><img src='../../images/FileManage/FOLDER.GIF'> "
+                    If OpFolder = "" Then
+                        OutStr += "<a href='MyshareFileslist.aspx?id=" & Cid & "&Folder=" & Server.UrlEncode(FileInfo.Name) & "'>" & FileInfo.Name & "</a></td>"
+                    Else
+                        OutStr += "<a href='MyshareFileslist.aspx?id=" & Cid & "&Folder=" & Server.UrlEncode(OpFolder & "\" & FileInfo.Name) & "'>" & FileInfo.Name & "</a></td>"
+                    End If
+
+                    OutStr += "<td>&nbsp;</td>"
+                    OutStr += "<td>文件夹</td>"
+                    OutStr += "<td>" & FileInfo.LastWriteTime & "</td>"
+                Else
+                    Dim FileType As String
+                    FileType = FileInfo.Extension
+                    Values(i) = Values(i).replace(RootPath, "")
+                    OutStr += "<td align=left><img src='../../images/FileManage/" & CheckFileType(FileType) & "'> "
+                    OutStr += "<a href='MyshareFileslist.aspx?id=" & Cid & "&FileName=" & Server.UrlEncode(OpFolder & "\" & FileInfo.Name) & "'>" & FileInfo.Name & "</a></td>"
+                    Dim FileSize As Integer
+                    FileSize = FileInfo.Length
+                    If FileSize > 0 Then
+                        FileSize = FileSize \ 1024
+                        If FileSize = 0 Then FileSize = 1
+                    End If
+                    OutStr += "<td>" & FileSize & "K</td>"
+                    OutStr += "<td>" & FileType & "文件</td>"
+                    OutStr += "<td>" & FileInfo.LastWriteTime & "</td>"
+                End If
+                OutStr += "</tr>"
+            Next
+        End If
+        OutStr += "</table>"
+        message.InnerHtml = OutStr
+    End Sub
+
+    Function CheckFileType(ByVal FileType As String) As String
+        Dim Result As String
+        FileType = filetype.ToLower
+        Select Case FileType
+            Case ".doc"
+                Result = "DOC.GIF"
+            Case ".txt"
+                Result = "TXT.GIF"
+            Case ".zip"
+                Result = "ZIP.GIF"
+            Case ".xls"
+                Result = "XLS.GIF"
+            Case ".pic"
+                Result = "PIC.GIF"
+            Case ".gif"
+                Result = "PIC.GIF"
+            Case ".bmp"
+                Result = "PIC.GIF"
+            Case ".jpg"
+                Result = "PIC.GIF"
+            Case ".ppt"
+                Result = "PPT.GIF"
+            Case ".pdf"
+                Result = "pdf.gif"
+            Case ".wav"
+                Result = "WAV.GIF"
+            Case ".mdb"
+                Result = "MDB.GIF"
+            Case ".mpg"
+                Result = "MPG.GIF"
+            Case Else
+                Result = "other.gif"
+        End Select
+        Return Result
+    End Function
+
+
+    Sub PrintContent(ByVal FileName As String)
+        Dim stream As FileStream = New FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.Read)
+        Dim Type1 As String
+        Type1 = FileName.Substring(FileName.LastIndexOf("."))
+        Try
+            Dim bufSize As Integer = stream.Length
+            Dim buf(bufSize) As Byte
+            Dim bytesRead As Integer = stream.Read(buf, 0, bufSize)
+            Dim UTF8 As Encoding = Encoding.GetEncoding("GB2312")
+            Response.ContentEncoding = UTF8
+            Response.AddHeader("Content-Disposition", "attachment; filename=SunFun" & Type1)
+            Response.AddHeader("Content-Length", bufSize.ToString())
+            Response.OutputStream.Write(buf, 0, bytesRead)
+            Response.End()
+        Catch ex As Exception
+            Base.Js.alert(Me, "打开出错.")
+        End Try
+    End Sub
+End Class

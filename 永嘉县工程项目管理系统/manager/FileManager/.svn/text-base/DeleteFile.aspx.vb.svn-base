@@ -1,0 +1,54 @@
+﻿
+Partial Class manager_FileManager_DeleteFile
+    Inherits System.Web.UI.Page
+
+
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Dim fileID As Integer
+        Try
+            fileID = Convert.ToInt32(Request("fileID"))
+        Catch ex As Exception
+            fileID = 0
+        End Try
+
+        If fileID = 0 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+
+        Dim UserInfo As New UserInfo
+
+        Dim username As String = UserInfo.GetWebUserName()
+        Dim userID As Integer = UserInfo.GetUserID(username)
+
+        If userID = 0 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+        Dim FileManager As New FileManager
+
+        Dim folderID As Integer = FileManager.GetFileBelongFolderID(fileID)
+        '如果文件存在于公共文件夹下，需要判断权限
+        If FileManager.IsPublicFolder(folderID) Then
+
+            If Not FileManager.GetUserPermission(userID, folderID).CanDelete Then
+                Response.Write("您没有对该文件删除的权限")
+                Response.End()
+            End If
+        End If
+
+
+
+
+        If FileManager.DeleteFile(fileID) Then
+            Response.Write("删除成功")
+        Else
+            Response.Write("删除失败")
+        End If
+
+    End Sub
+End Class

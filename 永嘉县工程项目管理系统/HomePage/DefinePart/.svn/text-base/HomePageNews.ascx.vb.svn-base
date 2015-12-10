@@ -1,0 +1,45 @@
+﻿
+Partial Class HomePage_DefinePart_HomePageNews
+    Inherits System.Web.UI.UserControl
+
+    Dim Base As New Base
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs)
+        Dim dt As New Data.DataTable
+        Dim ds As New PagedDataSource
+        dt = Base.DB.Table("SELECT TOP 10 * from HomePageNews order by [update] desc,cid desc", "HOME_NEWS")
+        ds.DataSource = dt.DefaultView
+        DataList1.DataSource = ds
+        DataList1.DataBind()
+        If dt.Rows.Count > 0 Then
+            Dim Url As String = dt.Rows(0)("imageUrl").ToString.ToLower
+            If Url.Substring(0, 7) = "http://" Then
+                imgnew.Src = dt.Rows(0)("imageUrl").ToString.Trim
+            Else
+                imgnew.Src = dt.Rows(0)("imageUrl").ToString
+            End If
+            imgnew.Attributes.Add("onclick", "javascript:location='HomePageNewsShow.aspx?cid=" & dt.Rows(0)("Cid").ToString() & "'")
+        End If
+        ds = Nothing
+        dt = Nothing
+        Base = Nothing
+    End Sub
+
+    Protected Sub DataList1_ItemDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.DataListItemEventArgs)
+        Dim lb, lb1 As New Label
+        lb = e.Item.FindControl("title")
+        lb1 = e.Item.FindControl("uptimelb")
+
+        If lb.Text.Length > 11 Then
+            lb.Text = lb.Text.Substring(0, 9) & "..."
+        End If
+        If lb1.Text.ToString <> "" Then
+            lb1.Text = CDate(lb1.Text.ToString).Date
+        End If
+
+    End Sub
+
+    Protected Sub Page_Disposed(ByVal sender As Object, ByVal e As System.EventArgs)
+        Base.Dispose()
+    End Sub
+End Class

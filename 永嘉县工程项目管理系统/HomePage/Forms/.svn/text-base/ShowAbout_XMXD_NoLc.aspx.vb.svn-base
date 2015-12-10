@@ -1,0 +1,52 @@
+﻿
+Partial Class HomePage_Forms_ShowAbout_XMXD_NoLc
+    Inherits System.Web.UI.Page
+
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim Fid As String
+    Dim XMDM, MKDM As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs)
+
+        Try
+            Fid = Request("SID")
+        Catch ex As Exception
+            Fid = 0
+        End Try
+
+
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("select XMDM,MKDM from XX_XMJC where FID=" & Fid, "XX_XMJC")
+        If Tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "项目流程有问题！")
+            Exit Sub
+        End If
+
+        Conn.SelectParameters("FID").DefaultValue = Fid
+        '得到当前IE的用户名
+        If GridView1.Rows.Count = 0 Then
+            Response.Write("<br><br><center><b>此项目暂时无修订信息</b></center>")
+        End If
+
+
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs)
+        Dim i As Integer
+        Dim Tb As New Data.DataTable
+        For i = 0 To GridView1.Rows.Count - 1
+            Tb = Base.DB.Table("select YGXM,DLMC from GY_YGDM where YGDM=" & GridView1.Rows(i).Cells(0).Text, "12421")
+            If Tb.Rows.Count > 0 Then
+                GridView1.Rows(i).Cells(0).Text = Tb.Rows(0)(0) & "(" & Tb.Rows(0)(1) & ")"
+            Else
+                Tb = Base.DB.Table("SELECT UserName FROM EnterprisesTable where cid=" & GridView1.Rows(i).Cells(0).Text, "EnterprisesTable")
+                If Tb.Rows.Count > 0 Then
+                    GridView1.Rows(i).Cells(0).Text = "外网企业用户(" & Tb.Rows(0)(0).ToString & ")"
+                Else
+                    GridView1.Rows(i).Cells(0).Text = "此用户已不存在"
+                End If
+            End If
+        Next
+    End Sub
+
+End Class

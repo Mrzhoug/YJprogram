@@ -1,0 +1,148 @@
+<?xml version="1.0"?>
+<configuration>
+	<connectionStrings>
+		<add name="Conn" connectionString="Data Source=CSC-PC\MSSQLSERVER2008;Initial Catalog=yjxmgl;User ID=sa;Password=sunfun" providerName="System.Data.SqlClient"/>
+	</connectionStrings>
+	<appSettings>
+		<add key="SunfunSoft.Xman.Title" value="康泰生物销售管理系统"/>
+		<!-- 设置系统名称,用来显示在TITLE -->
+		<add key="SunfunSoft.Xman.Copyright" value="温州圣火高科技有限公司 版权所有"/>
+		<!-- 设置版权信息 -->
+		<add key="SunfunSoft.Xman.Tabs" value="true"/>
+		<!-- 设置系统界面,是否具有标签页界面 -->
+		<!-- 设置演示XMAN的序列号 -->
+		<!--    <add key="SunfunSoft.Xman.LicenseKey" value="0000000000000000"/>  -->
+		<!-- 在线测试用户,此用户有其他的功能.但是不能修改密码与权限相关的设置 -->
+		<add key="SunfunSoft.Xman.Tester" value="administrator,"/>
+		<add key="SunfunSoft.Xman.ADUserAuthentication" value="false"/>
+		<!-- 设置是否采用AD进行用户验证 -->
+		<add key="SunfunSoft.Xman.OpenInfoPathOnly" value=""/>
+		<!-- 设置打开方式只能是一种,包括:Infopath,InfoJet -->
+		<add key="SunfunSoft.Xman.Session.TopStr" value="xman"/>
+		<!-- 设置入库方式是否为SQL2005入库方式,false则为XML文件 -->
+		<add key="SunfunSoft.Xman.Web.NotShowBar.Values" value=""/>
+		<!-- 设置Web打开时.不显示的工具的项目,以逗号分隔,逗号结束 -->
+		<!-- 设置ECP结合时，客户信息所对应的库名。默认为[客户信息] -->
+		<add key="SunfunSoft.Xman.ECP.CustomerInformation.Value" value=""/>
+		<!--表示是否开启ECP功能-->
+		<add key="SunfunSoft.Xman.ECP.Value" value="false"/>
+		<!-- 设置入库方式是否为二维表格映射入库方式 -->
+		<add key="SunfunSoft.Xman.FormLibrary.SQLMapping" value="true"/>
+		<add key="SunfunSoft.Xman.FormLibrary.Synchronization" value="true"/>
+		<!-- 设置入库后，是否通过服务进行同步 -->
+		<add key="SunfunSoft.Xman.FormLibrary.SQLXML" value="true"/>
+		<!-- 是否外网进行用户注册 -->
+		<add key="SunfunSoft.Xman.RegisterUser" value="true"/>
+		<!-- 设置采用验证码验证的类型 0表示不采用,1表示是中文,2表示是英文-->
+		<add key="SunfunSoft.Xman.CheckImageCode" value="0"/>
+		<!-- 设置是否允许由Webservice生成表单标题-->
+		<add key="SunfunSoft.Xman.CreateServiceTitle" value="True"/>
+		<!-- 设置表单提交的URL,主要因为域名URL转发生,会变成内网的IP.这里做固定(不用加http://,并以/结尾 暂时用于模板上传处 -->
+		<add key="SunfunSoft.Xman.BaseUrl" value=""/>
+		<!--设置表单域长度（http://www.cnblogs.com/xg521310/archive/2012/01/13/2321798.html），防止出现表单过大无法提交的错误-->
+		<add key="aspnet:MaxHttpCollectionKeys" value="5000"/>
+		<!-- InfoJetSoft 相关配置 -->
+		<add key="InfoJetSoft.Service.CN" value="true"/>
+		<add key="InfoJetSoft.Service.InlineFilePath" value="/inlinefiles"/>
+		<add key="InfoJetSoft.Service.LicenseKey" value="4oqCV4Kxqg+JWbHbmhKDvef8MFi3fvn8"/>
+		<add key="InfoJetSoft.Service.BrowserQuick" value="true"/>
+		<add key="InfoJetSoft.Service.ShowProgress" value="modaless"/>
+	</appSettings>
+	<system.web>
+		<httpRuntime maxRequestLength="819200" executionTimeout="43200" />
+		<globalization requestEncoding="utf-8" responseEncoding="utf-8"/>
+		<!-- 这里是关于Web Service的.如果没有加的话,在远程中调用时会出现:测试窗体只能用于来自本地计算机的请求 -->
+		<webServices>
+			<protocols>
+				<add name="HttpSoap"/>
+				<add name="HttpPost"/>
+				<add name="HttpGet"/>
+				<add name="Documentation"/>
+			</protocols>
+		</webServices>
+		<!-- 这里是关于Web Service的.如果没有加的话,在远程中调用时会出现:测试窗体只能用于来自本地计算机的请求 -->
+		<customErrors mode="Off"/>
+		<!--  动态调试编译
+          设置 compilation debug="true" 以将调试符号(.pdb 信息)
+          插入到编译页中。因为这将创建执行起来
+          较慢的大文件，所以应该只在调试时将该值设置为 true，而所有其他时候都设置为
+          false。有关更多信息，请参考有关
+          调试 ASP.NET 文件的文档。
+    -->
+		<compilation debug="true">
+			<compilers>
+				<compiler language="vb" extension=".VB" type="Microsoft.VisualBasic.VBCodeProvider, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=B77A5C561934E089" compilerOptions="/define:Debug=True /define:Trace=True /imports:Microsoft.VisualBasic,System,System.Collections,System.Configuration,System.Data,System.Drawing,System.Web,System.Web.UI,System.Web.UI.HtmlControls,System.Web.UI.WebControls"/>
+			</compilers>
+			<assemblies>
+				<add assembly="Microsoft.Office.Interop.Word, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71E9BCE111E9429C"/>
+			</assemblies>
+		</compilation>
+		<!--  自定义错误信息
+          设置 customErrors mode="On" 或 "RemoteOnly" 以启用自定义错误信息，或设置为 "Off" 以禁用自定义错误信息。 
+          为每个要处理的错误添加 <error> 标记。
+
+          "On" 始终显示自定义(友好的)信息。
+          "Off" 始终显示详细的 ASP.NET 错误信息。
+          "RemoteOnly" 只对不在本地 Web 服务器上运行的
+           用户显示自定义(友好的)信息。出于安全目的，建议使用此设置，以便 
+           不向远程客户端显示应用程序的详细信息。
+    -->
+		<!--  身份验证 
+          此节设置应用程序的身份验证策略。可能的模式是 "Windows"、 
+          "Forms"、 "Passport" 和 "None"
+
+          "None" 不执行身份验证。 
+          "Windows" IIS 根据应用程序的设置执行身份验证 
+            (基本、简要或集成 Windows)。在 IIS 中必须禁用匿名访问。
+          "Forms" 您为用户提供一个输入凭据的自定义窗体(Web 页)，然后 
+           在您的应用程序中验证他们的身份。用户凭据标记存储在 Cookie 中。
+          "Passport" 身份验证是通过 Microsoft 的集中身份验证服务执行的，
+           它为成员站点提供单独登录和核心配置文件服务。
+    -->
+		<authentication mode="Windows"/>
+		<!--  授权 
+           此节设置应用程序的授权策略。可以允许或拒绝不同的用户或角色访问
+          应用程序资源。通配符: "*" 表示任何人，"?" 表示匿名
+          (未经身份验证的)用户。
+    -->
+		<authorization>
+			<allow users="*"/>
+			<!-- 允许所有用户 -->
+			<!--  <allow     users="[逗号分隔的用户列表]"
+                             roles="[逗号分隔的角色列表]"/>
+                  <deny      users="[逗号分隔的用户列表]"
+                             roles="[逗号分隔的角色列表]"/>
+            -->
+		</authorization>
+		<!--  应用程序级别跟踪记录
+          应用程序级别跟踪为应用程序中的每一页启用跟踪日志输出。
+          设置 trace enabled="true" 可以启用应用程序跟踪记录。如果 pageOutput="true"，则
+          在每一页的底部显示跟踪信息。否则，可以通过浏览 Web 应用程序
+           根目录中的 "trace.axd" 页来查看
+          应用程序跟踪日志。
+    -->
+		<trace enabled="false" requestLimit="10" pageOutput="false" traceMode="SortByTime" localOnly="true"/>
+		<!--  会话状态设置
+          默认情况下，ASP.NET 使用 Cookie 来标识哪些请求属于特定的会话。
+          如果 Cookie 不可用，则可以通过将会话标识符添加到 URL 来跟踪会话。
+         若要禁用 Cookie，请设置 sessionState cookieless="true"。
+    -->
+		<sessionState mode="InProc" stateConnectionString="tcpip=127.0.0.1:42424" sqlConnectionString="data source=127.0.0.1;Trusted_Connection=yes" cookieless="false" timeout="1200"/>
+		<!--  全球化
+          此节设置应用程序的全球化设置。
+    -->
+		<xhtmlConformance mode="Legacy"/>
+		<pages enableEventValidation="false" validateRequest="false">
+			<namespaces>
+				<add namespace="Microsoft.VisualBasic"/>
+				<add namespace="System.Data"/>
+				<add namespace="System.Drawing"/>
+			</namespaces>
+		</pages>
+		<!-- 大附件上传 -->
+		<httpModules>
+			<add name="BigFileUploadModuleHandle " type="HelpSoft.BigFileUploadModuleHandle,BigFileUploadHandle"/>
+		</httpModules>
+		<!-- 大附件上传 -->
+	</system.web>
+</configuration>

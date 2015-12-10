@@ -1,0 +1,2 @@
+﻿System.Runtime.InteropServices.COMException (0x80040154): 检索 COM 类工厂中 CLSID 为 {2F4560E4-6968-4B08-B962-48FB2E3CF576} 的组件时失败，原因是出现以下错误: 80040154。
+   在 manager_YGDM_Default.GridView1_DataBound1(Object sender, EventArgs e) 位置 E:\SunFunSoft\sunfungov\govplat\code\manager\YGDM\Default.aspx.vb:行号 104

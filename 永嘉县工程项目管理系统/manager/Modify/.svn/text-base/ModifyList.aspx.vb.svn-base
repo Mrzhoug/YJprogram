@@ -1,0 +1,178 @@
+﻿Imports System.Xml
+Partial Class manager_Modify_ModifyList
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim MaxPage As Integer
+    Dim FID As Integer
+    Dim MKDM As Integer
+    Dim XMDM As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Try
+            FID = Request("FID")
+        Catch ex As Exception
+            FID = 0
+        End Try
+
+        Dim Tb As New Data.DataTable
+        If FID = 0 Then
+            Try
+                MKDM = Request("MKDM")
+                XMDM = Request("XMDM")
+            Catch ex As Exception
+                MKDM = 0
+                XMDM = 0
+            End Try
+            Tb = Base.DB.Table("SELECT FID,MKDM FROM XX_XMJC WHERE mkdm = " & MKDM & " and xmdm=" & XMDM, "XX_XMJC")
+        Else
+            Tb = Base.DB.Table("SELECT FID,MKDM FROM XX_XMJC WHERE Fid = " & FID, "XX_XMJC")
+        End If
+        If Tb.Rows.Count = 0 Then
+            Response.Write("你无权限访问,或是记录已经不存在")
+            Response.End()
+        End If
+        MKDM = Tb.Rows(0)(1)
+        FID = Tb.Rows(0)(0)
+
+        Dim Qx As Integer = Base.GetUserHaveQX(UserID, MKDM)
+        '这里对表单进行处理，判断表单是只读，或是可写的，或是没有权限的。
+        If Qx <= 1 Then
+            Response.Write("无权打开此表单的历史记录，请联系管理员" & Qx)
+            Response.End()
+        End If
+
+        Dim Sql As String = "SELECT [CID], [UserName], [XMDM], [XMMC], [FormName], [ModiTime] FROM [Form_Modify_Log] Where"
+        If UserName.Text.Trim.Length > 0 Then
+            Sql += " userName Like '%" & UserName.Text.Trim & "%' and "
+        End If
+        Sql += " FormName='" & FID & "' ORDER BY [ModiTime] DESC"
+        Conn.SelectCommand = Sql
+
+        GridView1.DataBind()
+    End Sub
+
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        Dim Index As Integer = e.NewSelectedIndex
+        Dim Tb As New Data.DataTable
+        Dim Cid As Integer = GridView1.DataKeys(Index).Item(0)
+        Tb = Base.DB.Table("SELECT [CID], [UserName], [XMDM], [XMMC], [FormName] FROM [Form_Modify_Log] where Cid =" & Cid, "Form_Modify_Log")
+        If Tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "非法访问!")
+            Exit Sub
+        End If
+        Dim MKMC As String = Tb.Rows(0)(3).ToString
+        Dim FId As Integer = Tb.Rows(0)(4)
+        Dim Path As String = Server.MapPath("../../")
+        If IO.File.Exists(Path & "\history\" & MKMC & "\" & Cid & ".xml") = False Then
+            Base.Js.alert(Me, "记录不存在")
+            Exit Sub
+        End If
+
+        Try
+            IO.File.Copy(Path & "\history\" & MKMC & "\" & Cid & ".xml", Path & "\FormFolder\" & MKMC & "\" & FId & ".xml", True)
+        Catch ex As Exception
+            Base.Js.alert(Me, "操作失败")
+            Exit Sub
+        End Try
+
+        Dim OpenNode As XmlNode = Base.XmlClass.GetXmlFile(Path & "\history\" & MKMC & "\" & Cid & ".xml")
+        Dim RootNodeName As String = Base.XmlClass.GetRootNodeName
+        Dim Fid_NodeName As String = Base.XmlClass.GetFormID
+        Dim TempNode As XmlNode = Base.XmlClass.GetRootNode.Item(0)
+
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.IsSQL2005").ToLower = "true" Then
+            Dim SQLRootName, Prefix As String
+            Dim SQLRootNameSpace As String
+            Dim NameSpaces As String = String.Empty
+            Dim SqlTemp As String
+            Try
+                SQLRootName = TempNode.ParentNode.CloneNode(True).Name
+                '得到当前节点的根节点的命名空间.
+                Prefix = TempNode.ParentNode.Prefix
+                SQLRootNameSpace = "xmlns:" & Prefix & "=""" & TempNode.ParentNode.GetNamespaceOfPrefix(Prefix) & """"
+                '得到当前节点的根节点中所有的命名空间,用来查询时进行快速定位
+                Dim i As Integer
+                For i = 0 To TempNode.ParentNode.Attributes.Count - 1
+                    Dim Temp As String = TempNode.ParentNode.Attributes(i).Name.Replace("xmlns:", "")       '过滤掉xmlns
+                    If NameSpaces Is String.Empty Then
+                        NameSpaces = "'" & TempNode.ParentNode.Attributes(i).InnerText & "' as " & Temp
+                    Else
+                        NameSpaces = NameSpaces & ",'" & TempNode.ParentNode.Attributes(i).InnerText & "' as " & Temp
+                    End If
+                Next
+            Catch ex As Exception
+                Response.Write("读取根节点错误,请与管理员联系!")
+                Response.End()
+            End Try
+            Dim row As Data.DataRow
+            row = Base.DB.Row("Set ARITHABORT ON select LId From FormLibrary_" & MKDM & " where Fid=" & FId, "dd")
+            Base.DB.Query("Set ARITHABORT ON")      '因为要插入ＸＭＬ字段．所以必须先开起这个开关
+            If row Is Nothing Then      '表示库中不存在
+                SqlTemp = "insert into FormLibrary_" & MKDM & "(FID,MKDM,Forms,RootName,RootNameSpace,NameSpaces) values(" & FId & "," & MKDM & ",'" & TempNode.OuterXml.Replace("'", "''") & "','" & Base.SqlFilter(SQLRootName) & "','" & SQLRootNameSpace.Replace("'", "''") & "','" & NameSpaces.Replace("'", "''") & "')"
+            Else
+                SqlTemp = "update FormLibrary_" & MKDM & " set Forms='" & TempNode.OuterXml.Replace("'", "''") & "',RootName='" & Base.SqlFilter(SQLRootName) & "',RootNameSpace='" & SQLRootNameSpace.Replace("'", "''") & "',NameSpaces='" & NameSpaces.Replace("'", "''") & "' where FID=" & FId
+            End If
+            Base.DB.Query(SqlTemp)
+            If Not Base.DB.ErrorMessage Is Nothing Then
+                Response.Write("系统错误：入库失败,请联系管理员！")
+                Response.End()
+            End If
+        Else
+            FormInfo.SubmitForm(FId)
+            'Base.SynSubmit(FId, "提交")
+        End If
+        GridView1.SelectedIndex = -1
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_DataBound1(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        Dim YGXM As String
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Cells(3).Text = "<a href='javascript:void(0)' onclick=""window.open('../Forms/OpenHistoryWeb.aspx?CID=" & GridView1.DataKeys(i).Item(0) & "','打开WEB表单','height=600, width=800, top=10, left=10, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');"">WEB</a>&nbsp;<a href='javascript:void(0)' onclick=""window.open('../Forms/OpenHistory.aspx?CID=" & GridView1.DataKeys(i).Item(0) & "','打开表单','height=300, width=550, top=150, left=150, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=yes');"">查看</a>"
+            GridView1.Rows(i).Attributes.Add("onmouseover", "OnMouseOver(this)")
+            GridView1.Rows(i).Attributes.Add("onmouseout", "OnMouseOut(this)")
+            YGXM = Base.DB.ExeScalar("SELECT YGXM FROM GY_YGDM where DLMC='" & Base.SqlFilter(GridView1.Rows(i).Cells(0).Text) & "'")
+            If YGXM Is Nothing Then
+                GridView1.Rows(i).Cells(0).Text = "未知(" & GridView1.Rows(i).Cells(0).Text & ")"
+            Else
+                GridView1.Rows(i).Cells(0).Text = YGXM & "(" & GridView1.Rows(i).Cells(0).Text & ")"
+            End If
+        Next
+
+        '------------------------------------------------------
+        '只为得到总记录数
+        Dim GV As New GridView
+        GV.DataSource = Conn
+        GV.DataBind()
+        MaxPage = GV.Rows.Count
+        '-------------------------------------------------------
+        If GridView1.Rows.Count = 0 Then
+            PageBar.InnerHtml = "<center><span style='font-size:9pt;'>暂无记录</span></center>"
+        Else
+            PageBar.InnerHtml = Base.pub.WritePage(GridView1, MaxPage)
+        End If
+    End Sub
+
+    Protected Sub GridView1_RowDeleting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs) Handles GridView1.RowDeleting
+        Dim Tb As New Data.DataTable
+        Dim Cid As Integer = GridView1.DataKeys(e.RowIndex).Item(0)
+        Tb = Base.DB.Table("SELECT [CID], [UserName], [XMDM], [XMMC], [FormName] FROM [Form_Modify_Log] where Cid =" & Cid, "Form_Modify_Log")
+        If Tb.Rows.Count > 0 Then
+            Dim MKMC As String = Tb.Rows(0)(3).ToString
+            Try
+                IO.File.Delete(Server.MapPath("../../") & "\history\" & MKMC & "\" & Cid & ".xml")
+            Catch ex As Exception
+            End Try
+        End If
+        Conn.DeleteCommand = "Delete Form_Modify_Log where Cid=" & Cid
+        Conn.Delete()
+        GridView1.DataBind()
+    End Sub
+End Class

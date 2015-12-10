@@ -1,0 +1,221 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Default.aspx.vb" Inherits="manager_FileManager_Default"
+    Theme="SkinFile" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>文件管理</title>
+    <link rel="Stylesheet" type="text/css" href="../../App_Themes/StyleSheet.css" />
+    <link rel="stylesheet" type="text/css" href="../../App_Themes/colorbox.css" />
+    <script type="text/javascript" src="../../Pub/jquery-1.8.0.js"></script>
+    <script type="text/javascript" src="../../Pub/jquery.colorbox.js"></script>
+    <script type="text/javascript" src="../../Pub/jquery.ui.js"></script>
+    <script type="text/javascript">
+        function uploadFile() {
+            belongFolderID = <%=belongFolderID %>
+            window.open("UploadFile.aspx?belongFolderID=" + belongFolderID , "上传文件", "height=200,width=400");
+            return false;
+        }
+
+        function createFolder(isPublic) {
+            belongFolderID = <%=belongFolderID %>
+            $.colorbox({
+                iframe: true,
+                width: "60%",
+                height: "60%",
+                close: "关闭",
+                href: "CreateFolder.aspx?belongFolderID=" + belongFolderID +"&isPublic="+isPublic,
+                opacity: 0.5
+            });
+            return false;
+        }
+
+        function renameFolder(folderID) {
+            $.colorbox({
+                iframe: true,
+                width: "60%",
+                height: "60%",
+                close: "关闭",
+                href: "RenameFolder.aspx?folderID=" + folderID,
+                opacity: 0.5
+            });
+            return false;
+        }
+
+        function deleteFolder(folderID) {
+            if (confirm("您确实要删除此文件夹吗？")) {
+                $.ajax(
+                {
+                    type: "post",
+                    url: "DeleteFolder.aspx",
+                    data: "folderID=" + folderID,
+                    success: function (msg) {
+                        alert(msg);
+                        location.reload();
+                    }
+                }
+                );
+            }
+        }
+
+        function moveFolder(folderID) {
+            $.colorbox({
+                iframe: true,
+                width: "60%",
+                height: "60%",
+                close: "关闭",
+                href: "MoveFolder.aspx?folderID=" + folderID,
+                opacity: 0.5
+            });
+            return false;
+        }
+
+        function copyFolder(folderID) {
+            $.colorbox({
+                iframe: true,
+                width: "60%",
+                height: "60%",
+                close: "关闭",
+                href: "CopyFolder.aspx?folderID=" + folderID,
+                opacity: 0.5
+            });
+            return false;
+        }
+
+        function renameFile(fileID) {
+            $.colorbox({
+                iframe: true,
+                width: "60%",
+                height: "60%",
+                close: "关闭",
+                href: "RenameFile.aspx?fileID=" + fileID,
+                opacity: 0.5
+            });
+            return false;
+        }
+
+        function deleteFile(fileID) {
+            if (confirm("您确实要删除此文件吗？")) {
+                $.ajax(
+                {
+                    type: "post",
+                    url: "DeleteFile.aspx",
+                    data: "fileID=" + fileID,
+                    success: function (msg) {
+                        alert(msg);
+                        location.reload();
+                    }
+                }
+                );
+            }
+        }
+
+        function moveFile(fileID) {
+            $.colorbox({
+                iframe: true,
+                width: "60%",
+                height: "60%",
+                close: "关闭",
+                href: "MoveFile.aspx?fileID=" + fileID,
+                opacity: 0.5
+            });
+            return false;
+        }
+
+        function copyFile(fileID) {
+            $.colorbox({
+                iframe: true,
+                width: "60%",
+                height: "60%",
+                close: "关闭",
+                href: "CopyFile.aspx?fileID=" + fileID,
+                opacity: 0.5
+            });
+            return false;
+        }
+        function sharedFolderSetting(folderID) {
+            if (confirm('你确认共享该文件夹吗?')==true)
+	        {   
+                window.open ('SharedFolder.aspx?folderID=' + folderID,'共享文件夹','height=580,width=560,top=160,left=220,toolbar=no,menubar=no,scrollbars=yes,location=no, status=no');
+            }
+            return false;
+        }
+
+        function publicFolderPermissions()
+        {
+            window.open ('PublicFolderPermissions.aspx?belongFolderID=<%=belongFolderID%>','公共文件夹','height=500,width=533,top=160,left=220,toolbar=no,menubar=no,scrollbars=yes,location=no, status=no');
+            return false;
+        }
+
+        //绑定colorbox关闭刷新事件
+        $(document).bind('cbox_closed', function () {
+            location.reload();
+        });
+    </script>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        <asp:Button ID="btn_upload" runat="server" Text="上传文件" CssClass="btnsubmit" OnClientClick="return uploadFile()" />
+        <asp:Button ID="btn_newFolder" runat="server" Text="新建文件夹" CssClass="btnsubmit" OnClientClick="return createFolder(false)" />
+        <asp:Button ID="btn_addPublicFolder" runat="server" Text="公共文件夹" CssClass="btnsubmit"
+            OnClientClick="return createFolder(true)" />
+        <asp:Button ID="btn_permissionsSetting" runat="server" Text="权限设置" CssClass="btnsubmit"
+            OnClientClick="return publicFolderPermissions()" />
+        <br />
+        <asp:Label ID="lb_path" runat="server" Text=""></asp:Label>
+        <br />
+        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="name,type,ThisID,isSharedFolder,isPublicFolder"
+            HorizontalAlign="Center" Width="98%" SkinID="GridViewSkin1" CellPadding="0" BorderWidth="1px">
+            <Columns>
+                <asp:TemplateField HeaderText="选择">
+                    <ItemTemplate>
+                        <asp:CheckBox ID="CheckBox1" runat="server" Enabled="false" />
+                    </ItemTemplate>
+                    <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" Width="20px" />
+                </asp:TemplateField>
+                <asp:BoundField HeaderText="序号">
+                    <ItemStyle HorizontalAlign="Center" Width="30px" />
+                </asp:BoundField>
+                <asp:BoundField DataField="name" HeaderText="名称" SortExpression="名称"></asp:BoundField>
+                <asp:BoundField DataField="filesize" HeaderText="大小(K)">
+                    <ItemStyle HorizontalAlign="Center" Width="60px" />
+                </asp:BoundField>
+                <asp:BoundField DataField="FileType" HeaderText="类型">
+                    <ItemStyle HorizontalAlign="Center" Width="50px" />
+                </asp:BoundField>
+                <asp:BoundField DataField="CreateTime" HeaderText="最后修改时间">
+                    <ItemStyle HorizontalAlign="Center" Width="120px" />
+                </asp:BoundField>
+                <asp:TemplateField HeaderText="更名">
+                    <ItemStyle HorizontalAlign="Center" Width="50px" />
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="删除">
+                    <ItemStyle HorizontalAlign="Center" Width="50px" />
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="移动">
+                    <ItemStyle HorizontalAlign="Center" Width="50px" />
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="复制">
+                    <ItemStyle HorizontalAlign="Center" Width="50px" />
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="共享">
+                    <ItemStyle HorizontalAlign="Center" Width="60px" />
+                </asp:TemplateField>
+                <asp:CommandField ShowSelectButton="True" Visible="False" />
+            </Columns>
+            <PagerSettings Visible="False" />
+        </asp:GridView>
+        <center>
+            <table style="width: 98%; height: 26px; text-align: center; vertical-align: middle;
+                background-color: #EBECEE;">
+                <tr>
+                    <td id="PageBar" runat="server" align="center">
+                    </td>
+                </tr>
+            </table>
+        </center>
+    </div>
+    </form>
+</body>
+</html>

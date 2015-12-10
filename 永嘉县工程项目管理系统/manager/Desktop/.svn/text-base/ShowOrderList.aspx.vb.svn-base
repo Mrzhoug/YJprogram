@@ -1,0 +1,36 @@
+﻿
+Partial Class manager_Desktop_ShowOrderList
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Int16
+        Dim XMDM As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            XMDM = GridView1.Rows(i).Cells(2).Text
+            If XMDM = -1 Then
+                GridView1.Rows(i).Cells(2).Text = "所有项目"
+            Else
+                GridView1.Rows(i).Cells(2).Text = "项目列表："
+            End If
+            GridView1.Rows(i).Cells(4).Attributes.Add("onclick", "return confirm('你确认删除此订阅信息吗?');")
+        Next
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Conn.SelectParameters("UserID").DefaultValue = UserID
+    End Sub
+
+    Protected Sub GridView1_RowDeleting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs) Handles GridView1.RowDeleting
+        Dim Index As Integer = GridView1.DataKeys(e.RowIndex).Item(0)
+        Conn.DeleteCommand = "delete Order_Form_Table where CID = " & Index
+        Conn.Delete()
+        GridView1.DataBind()
+    End Sub
+End Class

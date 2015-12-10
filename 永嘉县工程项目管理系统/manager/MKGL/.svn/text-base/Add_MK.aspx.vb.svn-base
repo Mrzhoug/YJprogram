@@ -1,0 +1,122 @@
+﻿
+Partial Class manager_MKGL_Add_MK
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim dt_group As New DataTable
+    Dim group As New ArrayList
+    Dim i, k As Integer
+    Dim RootPath As String
+    Dim P As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking("../manager/mkgl/index.aspx") '用来对文件进么权限判断.因为这个功能是前一功能的子功能.所以这样子处理
+
+        '得到根目录
+        Try
+            P = Request("Page")
+        Catch ex As Exception
+            P = 0
+        End Try
+        RootPath = Request.MapPath("./")
+        RootPath = RootPath.Substring(0, RootPath.LastIndexOf("manager") + 7)
+        If RadioButton2.Checked = True Then
+            RootPath = RootPath.Replace("manager", "ApplicationTemplateLibrary")
+        End If
+
+        If RadioButton1.Checked = True Then
+            ListBox1.Visible = True
+            URL.Visible = False
+        End If
+
+        If Not Page.IsPostBack Then
+            URL.Visible = False
+            dt_group = Base.DB.Table("select * from [GY_GROUP] where Group_Kind = 1", "dd")
+            group.Add("")
+            For i = 0 To dt_group.Rows.Count - 1
+                group.Add(dt_group.Rows(i)("group_name"))
+            Next
+            dl_group.DataSource = group
+            dl_group.DataBind()
+            dl_group.Items(0).Value = 0
+            For k = 1 To dt_group.Rows.Count
+                dl_group.Items(k).Value = dt_group.Rows(k - 1)(0)
+            Next
+            TMK_url.Text = Base.pub.LoadDir(RootPath, ListBox1, RootPath)
+            Base.pub.HideFileList(ListBox1, ".vb|.resx")
+        End If
+    End Sub
+
+    Protected Sub cmd_add_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles cmd_add.Click
+        If RadioButton3.Checked = True Then
+            If TMK_name.Text.Trim = "" Or URL.Text.Trim = "" Then
+                Base.Js.showalert(Me, "请填写完整！")
+                Exit Sub
+            End If
+        Else
+            If TMK_name.Text.Trim = "" Or TMK_url.Text.Trim = "" Then
+                Base.Js.showalert(Me, "请填写完整！")
+                Exit Sub
+            End If
+        End If
+
+        If Base.DB.GetRowCount("select * from [GY_MKXX] where MKMC='" & TMK_name.Text.Trim & "'", "dd") > 0 Then
+            Base.Js.alert(Me, "当前模块名称已经存在")
+            Exit Sub
+        Else
+            Dim mk_url As String
+            If RadioButton1.Checked = True Then mk_url = "../manager" & TMK_url.Text.Trim.Replace("\", "/")
+
+            If RadioButton2.Checked = True Then mk_url = "../ApplicationTemplateLibrary" & TMK_url.Text.Trim.Replace("\", "/")
+            If RadioButton3.Checked = True Then
+                If URL.Text.Substring(1, 6).ToLower = "ttp://" Or URL.Text.Substring(1, 7).ToLower = "ttps://" Then
+                    mk_url = URL.Text.Trim
+                Else
+                    mk_url = "http://" & URL.Text.Trim
+                End If
+            End If
+            Dim Row As DataRow = Base.DB.Row("select MKMC from [GY_MKXX] where XDLJ='" & mk_url & "'", "dd")
+            If Not Row Is Nothing Then
+                Base.Js.alert(Me, "当前功能已经建立,功能名为(" & Row.Item(0) & ")")
+                Exit Sub
+            End If
+
+            If Base.DB.ExeSql("insert into [GY_MKXX](MKMC, WLLJ, XDLJ,DisplayOrder) values('" & TMK_name.Text.Trim & "','" & RootPath & "\" & Replace(mk_url, "/", "\") & "','" & mk_url & "'," & 99 & " )") > 0 Then
+                If dl_group.SelectedValue = 0 Then
+                Else
+                    Dim mkdm As Integer = Base.DB.ExeScalar("select * from [GY_MKXX] where MKMC='" & TMK_name.Text.Trim & "'")
+                    Base.DB.ExeSql("insert into [GY_GROUP_INFO](GROUP_ID,MKDM) values(" & dl_group.SelectedValue & "," & mkdm & ")")
+                End If
+                Base.Js.CloseGoTo(Me, "添加成功！", "index.aspx?Page=" & P)
+            End If
+            End If
+    End Sub
+
+    Protected Sub ListBox1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles ListBox1.SelectedIndexChanged
+        TMK_url.Text = Base.pub.ChangeDir(TMK_url.Text, ListBox1, RootPath)
+        Base.pub.HideFileList(ListBox1, ".vb|.resx")
+    End Sub
+
+    Protected Sub RadioButton2_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles RadioButton2.CheckedChanged
+        If RadioButton2.Checked = True Then
+            ListBox1.Visible = True
+            URL.Visible = False
+            RootPath = RootPath.Replace("manager", "ApplicationTemplateLibrary")
+            TMK_url.Text = Base.pub.LoadDir(RootPath, ListBox1, RootPath)
+        End If
+    End Sub
+
+    Protected Sub RadioButton1_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles RadioButton1.CheckedChanged
+        If RadioButton1.Checked = True Then
+            ListBox1.Visible = True
+            URL.Visible = False
+            RootPath = RootPath.Replace("ApplicationTemplateLibrary", "manager")
+            TMK_url.Text = Base.pub.LoadDir(RootPath, ListBox1, RootPath)
+        End If
+    End Sub
+
+    Protected Sub RadioButton3_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles RadioButton3.CheckedChanged
+        If RadioButton3.Checked = True Then
+            ListBox1.Visible = False
+            URL.Visible = True
+        End If
+    End Sub
+End Class

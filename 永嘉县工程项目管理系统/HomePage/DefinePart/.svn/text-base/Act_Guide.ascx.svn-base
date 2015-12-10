@@ -1,0 +1,38 @@
+﻿<%@ Control Language="VB" AutoEventWireup="false" CodeFile="Act_Guide.ascx.vb" Inherits="HomePage_DefinePart_Act_Guide" %>
+
+
+<table id="Table_01" width="580" style="height:180px;" border="0" cellpadding="0" cellspacing="0">
+	<tr style="height:32px;">
+		<td style="background-image:url(images/actGuide.gif);">
+		<table height="18" border="0" cellpadding="0" cellspacing="0"><tr><td width=533></td><td width=40 onclick="window.location.href='Act_Guide_List.aspx'" style="cursor:hand"></td></tr></table>
+		</td>
+	</tr>
+	<tr>
+	<td style="background:url(images/页面2_12.gif);" valign="top">
+	    <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" CellPadding="4"
+    DataKeyNames="Cid" DataSourceID="Conn" ForeColor="#333333" HorizontalAlign="Center"
+    Width="99%" Font-Size="9pt">
+    <FooterStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
+    <Columns>
+        <asp:TemplateField HeaderText="序号">
+            <ItemStyle HorizontalAlign="Center" Width="30px" />
+        </asp:TemplateField>
+        <asp:BoundField DataField="Title" HeaderText="办事指南" SortExpression="Title" />
+        <asp:BoundField DataField="UpTime" HeaderText="日期" SortExpression="UpTime">
+            <ItemStyle HorizontalAlign="Center" Width="100px" />
+        </asp:BoundField>
+    </Columns>
+    <RowStyle BackColor="#F7F6F3" ForeColor="#333333" />
+    <EditRowStyle BackColor="#999999" />
+    <SelectedRowStyle BackColor="#E2DED6" Font-Bold="True" ForeColor="#333333" />
+    <PagerStyle BackColor="#284775" ForeColor="White" HorizontalAlign="Center" />
+    <HeaderStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
+    <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
+    </asp:GridView>
+</td>
+	</tr>
+	<tr><td style="height:7px;"><img src="images/页面2_16.gif" alt="" /></td></tr>
+</table>
+<asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+    SelectCommand="SELECT top 5  [Cid], [Title], [UpTime] FROM [Act_Guide] ORDER BY [UpTime] DESC">
+</asp:SqlDataSource>

@@ -1,0 +1,178 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ShowMenu_FunSetting.aspx.vb" Inherits="manager_Group_info_ShowMenu_FunSetting" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>显示菜单的功能设置</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+    <script type="text/javascript" language="JavaScript">
+    <!--
+        function chk(chk, id) {
+            var oEvent = document.all(id);
+            var chks = oEvent.getElementsByTagName("INPUT");
+            for (var i = 0; i < chks.length; i++) {
+                if (chks[i].type == "checkbox")
+                    chks[i].checked = chk.checked;
+            }
+        }
+    -->
+</script>
+</head>
+<body>
+    <center>
+    <form id="form1" runat="server"  style="width:900px">
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>组用户管理</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td colspan=3 style="text-align:center"> 
+                            <span id="TGroup_name" runat="server" style="font-size:15pt; font-weight:bold;"></span>                            
+                        </td>                    
+                    </tr>
+
+                    <tr>
+                        <th align="left" style="text-align:center; width:45%;">
+                            组内现有功能
+                        </th>
+                        <td style="width:10%">
+                            &nbsp;
+                        </td>
+                        <th align="left" style="text-align:center; width:45%;">
+                            系统所有功能
+                        </th>
+                    </tr>
+
+                    <tr>
+                        <td style="text-align:center">
+                            <asp:Button id="MoveUp" onclick="MoveUp_Click" runat="server" Enabled="False" Text="功能上移" CssClass="btnsubmit"></asp:Button> 
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <asp:Button id="MoveDown" onclick="MoveDown_Click" runat="server" Enabled="False" Text="功能下移" CssClass="btnsubmit"></asp:Button> 
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                        <td  style="text-align:right;">
+                            &nbsp;关键字：<asp:TextBox ID="TextBox1" runat="server"></asp:TextBox>
+                            <asp:Button ID="Button1" runat="server" Text="查 询" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+
+
+                    <tr style=" height:350px;">
+                        <td style="vertical-align:top;text-align:center;">
+                            <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" AllowPaging="true"
+                                DataKeyNames="Cid,Group_ID" Width="98%" SkinID="GVSkin_CoolTable" DataSourceID="conn1">
+                                <Columns>
+                                    <asp:TemplateField HeaderText="选择">
+                                        <HeaderTemplate>
+                                            <asp:CheckBox ID="CheckBox3" runat="server" onclick="chk(this,'GridView1')"/>
+                                        </HeaderTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox1" runat="server"  />
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center" Width="10%"  />
+                                        <HeaderStyle HorizontalAlign="Center" />
+                                    </asp:TemplateField>
+                                    <asp:BoundField DataField="ShowFunName" HeaderText="显示名" >
+                                        <ItemStyle HorizontalAlign="Left" VerticalAlign="Middle" Width="35%" />
+                                        <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                    </asp:BoundField>
+                                    <asp:TemplateField HeaderText="功能名" SortExpression="DLMC">
+                                        <EditItemTemplate>
+                                            <asp:Label ID="Label1" runat="server" Text='<%# Bind("MKMC") %>'></asp:Label>
+                                        </EditItemTemplate>
+                                        <ItemStyle HorizontalAlign="Left" VerticalAlign="Middle" />
+                                        <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                        <ItemTemplate>
+                                            <asp:Label ID="Label1" runat="server" Text='<%# Bind("MKMC") %>'></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>                                    
+                                    <asp:CommandField ShowEditButton="True" EditText="编辑名称">
+                                        <ItemStyle HorizontalAlign="Center" Width="20%" Wrap="False" />
+                                    </asp:CommandField>
+                                    <asp:CommandField ShowSelectButton="True" Visible="False" />
+                                </Columns>
+                                <RowStyle CssClass="cooltableRowStyle" />
+                                <AlternatingRowStyle CssClass="cooltableAlternatingRowStyle" />
+                                <RowStyle HorizontalAlign="Center" />
+                                
+                            </asp:GridView>
+                            <%--<table align="center" style="width:98%; height:26px; text-align:center; vertical-align:middle; background-color:#EBECEE;">
+                                <tr>
+                                    <td id="PageBarGridView1" runat="server" align="center"></td>
+                                </tr>
+                            </table>--%>
+                        </td>
+
+                        <td style="vertical-align:middle">
+                           <asp:Button ID="btn_add" runat="server" Text="<<添加"  CssClass="btnsubmit" />
+                            <br />
+                            <br />
+                            <asp:Button ID="btn_del" runat="server" Text="移除>>" CssClass="btnsubmit" />
+                        </td>
+
+                        <td style="vertical-align:top;text-align:center;">
+
+                            <asp:GridView ID="GridView2" runat="server" AutoGenerateColumns="False" AllowPaging="true"
+                                Width="98%" CssClass="cooltable" DataKeyNames="MKDM,MKMC" DataSourceID="conn2">
+                                <Columns>
+                                    <asp:TemplateField HeaderText="选择">
+                                        <HeaderTemplate>
+                                            <asp:CheckBox ID="CheckBox3" runat="server" onclick="chk(this,'GridView2')" />
+                                        </HeaderTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox1" runat="server"  />
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center" Width="15%" />
+                                        <HeaderStyle HorizontalAlign="Center" />
+                                    </asp:TemplateField>
+                                    <asp:BoundField DataField="MKMC" HeaderText="模块名称" SortExpression="YGXM" >
+                                        <ItemStyle HorizontalAlign="Left" VerticalAlign="Middle" />
+                                    </asp:BoundField>
+                                    <asp:BoundField DataField="XsnDir" HeaderText="模板名称" SortExpression="DLMC" >
+                                        <ItemStyle HorizontalAlign="Left" VerticalAlign="Middle" />
+                                    </asp:BoundField>
+                                </Columns>
+                                <RowStyle CssClass="cooltableRowStyle" />
+                                <AlternatingRowStyle CssClass="cooltableAlternatingRowStyle" />
+                                <RowStyle HorizontalAlign="Center" />
+                                
+                            </asp:GridView>
+                            <%--<table align="center" style="width:98%; height:26px; text-align:center; vertical-align:middle; background-color:#EBECEE;">
+                                <tr>
+                                    <td id="PageBarGridView2" runat="server" align="center"></td>
+                                </tr>
+                            </table>--%>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <asp:SqlDataSource ID="Conn1" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT Cid,Group_ID, GY_GROUP_INFO.MKDM, ShowFunName, MKMC FROM GY_MKXX,GY_GROUP_INFO where GY_MKXX.MKDM = GY_GROUP_INFO.MKDM and Group_Id=@GroupID  order by OrderBy" DeleteCommand="DELETE FROM GY_YGQX WHERE (GROUP_ID = @group_id) AND (YGDM = @YGDM)">
+            <SelectParameters>
+                <asp:Parameter DefaultValue="0" Name="groupid" />
+            </SelectParameters>
+            <DeleteParameters>
+                <asp:Parameter Name="group_id" />
+                <asp:Parameter Name="YGDM" />
+            </DeleteParameters>
+        </asp:SqlDataSource>
+        <asp:SqlDataSource ID="Conn2" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT [MKDM], [MKMC], [XsnDir] FROM [GY_MKXX] where MKDM not in (select MKDM from Gy_Group_Info where Group_Id = @GroupID)">
+            <SelectParameters>
+                <asp:Parameter DefaultValue="0" Name="GroupID" />
+            </SelectParameters>
+        </asp:SqlDataSource>
+    </form>
+    </center>
+</body>
+</html>

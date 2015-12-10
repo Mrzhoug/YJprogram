@@ -1,0 +1,62 @@
+﻿
+Partial Class manager_Forms_TagManage
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim LCDM As Integer
+
+    Dim Login_User As String
+    Dim UserID As Integer
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim TagName As String = Base.SqlFilter(TextBox1.Text)
+        If TagName.Length > 0 Then
+            Dim row As Data.DataRow = Base.DB.Row("Select Tid from Form_Tags_List where TagName='" & TagName & "'and LCDM='" & LCDM & "'", "dd")
+            If row Is Nothing Then
+                Base.DB.Query("INSERT INTO [Form_Tags_List] ([UserID],[LCDM],[TagName]) VALUES (" & UserID & "," & LCDM & ",'" & TagName & "') ")
+                GridView1.DataBind()
+            Else
+                Base.Js.alert(Me, "此标签已经存在")
+            End If
+        End If
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Try
+            LCDM = Request("LCDM")
+        Catch ex As Exception
+            Response.Write("非法参数")
+            Response.End()
+        End Try
+        Dim Row As Data.DataRow = Base.DB.Row("SELECT MKMC,XsnDir,MKDM FROM GY_MKXX where NoLcDM =" & LCDM, "123")
+        If Row Is Nothing Then
+            Response.Write("非法访问，或功能已经不存在")
+            Response.End()
+        End If
+
+        Conn.SelectParameters("LCDM").DefaultValue = LCDM
+        Conn.SelectParameters("UserID").DefaultValue = UserID
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        Dim Tid As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            Tid = GridView1.DataKeys(i).Item(0)
+            GridView1.Rows(i).Cells(0).Text = GridView1.Rows(i).Cells(0).Text & " (" & Base.DB.ExeScalar("Select Count(FTID) From [Form_Tags] where [TagID] = " & Tid).ToString & ")"
+        Next
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+        GridView1.SelectedIndex = -1
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        Dim TID As Integer = GridView1.DataKeys(e.NewSelectedIndex).Item(0)
+        Base.DB.Query("Delete Form_Tags_List Where TID=" & TID)
+        Base.DB.Query("Delete Form_Tags Where TagID=" & TID)
+        GridView1.DataBind()
+    End Sub
+End Class

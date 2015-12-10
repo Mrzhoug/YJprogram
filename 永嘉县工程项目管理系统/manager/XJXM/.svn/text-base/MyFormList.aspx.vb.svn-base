@@ -1,0 +1,376 @@
+﻿Imports System.IO
+Partial Class manager_XJXM_MyFormList
+    Inherits System.Web.UI.Page
+    Dim LCDM As Integer
+    Dim Base As New Base
+    Dim TempTable As New Data.DataTable
+    Dim MaxTitle As Integer
+    Dim MKMC As String
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim SelectSQL As String
+    Dim MaxPage As Integer
+    Dim MKDM As Integer
+    Dim BaseUrl As String       '在读取XML文件内容时的基目录
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Try
+            LCDM = Request("lcdm")
+        Catch ex As Exception
+            Base.Js.alert(Me, "非法访问!")
+            Exit Sub
+        End Try
+
+        '得到模块名称
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("SELECT MKMC,XsnDir,MKDM FROM GY_MKXX where NoLcDM =" & LCDM, "GY_MKXX")
+        If tb.Rows.Count <= 0 Then
+            Base.Js.alert(Me, "功能模板有问题!")
+            Response.End()
+        End If
+        Base.Js.WriteScript(Me, "var lcdm='" & LCDM & "';" & vbCrLf & "var menuid='" & Request("MenuID") & "';")
+        MKDM = tb.Rows(0).Item(2).ToString.Trim
+        MKMC = tb.Rows(0).Item(0).ToString.Trim
+        BaseUrl = Server.MapPath("../../") & "FormFolder/" & MKMC & "/"
+        SelectSQL = "SELECT XX_XMJC.FID,GY_XMXX.XMDM FROM GY_XMXX,XX_XMJC where XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" & LCDM & " and (GY_XMXX.XMJD is not null) and GY_XMXX.XMSM='" & Login_User & "' "
+        If Page.IsPostBack = False Then
+            Try
+                Base.CreateGridviewTitle(GridView1, LCDM, False)
+                TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", False)
+                MaxPage = TempTable.Rows.Count
+            Catch ex As Exception
+                Response.Write("此功能的模板已经不存在,请刷新菜单!")
+                Response.End()
+            End Try
+            GridView1.DataBind()
+        Else
+            TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", False)
+            MaxPage = TempTable.Rows.Count
+        End If
+    End Sub
+
+    Sub DeleteAnnexFile(ByVal Fid As Integer, ByVal MKMC As String)
+        Dim i, j As Integer
+        Dim SaveBase As String = Server.MapPath("../../") & "\FormFolder\" & MKMC & "\Annex\"
+        Dim SaveFile As String
+        For i = 0 To 20
+            For j = 0 To 20
+                SaveFile = Fid & "_" & i & "_" & j & ".txt"
+                If IO.File.Exists(SaveBase & SaveFile) = True Then
+                    Try
+                        IO.File.Delete(SaveBase & SaveFile)
+                    Catch ex As Exception
+                    End Try
+                Else
+                    j = 20
+                End If
+            Next
+        Next
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        SortGridview()
+    End Sub
+
+    Protected Sub GridView1_Sorting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSortEventArgs) Handles GridView1.Sorting
+        TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, e.SortExpression, False)
+        MaxPage = TempTable.Rows.Count
+        Dim Dv As New Data.DataView(TempTable)
+        Dim TempSort As String
+        TempSort = ViewState("sortDirection")
+        If TempSort = "" Then
+            Dv.Sort = e.SortExpression
+        Else
+            Dim ls As String()
+            ls = TempSort.Split(" ")
+            If ls(0) = e.SortExpression And ls.GetUpperBound(0) = 0 Then
+                Dv.Sort = e.SortExpression & " desc"
+            Else
+                Dv.Sort = e.SortExpression
+            End If
+        End If
+        ViewState("sortDirection") = Dv.Sort
+
+        GridView1.DataSource = Dv
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_RowDeleting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs) Handles GridView1.RowDeleting
+        Dim index As Integer = e.RowIndex
+        Dim Fid As String = GridView1.DataKeys(index).Item(0)
+
+        '从模板信息表中,得到当前模板的模板名
+
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("select xsndir,MKMC from GY_MKXX where NoLCDM = " & LCDM, "GY_MKXX")
+        Dim XsnDir As String = tb.Rows(0).Item(0).ToString.Trim
+        Dim XMMC As String = tb.Rows(0).Item(1).ToString.Trim
+        Try
+            tb = Base.DB.Table("SELECT xmdm,lock,MKDM FROM XX_XMJC where fid=" & Fid, "XX_XMJC")
+        Catch ex As Exception
+            Base.Js.alert(Me, "删除失败,LOCK字段未找到.请联系管理员!")
+            Exit Sub
+        End Try
+        Dim XMDM As String = tb.Rows(0).Item(0)
+        Dim MKDM As String = tb.Rows(0).Item(2)
+        Dim Qx As Integer = Base.GetUserHaveQX(UserID, MKDM)
+        If Qx < 8 Then
+            Base.Js.alert(Me, "你没有删除此表单的权力,请与管理员联系")
+            Exit Sub
+        End If
+        Dim Lock As Integer
+        Try
+            Lock = tb.Rows(0)(1)
+        Catch ex As Exception
+            Lock = 0
+        End Try
+
+        If Lock = 1 Then
+            Base.Js.alert(Me, "此表单已经锁定,删除文件前请解锁")
+            Exit Sub
+        End If
+
+        tb = Nothing
+
+        Dim DFileName As String = Server.MapPath("../../") & "\FormFolder\" & XMMC & "\" & Fid & ".xml"
+
+        '先删除数据库
+        Base.DB.Query("delete GY_XMXX where XMDM = " & XMDM)
+        Base.System_UserOp_Log(UserID, "delete GY_XMXX where XMDM = " & XMDM)
+        Base.DB.Query("delete XX_XMJC where FID = " & Fid)
+        Base.System_UserOp_Log(UserID, "delete XX_XMJC where FID = " & Fid)
+
+        '当是二维映射时.进行同步删除
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLMapping").ToLower = "true" Then
+            Base.DB.Query("delete [" & XMMC & "_Mapping] where Fid=" & Fid)
+            Base.System_UserOp_Log(UserID, "delete [" & XMMC & "_Mapping] where aid=" & Fid)
+            Base.DB.Query("delete [" & XMMC & "_MapExt] where Fid=" & Fid)
+            Base.System_UserOp_Log(UserID, "delete [" & XMMC & "_MapExt] where aid=" & Fid)
+            '提交到服务，进行同步处理
+            FormInfo.DelForm(Fid)
+            'Base.SynSubmit(Fid, "删除|" & XMMC)
+        Else
+            If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.IsSQL2005").ToLower = "true" Then
+                Base.DB.Query("Set ARITHABORT ON")      '因为要插入ＸＭＬ字段．所以必须先开起这个开关
+                Base.DB.Query("Delete FormLibrary_" & MKDM & " where fid = " & Fid)
+                Base.System_UserOp_Log(UserID, "Delete FormLibrary_" & MKDM & " where fid = " & Fid)
+            Else
+                '再删除库中的记录
+                Dim TempFileName As String = Server.MapPath("../../") & "\FormFolder\" & XMMC & ".库.xml"
+                Try
+                    Dim Node As System.Xml.XmlNode = Base.XmlClass.GetXmlFile(TempFileName).ChildNodes(0)
+                    Dim Fid_NodeName As String = Base.XmlClass.GetFormID
+                    Base.XmlClass.DelNode("//" & Node.Name & "/" & Fid_NodeName.Replace("表单号", "标题") & "[" & Fid_NodeName & "='" & Fid & "']")
+                Catch ex As Exception
+                    Base.Log(Login_User, "MyFormList.aspx", ex.Message.ToString(), Fid)
+                End Try
+            End If
+
+            '再删除文件
+            Try
+                If File.Exists(DFileName) = True Then
+                    File.Delete(DFileName)
+                    Base.System_UserOp_Log(UserID, "删除文件:" & DFileName)
+                End If
+                DeleteAnnexFile(Fid, MKMC)
+            Catch ex As Exception
+                Base.Js.alert(Me, "表单正在使用中,删除文件失败!")
+            End Try
+        End If
+
+        Response.Redirect("MyFormList.aspx?LCDM=" & LCDM)
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i, j, FID As Integer
+        Dim FileName As String
+        Dim TopNum As Integer
+        Dim LockFlag As Integer         '锁定标志
+        Dim ShowTb As New Data.DataTable
+        ShowTb = Base.DB.Table("Select ShowName,NodeName from ShowList_LCDM where LCDM = " & LCDM & " order by ID", "ShowList_LCDM")
+
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Attributes.Add("onmouseover", "OnMouseOver(this)")
+            GridView1.Rows(i).Attributes.Add("onmouseout", "OnMouseOut(this)")
+            GridView1.Rows(i).Attributes.Add("id", "gridview1_" & GridView1.DataKeys(i).Item(0))
+            GridView1.Rows(i).Attributes.Add("onmouseup", "gpc(" & GridView1.DataKeys(i).Item(0) & ",this," & i & ");")
+
+            FID = GridView1.DataKeys(i).Item(0)
+            FileName = BaseUrl & FID & ".xml"
+
+            If Base.XmlClass.GetXmlFile(FileName) Is Nothing Then
+                '表示找不到记录，则显示空记录
+                For j = 0 To ShowTb.Rows.Count - 1
+                    GridView1.Rows(i).Cells(j + 2).Text = "空"
+                Next
+            Else
+                '再列自定义的列
+                For j = 0 To ShowTb.Rows.Count - 1
+                    Dim dd As System.Xml.XmlNode = Base.XmlClass.FindNode("//" & ShowTb.Rows(j).Item(1).ToString.Replace("<", "").Replace(">", ""))
+                    If dd Is Nothing Then
+                        GridView1.Rows(i).Cells(j + 2).Text = "空"
+                    Else
+                        If dd.ChildNodes.Item(0) Is Nothing Then
+                            GridView1.Rows(i).Cells(j + 2).Text = "空"
+                        Else
+                            If dd.ChildNodes.Item(0).Value Is Nothing Then
+                                If dd.HasChildNodes = True Then     '当是父节点.但是存在子节点时.则显示子节点的内容(或是超文本框)
+                                    Dim TempOut As String = dd.ChildNodes.Item(0).OuterXml.ToString.Trim
+                                    If TempOut.Length >= 100 Then
+                                        GridView1.Rows(i).Cells(j + 2).Text = Server.HtmlEncode(TempOut.Substring(0, 98)) & "..."
+                                    Else
+                                        GridView1.Rows(i).Cells(j + 2).Text = Server.HtmlEncode(TempOut)
+                                    End If
+                                Else
+                                    GridView1.Rows(i).Cells(j + 2).Text = "空"
+                                End If
+                            Else
+                                If dd.ChildNodes.Item(0).Value.ToString.Trim.Length >= 100 Then
+                                    GridView1.Rows(i).Cells(j + 2).Text = Server.HtmlEncode(dd.ChildNodes.Item(0).Value.ToString.Substring(0, 98)) & "..."
+                                Else
+                                    GridView1.Rows(i).Cells(j + 2).Text = Server.HtmlEncode(dd.ChildNodes.Item(0).Value)
+                                End If
+                            End If
+                        End If
+                    End If
+                    If j = 0 Then           '当是自定义列第一列时
+                        Try
+                            TopNum = Base.DB.ExeScalar("SELECT TopNum FROM XX_XMJC WHERE FID =" & FID)
+                        Catch ex As Exception
+                            TopNum = 0
+                        End Try
+
+                        If TopNum > 0 Then
+                            GridView1.Rows(i).Cells(1).Text = "<img src='../../images/cal_nextMonth.gif'>&nbsp;"
+                            'GridView1.Rows(i).Cells(1).Text = "顶"
+                        End If
+
+                        Try         '添加锁定图标
+                            LockFlag = Base.DB.ExeScalar("SELECT Lock FROM XX_XMJC WHERE FID =" & FID)
+                        Catch ex As Exception
+                            LockFlag = 0
+                        End Try
+
+                        If LockFlag > 0 Then
+                            GridView1.Rows(i).Cells(1).Text = GridView1.Rows(i).Cells(1).Text & "<img src='../../images/Ext.UI/resources/images/default/grid/hmenu-lock.gif'>"
+                        End If
+
+
+                        Dim State As String
+                        Try
+                            State = Base.DB.ExeScalar("Select state from   XX_XMJC where FID=" & FID).ToString()
+                        Catch ex As Exception
+                            State = "0"
+                        End Try
+
+                        Select Case State
+                            Case "0"
+                                GridView1.Rows(i).Cells(1).Text = GridView1.Rows(i).Cells(1).Text & "<img src='../../images/Ext.UI/resources/images/default/dd/drop-add.gif'>"
+                            Case "1"
+                                GridView1.Rows(i).Cells(1).Text = GridView1.Rows(i).Cells(1).Text & "<img src='../../images/Ext.UI/resources/images/default/dd/drop-yes.gif'>"
+                            Case "-1"
+                                GridView1.Rows(i).Cells(1).Text = GridView1.Rows(i).Cells(1).Text & "<img src='../../images/Ext.UI/resources/images/default/drop-no.gif'>"
+                        End Select
+
+
+                    End If
+                Next
+            End If
+        Next
+        GridView1.Columns(GridView1.Columns.Count - 1).Visible = False
+        PageBar.InnerHtml = Base.pub.WritePage(GridView1, MaxPage)
+    End Sub
+
+    Protected Sub GridView1_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs) Handles GridView1.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            e.Row.Attributes.Add("OnDblClick", "DbClickEvent('" & GridView1.DataKeys(e.Row.RowIndex).Item(0) & "','" & Request("MenuID") & "')")
+            e.Row.Attributes("style") = "Cursor:hand"
+        End If
+    End Sub
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+        GridView1.SelectedIndex = -1
+        GridView1.DataBind()
+    End Sub
+
+    Sub SortGridview()
+        Dim ls As String()
+        Try
+            ls = ViewState("sortDirection").ToString.Split(" ")
+            TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, ls(0), False)
+        Catch ex As Exception
+            TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", False)
+        End Try
+        MaxPage = TempTable.Rows.Count
+        Dim Dv As New Data.DataView(TempTable)
+        Dim TempSort As String
+        TempSort = ViewState("sortDirection")
+        If TempSort <> "" Then
+            Dv.Sort = TempSort
+            ViewState("sortDirection") = Dv.Sort
+        End If
+        GridView1.DataSource = Dv
+        GridView1.DataBind()
+    End Sub
+
+
+    Protected Sub DropDownList1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles DropDownList1.SelectedIndexChanged
+        Dim Sidx As Integer = DropDownList1.SelectedIndex
+        Dim ck As CheckBox
+        Dim i As Integer
+        Dim FID As Integer
+
+        If Sidx = 4 Or Sidx = 5 Or Sidx = 6 Then
+            If Base.GetUserHaveQX(UserID, MKDM) < 8 Then
+                Base.Js.alert(Me, "权限不够.你必须拥有删除表单权限才能使用功能!")
+                Exit Sub
+            End If
+        Else
+            If Base.GetUserHaveQX(UserID, MKDM) < 2 Then
+                Base.Js.alert(Me, "权限不够.你必须拥有写表单的权限才能使用此功能!")
+                Exit Sub
+            End If
+        End If
+
+        For i = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                FID = GridView1.DataKeys(i).Item(0)
+                Select Case Sidx
+                    Case 1      '设置成[完成]状态
+                        Base.DB.Query("update XX_XMJC set State=1 where FID=" & FID)
+                    Case 2      '设置成[修改]状态
+                        Base.DB.Query("update XX_XMJC set State=0 where FID=" & FID)
+                    Case 3      '设置成[取消]状态
+                        Base.DB.Query("update XX_XMJC set State=-1 where FID=" & FID)
+                    Case 4      '删除表单功能
+                        Base.DeleteForm(FID, MKMC, UserID, Login_User)
+                    Case 5      '锁定所选表单
+                        Base.DB.Query("update XX_XMJC set Lock=1 where FID=" & FID)
+                    Case 6      '解锁表单
+                        Base.DB.Query("update XX_XMJC set Lock=0 where FID=" & FID)
+                    Case 7      '置顶表单
+                        Base.DB.Query("update XX_XMJC set TopNum=(select max(topnum) from XX_XMJC where mkdm=" & MKDM & ") + 1 where FID=" & FID)
+                    Case 8      '取消置顶
+                        Base.DB.Query("update XX_XMJC set TopNum=0 where FID=" & FID)
+                End Select
+            End If
+        Next
+
+
+        '重新刷新界面
+        TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", False)
+        MaxPage = TempTable.Rows.Count
+        GridView1.DataBind()
+        DropDownList1.SelectedIndex = 0
+        DropDownList1.DataBind()
+    End Sub
+End Class

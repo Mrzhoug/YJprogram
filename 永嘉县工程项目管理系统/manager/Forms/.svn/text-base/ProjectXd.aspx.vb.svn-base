@@ -1,0 +1,119 @@
+﻿Imports System.Xml
+
+Partial Class manager_Forms_ProjectXd
+    Inherits System.Web.UI.Page
+
+    Dim Fid As Integer
+    Dim Base As New Base
+    Dim base64 As New SunFun.Base64
+    Dim Xdtext As String            '修订内容
+
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim FQR As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim Cid As Integer
+        Try
+            Cid = Request("CID")
+        Catch ex As Exception
+            Response.Write("非法参数或是非法访问!")
+            Response.End()
+        End Try
+
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("SELECT CID,FID,Xdtext,FQR FROM Gy_XmXd where cid =" & Cid, "dd")
+        If Tb.Rows.Count <= 0 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+        Fid = Tb.Rows(0)("FID")
+        Xdtext = Tb.Rows(0)("Xdtext").ToString
+        FQR = Tb.Rows(0)("FQR")
+
+        Try         '做已读标志
+            Base.DB.Query("update DesktopMessage set looked=1 where Dkind='修订' and DKID = " & Cid)
+        Catch ex As Exception
+        End Try
+
+        '根据ＦＩＤ得到相关的信息        
+        Tb = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir,GY_MKXX.MKDM,XX_XMJC.XMDM,[View] FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & Fid & ")", "XX_XMJC")
+        If Tb.Rows.Count = 0 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+    End Sub
+
+    Function GetImages()
+        Dim Tb As New Data.DataTable
+        '根据ＦＩＤ得到相关的信息        
+        Tb = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir,GY_MKXX.MKDM,XX_XMJC.XMDM,[View] FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & Fid & ")", "XX_XMJC")
+        If Tb.Rows.Count = 0 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+        Dim MKMC As String = Tb.Rows(0).Item(1)
+        Dim XsnDir As String = Tb.Rows(0).Item(2).ToString.Trim
+        Dim Opfile As String = Server.MapPath("../../") & "\FormFolder\" & MKMC & "\" & Fid & ".xml"
+        If IO.File.Exists(Opfile) = False Then      '若文件不存在,读取临时目录下的文件
+            Opfile = Server.MapPath("../../") & "\Submit_Temp\CreateTemp\" & Fid & ".xml"
+        End If
+        Dim SchemaFile As String = Server.MapPath("../../") & "\TemplateLibrary\" & XsnDir & "\myschema.xsd"
+        Dim SaveBase As String = Server.MapPath("../../") & "\FormFolder\" & MKMC & "\Annex\"
+        Base.pub.CreateDir(SaveBase)
+        If IO.File.Exists(SchemaFile) = False Then
+            Response.Write("请更新模板")
+            Response.End()
+        End If
+
+        Dim Scriptstr As String = String.Empty
+        Base.XmlClass.GetXmlFile(SchemaFile)
+        Dim NodeList As XmlNodeList = Base.XmlClass.FindNodes("/xsd:schema/xsd:element[@type='xsd:base64Binary']")
+        Dim NodeList1 As XmlNodeList
+        Dim AnnNodeName As String
+        Dim SaveFile As String
+        Dim i, j As Integer
+        '查询找附件的节点.并进行还原
+        For i = 0 To NodeList.Count - 1
+            AnnNodeName = NodeList.Item(i).Attributes("name").Value
+            Base.XmlClass.GetXmlFile(Opfile)
+            NodeList1 = Base.XmlClass.FindNodes("//my:" & AnnNodeName)
+            For j = 0 To NodeList1.Count - 1
+                SaveFile = Fid & "_" & i & "_" & j & ".txt"
+                If IO.File.Exists(SaveBase & SaveFile) = True Then
+                    Dim imgpath As String = Server.MapPath("../../") & "\Submit_Temp\" & Fid & "-" & i & "-" & j & ".jpg"
+                    Base.pub.SaveBase64ToFile(Base.pub.Text_File_Read(SaveBase & SaveFile), imgpath)
+                    Scriptstr += "imgsrc[" & j & "]='" & "../../Submit_Temp/" & Fid & "-" & i & "-" & j & ".jpg'" & ";" & vbCrLf
+                End If
+            Next
+            Scriptstr += "  maxnum = " & j - 1 & ";" & vbCrLf
+        Next
+
+        '如果不存在图片节点．则转到正常表单．
+        If Scriptstr.Length <= 0 Then Response.Redirect("WebInfoPath.aspx?FID=" & Fid)
+
+        Scriptstr += "  xdtext='" & Xdtext & "';" & vbCrLf
+        Return Scriptstr
+    End Function
+
+
+
+  
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+
+        Dim Title As String
+        Dim CId As Integer = Base.DB.ExeScalar("INSERT INTO [Gy_XmXd]([Fid],[YGDM] ,[XdText] ,[FQR],[XdBZ]) VALUES (" & Fid & "," & FQR & ",'" & Base.SqlFilter(TextBox1.Text) & "'," & UserID & ",0);Select Cid From Gy_XmXd where Cid = @@IDENTITY")
+        Title = "已经处理[" & Xdtext & "] 处理意见：" & Server.HtmlEncode(Base.SqlFilter(TextBox1.Text))
+        If Title.Length > 200 Then Title.Substring(0, 199)
+        Base.DB.Query("INSERT INTO [DesktopMessage] ([YGDM],[DTitle],[Dkind],[DKID]) VALUES(" & FQR & ",'" & Title & "','修订'," & CId & " )")
+        Base.Js.closestr(Me, "提交成功!")
+
+    End Sub
+End Class

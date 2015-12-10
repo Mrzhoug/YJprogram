@@ -1,0 +1,145 @@
+﻿Imports Microsoft.VisualBasic
+
+Public Class MFileInfo
+
+    Private _id As Integer
+    ''' <summary>
+    ''' ID
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property ID() As Integer
+        Get
+            Return _id
+        End Get
+        Set(ByVal value As Integer)
+            _id = value
+        End Set
+    End Property
+
+
+
+
+    Private _fileName As String
+    ''' <summary>
+    ''' 文件名称
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property FileName() As String
+        Get
+            Return _fileName
+        End Get
+        Set(ByVal value As String)
+            _fileName = value
+        End Set
+    End Property
+
+
+    Private _fileSize As Integer
+    ''' <summary>
+    ''' 文件大小
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property FileSize() As Integer
+        Get
+            Return _fileSize
+        End Get
+        Set(ByVal value As Integer)
+            _fileSize = value
+        End Set
+    End Property
+
+
+
+    Private _fileType As String
+    ''' <summary>
+    ''' 文件类型
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property FileType() As String
+        Get
+            Return _fileType
+        End Get
+        Set(ByVal value As String)
+            _fileType = value
+        End Set
+    End Property
+
+
+    Private _filePath As String
+    ''' <summary>
+    ''' 文件路径
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property FilePath() As String
+        Get
+            Return _filePath
+        End Get
+        Set(ByVal value As String)
+            _filePath = value
+        End Set
+    End Property
+
+
+    Private _createTime As DateTime
+    ''' <summary>
+    ''' 创建时间
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property CreateTime() As DateTime
+        Get
+            Return _createTime
+        End Get
+        Set(ByVal value As DateTime)
+            _createTime = value
+        End Set
+    End Property
+
+
+    Private _createUserID As Integer
+    ''' <summary>
+    ''' 创建用户ID
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property CreateUserID() As Integer
+        Get
+            Return _createUserID
+        End Get
+        Set(ByVal value As Integer)
+            _createUserID = value
+        End Set
+    End Property
+
+
+    Private _belongFolderID As Integer
+    ''' <summary>
+    ''' 隶属文件夹ID
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property BelongFolderID() As Integer
+        Get
+            Return _belongFolderID
+        End Get
+        Set(ByVal value As Integer)
+            _belongFolderID = value
+        End Set
+    End Property
+
+
+
+End Class

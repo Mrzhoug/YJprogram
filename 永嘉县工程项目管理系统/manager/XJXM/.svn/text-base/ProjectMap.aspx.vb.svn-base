@@ -1,0 +1,419 @@
+﻿
+Partial Class manager_XJXM_ProjectMap
+    Inherits System.Web.UI.Page
+    Dim XMDM As Integer
+    Dim Base As New Base
+    Dim FirstMKDM As Integer
+    Dim Login_User As String
+    Dim UserID As String
+    Dim tb As New DataTable
+    Dim BaseUrl As String
+    Dim LCDM As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        '根据配置文件，对相应的按钮进行判断，是否显示
+        'If Base.GetXmanConfigEnabled("/系统配置/有流程/项目导航图/查看审批信息", "../../") = False Then Button1.Visible = False
+        'If Base.GetXmanConfigEnabled("/系统配置/有流程/项目导航图/分发项目", "../../") = False Then Button4.Visible = False
+        BaseUrl = Server.MapPath("../../") & "FormFolder/"
+        Try
+            XMDM = Request("XMDM")
+        Catch ex As Exception
+            XMDM = 0
+        End Try
+
+        Dim msgid As Integer
+        Try
+            msgid = Request("msgid")
+        Catch ex As Exception
+            msgid = 0
+        End Try
+        ShowBtn()
+        If msgid > 0 Then Base.DB.Query("Update Sendmessage set lookflag=1 where cid=" & msgid)
+
+
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+        GridView1.Columns.Clear()
+        ShowProjectInfo()
+        Dim Tb As New DataTable
+        Dim SelectSQL As String
+        Tb = Base.DB.Table("SELECT LCDM FROM GY_XMXX where XMDM=" & XMDM, "d")
+        If Tb.Rows.Count > 0 Then
+            LCDM = Tb.Rows(0)("LCDM")
+        Else
+            LCDM = -1
+        End If
+
+        SelectSQL = "SELECT [XMDM], [XMMC], [XMSM], [XMLX],[xmjd] FROM [GY_XMXX] where lcdm = " & LCDM & " and xmdm=" & XMDM
+        Base.CreateGridviewTitle(GridView1, LCDM, True)
+        Base.FillDataToGridview(GridView1, LCDM, "", SelectSQL, "", True)
+        GridView1.DataBind()
+
+    End Sub
+
+    Sub ShowBtn()
+        Dim javastr As String
+        javastr = ""
+        javastr += "Ext.onReady(function(){"
+        javastr += "var tb = new Ext.Toolbar();"
+        javastr += "tb.render('toolbar');"
+        javastr += "tb.add('-',"
+        If Base.GetXmanConfigEnabled("/系统配置/有流程/项目导航图/查看审批信息", "../../") = False Then
+            Button1.Visible = False
+        Else
+            javastr += "{"
+            javastr += " Icon '../../images/Ext.UI/icons/fam/application_view_list.png', "
+            javastr += "iconCls 'blist',"
+            javastr += "text '查看审批信息&nbsp;',"
+            javastr += "handler : onItemClick()"
+            javastr += "},'-',"
+        End If
+        javastr += "{"
+        javastr += "icon: '../../images/Ext.UI/icons/fam/cross.gif',"
+        javastr += "iconCls: 'blist',"
+        javastr += "text: '删除项目&nbsp;',"
+        javastr += "handler: onItemClick"
+        javastr += " },'-',"
+        javastr += "{"
+        javastr += "icon: '../../images/Ext.UI/icons/fam/application_go.png',"
+        javastr += "iconCls: 'blist',"
+        javastr += "text: '项目重发&nbsp;',"
+        javastr += "handler: onItemClick"
+        javastr += " },'-'"
+
+        If Base.GetXmanConfigEnabled("/系统配置/有流程/项目导航图/分发项目", "../../") = False Then
+            Button4.Visible = False
+        Else
+            javastr += "'{"
+            javastr += " Icon '../../images/Ext.UI/icons/fam/table_refresh.png', "
+            javastr += "iconCls 'blist',"
+            javastr += "text '分发项目&nbsp;',"
+            javastr += "handler : onItemClick()"
+            javastr += "},'-'"
+        End If
+        javastr += ");"
+        javastr += "});"
+        ShowXMXX.InnerHtml = "<script language='javascript' type='text/javascript'>" + javastr + "</script>"
+
+
+    End Sub
+
+    ''' <summary>
+    ''' 显示项目信息
+    ''' </summary>
+    ''' <remarks></remarks>
+    Sub ShowProjectInfo()
+
+        Dim tb1 As New DataTable
+        Dim ztmx As New DataTable
+        tb = Base.DB.Table("SELECT zt.XMZT,zt.ZTMC FROM GY_XMZT as zt,GY_XMXX as xm where xm.lcdm=zt.lcdm and xm.xmdm=" & XMDM & " order by ORDERBY", "XMZT")
+        Dim i, j As Int16
+        Dim s As String = "<table border=0 cellpadding=0 ><tr>"
+        For i = 0 To tb.Rows.Count - 1
+            s += "<td align=center>"
+
+            'D8DFF2
+            '33649C
+
+            ztmx = Base.DB.Table("SELECT mx.mkdm,mx.showname,mk.mkmc,mx.Outlc,mk.NoLcDM FROM GY_ZTMX as mx , GY_MKXX as mk where mx.mkdm=mk.mkdm and xmzt=" & tb.Rows(i).Item(0), "ztmx")
+            Dim MKname As String
+            If ztmx.Rows.Count = 1 Then         '当只有一个功能的时候．
+                Dim MKDM As Integer = ztmx.Rows(0).Item(0)
+                If i = 0 Then FirstMKDM = MKDM
+                If ztmx.Rows(0)("Outlc") = 1 Then               '如果是无流程的关连表单,则直接转到表单库
+                    tb1 = Base.DB.Table("SELECT MK.MKMC, MK.XDLJ, MK.List_QX_LCDM, MK.NoLcDM, MK.MKDM, GI.ShowFunName FROM GY_MKXX AS MK INNER JOIN GY_GROUP_INFO AS GI ON MK.MKDM = GI.MKDM INNER JOIN GY_GROUP AS gp ON GI.GROUP_ID = gp.GROUP_ID where gp.Group_Kind=0 and MK.mkdm = " & MKDM, "dd")
+                    If tb1.Rows.Count > 0 Then
+                        If tb1.Rows(0)("ShowFunName").ToString.Trim.Length = 0 Then
+                            MKname = tb1.Rows(0)("MKMC").ToString.Trim
+                        Else
+                            MKname = tb1.Rows(0)("ShowFunName").ToString.Trim
+                        End If
+                        s += "<table border=0 cellpadding=5 width=35><tr><td height=320 align=center style='cursor:hand;color:white;' bgcolor='#33649C' onclick=""javascript:opener.window.parent.addTab('Menu/NavPage.aspx?LCDM=" & tb1.Rows(0)("NoLcDM") & "','" & MKname & "','Menu_NOLC_" & MKDM & "');window.close()""  Title='" & MKname & "'>" & EnterStr(tb.Rows(i).Item(1)) & "</td></tr></table>"
+                    End If
+                    Base.DB.Query("update XX_XMJC set state=-1 where xmdm=" & XMDM & " and MKDM=" & MKDM)
+                Else
+                    If ztmx.Rows(0)(1).ToString.Trim.Length = 0 Then
+                        MKname = ztmx.Rows(0)(2)
+                    Else
+                        MKname = ztmx.Rows(0)(1)
+                    End If
+                    If Base.DB.GetRowCount("SELECT fid FROM XX_XMJC where state=-1 and MKDM=" & MKDM & " and XMDM=" & XMDM, "dd") > 0 Then
+                        s += "<table border=0 cellpadding=5 width=35><tr><td height=320 rowspan=2 align=center style='cursor:hand;color:white;' bgcolor='#33649C' onclick=""javascript:window.open('../Forms/Function.aspx?XMDM=" & XMDM & "&MKDM=" & MKDM & "&Flag=0','打开表单','height=300, width=550, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=no');""  Title='" & MKname & "'>" & EnterStr(tb.Rows(i).Item(1)) & "</td></tr></table>"
+                    Else
+                        If Base.DB.GetRowCount("SELECT fid FROM XX_XMJC where wcbz=1 and MKDM=" & MKDM & " and XMDM=" & XMDM, "dd") > 0 Then
+                            s += "<table border=0 cellpadding=5 width=35><tr><td height=230 align=center style='cursor:hand' bgcolor='#99B1D1' onclick=""javascript:window.open('../Forms/Function.aspx?XMDM=" & XMDM & "&MKDM=" & MKDM & "&Flag=0','打开表单','height=300, width=550, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=no');""  Title='" & MKname & "'>" & EnterStr(tb.Rows(i).Item(1)) & "</td></tr><tr><td width=45 bgcolor='#99B1D1'><a href='javascript:void(0)' onclick=""javascript:window.open('../Forms/FormToTop.aspx?K=state&state=-1&XMDM=" & XMDM & "&MKDM=" & MKDM & "','打开表单','height=0, width=0, top=0, left=0, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no');alert('操作完成');window.location.href='../XJXM/ProjectMap.aspx?XMDM=" & XMDM & "';"">" & Me.EnterStr("设为完成") & "</a></td></tr></table>"
+                        Else
+                            s += "<table border=0 cellpadding=5 width=35><tr><td height=230 align=center style='cursor:hand' bgcolor='#D8DFF2' onclick=""javascript:window.open('../Forms/Function.aspx?XMDM=" & XMDM & "&MKDM=" & MKDM & "&Flag=0','打开表单','height=300, width=550, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=no');""  Title='" & MKname & "'>" & EnterStr(tb.Rows(i).Item(1)) & "</td></tr><tr><td width=45 bgcolor='#D8DFF2'><a href='javascript:void(0)' onclick=""javascript:window.open('../Forms/FormToTop.aspx?K=state&state=-1&XMDM=" & XMDM & "&MKDM=" & MKDM & "','打开表单','height=0, width=0, top=0, left=0, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no');alert('操作完成');window.location.href='../XJXM/ProjectMap.aspx?XMDM=" & XMDM & "';"">" & Me.EnterStr("设为完成") & "</a></td></tr></table>"
+                        End If
+                    End If
+                End If
+
+            Else
+                FirstMKDM = 0           '默认设置为0
+                Dim allok As Boolean = True
+                Dim tmp As String = ""
+                Dim tmpOkstr As String = ""
+                For j = 0 To ztmx.Rows.Count - 1
+                    Dim MKDM As Integer = ztmx.Rows(j).Item(0)
+                    If i = 0 Then FirstMKDM = ztmx.Rows(0).Item(0)
+                    If ztmx.Rows(j)("Outlc") = 1 Then               '如果是无流程的关连表单,则直接转到表单库
+                        tb1 = Base.DB.Table("SELECT MK.MKMC, MK.XDLJ, MK.List_QX_LCDM, MK.NoLcDM, MK.MKDM, GI.ShowFunName FROM GY_MKXX AS MK INNER JOIN GY_GROUP_INFO AS GI ON MK.MKDM = GI.MKDM INNER JOIN GY_GROUP AS gp ON GI.GROUP_ID = gp.GROUP_ID where gp.Group_Kind=0 and MK.mkdm = " & MKDM, "dd")
+                        If tb1.Rows.Count > 0 Then
+                            If tb1.Rows(0)("ShowFunName").ToString.Trim.Length = 0 Then
+                                MKname = tb1.Rows(0)("MKMC").ToString.Trim
+                            Else
+                                MKname = tb1.Rows(0)("ShowFunName").ToString.Trim
+                            End If
+                            If ztmx.Rows(j)(1).ToString.Trim.Length = 0 Then
+                                tmp += "<td height=320 rowspan=2 bgcolor='#33649C' style='cursor:hand;color:white;' onclick=""javascript:opener.window.parent.addTab('Menu/NavPage.aspx?LCDM=" & tb1.Rows(0)("NoLcDM") & "','" & MKname & "','Menu_NOLC_" & MKDM & "');window.close();""  Title='" & MKname & "'>" & EnterStr(ztmx.Rows(j).Item(2).ToString)
+                            Else
+                                tmp += "<td height=320 rowspan=2 bgcolor='#33649C' style='cursor:hand;color:white;' onclick=""javascript:opener.window.parent.addTab('Menu/NavPage.aspx?LCDM=" & tb1.Rows(0)("NoLcDM") & "','" & MKname & "','Menu_NOLC_" & MKDM & "');window.close();""  Title='" & MKname & "'>" & EnterStr(ztmx.Rows(j).Item(1).ToString)
+                            End If
+                        End If
+                        Base.DB.Query("update XX_XMJC set state=-1 where xmdm=" & XMDM & " and MKDM=" & MKDM)
+                    Else
+                        Dim tmpOk As Boolean = False
+                        If Base.DB.GetRowCount("SELECT fid FROM XX_XMJC where state=-1 and MKDM=" & MKDM & " and XMDM=" & XMDM, "dd") > 0 Then
+                            tmpOk = True
+                            tmp += "<td height=300 width=25 rowspan=2 bgcolor='#33649C' style='cursor:hand;color:white;'"
+                        Else
+                            tmp += "<td height=210 width=25 bgcolor='#D8DFF2' style='cursor:hand'"
+                            allok = False
+                        End If
+
+                        If ztmx.Rows(j)(1).ToString.Trim.Length = 0 Then
+                            tmp += "onclick=""javascript:window.open('../Forms/Function.aspx?XMDM=" & XMDM & "&MKDM=" & MKDM & "&Flag=0','打开表单','height=300, width=550, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=no');""  Title='" & ztmx.Rows(j).Item(2).ToString & "'>"
+                            tmp += EnterStr(ztmx.Rows(j).Item(2).ToString)
+                        Else
+                            tmp += "onclick=""javascript:window.open('../Forms/Function.aspx?XMDM=" & XMDM & "&MKDM=" & MKDM & "&Flag=0','打开表单','height=300, width=550, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=no');""  Title='" & ztmx.Rows(j).Item(1).ToString & "'>"
+                            tmp += EnterStr(ztmx.Rows(j).Item(1).ToString)
+                        End If
+                        If tmpOk = False Then
+                            tmpOkstr += "<td bgcolor='#D8DFF2' align=center><a href='javascript:void(0)' onclick=""javascript:window.open('../Forms/FormToTop.aspx?K=state&state=-1&XMDM=" & XMDM & "&MKDM=" & MKDM & "','打开表单','height=0, width=0, top=0, left=0, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no');alert('操作完成');window.location.href='../XJXM/ProjectMap.aspx?XMDM=" & XMDM & "';"">" & Me.EnterStr("设为完成") & "</a></td>"
+                        End If
+                    End If
+                    tmp += "</td>"
+                Next
+
+                If allok = True Then        '此多个功能的状态点是否表单全部完成．
+                    s += "<table border=0 cellpadding=5 width=35><tr><td width=80 height=320 align=center style='cursor:hand;color:white;' bgcolor='#33649C' onclick=""show('menu" & i & "');"" Title='点击显示具体功能'>" & EnterStr(tb.Rows(i).Item(1)) & "</td></tr></table>"
+                Else
+                    s += "<table border=0 cellpadding=5 width=35><tr><td width=80 height=320 align=center style='cursor:hand' bgcolor='#D8DFF2' onclick=""show('menu" & i & "');"" Title='点击显示具体功能'>" & EnterStr(tb.Rows(i).Item(1)) & "</td></tr></table>"
+                End If
+
+                s += "<td><table border=0 cellpadding=5 cellspacing=5 id='menu" & i & "' style='display:none'><tr>"
+                s += tmp
+                s += "</tr><tr>" & tmpOkstr
+                s += "</tr></table></td>"
+
+            End If
+
+            If i < tb.Rows.Count - 1 Then s += "</td><td align=center><img src='../../images/Ext.UI/resources/images/default/grid/page-next.gif'></td>"
+
+        Next
+        s += "</table>"
+
+        '显示分发记录
+        Dim ffmsg As String = "<br><br><table border=0 width=700 cellpadding=3 style='font-size:9pt;'><tr bgcolor='#DEDFDE' align='center'><td>发送人</td><td>内容</td><td>接收人</td><td width=80>时间</td></tr>"
+        tb = Base.DB.Table("SELECT YGDM,XDtext,fqr,dotime FROM Gy_XmXd where xmdm = " & XMDM, "ddd")
+        For i = 0 To tb.Rows.Count - 1
+            ffmsg += "<tr bgcolor='#f3f3f3'><td width=140>" & Base.GetUserName(tb.Rows(i)("fqr"), 3) & "</td><td>" & tb.Rows(i)("XDtext").ToString & "</td><td width=120 align=center>" & Base.GetUserName(tb.Rows(i)("YGDM"), 3) & "</td><td width=100>" & tb.Rows(i)("dotime") & "</td></tr>"
+        Next
+        ffmsg += "</table>"
+        If tb.Rows.Count > 0 Then s += ffmsg
+
+        out.InnerHtml = s
+
+        If FirstMKDM > 0 Then ShowProjectTitleInfo()
+
+    End Sub
+
+    ''' <summary>
+    ''' 显示项目的头信息，主要显示第一张单的前五个显示列
+    ''' </summary>
+    ''' <remarks></remarks>
+    Sub ShowProjectTitleInfo()
+        'tb = Base.GetShowFieldDate_NoLc(FirstMKDM, XMDM, 5)
+        'Dim i As Integer
+        'Dim cc As DataTable = New DataTable
+        'cc.Rows.Add(cc.NewRow)
+        'If Not tb Is Nothing Then
+        '    For i = 0 To tb.Columns.Count - 1
+        '        If tb.Columns(i).ColumnName.Trim <> "未设置" & i Then
+        '            Dim c As DataColumn = New DataColumn(tb.Columns(i).ColumnName.Trim)
+        '            cc.Columns.Add(c)
+        '            cc.Rows(0).Item(i) = tb.Rows(0).Item(i)
+        '        End If
+        '    Next
+        'End If
+        'GridView1.DataSource = cc
+        'GridView1.DataBind()
+
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Response.Redirect("ShowAbout_XMSP.aspx?XMDM=" & XMDM)
+    End Sub
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+        '流程存在.判断用户是否有权限创建
+        '后面的ORDER BY 语句,用来显示状态的顺序
+        Dim MKDM As Integer
+        Dim Tb As New DataTable
+        Dim LCDM As Integer
+        Tb = Base.DB.Table("SELECT LCDM FROM GY_XMXX where XMDM=" & XMDM, "d")
+        If Tb.Rows.Count > 0 Then
+            LCDM = Tb.Rows(0)("LCDM")
+        Else
+            Response.Write("项目不存在")
+            Response.End()
+        End If
+
+        Tb = Base.DB.Table("SELECT GY_ZTMX.XMZT,GY_ZTMX.MKDM, GY_ZTMX.SPBZ, GY_ZTMX.TimeBZ, GY_ZTMX.RuleTime  FROM GY_ZTMX,GY_XMZT where GY_XMZT.XMZT = GY_ZTMX.XMZT and gy_XMZT.LCDM =" & LCDM & "  ORDER BY GY_XMZT.OrderBy, GY_XMZT.XMZT", "GY_ZTMX")
+        If Tb.Rows.Count > 0 Then
+            MKDM = Tb.Rows(0)(1)
+        Else
+            Response.Write("流程存在问题，请与管理员联系")
+            Response.End()
+        End If
+        Dim Qx As Integer = Base.GetUserHaveQX(UserID, MKDM)
+        '判断能力权限,1读,2写,4改,8删除
+        If Qx < 8 Then
+            Base.Js.alert(Me, "你无删除项目的权力,有问题请与管理员联系!")
+            Exit Sub
+        End If
+
+
+        Dim i As Integer
+        Dim DFileName As String         '表示表单所存在的文件路径
+        Dim TempFileName As String      '表示表单库的文件路径
+        Dim MKMC As String              '表示模块的真实名称
+        Dim FID As Integer              '表单的真实表单ID
+        Tb = Base.DB.Table("SELECT  GY_MKXX.MKMC, GY_MKXX.XDLJ, GY_MKXX.MKDM, GY_XMZT.XMZT, XX_XMJC.FID FROM XX_XMJC INNER JOIN GY_MKXX ON XX_XMJC.MKDM = GY_MKXX.MKDM INNER JOIN GY_XMZT ON XX_XMJC.XMZT = GY_XMZT.XMZT  WHERE(XX_XMJC.XMDM = " & XMDM & ")", "MKXX")
+        For i = 0 To Tb.Rows.Count - 1
+            MKMC = Tb.Rows(i).Item(0)
+            FID = Tb.Rows(i).Item(4)
+            'DFileName = Server.MapPath("../../") & "\FormFolder\" & MKMC & "\" & FID & ".xml"
+            'TempFileName = Server.MapPath("../../") & "\FormFolder\" & MKMC & ".库.xml"
+            Base.DeleteForm(FID, MKMC, UserID, Login_User)
+        Next
+
+        '刷新列表,并关闭当前窗口
+        Base.Js.WriteScript(Me, "opener.window.parent.addTab('manager/XJXM/Default.aspx?LCDM=" & LCDM & "','项目列表','Menu_LC_" & LCDM & "');alert('删除成功!');window.close()")
+
+
+    End Sub
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+        '流程存在.判断用户是否有权限创建
+        '后面的ORDER BY 语句,用来显示状态的顺序
+        Dim MKDM As Integer
+        Dim Tb As New DataTable
+        Dim LCDM As Integer
+        Tb = Base.DB.Table("SELECT LCDM FROM GY_XMXX where XMDM=" & XMDM, "d")
+        If Tb.Rows.Count > 0 Then
+            LCDM = Tb.Rows(0)("LCDM")
+        Else
+            Response.Write("项目不存在")
+            Response.End()
+        End If
+        Tb = Base.DB.Table("SELECT GY_ZTMX.XMZT,GY_ZTMX.MKDM, GY_ZTMX.SPBZ, GY_ZTMX.TimeBZ, GY_ZTMX.RuleTime  FROM GY_ZTMX,GY_XMZT where GY_XMZT.XMZT = GY_ZTMX.XMZT and gy_XMZT.LCDM =" & LCDM & "  ORDER BY GY_XMZT.OrderBy, GY_XMZT.XMZT", "GY_ZTMX")
+        If Tb.Rows.Count > 0 Then
+            MKDM = Tb.Rows(0)(1)
+        Else
+            Response.Write("流程存在问题，请与管理员联系")
+            Response.End()
+        End If
+        Dim Qx As Integer = Base.GetUserHaveQX(UserID, MKDM)
+        '判断能力权限,1读,2写,4改,8删除
+        If Qx < 8 Then
+            Base.Js.alert(Me, "你无重发项目的权力,有问题请与管理员联系!")
+            Exit Sub
+        End If
+
+        Base.DB.Query("Update GY_XMXX set xmjd='' where XMDM=" & XMDM)
+        Base.DB.Query("update XX_XMJC set SPBZ=0,state = 0 where XMDM =" & XMDM)
+        '刷新列表
+        ShowProjectInfo()
+    End Sub
+
+    Function EnterStr(ByVal str As String)
+        Dim i As Integer
+        Dim Restr As String = ""
+        For i = 1 To str.Length
+            If Mid(str, i, 1) <> "_" Then Restr += Mid(str, i, 1) & "<br>"
+        Next
+        Return Restr
+    End Function
+
+    Protected Sub Button4_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button4.Click
+        Base.Js.OpenWindow(Me, "../desktop/WriteSendMessage.aspx?Kind=5&XMDM=" & XMDM, "分发项目", "height=500, width=800, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes")
+    End Sub
+
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i, j, MKDM As Integer
+        Dim FileName As String
+        Dim TempTb As New Data.DataTable
+        Dim ShowTb As New Data.DataTable
+
+        ShowTb = Base.DB.Table("Select ShowName,NodeName,FormName from ShowList_LCDM where LCDM = " & LCDM & " order by ID", "ShowList_LCDM")
+
+        For i = 0 To GridView1.Rows.Count - 1
+            XMDM = GridView1.DataKeys(i).Item(0)
+            For j = 0 To ShowTb.Rows.Count - 1
+                Try
+                    MKDM = ShowTb.Rows(j).Item("FormName")
+                Catch ex As Exception
+                    MKDM = 0
+                End Try
+                If MKDM = 0 Then            '如果为空，则表示。
+                    TempTb = Base.DB.Table("SELECT GY_MKXX.MKMC,XX_XMJC.Fid FROM XX_XMJC,GY_MKXX where GY_MKXX.MKDM=XX_XMJC.MKDM and XX_XMJC.XMDM=" & XMDM, "GY_MKXX")
+                Else            '表示来自不同表单的。
+                    TempTb = Base.DB.Table("SELECT GY_MKXX.MKMC,XX_XMJC.Fid FROM XX_XMJC,GY_MKXX where GY_MKXX.MKDM=XX_XMJC.MKDM and XX_XMJC.XMDM=" & XMDM & " and XX_XMJC.MKDM=" & MKDM, "GY_MKXX")
+                End If
+                If TempTb.Rows.Count > 0 Then
+                    FileName = BaseUrl & TempTb.Rows(0).Item(0) & "/" & TempTb.Rows(0).Item(1) & ".xml"
+                    If Base.XmlClass.GetXmlFile(FileName) Is Nothing Then
+                        GridView1.Rows(i).Cells(j).Text = "空1"
+                    Else
+                        Dim dd As System.Xml.XmlNode = Base.XmlClass.FindNode("//" & ShowTb.Rows(j).Item(1).ToString.Replace("<", "").Replace(">", ""))
+                        If dd Is Nothing Then
+                            GridView1.Rows(i).Cells(j).Text = "空"
+                        Else
+                            If dd.ChildNodes.Item(0) Is Nothing Then
+                                GridView1.Rows(i).Cells(j).Text = "空"
+                            Else
+                                If dd.ChildNodes.Item(0).Value Is Nothing Then
+                                    If dd.HasChildNodes = True Then     '当是父节点.但是存在子节点时.则显示子节点的内容(或是超文本框)
+                                        Dim TempOut As String = dd.ChildNodes.Item(0).OuterXml.ToString.Trim
+                                        If TempOut.Length >= 100 Then
+                                            GridView1.Rows(i).Cells(j).Text = Server.HtmlEncode(TempOut.Substring(0, 98)) & "..."
+                                        Else
+                                            GridView1.Rows(i).Cells(j).Text = Server.HtmlEncode(TempOut)
+                                        End If
+                                    Else
+                                        GridView1.Rows(i).Cells(j).Text = "空"
+                                    End If
+                                Else
+                                    If dd.ChildNodes.Item(0).Value.ToString.Trim.Length >= 100 Then
+                                        GridView1.Rows(i).Cells(j).Text = Server.HtmlEncode(dd.ChildNodes.Item(0).Value.ToString.Substring(0, 98)) & "..."
+                                    Else
+                                        GridView1.Rows(i).Cells(j).Text = Server.HtmlEncode(dd.ChildNodes.Item(0).Value)
+                                    End If
+                                End If
+                            End If
+                        End If
+                    End If
+                Else
+                    GridView1.Rows(i).Cells(j).Text = "空2"
+                End If
+            Next
+
+        Next
+        GridView1.Columns(GridView1.Columns.Count - 1).Visible = False
+    End Sub
+
+End Class

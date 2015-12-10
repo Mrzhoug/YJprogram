@@ -1,0 +1,225 @@
+﻿
+Partial Class manager_Install
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+
+    ''' <summary>
+    ''' 开始创建数据库表,采用文件读取的方法
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    ''' <remarks></remarks>
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        checkpwd()
+
+
+        Dim fileName As String
+        fileName = Server.MapPath("./") & "\SqlText\database.sql"
+
+
+        Dim stream As New System.IO.FileStream(fileName, IO.FileMode.Open)
+        Dim reader As New System.IO.StreamReader(stream)
+
+        Dim tempstr As String = String.Empty
+        tempstr = reader.ReadLine()
+        Dim sqlstr As String = String.Empty
+        While (tempstr <> Nothing)
+            If tempstr = "GO" And sqlstr <> "" Then
+                Base.DB.ExeSql(sqlstr)
+                sqlstr = String.Empty
+            Else
+                sqlstr += tempstr
+            End If
+            tempstr = reader.ReadLine()
+        End While
+
+        reader.Close()
+        stream.Close()
+        Response.Write("完成")
+
+    End Sub
+
+    ''' <summary>
+    ''' 初始化数据库
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    ''' <remarks></remarks>
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+        checkpwd()
+
+        '定义功能列表
+        Dim Fun(8) As String
+        Fun(0) = "INSERT INTO [GY_MKXX]([MKMC],[WLLJ],[XDLJ])VALUES('显示菜单组设置','','../manager/Group_info/ShowGroupSetting.aspx')"
+        Fun(1) = "INSERT INTO [GY_MKXX]([MKMC],[WLLJ],[XDLJ])VALUES('系统模块管理','','../manager/mkgl/index.aspx');"
+        Fun(2) = "INSERT INTO [GY_MKXX]([MKMC],[WLLJ],[XDLJ])VALUES('模块权限管理','','../manager/Group_info/group.aspx')"
+        Fun(3) = "INSERT INTO [GY_MKXX]([MKMC],[WLLJ],[XDLJ])VALUES('用户账号管理','','../manager/YGDM/Default.aspx')"
+
+        Fun(4) = "INSERT INTO [GY_MKXX]([MKMC],[WLLJ],[XDLJ])VALUES('新增表单库','','../manager/CreateFunction/NoLC.aspx')"
+        Fun(5) = "INSERT INTO [GY_MKXX]([MKMC],[WLLJ],[XDLJ])VALUES('管理表单库','','../manager/CreateFunction/DelForm.aspx')"
+        Fun(6) = "INSERT INTO [GY_MKXX]([MKMC],[WLLJ],[XDLJ])VALUES('模板库管理','','../manager/CreateFunction/XSN_Model.aspx')"
+        Fun(7) = "INSERT INTO [GY_MKXX]([MKMC],[WLLJ],[XDLJ])VALUES('维护功能表单','','../manager/CreateFunction/ModifyModel.aspx')"
+        Fun(8) = "INSERT INTO [GY_MKXX]([MKMC],[WLLJ],[XDLJ])VALUES('应用模板库','','../manager/CreateFunction/Other_Model.aspx')"
+
+
+        '创建用户   sunfun
+        Dim UserId As Integer = Base.DB.ExeScalar("INSERT INTO [GY_YGDM]([YGXM],[DLMC],[DLPWD],[QYBZ])VALUES('超级管理员','admin','2ef88983bcee7c76b86030013fc04de8',1);Select YGDM from GY_YGDM where YGDM = @@IDENTITY")
+
+        '先创建权限组
+        Dim MKXX_Group1 As Integer = Base.DB.ExeScalar("INSERT INTO [GY_GROUP]([GROUP_NAME],[Group_Kind],[LcFlag],IsSysGroup) VALUES ('用户权限管理',0,0,1);Select Group_ID from GY_GROUP where Group_ID = @@IDENTITY")
+
+        Dim Form_Group1 As Integer = Base.DB.ExeScalar("INSERT INTO [GY_GROUP]([GROUP_NAME],[Group_Kind],[LcFlag],IsSysGroup) VALUES ('表单库管理',0,0,1);Select Group_ID from GY_GROUP where Group_ID = @@IDENTITY")
+
+        '将用户添加到组里
+        Base.DB.ExeSql("INSERT INTO [GY_YGQX]([YGDM],[GROUP_ID]) values (" & UserId & "," & MKXX_Group1 & ")")
+        Base.DB.ExeSql("INSERT INTO [GY_YGQX]([YGDM],[GROUP_ID]) values (" & UserId & "," & Form_Group1 & ")")
+
+        '再创建显示组
+        Dim MKXX_Group2 As Integer = Base.DB.ExeScalar("INSERT INTO [GY_GROUP]([GROUP_NAME],[Group_Kind],[LcFlag]) VALUES ('用户权限管理',1,0);Select Group_ID from GY_GROUP where Group_ID = @@IDENTITY")
+        Dim Form_Group2 As Integer = Base.DB.ExeScalar("INSERT INTO [GY_GROUP]([GROUP_NAME],[Group_Kind],[LcFlag]) VALUES ('表单库管理',1,0);Select Group_ID from GY_GROUP where Group_ID = @@IDENTITY")
+        Response.Write("UserID:" & UserId & "<br>")
+        Response.Write("MKXX_Group1:" & MKXX_Group1 & "<br>")
+        Response.Write("Form_Group1:" & Form_Group1 & "<br>")
+
+        Dim i As Integer
+        Dim TmpSql As String = ""
+        Dim TmpMKDM As Integer
+        For i = 0 To Fun.Length - 1
+            TmpSql = Fun(i) & ";Select MKDM from GY_MKXX where MKDM = @@IDENTITY"
+            TmpMKDM = Base.DB.ExeScalar(TmpSql)
+            If i <= 3 Then
+                Base.DB.ExeSql("INSERT INTO [GY_GROUP_INFO]([GROUP_ID],[MKDM],[CanRead]) VALUES (" & MKXX_Group1 & "," & TmpMKDM & ",1)")
+                Base.DB.ExeSql("INSERT INTO [GY_GROUP_INFO]([GROUP_ID],[MKDM],[CanRead]) VALUES (" & MKXX_Group2 & "," & TmpMKDM & ",0)")
+            Else
+                Base.DB.ExeSql("INSERT INTO [GY_GROUP_INFO]([GROUP_ID],[MKDM],[CanRead]) VALUES (" & Form_Group1 & "," & TmpMKDM & ",1)")
+                Base.DB.ExeSql("INSERT INTO [GY_GROUP_INFO]([GROUP_ID],[MKDM],[CanRead]) VALUES (" & Form_Group2 & "," & TmpMKDM & ",0)")
+            End If
+        Next
+
+    End Sub
+
+
+
+    ''' <summary>
+    ''' 对当前的密码进行检测
+    ''' </summary>
+    ''' <remarks></remarks>
+    Sub checkpwd()
+        If TextBox1.Text <> "wwkfukfd1" Then
+            Response.Write("非法操作")
+            Response.End()
+        End If
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+    End Sub
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+        Dim Str As String = TextBox2.Text
+        Dim TmpLine() As String = Str.Split(Chr(13))
+        Dim Rows() As String
+        Dim XM, UserName As String
+        Dim i As Integer
+        For i = 0 To TmpLine.Length - 1
+            If TmpLine(i).ToString.Length > 0 Then
+                Rows = TmpLine(i).Split(",")
+                If Rows.Length >= 2 Then
+                    XM = Rows(0).ToString.Trim
+                    UserName = Rows(1).ToString.Trim
+                    If XM.Length = 0 Or UserName.Length = 0 Then
+                        Response.Write("第" & i + 1 & "行导入失败，姓名或用户名为空<br>")
+                    Else
+                        Dim row As Data.DataRow = Base.DB.Row("select YGDM from GY_YGDM where DLMC='" & Base.SqlFilter(UserName) & "' ", "GY_YGDM")
+                        If row Is Nothing Then
+                            Base.DB.Query("insert into GY_YGDM(YGXM,dlmc,QYBZ) values('" & Base.SqlFilter(XM) & "', '" & Base.SqlFilter(UserName) & "',1)")
+                        Else
+                            Response.Write("第" & i + 1 & "行导入失败，用户已经存在<br>")
+                        End If
+                    End If
+                Else
+                    Response.Write("第" & i + 1 & "行格式非法<br>")
+                End If
+            End If
+        Next
+    End Sub
+
+    Protected Sub Button4_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button4.Click
+        Base.DB.Query("update   GY_GROUP_INFO set canread=0 where canread is null")
+        Base.DB.Query("update   GY_GROUP_INFO set canwrite=0 where canwrite is null")
+        Base.DB.Query("update   GY_GROUP_INFO set candelete=0 where candelete is null")
+        Base.DB.Query("update   GY_GROUP_INFO set canmodify=0 where canmodify is null")
+        Base.DB.Query("update   GY_GROUP_INFO set Canall=0 where Canall is null")
+        Base.DB.Query("update   GY_GROUP_INFO set CanListForm=0 where CanListForm is null")
+        Response.Write("完成")
+    End Sub
+
+    Protected Sub Button5_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button5.Click
+        Try
+            Base.DB.Query("SELECT MapXpath FROM GY_MKXX where mkdm = -1")
+        Catch ex As Exception
+            Response.Write("GY_MKXX MapXpath varchar(200)")
+        End Try
+
+        Try
+            Base.DB.Query("Select IsTotal From MapConfig where aid = 0 ")
+        Catch ex As Exception
+            Response.Write("MapConfig  IsTotal int Default(0)")
+        End Try
+        Try
+            Base.DB.Query("select AID from MapConfig where AID = 0")
+        Catch ex As Exception
+            Response.Write("")
+            Response.Write("CREATE TABLE [dbo].[MapConfig](")
+            Response.Write("[AID] [numeric](18, 0) IDENTITY(1,1) NOT NULL,")
+            Response.Write("[MKDM] [numeric](18, 0) NOT NULL,")
+            Response.Write("[MapExtName] [nvarchar](200) NOT NULL,")
+            Response.Write("[dates] [datetime] NOT NULL CONSTRAINT [DF_MapConfig_dates]  DEFAULT (getdate()),")
+            Response.Write("[IsTotal] [int] NULL CONSTRAINT [DF_MapConfig_IsTotal]  DEFAULT ((0)),")
+            Response.Write("CONSTRAINT [PK_MapConfig] PRIMARY KEY CLUSTERED ")
+            Response.Write("(")
+            Response.Write("[AID](Asc)")
+            Response.Write(")WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ")
+            Response.Write("ON [PRIMARY]")
+        End Try
+
+        Try
+            Base.DB.Query("Select IsTotal from MapConfig Where IsTotal = 2")
+        Catch ex As Exception
+            Response.Write("MapConfig IsTotal int(0)")
+        End Try
+        Response.Write("OK")
+    End Sub
+
+    ''' <summary>
+    ''' 考勤功能，包括创建考勤表，考勤功能模块
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    ''' <remarks></remarks>
+    Protected Sub Button6_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button6.Click
+        Dim TempStr As String = ""
+        TempStr += "CREATE TABLE [dbo].[User_Attendance](" & vbCrLf
+        TempStr += "	[AID] [numeric](18, 0) IDENTITY(1,1) NOT NULL," & vbCrLf
+        TempStr += "	[UserID] [numeric](18, 0) NULL," & vbCrLf
+        TempStr += "	[Att_Time] [datetime] NULL," & vbCrLf
+        TempStr += "	[Att_IP] [varchar](50) NULL," & vbCrLf
+        TempStr += " CONSTRAINT [PK_User_Attendance] PRIMARY KEY CLUSTERED " & vbCrLf
+        TempStr += "(" & vbCrLf
+        TempStr += "	[AID] ASC" & vbCrLf
+        TempStr += ")WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]" & vbCrLf
+        TempStr += ") ON [PRIMARY]" & vbCrLf
+
+        Try
+            Base.DB.Query(TempStr)
+        Catch ex As Exception
+        End Try
+
+        Dim Row As DataRow = Base.DB.Row("select * FROM GY_MKXX WHERE (XDLJ = '../manager/Personbag/Attendance.aspx')", "dd")
+        If Row Is Nothing Then
+            Base.DB.Query("insert into GY_MKXX(MKMC,XDLJ,DisplayOrder) values('考勤','../manager/Personbag/Attendance.aspx',99)")
+        End If
+        Response.Write("OK")
+
+    End Sub
+End Class

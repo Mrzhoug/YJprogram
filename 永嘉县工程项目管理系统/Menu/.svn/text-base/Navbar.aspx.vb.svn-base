@@ -1,0 +1,263 @@
+﻿
+Partial Class Menu_Navbar
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+
+    Function GetTwoMenu(ByVal ID As String, ByVal ButtonPage As String, ByVal MainPage As String, ByVal Title As String) As String
+        Dim Temp As String
+        Temp = "<TR>"
+        Temp += "<TD class=menu_level2 id=" & ID & " onmouseover=level2_mover(this) onmouseout=level2_mout(this) "
+        If MainPage.Substring(0, 7).ToLower = "http://" Or MainPage.Substring(0, 8).ToLower = "https://" Then
+            Temp += "onclick=""window.open('" & MainPage & "','_blank'); menu_click('" & ID & "')"" >" & Title & "</TD></TR>"
+        Else
+            Temp += "onclick=""parent.main.location='" & MainPage & "'; menu_click('" & ID & "')"" >" & Title & "</TD></TR>"
+        End If
+
+        Temp += "<TR>"
+        Temp += "<TD class=menu_spacer2></TD></TR>"
+        Return Temp
+    End Function
+
+    Function GetMenuTitle(ByVal Title As String) As String
+        Dim temp As String = ""
+        Temp += "<TR id=level1>"
+        temp += "<TD class=menu_level1 id=system onmouseover=""mover(this)"" onmouseout=""mout(this)"">" & Title & "</TD></TR>"
+        Temp += "<TR id=foldinglist style='DISPLAY: none'>"
+        Temp += "<TD class=foldinglist>"
+        Temp += "<TABLE cellSpacing=0 cellPadding=0 width='100%' border=0>"
+        Temp += "<TBODY>"
+        Return temp
+    End Function
+
+    Function GetMenuButton() As String
+        Dim temp As String = ""
+        temp += "</TBODY>"
+        temp += "</TABLE></TD></TR>"
+        temp += "<TR><TD class=menu_spacer1></TD></TR>"
+        Return (temp)
+    End Function
+
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Dim tb As New Data.DataTable
+        Dim YGXM As String
+        Try
+            tb = Base.DB.Table("select YGDM,YGXM from GY_YGDM where DLMC ='" & Base.SqlFilter(Login_User) & "' and QYBZ=1", "GY_YGDM")
+            If tb.Rows.Count > 0 Then
+                UserID = tb.Rows(0)(0)
+                YGXM = tb.Rows(0).Item(1)
+            Else
+                Response.Write("<b>系统不允许此用户进入本系统,菜单无法显示!</b><br>")
+                Response.Write("<b><font color=red>解决办法</font></b>:通知管理员.在本系统中添加用户即可!")
+                Response.End()
+            End If
+        Catch ex As Exception
+            Response.Write("数据库连接错误")
+            Response.End()
+        End Try
+
+
+        Dim Temp As String = ""
+        Dim i, j As Integer
+        Dim Tb_Item As New Data.DataTable
+        Dim group_id As Long
+
+
+        If Login_User.Trim.Length = 0 Then
+            Response.Write("<b>得到不IIS用户.菜单无法显示!</b><br>")
+            Response.Write("<b><font color=red>解决办法</font></b>:将在IIS中,将站点设为集成windows登陆方式即可!")
+            Response.Write("Internet 信息服务->选中你的站点->右键属性->目录安全性->编辑->将[匿名访问]的钩去掉,并钩选[集成windows身份验证]->确定->确定")
+            Response.End()
+        End If
+
+
+        Dim OldCook As String
+        Try
+            OldCook = Request.Cookies("SessionID").Value
+        Catch ex As Exception
+            OldCook = Nothing
+        End Try
+
+        If Not OldCook Is Nothing Then
+            Base.DB.Query("delete Online_User where SessionID='" & OldCook & "'")
+            Response.Cookies.Clear()
+        End If
+
+
+        tb = Base.DB.Table("select * from Online_User where userid = " & UserID, "dd")
+        If tb.Rows.Count > 0 Then
+            Base.DB.Query("delete online_user where userid = " & UserID)
+        End If
+
+
+        Dim SessionID As String = Session.SessionID
+        Dim NowDate As Date = Now()
+        Dim YZM As String = Base.EnCrypt.MD5(SessionID)
+        Base.DB.Query("Insert into Online_User(SessionID,UserID,YZM,Date1) values ('" & SessionID & "'," & UserID & ",'" & YZM & "','" & NowDate & "')")
+        Dim Cookies1 As New System.Web.HttpCookie("SessionID")
+        Cookies1.Expires = FormatDateTime(DateAdd("d", 365, NowDate))
+        Cookies1.Value = SessionID
+        Response.Cookies.Set(Cookies1)
+        Dim Cookies2 As New System.Web.HttpCookie("cnxmanyzm")
+        Cookies2.Expires = FormatDateTime(DateAdd("d", 365, NowDate))
+        Cookies2.Value = YZM
+        Response.Cookies.Set(Cookies2)
+
+        Temp = "<TABLE class=mainnav cellSpacing=0 cellPadding=0 border=0><tbody>"
+
+        '显示我的公文包
+        Temp += GetMenuTitle("我的文件夹")
+        'Temp += GetTwoMenu("Bag1", "button.htm", "../manager/Personbag/ModelList.aspx", "应用模板列表")
+        Temp += GetTwoMenu("Bag2", "button.htm", "../manager/Personbag/MyFiles.aspx", "我的文件")
+        Temp += GetTwoMenu("Bag3", "button.htm", "../manager/Personbag/MyshareFiles.aspx", "共享文件")
+        Temp += GetTwoMenu("ModifyPwd", "button.htm", "../manager/Personbag/ModifyPwd.aspx", "修改密码")
+        Temp += GetTwoMenu("Desktop", "button.htm", "../manager/Desktop/MyDesktop.aspx", "我的桌面")
+        Temp += GetTwoMenu("loginlog", "button.htm", "../manager/Desktop/LoginList.aspx", "登陆日志")
+        Temp += GetMenuButton()
+
+
+        '显示系统菜单与无流程的功能。
+        tb = Base.DB.Table("select Group_Id,Group_Name,LCDM From Gy_Group where Group_Kind = 1 order by orderby", "Gy_Group")
+        Dim Item_Temp As String = String.Empty
+        Dim XDLJ As String = String.Empty
+        Dim MKMC As String = String.Empty
+        Dim NoLCDM As Integer
+        Dim MKDM As Integer
+        Dim ShowTitleFlag As Boolean = False    '判断是否显示
+        Dim LCDM As Integer
+        For i = 0 To tb.Rows.Count - 1
+
+            If IsDBNull(tb.Rows(i)(2)) = True Then
+                LCDM = 0
+            Else
+                LCDM = tb.Rows(i)(2)
+            End If
+
+            If LCDM <> 0 Then
+                '有流程的流程显示
+                Temp += ShowLC_Menu(LCDM)
+            Else
+
+                ShowTitleFlag = False
+                group_id = tb.Rows(i).Item(0)
+                Item_Temp = GetMenuTitle(tb.Rows(i)(1).ToString.Trim)
+                ' " and  not GY_MKXX.XDLJ like '../FormFolder/%.xml' and (GY_MKXX.LIST_QX_LCDM is null or GY_MKXX.LIST_QX_LCDM = 0)"
+                '上面的条件是过滤掉,表单类型的功能,以及项目相关型的功能(如删除项目功能,显示未完成列表功能)
+                Tb_Item = Base.DB.Table("SELECT GY_MKXX.MKMC,GY_MKXX.XDLJ,GY_MKXX.List_QX_LCDM,NoLcDm,GY_MKXX.MKDM,ShowFunName FROM GY_MKXX,GY_Group_INFO Where GY_GROUP_INFO.MKDM = GY_MKXX.MKDM And GY_Group_info.GROUP_ID = " & group_id & " and (GY_MKXX.LIST_QX_LCDM is null or GY_MKXX.LIST_QX_LCDM = 0) order by GY_Group_info.orderby", "GY_MKXX")
+                For j = 0 To Tb_Item.Rows.Count - 1
+                    MKDM = Tb_Item.Rows(j)(4)
+                    If Tb_Item.Rows(j)(5).ToString.Trim.Length = 0 Then
+                        MKMC = Tb_Item.Rows(j)(0).ToString.Trim
+                    Else
+                        MKMC = Tb_Item.Rows(j)(5).ToString.Trim
+                    End If
+
+                    XDLJ = Tb_Item.Rows(j).Item(1).ToString.Trim()
+                    '检测当前用户对该项目是否有访问权限
+                    If Base.GetUserHaveQX(UserID, MKDM) > 0 Then
+                        '过滤掉模板生成的功能。标志为"../FormFolder/模板功能名.xml"
+                        If XDLJ.IndexOf("/FormFolder") < 0 Or XDLJ.IndexOf(".xml") < 0 Or XDLJ.IndexOf("..") < 0 Then
+                            If XDLJ.IndexOf("/ApplicationTemplateLibrary") > 0 Then
+                                Item_Temp += GetTwoMenu("MenuA" & i & j, "button.htm", "../Manager/Forms/OpenModelFile.aspx?MKDM=" & MKDM, MKMC)
+                            Else
+                                If Tb_Item.Rows(j).Item(2).ToString.Trim = "" Then
+                                    Item_Temp += GetTwoMenu("MenuA" & i & j, "button.htm", XDLJ, MKMC)
+                                End If
+                            End If
+
+                        Else
+                            If IsDBNull(Tb_Item.Rows(j)(3)) = True Then
+                                NoLCDM = 0
+                                '表示是有流程的，在这里不显示
+                            Else
+                                NoLCDM = Tb_Item.Rows(j)(3).ToString.Trim     '得到流程代码    
+                                Item_Temp += GetTwoMenu("SMenuA" & i & j, "button.htm", "NavPage.aspx?LCDM=" & NoLCDM, MKMC)
+                            End If
+                        End If
+                        ShowTitleFlag = True    '表示，如果该组中有一条记录是有权限的，显示该组
+                    End If
+                Next
+                Item_Temp += GetMenuButton()
+                If ShowTitleFlag = True Then
+                    Temp += Item_Temp
+                End If
+
+
+            End If
+        Next
+
+        '示例            
+        'Temp += GetMenuTitle("管理员系统" & i)
+        'Temp += GetTwoMenu("dd1" & i, "button.htm", "menu\main.htm", "状态" & i)
+        'Temp += GetTwoMenu("dd2" & i, "button.htm", "main.htm", "状态" & i)
+        'Temp += GetTwoMenu("dd3" & i, "button.htm", "main.htm", "状态" & i)
+        'Temp += GetTwoMenu("dd4" & i, "button.htm", "main.htm", "状态" & i)
+        'Temp += GetMenuButton()
+
+        Temp += "</tbody></TABLE>"
+
+        Temp += "<script language=javascript>" & vbCrLf
+        Temp += "window.status='当前用户：" & YGXM & " (" & Login_User & ")';" & vbCrLf
+        Temp += "</scr" + "ipt>"
+        ShowMenu.InnerHtml = Temp
+    End Sub
+
+    '-----------------------------------------------------------------------------------
+    '有流程的情况下显示菜单
+    Function ShowLC_Menu(ByVal LCDM As Integer) As String
+        Dim i, j, MKDM As Integer
+        Dim Temp As String = String.Empty
+        Dim MKMC As String
+        Dim LCMC As String = String.Empty
+        Dim Tb1 As New Data.DataTable
+        Dim Tb As New Data.DataTable
+        Dim Sql As String
+        Sql = "SELECT GY_XMZT.LCDM "
+        Sql += "FROM GY_XMZT, GY_ZTMX, Gy_Group_Info, GY_YGQX "
+        Sql += "where GY_XMZT.XMZT = GY_ZTMX.XMZT And Gy_Group_Info.MKDM = GY_ZTMX.MKDM and GY_YGQX.GRoup_ID = GY_Group_Info.Group_ID and GY_YGQX.YGDM  = " & UserID & " and GY_XMZT.lcdm=" & LCDM
+        Sql += " group by GY_XMZT.LCDM"
+        Tb = Base.DB.Table(Sql, "Gy_LCDM")
+
+        If Tb.Rows.Count > 0 Then
+            Dim TempTb As New Data.DataTable
+            Dim Tb2 As New Data.DataTable
+            For i = 0 To Tb.Rows.Count - 1
+                '这里做功能性的判断,是否显示此菜单
+                LCDM = Tb.Rows(i).Item(0).ToString.Trim     '得到流程代码
+                TempTb = Base.DB.Table("SELECT LCMC FROM GY_LCDM where LCDM = " & LCDM, "GY_LCDM")
+                If TempTb.Rows.Count > 0 Then
+                    LCMC = TempTb.Rows(0).Item(0).ToString.Trim     '得到流程名称
+                    Temp += GetMenuTitle(LCMC)
+                    Temp += GetTwoMenu("SMenu4" & LCDM & "-" & i, "button.htm", "../manager/XJXM/Default.aspx?LCDM=" & LCDM, "项目列表")
+
+                    '这里显示流程内的表单功能.点击进去为到达当前功能的项目列表
+                    Sql = "Select GY_ZTMX.MKDM,ShowName  FROM GY_XMZT, GY_ZTMX, Gy_Group_Info, GY_YGQX"
+                    Sql += " where GY_XMZT.XMZT = GY_ZTMX.XMZT And Gy_Group_Info.MKDM = GY_ZTMX.MKDM  And GY_YGQX.GRoup_ID = GY_Group_Info.Group_ID "
+                    Sql += "and GY_YGQX.YGDM = " & UserID & " and GY_XMZT.LCDM = " & LCDM & " order by  GY_XMZT.Orderby,GY_XMZT.XMZT"
+                    Tb1 = Base.DB.Table(Sql, "GY_ZTMX")
+                    For j = 0 To Tb1.Rows.Count - 1
+                        MKDM = Tb1.Rows(j).Item(0)
+                        If Tb1.Rows(j).Item(1).ToString.Trim <> "" Then
+                            MKMC = Tb1.Rows(j)(1).ToString.Trim
+                        Else
+                            Tb2 = Base.DB.Table("select MKMC from GY_MKXX where MKDM = " & MKDM, "GY_MKXX")
+                            MKMC = Tb2.Rows(0).Item(0)
+                        End If
+
+                        Temp += GetTwoMenu("SMenu6" & LCDM & "-" & i & j, "button.htm", "../manager/XJXM/ShowListXJJC.aspx?MKDM=" & MKDM & "&LCDM=" & LCDM, MKMC)
+                    Next
+                    Temp += GetMenuButton()
+                End If
+            Next
+            TempTb = Nothing
+            Tb1 = Nothing
+        End If
+        Return Temp
+    End Function
+End Class

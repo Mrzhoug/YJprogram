@@ -1,0 +1,559 @@
+﻿Imports Microsoft.VisualBasic
+
+Public Class DoJS
+    ''' <summary>
+    ''' 在页面中插入自定义JS代码段
+    ''' </summary>
+    ''' <param name="myPage">当前页面</param>
+    ''' <param name="msg">信息</param>
+    Public Shared Sub WriteScript(ByVal myPage As Page, ByVal msg As String)
+        Dim ShowMessage As String = Nothing
+        ShowMessage = "<script language=javascript>" & msg & "</script>"
+        If Not myPage.ClientScript.IsStartupScriptRegistered("ShowMessage") Then
+            myPage.ClientScript.RegisterStartupScript(myPage.[GetType](), "ShowMessage", ShowMessage)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 返回上个页面
+    ''' </summary>
+    ''' <param name="myPage"></param>
+    ''' <remarks></remarks>
+    Public Shared Sub goBack(ByVal myPage As Page)
+        Dim ShowMessage As String = Nothing
+        ShowMessage = "<script language=javascript>" & "history.go(-1);"
+        ShowMessage += "</script>"
+        If (Not myPage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            myPage.ClientScript.RegisterStartupScript(myPage.[GetType](), "back", ShowMessage)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 打开新窗口
+    ''' </summary>
+    ''' <param name="myPage">当前页面</param>
+    ''' <param name="url">打开窗体的URL</param>
+    ''' <param name="name">窗体名称</param>
+    ''' <param name="parameter">窗体参数</param>
+    ''' <remarks></remarks>
+    Public Shared Sub openWindow(ByVal myPage As Page, ByVal url As String, ByVal name As String, ByVal parameter As String)
+        Dim str As String = Nothing
+        str = "<script language=javascript>" & "window.open('" & url & "','" & name & "','" & parameter & "')"
+        str += "</script>"
+        If Not myPage.ClientScript.IsStartupScriptRegistered("str") Then
+            myPage.ClientScript.RegisterStartupScript(myPage.[GetType](), "back", str)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 打开modalDialog提示框
+    ''' </summary>
+    ''' <param name="myPage">当前页面</param>
+    ''' <param name="url">提示框的URL</param>
+    ''' <param name="parameter">提示框参数</param>
+    ''' <remarks></remarks>
+    Public Shared Sub showModalDialog(ByVal myPage As Page, ByVal url As String, ByVal parameter As String)
+        Dim str As String = Nothing
+        str = "<script language=javascript>" & "window.showModalDialog('" & url & "','','" & parameter & "')"
+        str += "</script>"
+        If Not myPage.ClientScript.IsStartupScriptRegistered("str") Then
+            myPage.ClientScript.RegisterStartupScript(myPage.[GetType](), "back", str)
+        End If
+    End Sub
+
+#Region "几种警告框"
+    ''' <summary>
+    ''' 警告框
+    ''' </summary>
+    ''' <param name="myPage">当前页面</param>
+    ''' <param name="msg">提示信息</param>
+    ''' <remarks></remarks>
+    Public Shared Sub alert(ByVal myPage As Page, ByVal msg As String)
+        Dim ShowMessage As String = Nothing
+        ShowMessage = "<script language=javascript>" & "alert('" & msg & "');"
+        ShowMessage += "</script>"
+        If Not myPage.ClientScript.IsStartupScriptRegistered("ShowMessage") Then
+            myPage.ClientScript.RegisterStartupScript(myPage.[GetType](), "ShowMessage", ShowMessage)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 警告后跳转页面
+    ''' </summary>
+    ''' <param name="myPage">当前页面</param>
+    ''' <param name="msg">提示信息</param
+    ''' <param name="repage">跳转页面地址</param>
+    ''' <remarks></remarks>
+    Public Shared Sub alert(ByVal myPage As Page, ByVal msg As String, ByVal repage As String)
+        Dim ShowMessage As String = Nothing
+        ShowMessage = "<script language=javascript>" & "alert('" & msg & "');location.href='" & repage & "';"
+        ShowMessage += "</script>"
+        If (Not myPage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            myPage.ClientScript.RegisterStartupScript(myPage.[GetType](), "repage", ShowMessage)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 警告后指定页跳转
+    ''' </summary>
+    ''' <param name="myPage">当前页面</param>
+    ''' <param name="msg">提示信息</param>
+    ''' <param name="repage">跳转页面地址</param>
+    ''' <param name="window">需要跳转页面的地址</param>
+    ''' <remarks></remarks>
+    Public Shared Sub alert(ByVal myPage As Page, ByVal msg As String, ByVal repage As String, ByVal window As String)
+        Dim ShowMessage As String = Nothing
+        ShowMessage = "<script language=javascript>" & "alert('" & msg & "');" & window & ".location.href='" & repage & "';"
+        ShowMessage += "</script>"
+        If (Not myPage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            myPage.ClientScript.RegisterStartupScript(myPage.[GetType](), "windowRepage", ShowMessage)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 警告后返回上一页面
+    ''' </summary>
+    ''' <param name="myPage">当前页面</param>
+    ''' <param name="msg">提示信息</param>
+    ''' <remarks></remarks>
+    Public Shared Sub alertGetBack(ByVal myPage As Page, ByVal msg As String)
+        Dim ShowMessage As String = Nothing
+        ShowMessage = "<script language=javascript>" & "alert('" & msg & "');"
+        ShowMessage += "history.go(-1);"
+        ShowMessage += "</script>"
+        If Not myPage.ClientScript.IsStartupScriptRegistered("ShowMessage") Then
+            myPage.ClientScript.RegisterStartupScript(myPage.[GetType](), "ShowMessage", ShowMessage)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 警告后关闭页面
+    ''' </summary>
+    ''' <param name="myPage">当前页面</param>
+    ''' <param name="msg">提示信息</param>
+    ''' <remarks></remarks>
+    Public Shared Sub alertClose(ByVal myPage As Page, ByVal msg As String)
+        Dim ShowMessage As String = Nothing
+        ShowMessage = "<script language=javascript>" & "alert('" & msg & "');window.close();"
+        ShowMessage += "</script>"
+        If (Not myPage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            myPage.ClientScript.RegisterStartupScript(myPage.[GetType](), "close", ShowMessage)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 警告后关闭并当前页，指定页跳转
+    ''' </summary>
+    ''' <param name="myPage">当前页面</param>
+    ''' <param name="msg">提示信息</param>
+    ''' <param name="top">指定页</param>
+    ''' <remarks></remarks>
+    Public Shared Sub alertCloseReloadPage(ByVal myPage As Page, ByVal msg As String, ByVal top As String)
+        Dim ShowMessage As String = Nothing
+        ShowMessage = "<script language=javascript>" & "alert('" & msg & "');" & top & ".location.reload();window.close();"
+        ShowMessage += "</script>"
+        If (Not myPage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            myPage.ClientScript.RegisterStartupScript(myPage.[GetType](), "reload", ShowMessage)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 警告后关闭并当前页，并刷新父页
+    ''' </summary>
+    ''' <param name="myPage">当前页面</param>
+    ''' <param name="msg">提示信息</param>
+    ''' <remarks></remarks>
+
+    Public Shared Sub alertCloseReloadFatherPage(ByVal myPage As Page, ByVal msg As String)
+        Dim ShowMessage As String = Nothing
+        ShowMessage = "<script language=javascript>" & "alert('" & msg & "');window.opener.location.reload();window.close();"
+        ShowMessage += "</script>"
+        If (Not myPage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            myPage.ClientScript.RegisterStartupScript(myPage.[GetType](), "windowRepage", ShowMessage)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 警告后关闭并当前页，父页跳转
+    ''' </summary>
+    ''' <param name="myPage">当前页面</param>
+    ''' <param name="msg">提示信息</param>
+    ''' <param name="href">父页跳转URL</param>
+    ''' <remarks></remarks>
+    Public Shared Sub alertCloseFatherPageGoTo(ByVal myPage As Page, ByVal msg As String, ByVal href As String)
+        Dim ShowMessage As String = Nothing
+        ShowMessage = "<script language=javascript>" & "alert('" & msg & "');window.opener.location.href='" & href & "';window.close();"
+        ShowMessage += "</script>"
+        If (Not myPage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            myPage.ClientScript.RegisterStartupScript(myPage.[GetType](), "windowRepage", ShowMessage)
+        End If
+    End Sub
+#End Region
+
+    ''' <summary>
+    ''' 指定页面重载
+    ''' </summary>
+    ''' <param name="myPage"></param>
+    ''' <param name="top"></param>
+    ''' <remarks></remarks>
+    Public Shared Sub relocation(ByVal myPage As Page, ByVal top As String)
+        Dim ShowMessage As String = Nothing
+        ShowMessage = "<script language=javascript>" & top & ".location.reload();"
+        ShowMessage += "</script>"
+        If (Not myPage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            myPage.ClientScript.RegisterStartupScript(myPage.[GetType](), "relocation", ShowMessage)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 关闭当前页面，刷新父页
+    ''' </summary>
+    ''' <param name="myPage">当前页面</param>
+    ''' <remarks></remarks>
+    Public Shared Sub closeReload(ByVal myPage As Page)
+        Dim ShowMessage As String = Nothing
+        ShowMessage = "<script language=javascript>window.close();window.opener.location.reload();"
+        ShowMessage += "</script>"
+        If (Not myPage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            myPage.ClientScript.RegisterStartupScript(myPage.[GetType](), "windowRepage", ShowMessage)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 关闭当前页面，父页跳转
+    ''' </summary>
+    ''' <param name="myPage">当前页面</param>
+    ''' <param name="href">父页跳转地址</param>
+    ''' <remarks></remarks>
+    Public Shared Sub closeFatherPageGoTo(ByVal myPage As Page, ByVal href As String)
+        Dim ShowMessage As String = Nothing
+        ShowMessage = "<script language=javascript>window.opener.location.href='" & href & "';window.close();"
+        ShowMessage += "</script>"
+        If (Not myPage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            myPage.ClientScript.RegisterStartupScript(myPage.[GetType](), "windowRepage", ShowMessage)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 页面跳转错误信息提示页面，并给出错误
+    ''' </summary>
+    ''' <param name="myPage">当前页面</param>
+    ''' <param name="msg">错误信息</param>
+    ''' <remarks></remarks>
+    Public Shared Sub showError(ByVal myPage As Page, ByVal msg As String)
+        Dim ShowMessage As String = Nothing
+        ShowMessage = "<script language=javascript>location.href=err.aspx?err='" & msg & "';"
+        ShowMessage += "</script>"
+        If (Not myPage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            myPage.ClientScript.RegisterStartupScript(myPage.[GetType](), "windowRepage", ShowMessage)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 框架大小自动调整
+    ''' </summary>
+    ''' <param name="myPage">需要自动调整的页面</param>
+    ''' <remarks></remarks>
+    Public Shared Sub showAll(ByVal myPage As System.Web.UI.Page)
+        Dim script As String = Nothing
+        script = "<script language=javascript>"
+        script = script & "function openMember(id)"
+        script = script & "{window.open('/newweb/jgml/member.asp?memberid='+id,'','width=525,height=480 scrollbars=1');}"
+        script = script & "function winopen(url){"
+        script = script & "window.open(url,'','width=520,height=500 scrollbars=1');}"
+        script = script & "function parentIframeHeight(){"
+        script = script & "if(top!=self && self.name!=''){"
+        script = script & "var e;"
+        script = script & "/*@cc_on @*/ /*@if (@_jscript_version>=3) e = window.parent.document.all(self.name); @else @*/"
+        script = script & "if(window.navigator.appName=='Netscape' && parseInt(window.navigator.appVersion)>5)"
+        script = script & "e = window.parent.document.getElementById(self.name);"
+        script = script & "else e = eval('window.parent.'+ self.name);"
+        script = script & "/*@end @*/"
+        script = script & "var n = (document.body.style.overflow ==  'hidden') ? 0 : 16;"
+        script = script & "e.height = parseInt(document.body.scrollHeight + n, 10); }}"
+        script = script & "window.attachEvent('onload', parentIframeHeight);"
+        script = script & "</script>"
+        If (Not myPage.ClientScript.IsStartupScriptRegistered("script")) Then
+            myPage.ClientScript.RegisterStartupScript(myPage.[GetType](), "script", script)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 绑定GridView行鼠标效果
+    ''' </summary>
+    ''' <param name="e"></param>
+    Public Shared Sub BindRowSkinFile(ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs)
+        If e.Row.RowType = System.Web.UI.WebControls.DataControlRowType.DataRow Then
+            e.Row.Attributes.Add("onmouseover", "OnMouseOver(this)")
+            e.Row.Attributes.Add("onmouseout", "OnMouseOut(this)")
+            e.Row.Attributes("style") = "Cursor:hand"
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 自定义翻页栏
+    ''' </summary>
+    ''' <param name="TempGrid"></param>
+    ''' <param name="MaxPageCount"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function WriteGridViewFoot(ByVal TempGrid As System.Web.UI.WebControls.GridView, ByVal MaxPageCount As Integer) As String
+        '显示分页的信息(因为自带的只能显示部分功能) 
+        '完全采用系统自带功能实现． 
+        '在GridView的标签后面添加控件<table align=center width=98% height=26 valign=middle bgcolor=#e0e0e0 ><tr><td id=PageBar runat=server align=center></td></tr></table> 
+        '再想办法得到未分页前的最大页数，然在Data_bound中添加这个函数 PageBar.InnerHtml = Base.Pub.Write(Gridview,MaxPage) 
+
+        If MaxPageCount = 0 Then
+            Return "暂无数据"
+        End If
+
+        Dim Ret As String = String.Empty
+        Dim RowCount As Integer = TempGrid.Rows.Count
+        Dim PageIndex As Integer = TempGrid.PageIndex + 1
+        Dim PageCount As Integer = TempGrid.PageCount
+        Ret = "<span style='font-size:9pt;'>总记录数:" & MaxPageCount.ToString() & "    每页:" & TempGrid.PageSize.ToString() & "条     页数:" & PageIndex.ToString() & "/" & PageCount.ToString() & ""
+        If (PageIndex > 1) Then
+            Ret += "<a href=""javascript:__doPostBack('" & TempGrid.ID & "','Page$First')"">首页</a>  <a href=""javascript:__doPostBack('" & TempGrid.ID & "','Page$Prev')"">上页</a> "
+        Else
+            Ret += "首页  上页 "
+        End If
+        '------------------------------------------------------------------------------------ 
+        '此部分为中间的显示页码数，规则是当前页的前后五页 
+        Dim StartPage As Integer = 0
+        Dim EndPage As Integer = 0
+        If PageIndex > 5 Then
+            StartPage = PageIndex - 5
+            If PageIndex + 5 >= PageCount Then
+                StartPage = PageCount - 10
+
+            End If
+        Else
+            StartPage = 1
+        End If
+
+        If PageIndex + 5 > PageCount Then
+            EndPage = PageCount
+        Else
+            EndPage = PageIndex + 5
+            If EndPage < 10 Then
+                EndPage = 10
+
+            End If
+        End If
+
+        Dim i As Integer = 0
+        For i = StartPage To EndPage
+            If i = PageIndex Then
+                Ret += "<b>" & i.ToString() & "</b> "
+            Else
+                Ret += "<a href=""javascript:__doPostBack('" & TempGrid.ID & "','Page$" & i & "')"">" & i & "</a>" & " "
+            End If
+        Next
+        '------------------------------------------------------------------------------------- 
+        If (PageIndex < PageCount) Then
+            Ret += "  <a href=""javascript:__doPostBack('" & TempGrid.ID & "','Page$Next')"">下页</a>  <a href=""javascript:__doPostBack('" & TempGrid.ID & "','Page$Last')"">尾页</a>"
+        Else
+            Ret += "  下页  尾页"
+        End If
+        '-------------------------------------------------------------------------------------- 
+        '以下是输入页码，进行换行的部分' 
+        Ret += " <input id='PageNum_" & TempGrid.ID & "' onkeydown='if(!KeyIsNumber(event.keyCode))  {  return false; }' type='text' size='2' style='border-style:Groove;font-size:8pt;width:25px;' /> <a href='#' onclick='javascript:CheckPageNum_" & TempGrid.ID & "()'>跳转</a>"
+        'JAVASCRIPT部分，用来限制输入框的输入值，以及对输入值进行换页处理 
+        Ret += Environment.NewLine + "<script language=""javascript"">" + Environment.NewLine
+        Ret += (" var MaxPage_" & TempGrid.ID & "=" & PageCount.ToString() & ";") + Environment.NewLine
+        Ret += "function KeyIsNumber(KeyCode)" + Environment.NewLine
+        Ret += "{ //如果输入的字符是在0-9之间，或者是backspace、DEL键" + Environment.NewLine
+        Ret += "if(((KeyCode>47)&&(KeyCode<58))||(KeyCode==8)||(KeyCode==46)||((KeyCode>95)&&(KeyCode<105)))" + Environment.NewLine
+        Ret += "{ return true;  }" + Environment.NewLine
+        Ret += "else" + Environment.NewLine
+        Ret += "{ return false; }" + Environment.NewLine
+        Ret += "}" + Environment.NewLine
+        Ret += ("function CheckPageNum_" & TempGrid.ID & "()") + Environment.NewLine
+        Ret += ("{ var obj = document.getElementById(""PageNum_" & TempGrid.ID & """);") + Environment.NewLine
+        Ret += ("if ((obj.value!='')&&(obj.value!=0)&&(obj.value<=MaxPage_" & TempGrid.ID & "))") + Environment.NewLine
+        Ret += "{" + Environment.NewLine
+        Ret += "try{" + Environment.NewLine
+        Ret += ("__doPostBack('" & TempGrid.ID & "','Page$'+obj.value);    }") + Environment.NewLine
+        Ret += "catch(err) { alert('err')}" + Environment.NewLine
+        Ret += "}" + Environment.NewLine
+        Ret += ("}" + Environment.NewLine & "</script>") + Environment.NewLine
+        '------------------------------------------------------------------- 
+        Return Ret & "</span>"
+    End Function
+
+    ''' <summary>
+    ''' 自定义翻页栏
+    ''' </summary>
+    ''' <param name="TempGrid"></param>
+    ''' <param name="MaxPageCount"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function WriteGridViewSimpleFoot(ByVal TempGrid As System.Web.UI.WebControls.GridView, ByVal MaxPageCount As Integer) As String
+        '显示分页的信息(因为自带的只能显示部分功能) 
+        '完全采用系统自带功能实现． 
+        '在GridView的标签后面添加控件<table align=center width=98% height=26 valign=middle bgcolor=#e0e0e0 ><tr><td id=PageBar runat=server align=center></td></tr></table> 
+        '再想办法得到未分页前的最大页数，然在Data_bound中添加这个函数 PageBar.InnerHtml = Base.Pub.Write(Gridview,MaxPage) 
+
+        If MaxPageCount = 0 Then
+            Return "暂无数据"
+        End If
+
+        Dim Ret As String = String.Empty
+        Dim RowCount As Integer = TempGrid.Rows.Count
+        Dim PageIndex As Integer = TempGrid.PageIndex + 1
+        Dim PageCount As Integer = TempGrid.PageCount
+        If (PageIndex > 1) Then
+            Ret += "<a href=""javascript:__doPostBack('" & TempGrid.ID & "','Page$First')"">首页</a>  <a href=""javascript:__doPostBack('" & TempGrid.ID & "','Page$Prev')"">上页</a> "
+        Else
+            Ret += "首页  上页 "
+        End If
+        '------------------------------------------------------------------------------------ 
+        '此部分为中间的显示页码数，规则是当前页的前后五页 
+        Dim StartPage As Integer = 0
+        Dim EndPage As Integer = 0
+        If PageIndex > 5 Then
+            StartPage = PageIndex - 5
+        Else
+            StartPage = 1
+        End If
+        If PageIndex + 5 > PageCount Then
+            EndPage = PageCount
+        Else
+            EndPage = PageIndex + 5
+        End If
+
+        Dim i As Integer = 0
+        For i = StartPage To EndPage
+            If i = PageIndex Then
+                Ret += "<b>" & i.ToString() & "</b> "
+            Else
+                Ret += "<a href=""javascript:__doPostBack('" & TempGrid.ID & "','Page$" & i & "')"">" & i & "</a>" & " "
+            End If
+        Next
+        '------------------------------------------------------------------------------------- 
+        If (PageIndex < PageCount) Then
+            Ret += "  <a href=""javascript:__doPostBack('" & TempGrid.ID & "','Page$Next')"">下页</a>  <a href=""javascript:__doPostBack('" & TempGrid.ID & "','Page$Last')"">尾页</a>"
+        Else
+            Ret += "  下页  尾页"
+        End If
+        '-------------------------------------------------------------------------------------- 
+        '以下是输入页码，进行换行的部分' 
+        Ret += " <input id='PageNum_" & TempGrid.ID & "' onkeydown='if(!KeyIsNumber(event.keyCode))  {  return false; }' type='text' size='2' style='border-style:Groove;font-size:8pt;width:25px;' /> <a href='#' onclick='javascript:CheckPageNum_" & TempGrid.ID & "()'>跳转</a>"
+        'JAVASCRIPT部分，用来限制输入框的输入值，以及对输入值进行换页处理 
+        Ret += Environment.NewLine + "<script language=""javascript"">" + Environment.NewLine
+        Ret += (" var MaxPage_" & TempGrid.ID & "=" & PageCount.ToString() & ";") + Environment.NewLine
+        Ret += "function KeyIsNumber(KeyCode)" + Environment.NewLine
+        Ret += "{ //如果输入的字符是在0-9之间，或者是backspace、DEL键" + Environment.NewLine
+        Ret += "if(((KeyCode>47)&&(KeyCode<58))||(KeyCode==8)||(KeyCode==46)||((KeyCode>95)&&(KeyCode<105)))" + Environment.NewLine
+        Ret += "{ return true;  }" + Environment.NewLine
+        Ret += "else" + Environment.NewLine
+        Ret += "{ return false; }" + Environment.NewLine
+        Ret += "}" + Environment.NewLine
+        Ret += ("function CheckPageNum_" & TempGrid.ID & "()") + Environment.NewLine
+        Ret += ("{ var obj = document.getElementById(""PageNum_" & TempGrid.ID & """);") + Environment.NewLine
+        Ret += ("if ((obj.value!='')&&(obj.value!=0)&&(obj.value<=MaxPage_" & TempGrid.ID & "))") + Environment.NewLine
+        Ret += "{" + Environment.NewLine
+        Ret += "try{" + Environment.NewLine
+        Ret += ("__doPostBack('" & TempGrid.ID & "','Page$'+obj.value);    }") + Environment.NewLine
+        Ret += "catch(err) { alert('err')}" + Environment.NewLine
+        Ret += "}" + Environment.NewLine
+        Ret += ("}" + Environment.NewLine & "</script>") + Environment.NewLine
+        '------------------------------------------------------------------- 
+        Return Ret & "</span>"
+    End Function
+
+    ''' <summary>
+    ''' 自定义翻页栏(数据分页)
+    ''' </summary>
+    ''' <param name="gridViewID">容器ID</param>
+    ''' <param name="pageIndex">当前页数</param>
+    ''' <param name="pageSize">页面大小</param>
+    ''' <param name="totalCount">总记录数</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function WriteGridViewFootWithSQLPaging(ByVal gridViewID As String, ByVal pageIndex As Integer, ByVal pageSize As Integer, ByRef totalCount As Integer) As String
+
+
+        '显示分页的信息(因为自带的只能显示部分功能) 
+        '完全采用系统自带功能实现． 
+        '在GridView的标签后面添加控件<table align=center width=98% height=26 valign=middle bgcolor=#e0e0e0 ><tr><td id=PageBar runat=server align=center></td></tr></table> 
+        '再想办法得到未分页前的最大页数，然在Data_bound中添加这个函数 PageBar.InnerHtml = Base.Pub.Write(Gridview,MaxPage) 
+
+        If totalCount = 0 Then
+            Return "暂无数据"
+        End If
+
+        Dim htmlStr As String = String.Empty
+
+        '向上取整，获取总页数
+        Dim pageCount As Integer = Math.Ceiling(totalCount / pageSize)
+
+        htmlStr = "<span style='font-size:9pt;'>总记录数:" & totalCount & "    每页:" & pageSize & "条     页数:" & pageIndex.ToString() & "/" & pageCount.ToString() & ""
+        If (pageIndex > 1) Then
+            htmlStr += "<a href=""javascript:__doPostBack('" & gridViewID & "','Page$First')"">首页</a>  <a href=""javascript:__doPostBack('" & gridViewID & "','Page$" & pageIndex - 1 & "')"">上页</a> "
+        Else
+            htmlStr += "首页  上页 "
+        End If
+        '------------------------------------------------------------------------------------ 
+        '此部分为中间的显示页码数，规则是当前页的前后五页 
+       '此部分为中间的显示页码数，规则是当前页的前后五页 
+        Dim StartPage As Integer = 0
+        Dim EndPage As Integer = 0
+        If pageIndex > 5 Then
+            StartPage = pageIndex - 5
+        Else
+            StartPage = 1
+        End If
+        If pageIndex + 5 > pageCount Then
+            EndPage = pageCount
+        Else
+            EndPage = pageIndex + 5
+        End If
+
+        Dim i As Integer = 0
+        For i = StartPage To EndPage
+            If i = pageIndex Then
+                htmlStr += "<b>" & i.ToString() & "</b> "
+            Else
+                htmlStr += "<a href=""javascript:__doPostBack('" & gridViewID & "','Page$" & i & "')"">" & i & "</a>" & " "
+            End If
+        Next
+        '------------------------------------------------------------------------------------- 
+        If (pageIndex < pageCount) Then
+            htmlStr += "  <a href=""javascript:__doPostBack('" & gridViewID & "','Page$" & pageIndex + 1 & "')"">下页</a>  <a href=""javascript:__doPostBack('" & gridViewID & "','Page$" & pageCount & "')"">尾页</a>"
+        Else
+            htmlStr += "  下页  尾页"
+        End If
+        '-------------------------------------------------------------------------------------- 
+        '以下是输入页码，进行换行的部分' 
+        htmlStr += " <input id='PageNum_" & gridViewID & "' onkeydown='if(!KeyIsNumber(event.keyCode))  {  return false; }' type='text' size='2' style='border-style:Groove;font-size:8pt;width:25px;' /> <a href='#' onclick='javascript:CheckPageNum_" & gridViewID & "()'>跳转</a>"
+        'JAVASCRIPT部分，用来限制输入框的输入值，以及对输入值进行换页处理 
+        htmlStr += Environment.NewLine + "<script language=""javascript"">" + Environment.NewLine
+        htmlStr += (" var MaxPage_" & gridViewID & "=" & pageCount.ToString() & ";") + Environment.NewLine
+        htmlStr += "function KeyIsNumber(KeyCode)" + Environment.NewLine
+        htmlStr += "{ //如果输入的字符是在0-9之间，或者是backspace、DEL键" + Environment.NewLine
+        htmlStr += "if(((KeyCode>47)&&(KeyCode<58))||(KeyCode==8)||(KeyCode==46)||((KeyCode>95)&&(KeyCode<105)))" + Environment.NewLine
+        htmlStr += "{ return true;  }" + Environment.NewLine
+        htmlStr += "else" + Environment.NewLine
+        htmlStr += "{ return false; }" + Environment.NewLine
+        htmlStr += "}" + Environment.NewLine
+        htmlStr += ("function CheckPageNum_" & gridViewID & "()") + Environment.NewLine
+        htmlStr += ("{ var obj = document.getElementById(""PageNum_" & gridViewID & """);") + Environment.NewLine
+        htmlStr += ("if ((obj.value!='')&&(obj.value!=0)&&(obj.value<=MaxPage_" & gridViewID & "))") + Environment.NewLine
+        htmlStr += "{" + Environment.NewLine
+        htmlStr += "try{" + Environment.NewLine
+        htmlStr += ("__doPostBack('" & gridViewID & "','Page$'+obj.value);    }") + Environment.NewLine
+        htmlStr += "catch(err) { alert('err')}" + Environment.NewLine
+        htmlStr += "}" + Environment.NewLine
+        htmlStr += ("}" + Environment.NewLine & "</script>") + Environment.NewLine
+        '------------------------------------------------------------------- 
+        Return htmlStr & "</span>"
+    End Function
+
+    'Shared Function GetAHtml(ByVal pageIndex As Integer, ByVal url As String)
+    '    Dim htmlStr As String
+    '    htmlStr = "<a " + attr + " href=""+ url + "" style=""margin-right:5px;"">" + pageIndex + "</a>" + Environment.NewLine
+    '    Return
+    'End Function
+
+End Class

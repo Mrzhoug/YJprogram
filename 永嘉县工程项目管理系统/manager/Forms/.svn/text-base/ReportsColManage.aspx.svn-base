@@ -1,0 +1,25 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ReportsColManage.aspx.vb" Inherits="manager_Forms_ReportsColManage" ValidateRequest="false"  Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>报表显示列</title>
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div style="width:483px;">
+        <asp:TextBox ID="ShowName" runat="server" Width="224px"></asp:TextBox>
+        <asp:DropDownList ID="NodeName" runat="server" Width="168px">
+        </asp:DropDownList>
+        <asp:Button ID="ListAdd" runat="server" Text=" 添 加 " />&nbsp;
+        <br />
+        <asp:ListBox ID="ListBox1" runat="server" Height="231px" SelectionMode="Multiple"
+            Width="483px"></asp:ListBox>
+        <br /><center>
+        <asp:Button ID="Button1" runat="server" Text="所选向上" />&nbsp;
+        <asp:Button ID="Button2" runat="server" Text="所选向下" />&nbsp;
+        <asp:Button ID="Button3" runat="server" Text="删除所选" />&nbsp;
+        <asp:Button ID="Button4" runat="server" Text="保存结果" /></center></div>
+    </form>
+</body>
+</html>

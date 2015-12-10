@@ -1,0 +1,280 @@
+﻿
+Partial Class manager_Forms_WebInfoPath
+    Inherits System.Web.UI.Page
+
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim Mkdm As Integer
+    Dim XMDM As Integer
+    Dim LCDM As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Dim Fid As Integer
+        Dim msgid As Integer = 0
+        Try
+            Fid = Convert.ToInt32(Request("FID"))
+            msgid = Convert.ToInt32(Request("msgid"))
+        Catch ex As Exception
+            Response.Write("非法参数或是非法访问!")
+            Response.End()
+        End Try
+        If msgid <> 0 Then
+            Try         '做已读标志
+                Base.DB.Query("update SendMessage set lookflag=1 where cid =" & msgid)
+            Catch ex As Exception
+            End Try
+        End If
+
+        Dim isDraft As Boolean
+        Try
+            Dim dt As New DataTable
+            dt = Base.DB.Table("select state from xx_xmjc where fid=" & Fid, "dd")
+
+            If IsDBNull(dt.Rows(0).Item(0)) Then
+                isDraft = True
+            Else
+                If dt.Rows(0).Item(0) = "-17" Then
+                    isDraft = True
+                Else
+                    isDraft = False
+                End If
+            End If
+                
+
+
+        Catch ex As Exception
+
+        End Try
+
+
+
+        Dim Tb As New Data.DataTable
+        '根据ＦＩＤ得到相关的信息        
+        Tb = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir,GY_MKXX.MKDM,XX_XMJC.XMDM,[View] FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & Fid & ")", "XX_XMJC")
+        If Tb.Rows.Count = 0 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+        Me.Title = Tb.Rows(0)(1).ToString
+        Mkdm = Tb.Rows(0)(3).ToString
+        XMDM = Tb.Rows(0)(4)
+        Dim MKMC As String = Tb.Rows(0).Item(1)
+        Dim XsnDir As String = Tb.Rows(0).Item(2).ToString.Trim
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.Web.NotShowBar.Values").IndexOf(Mkdm & ",") >= 0 Then
+            Response.Write("<script language=javascript>" & vbCrLf & "var cid=" & Fid & ";" & vbCrLf & "var toolbar=false;</script>")
+        Else
+            Response.Write("<script language=javascript>" & vbCrLf & "var cid=" & Fid & ";" & vbCrLf & "var toolbar=true;</script>")
+        End If
+
+
+        '将表单状态标志填写在菜单上.
+        Dim scriptstr As String = vbCrLf & "<script language='javascript' type='text/javascript'>" & vbCrLf
+        '设置状态菜单
+        scriptstr += " var menu = new Ext.menu.Menu({items: [" & vbCrLf
+        scriptstr += "{text:   '设置为[已完成]',handler: function(){  dostate(-1);},iconCls:  'blist' }" & vbCrLf
+        scriptstr += ",{text:   '设置为[进行中]',handler: function(){  dostate(0);},iconCls:  'blist' }" & vbCrLf
+        scriptstr += ",{text:   '设置为[已取消]',handler: function(){  dostate(-2);},iconCls:  'blist' }" & vbCrLf
+        Tb = Base.DB.Table("Select cid,value from Xconfig,GY_XMXX where config='表单标签' and Xconfig.lcdm=GY_XMXX.LCDM and GY_XMXX.XMDM=" & XMDM, "dd")
+        Dim i As Integer
+        For i = 0 To Tb.Rows.Count - 1
+            scriptstr += ",{text:   '设置为[" & Tb.Rows(i).Item(1) & "]',handler: function(){  dostate(" & Tb.Rows(i).Item(0) & ");},iconCls:  'blist' }" & vbCrLf
+        Next
+        scriptstr += "]});" & vbCrLf
+
+        '根据是否有流程,显示不同的审批页面
+        Tb = Base.DB.Table("Select FID From XX_XMJC where XMZT is null and FID=" & Fid, "XMJC")
+        scriptstr += " function createsp()" & vbCrLf
+        scriptstr += "{" & vbCrLf
+        If Tb.Rows.Count > 0 Then       '表示是无流程
+            scriptstr += "window.open('../Forms/FormSP_NoLc.aspx?FID=" & Fid & "','发起审阅','height=450, width=800, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');" & vbCrLf
+        Else
+            scriptstr += "window.open('../Forms/Function.aspx?XMDM=" & XMDM & "&MKDM=" & Mkdm & "&Flag=1','发起审阅','height=450, width=800, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');" & vbCrLf
+        End If
+        scriptstr += "}" & vbCrLf
+
+        '开始处理菜单 
+        
+        '打开表单菜单配置
+        Dim WebInfoPathMenu As String = ""
+        Dim Row As Data.DataRow
+        Try
+            Row = Base.DB.Row("Select * From WebInfoPath_MenuConfig Where MKDM=" & Mkdm, "dd")
+        Catch ex As Exception
+            Row = Nothing
+        End Try
+        If Not Row Is Nothing Then
+
+            If Row.Item("Config9").ToString = "True" Then
+                If isDraft = True Then
+                    WebInfoPathMenu += "tb.add('-',{ icon: '../../images/Ext.UI/icons/fam/save.png', 	iconCls: 'blist',   text: '保存草稿&nbsp;',handler:onItemClick  })" & vbCrLf
+                End If
+
+            End If
+            If Row.Item("Config1").ToString = "True" Then
+                WebInfoPathMenu += "tb.add('-',{ icon: '../../images/Ext.UI/icons/fam/save.png', 	iconCls: 'blist',   text: '保存表单&nbsp;',handler: onItemClick  })" & vbCrLf
+            End If
+            If Row.Item("Config2").ToString = "True" Then
+                WebInfoPathMenu += "tb.add('-',{ icon: '../../images/Ext.UI/icons/fam/user_edit.png',iconCls: 'blist',text: '申请审阅&nbsp;',handler: createsp  })" & vbCrLf
+            End If
+            If Row.Item("Config3").ToString = "True" Then
+                WebInfoPathMenu += "tb.add('-',{ icon: '../../images/Ext.UI/icons/fam/application_view_list.png', 	iconCls: 'blist',   text: '审阅意见&nbsp;',handler: onItemClick  })" & vbCrLf
+            End If
+            If Row.Item("Config4").ToString = "True" Then
+                WebInfoPathMenu += "tb.add('-',{ icon: '../../images/Ext.UI/icons/fam/application_go.png', 	iconCls: 'blist',   text: '分发表单&nbsp;',handler: onItemClick  })" & vbCrLf
+            End If
+            If Row.Item("Config5").ToString = "True" Then
+                WebInfoPathMenu += "tb.add('-',{ icon: '../../images/Ext.UI/icons/fam/application_view_list.png', 	iconCls: 'blist',   text: '查看回复&nbsp;',handler: onItemClick  })" & vbCrLf
+            End If
+            If Row.Item("Config6").ToString = "True" Then
+                WebInfoPathMenu += "tb.add('-',{ icon: '../../images/Ext.UI/icons/fam/print.png', 	iconCls: 'blist',   text: '打印表单&nbsp;',handler: onItemClick  })" & vbCrLf
+            End If
+            If Row.Item("Config7").ToString = "True" Then
+                WebInfoPathMenu += "tb.add('-',{ icon: '../../images/Ext.UI/icons/fam/user.gif', 	iconCls: 'blist',   text: '设置状态&nbsp;',menu:menu  })" & vbCrLf
+            End If
+            If Row.Item("Config8").ToString = "True" Then
+                WebInfoPathMenu += "tb.add('-',{ icon: '../../images/Ext.UI/icons/fam/annex.png', 	iconCls: 'blist',   text: '附件管理&nbsp;',handler:onItemClick  })" & vbCrLf
+            End If
+
+
+            If WebInfoPathMenu.Trim.Length > 0 Then
+                scriptstr += "var tb = new Ext.Toolbar();" & vbCrLf
+                scriptstr += "tb.render('toolbar');" & vbCrLf
+                scriptstr += WebInfoPathMenu
+            End If
+        Else            '假如没有设置过，默认显示全部(以配置文件为准
+            scriptstr += "var tb = new Ext.Toolbar();" & vbCrLf
+            scriptstr += "tb.render('toolbar');" & vbCrLf
+            scriptstr += "tb.add('-',{ icon: '../../images/Ext.UI/icons/fam/add.gif', 	iconCls: 'blist',   text: '保存表单&nbsp;',handler: onItemClick  })" & vbCrLf
+            '根据配置文件，对相应的按钮进行判断，是否显示
+            If Base.GetXmanConfigEnabled("/系统配置/WEB打开菜单/申请审阅", "../../") = True Then
+                scriptstr += "tb.add('-',{ icon: '../../images/Ext.UI/icons/fam/application_go.png', 	iconCls: 'blist',   text: '申请审阅&nbsp;',handler: createsp  })" & vbCrLf
+            End If
+            If Base.GetXmanConfigEnabled("/系统配置/WEB打开菜单/审阅意见", "../../") = True Then
+                scriptstr += "tb.add('-',{ icon: '../../images/Ext.UI/icons/fam/application_view_list.png', 	iconCls: 'blist',   text: '审阅意见&nbsp;',handler: onItemClick  })" & vbCrLf
+            End If
+            If Base.GetXmanConfigEnabled("/系统配置/WEB打开菜单/分发表单", "../../") = True Then
+                scriptstr += "tb.add('-',{ icon: '../../images/Ext.UI/icons/fam/application_go.png', 	iconCls: 'blist',   text: '分发表单&nbsp;',handler: onItemClick  })" & vbCrLf
+            End If
+            If Base.GetXmanConfigEnabled("/系统配置/WEB打开菜单/查看回复", "../../") = True Then
+                scriptstr += "tb.add('-',{ icon: '../../images/Ext.UI/icons/fam/application_view_list.png', 	iconCls: 'blist',   text: '查看回复&nbsp;',handler: onItemClick  })" & vbCrLf
+            End If
+            If Base.GetXmanConfigEnabled("/系统配置/WEB打开菜单/打印表单", "../../") = True Then
+                scriptstr += "tb.add('-',{ icon: '../../images/Ext.UI/icons/fam/connect.gif', 	iconCls: 'blist',   text: '打印表单&nbsp;',handler: onItemClick  })" & vbCrLf
+            End If
+            If Base.GetXmanConfigEnabled("/系统配置/WEB打开菜单/设置状态", "../../") = True Then
+                scriptstr += "tb.add('-',{ icon: '../../images/Ext.UI/icons/fam/user.gif', 	iconCls: 'blist',   text: '设置状态&nbsp;',menu:menu  })" & vbCrLf
+            End If
+            If Base.GetXmanConfigEnabled("/系统配置/WEB打开菜单/附件管理", "../../") = True Then
+                scriptstr += "tb.add('-',{ icon: '../../images/Ext.UI/icons/fam/user.gif', 	iconCls: 'blist',   text: '附件管理&nbsp;',handler:onItemClick  })" & vbCrLf
+            End If
+        End If
+
+        '开始重置窗休大小
+        Dim Row1 As DataRow = Base.DB.Row("select LCDM From  GY_XMXX where XMDM='" & XMDM & "'", "dd")
+        If Row1 Is Nothing Then
+            Response.Write("非法访问")
+            Response.End()
+        Else
+            LCDM = Row1("LCDM").ToString
+            Dim _Width As Integer
+            Try
+                _Width = Base.ReadConfig("表单打开长度", LCDM)
+            Catch ex As Exception
+                _Width = 0
+            End Try
+            Dim _Height As Integer
+            Try
+                _Height = Base.ReadConfig("表单打开宽度", LCDM)
+            Catch ex As Exception
+                _Height = 0
+            End Try
+
+            'scriptstr += "ResetWindows(" & _Width & "," & _Height & ");" & vbCrLf
+            scriptstr += "var lcdm=" & LCDM & ";" & vbCrLf
+        End If
+
+        scriptstr += "</script>" & vbCrLf
+        clientscript.InnerHtml = scriptstr
+
+        '------------------------------
+
+
+
+        Dim uri As String = Server.MapPath("../../") & "TemplateLibrary\" & XsnDir & ".xsn"
+        If IO.File.Exists(uri) = False Then
+            Response.Write("模板不存在,或是已经被删除,请检查!")
+            Response.End()
+        End If
+        Dim PublicUrl As String = Request("publicurl")
+        Dim Form As InfoJetSoft.Service.InfoJetForm = Nothing
+        Dim DfileName As String = Server.MapPath("../../") & "\FormFolder\" & MKMC & "\" & Fid & ".xml"
+
+        Dim TmpFileName As String = Server.MapPath("../../") & "\Submit_Temp\" & Login_User & "\" & Fid & ".xml"
+        If IO.File.Exists(TmpFileName) = True Then
+            DfileName = TmpFileName
+        End If
+
+        '如果文件不存在.表示未提交过.存在临时目录下.
+        If IO.File.Exists(DfileName) = False Then
+            DfileName = Server.MapPath("../../") & "\Submit_Temp\CreateTemp\" & Fid & ".xml"
+        End If
+
+
+
+
+        If IO.File.Exists(DfileName) = False Then
+            Response.Write("表单不存在,或是已经被删除,请检查!")
+            Response.End()
+        End If
+
+        Dim xml As String = Base.pub.Text_File_Read(DfileName)
+
+        Dim Fs As IO.FileStream = New IO.FileStream(uri, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read)  '当False为True是.向文件添加内容
+        Dim xsnContent(Fs.Length) As Byte
+        Dim strread As New IO.BinaryReader(Fs) '流处理要传输的文件
+        strread.Read(xsnContent, 0, xsnContent.Length)
+
+        '得到列表后,进行检测,模板是否已经注册过.
+        Dim uriList As String() = InfoJetSoft.Service.InfoJetService.List()
+        Dim RegFlag As Boolean = False
+
+        For i = 0 To uriList.GetUpperBound(0)
+            If uriList(i).IndexOf("/" & XsnDir & ".xsn") > 0 Then
+                PublicUrl = uriList(i)
+                RegFlag = True
+                Exit For
+            End If
+        Next
+
+        If RegFlag = False Then
+            Try
+                PublicUrl = InfoJetSoft.Service.InfoJetService.Register(Context, xsnContent)
+            Catch ex As Exception
+                Base.SaveErrLog(2, ex.Message)
+                Response.Write("注册模板出现意外,请稍候再试!如果再试还是不行,请先用Infopath打方式.并联系管理员!")
+                Response.End()
+            End Try
+        End If
+
+        If Not PublicUrl Is Nothing Then
+            Try
+                Form = InfoJetSoft.Service.InfoJetService.BuildFormByXML(Context, PublicUrl, xml, "")
+            Catch ex As Exception
+                Base.SaveErrLog(2, ex.Message)
+                Base.Js.alert(Me, "以Web方式打开出错,请稍候再试!如果再试还是不行,请先用Infopath打方式.并联系管理员!")
+                xDocContent.Text = "以Web方式打开出错,请稍候再试!如果再试还是不行,请先用Infopath打方式.并联系管理员!"
+                Exit Sub
+            End Try
+            xDocContent.Text = Form.Xhtml
+            FileName.Value = xml
+            MenuID.Value = Request("MenuID")
+        End If
+
+    End Sub
+End Class

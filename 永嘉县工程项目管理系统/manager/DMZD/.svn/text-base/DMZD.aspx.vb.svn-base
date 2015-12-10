@@ -1,0 +1,50 @@
+﻿
+Partial Class manager_DMZD_DMZD
+    Inherits System.Web.UI.Page
+
+    Protected Sub GridView1_RowDeleting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs) Handles GridView1.RowDeleting
+        SqlDataSource1.DeleteCommand = "delete GY_DMZD where DMXH=" & GridView1.DataKeys(e.RowIndex).Item(0)
+        SqlDataSource1.Delete()
+    End Sub
+
+    Protected Sub GridView1_RowUpdating(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewUpdateEventArgs) Handles GridView1.RowUpdating
+        SqlDataSource1.UpdateCommand = "update GY_DMZD set DMSB='" & e.NewValues(0) & "',SSDM='" & e.NewValues(1) & "',DMMC='" & e.NewValues(2) & "' where DMXH=" & GridView1.DataKeys(e.RowIndex).Item(0)
+        SqlDataSource1.Update()
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        If Page.IsPostBack = False Then
+            GridView1.DataBind()
+        End If
+        Label5.Text = ""
+        Label5.Visible = False
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim gv As New GridView
+        SqlDataSource1.SelectCommand = "select * from GY_DMZD where DMXH='" & TextBox1.Text & "'"
+        gv.DataSource = SqlDataSource1
+        gv.DataBind()
+        If gv.Rows.Count > 0 Then
+            Label5.Text = "代码添加失败，代码序号已存在"
+            Label5.ForeColor = Drawing.Color.Red
+            Label5.Visible = True
+            SqlDataSource1.SelectCommand = "select * from GY_DMZD "
+            GridView1.DataBind()
+        ElseIf TextBox1.Text.Trim = "" Or TextBox2.Text.Trim = "" Or TextBox3.Text.Trim = "" Or TextBox4.Text.Trim = "" Then
+            SqlDataSource1.SelectCommand = "select * from GY_DMZD "
+            GridView1.DataBind()
+            Label5.Text = "请填写完整"
+            Label5.ForeColor = Drawing.Color.Green
+            Label5.Visible = True
+        Else
+            SqlDataSource1.InsertCommand = " INSERT INTO GY_DMZD (DMXH,DMSB,SSDM,DMMC) VALUES ('" & TextBox1.Text & "','" & TextBox2.Text & "', '" & TextBox3.Text & "', '" & TextBox4.Text & "') "
+            SqlDataSource1.Insert()
+            SqlDataSource1.SelectCommand = "select * from GY_DMZD "
+            GridView1.DataBind()
+            Label5.Text = "代码添加成功"
+            Label5.ForeColor = Drawing.Color.Blue
+            Label5.Visible = True
+        End If
+    End Sub
+End Class

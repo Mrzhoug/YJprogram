@@ -1,0 +1,79 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="processRuleList.aspx.vb" Inherits="manager_ProcessManager_processRuleList"  Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>流转规则设置</title>
+
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+    <script type="text/javascript" language="javascript">
+        function goEidt(ruleID, conditionID) {
+            window.open("processRuleSetting.aspx?ruleID=" + ruleID + "&conditionID=" + conditionID, "编辑流程条件", "height=500, width=550, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes")
+        }
+        function chk(chk, id) {
+            var oEvent = document.all(id);
+            var chks = oEvent.getElementsByTagName("INPUT");
+            for (var i = 0; i < chks.length; i++) {
+                if (chks[i].type == "checkbox")
+                    chks[i].checked = chk.checked;
+            }
+        }
+    </script>
+</head>
+<body>
+    <center>
+    <form id="form1" runat="server" style="width:500px">
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>流转规则设置</span></a></li>
+            </ul>
+        </div>
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">                    
+                    <tr>
+                        <td style="text-align:center">
+                            <asp:Button ID="btnAdd" runat="server" Text="添加规则" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:center">
+                            <asp:Button id="MoveUp" runat="server" Enabled="False" Text="规则上移" CssClass="btnsubmit" />
+        		            <asp:Button id="BtnDel" runat="server" Enabled="true" Text="规则删除" CssClass="btnsubmit" />
+        		            <asp:Button id="MoveDown" runat="server" Enabled="False" Text="规则下移" CssClass= "btnsubmit" />
+                            <br />
+                            <br />
+                            <asp:GridView id="GridView1" runat="server" PageSize="11" DataKeyNames="id,order"
+                                SkinID="GVSkin_CoolTable"  AutoGenerateColumns="False" EnableModelValidation="True">                                
+                                <Columns>
+                                    <asp:TemplateField HeaderText="选择">
+                                        <HeaderTemplate>
+                                            <asp:CheckBox ID="CheckBox3" runat="server" onclick="chk(this,'GridView1')" />
+                                        </HeaderTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox1" runat="server"   />
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle"/>
+                                        <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" Width="20px" />
+                                    </asp:TemplateField>
+                                    <asp:BoundField DataField="nodeName" HeaderText="节点名"  />
+                                    <asp:BoundField HeaderText="符号" HeaderStyle-Width="60px" DataField="symbol">
+                                        <HeaderStyle Width="60px"></HeaderStyle>
+                                    </asp:BoundField>
+                                    <asp:BoundField DataField="ruleContent" HeaderText="条件" />
+                                    <asp:BoundField DataField="order" HeaderText="规则序列" />
+                                    <asp:BoundField HeaderText="编辑条件" />
+                                    <asp:CommandField ShowSelectButton="True" Visible="False" ></asp:CommandField>
+                                </Columns>
+                            </asp:GridView>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+    </center>
+</body>
+</html>

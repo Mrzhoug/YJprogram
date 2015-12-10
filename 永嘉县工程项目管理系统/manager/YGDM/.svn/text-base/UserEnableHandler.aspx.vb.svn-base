@@ -1,0 +1,56 @@
+﻿
+Partial Class manager_YGDM_UserEnableHandler
+    Inherits System.Web.UI.Page
+
+    Dim Login_User As String
+    Dim UserID As Integer
+
+    Dim Base As New Base
+
+    Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
+
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        If UserID = -1 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+        Dim enalbeUserID As Integer
+        Dim enable As Integer
+        Try
+            enalbeUserID = Convert.ToInt32(Request("userid"))
+            enable = Convert.ToInt32(Request("enable"))
+        Catch ex As Exception
+            enalbeUserID = -1
+            enable = -1
+        End Try
+
+        If enalbeUserID = -1 Or enable = -1 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+        Dim sqlstr As String
+
+        sqlstr = "update gy_ygdm set qybz = " & enable & " where ygdm = " & enalbeUserID
+
+        Base.DB.Query(sqlstr)
+
+
+
+        If enable = 1 Then
+            Response.Write("启用成功")
+        Else
+            Response.Write("禁用成功")
+        End If
+
+
+
+        
+
+
+
+    End Sub
+End Class

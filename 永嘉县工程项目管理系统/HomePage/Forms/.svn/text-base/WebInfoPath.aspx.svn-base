@@ -1,0 +1,255 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="WebInfoPath.aspx.vb" Inherits="HomePage_Forms_WebInfoPath"  ValidateRequest="false"  %>
+
+<html>
+<head id="Head1" runat="server">
+    <title>Web方式打开表单</title>
+    <link rel="stylesheet" type="text/css" href="../../images/Ext.UI/resources/css/ext-all.css" />
+    <script type="text/javascript" src="../../images/Ext.UI/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="../../images/Ext.UI/ext-all.js"></script>
+    <script type="text/javascript" src="../../images/Ext.UI/TabCloseMenu.js"></script>
+    <script type="text/javascript" src="../../pub/function.js"></script>
+    
+    <style type="text/css">
+        TD { FONT-SIZE: 8.5pt; LINE-HEIGHT: 180%; FONT-FAMILY: "verdana", "Helvetica", "sans-serif" }
+	    A:link { FONT-SIZE: 8.5pt; COLOR: #000000; FONT-FAMILY: "verdana", "Helvetica", "sans-serif"; TEXT-DECORATION: none }
+	    A:hover { FONT-SIZE: 8.5pt; COLOR: #b84e07; FONT-FAMILY: "verdana", "Helvetica", "sans-serif"; TEXT-DECORATION: underline }
+	    A:visited { FONT-SIZE: 8.5pt; COLOR: #000000; FONT-FAMILY: "verdana", "Helvetica", "sans-serif"; TEXT-DECORATION: none }
+	</style>
+    <link rel="stylesheet" type="text/css" media="all" href="../../Manager/Forms/js/calendar-win2k-cold-1.css"	title="win2k-cold-1" />
+    <script type="text/javascript" src="../../Manager/Forms/js/calendar.js"></script>
+	<script type="text/javascript" src="../../Manager/Forms/js/calendar-cn.js"></script>
+	<script type="text/javascript" src="../../Manager/Forms/js/calendar-setup.js"></script>
+	<script type="text/javascript" src="../../Manager/Forms/js/infojet.js"></script>
+</head>
+
+<body onload="InfoJet_Init();" style="margin:0;">
+    <form name="xmlForm" action="../../submit.aspx" method="post">
+    <div id="toolbar" class="Noprint" style="Z-INDEX: 10; POSITION: absolute;"></div><br /><br />
+    <input id="FileName" type="hidden" name="FileName" runat="server" />
+    <input id="MenuID" type="hidden" name="MenuID" runat="server" />
+    <center>
+        <asp:Label id="xDocContent" runat="server">xDocContent</asp:Label>&nbsp;<br />
+    </center>
+    </form>
+<span id="clientscript" runat="server"></span>
+
+<script language="javascript" type="text/javascript">
+   
+	var tb = new Ext.Toolbar();
+    tb.render('toolbar');
+
+    // They can also be referenced by id in or components
+    tb.add("-",
+    {
+    	icon: '../../images/Ext.UI/icons/fam/add.gif', 
+    	iconCls: 'blist',
+        text: '保存草稿&nbsp;',
+        handler: onItemClick
+    },"-",
+//    {
+//    	icon: '../../images/Ext.UI/icons/fam/application_view_list.png', 
+//    	iconCls: 'blist',
+//        text: '发起审阅&nbsp;',
+//        handler: createsp
+//    },"-",
+//    {
+//    	icon: '../../images/Ext.UI/icons/fam/application_view_list.png', 
+//    	iconCls: 'blist',
+//        text: '查看审阅&nbsp;',
+//        handler: onItemClick
+//    },"-",
+//    {
+//    	icon: '../../images/Ext.UI/icons/fam/application_go.png', 
+//    	iconCls: 'blist',
+//        text: '分发记录&nbsp;',
+//        handler: onItemClick
+//    },"-",
+    {
+    	icon: '../../images/Ext.UI/icons/fam/connect.gif', 
+    	iconCls: 'blist',
+        text: '打印表单&nbsp;',
+        handler: onItemClick
+    },"-",
+    {
+    	icon: '../../images/Ext.UI/icons/fam/user.gif', 
+    	iconCls: 'blist',
+        text: '提交表单&nbsp;',
+        handler: onItemClick
+     },"-",
+    {                   // <-- Add the action directly to a toolbar
+        icon: '../../images/Ext.UI/icons/fam/user.gif',
+        iconCls: 'blist',
+        text: '附件管理&nbsp;',
+        handler: onItemClick
+    }
+     );
+     
+     function onItemClick(item){
+        switch (item.text)
+        {
+        case '保存草稿&nbsp;': doDownload();    break; 
+        case '查看审阅&nbsp;': looksp();        break; 
+        case '分发记录&nbsp;': lookxd();        break; 
+        case '打印表单&nbsp;': formprint();     break; 
+        case '提交表单&nbsp;': doSubmit();     break; 
+        case '附件管理&nbsp;': manageannex(); break;
+        }
+    }
+//});
+
+
+if (toolbar==false)
+{
+    show("toolbar");
+}
+</script>
+</body>
+</html>
+
+
+
+<script type="text/javascript" language="javascript">
+    function doDownload()
+    {
+        if (InfoJet_IsValid()==false)
+        {
+            alert("请将必填项填完(带红星的输入框)!");
+            return false;
+        }
+        
+        var msg = false;
+        if (msg==true) 
+        {
+	        if (confirm('此表单已经被审批过，如果你现在提交，系统将清除所有审批记录，你确认提交吗？')==1)    
+	        {
+                //document.forms( "xmlForm" ).action = "../../submit.aspx";
+                //document.forms( "xmlForm" ).submit();
+            }
+        }
+        else
+        {
+                document.forms( "xmlForm" ).action = "../../submit.aspx?state=0";
+                document.forms( "xmlForm" ).submit();
+        }
+    }
+    
+    function manageannex()
+    {
+        window.open("FormAnnex.aspx?FID=" + cid,"查看审阅" ,"height=300, width=650, top=100, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no");
+    }
+    
+    function doSubmit()
+    {
+        if (InfoJet_IsValid()==false)
+        {
+            alert("请将必填项填完(带红星的输入框)!");
+            return false;
+        }
+        
+        var msg = false;
+        if (msg==true) 
+        {
+	        if (confirm('此表单已经被审批过，如果你现在提交，系统将清除所有审批记录，你确认提交吗？')==1)    
+	        {
+                //document.forms( "xmlForm" ).action = "../../submit.aspx";
+                //document.forms( "xmlForm" ).submit();
+            }
+        }
+        else
+        {
+                document.forms( "xmlForm" ).action = "../../submit.aspx?state=-1";
+                document.forms( "xmlForm" ).submit();
+        }
+    }
+    
+    function looksp()
+    {
+        window.open("../XJXM/ShowAbout_XMSP_NoLc.aspx?SID=" + cid,"查看审阅" ,"height=300, width=550, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no");
+    }
+    
+     function lookxd()
+    {
+        window.open("../XJXM/ShowAbout_XMXD_NoLc.aspx?SID=" + cid,"查看审阅" ,"height=300, width=550, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no");
+    }
+    
+    function formprint()
+    {
+        //根据infojet打印
+        InfoJet_OpenPrintableVersion('');
+        //window.location.href = "FormPrint.aspx?Fid=" + cid;
+    }
+    
+    function formcy(fid)
+    {
+        window.open("../desktop/WriteSendMessage.aspx?Kind=1&FID=" + cid,"表单分发" ,"height=400, width=750, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes");
+    }
+    
+    function dostate(state)
+    {
+        window.location.href = "FormToTop.aspx?K=state&state=" + state + "&Fid=" + cid;
+    }
+    
+</script>
+
+<script language="JavaScript" type="text/javascript">
+<!--
+var delta=0.8;
+var collection;
+var closeB=false;
+function floaters() {
+this.items = [];
+this.addItem = function(id,x,y,content)
+{
+//document.write('<DIV id='+id+' style="Z-INDEX: 10; POSITION: absolute; background-color:#ffffff; padding-top:8px; padding-bottom:8px;  width:100%;left:'+(typeof(x)=='string'?eval(x):x)+';top:'+(typeof(y)=='string'?eval(y):y)+'">'+content+'</DIV>');
+var newItem     = {};
+newItem.object    = document.getElementById(id);
+newItem.x     = x;
+newItem.y     = y;
+this.items[this.items.length]   = newItem;
+}
+this.play = function()
+{
+collection     = this.items
+setInterval('play()',30);
+}
+}
+function play()
+{
+if(screen.width<=800 || closeB)
+{
+for(var i=0;i<collection.length;i++)
+{
+collection[i].object.style.display = 'none';
+}
+return;
+}
+for(var i=0;i<collection.length;i++)
+{
+var followObj   = collection[i].object;
+var followObj_x   = (typeof(collection[i].x)=='string'?eval(collection[i].x):collection[i].x);
+var followObj_y   = (typeof(collection[i].y)=='string'?eval(collection[i].y):collection[i].y);
+if(followObj.offsetLeft!=(document.body.scrollLeft+followObj_x)) {
+var dx=(document.body.scrollLeft+followObj_x-followObj.offsetLeft)*delta;
+dx=(dx>0?1:-1)*Math.ceil(Math.abs(dx));
+followObj.style.left=followObj.offsetLeft+dx;
+}
+if(followObj.offsetTop!=(document.body.scrollTop+followObj_y)) {
+var dy=(document.body.scrollTop+followObj_y-followObj.offsetTop)*delta;
+dy=(dy>0?1:-1)*Math.ceil(Math.abs(dy));
+followObj.style.top=followObj.offsetTop+dy;
+}
+followObj.style.display = '';
+}
+}
+function closeBanner()
+{
+closeB=true;
+return;
+}
+var theFloaters   = new floaters();
+//
+var obj = document.getElementById("toolbar");
+theFloaters.addItem('toolbar',0,0,'');
+theFloaters.play();
+-->
+</script>

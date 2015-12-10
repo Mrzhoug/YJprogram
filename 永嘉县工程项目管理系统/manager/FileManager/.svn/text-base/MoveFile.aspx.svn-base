@@ -1,0 +1,202 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="MoveFile.aspx.vb" Inherits="manager_FileManager_MoveFile" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>移动文件</title>
+    <link href="../../App_Themes/StyleSheet.css" rel="stylesheet" type="text/css" />
+    <link href="../../App_Themes/zTreeStyle/zTreeStyle.css" rel="stylesheet" type="text/css" />
+    <script src="../../Pub/jquery-1.8.0.js" type="text/javascript"></script>
+    <script src="../../Pub/jquery.json.js" type="text/javascript"></script>
+    <script src="../../Pub/ztree/jquery.ztree.all-3.5.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //初始化ztree
+            $.fn.zTree.init($("#fileInfo"), setting, zNodes);
+        });
+
+        var zNodes = [
+        { id: "0", name: "根目录", isParent: true, open: true }
+        ]
+
+        var setting = {
+            async: {
+                enable: true,
+                url: "GetFolderInfosHandler.aspx",
+                autoParam: ["id", "name=n", "level=lv"],
+                dataFilter: filter
+            },
+            callback: {
+                beforeAsync: beforeAsync,
+                onAsyncSuccess: onAsyncSuccess,
+                onAsyncError: onAsyncError,
+                beforeDrag: beforeDrag,
+                beforeDrop: beforeDrop
+            },
+            data: {
+                simpleData: {
+                    idKey: "id",
+                    pIdKey: "pId",
+                    rootPId: 0,
+                    enable: true
+                }
+            },
+            edit: {
+                drag: {
+                    isCopy: true,
+                    isMove: true,
+                    prev: false,
+                    next: false,
+                    inner: true
+                },
+                enable: true,
+                showRemoveBtn: false,
+                showRenameBtn: false
+            }
+        };
+
+        function beforeDrag(treeId, treeNodes) {
+            for (var i = 0, l = treeNodes.length; i < l; i++) {
+                if (treeNodes[i].drag === false) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        function beforeDrop(treeId, treeNodes, targetNode, moveType) {
+
+            return targetNode ? targetNode.drop !== false : true;
+        }
+
+        function filter(treeId, parentNode, childNodes) {
+            if (!childNodes) return null;
+            for (var i = 0, l = childNodes.length; i < l; i++) {
+                childNodes[i].name = childNodes[i].name.replace(/\.n/g, '.');
+            }
+            return childNodes;
+        }
+
+        function beforeAsync() {
+            curAsyncCount++;
+        }
+
+        function onAsyncSuccess(event, treeId, treeNode, msg) {
+            curAsyncCount--;
+            if (curStatus == "expand") {
+                expandNodes(treeNode.children);
+            } else if (curStatus == "async") {
+                asyncNodes(treeNode.children);
+            }
+
+            if (curAsyncCount <= 0) {
+                if (curStatus != "init" && curStatus != "") {
+                    $("#demoMsg").text((curStatus == "expand") ? demoMsg.expandAllOver : demoMsg.asyncAllOver);
+                    asyncForAll = true;
+                }
+                curStatus = "";
+            }
+        }
+
+        function onAsyncError(event, treeId, treeNode, XMLHttpRequest, textStatus, errorThrown) {
+            curAsyncCount--;
+
+            if (curAsyncCount <= 0) {
+                curStatus = "";
+                if (treeNode != null) asyncForAll = true;
+            }
+        }
+
+        var curStatus = "init", curAsyncCount = 0, asyncForAll = false,
+		goAsync = false;
+        function expandAll() {
+            if (!check()) {
+                return;
+            }
+            var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+            if (asyncForAll) {
+                $("#demoMsg").text(demoMsg.expandAll);
+                zTree.expandAll(true);
+            } else {
+                expandNodes(zTree.getNodes());
+                if (!goAsync) {
+                    $("#demoMsg").text(demoMsg.expandAll);
+                    curStatus = "";
+                }
+            }
+        }
+        function expandNodes(nodes) {
+            if (!nodes) return;
+            curStatus = "expand";
+            var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+            for (var i = 0, l = nodes.length; i < l; i++) {
+                zTree.expandNode(nodes[i], true, false, false);
+                if (nodes[i].isParent && nodes[i].zAsync) {
+                    expandNodes(nodes[i].children);
+                } else {
+                    goAsync = true;
+                }
+            }
+        }
+
+        function Save() {
+            //获取数对象
+            var treeObj = $.fn.zTree.getZTreeObj("fileInfo");
+            //获取选中对象
+            var sNodes = treeObj.getSelectedNodes();
+            if (sNodes.length != 1) {
+                alert("请选择文件夹！");
+                return false;
+            }
+            if (confirm("您确实要移动此文件吗？")) {
+                $.ajax(
+                {
+                    type: "post",
+                    url: "MoveFileHandler.aspx",
+                    data: "fileID=<%=fileID %>&toFolderID=" + sNodes[0].id,
+                    success: function (msg) {
+                        alert(msg);
+                        location.reload();
+                    }
+                }
+                );
+            }
+            return false;
+        }
+    </script>
+</head>
+<body>
+    <center>
+        <form id="form1" runat="server" style="width: 250px">
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);"><span>
+                    移动文件</span></a></li>
+            </ul>
+        </div>
+        <div class="main" style="border: none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td style="text-align: left">
+                            移动至：
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; height: 180px; vertical-align: top;">
+                            <ul id="fileInfo" class="ztree">
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <asp:Button ID="btn_save" runat="server" Text="确定" CssClass="btnsubmit" OnClientClick="return Save();" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        </form>
+    </center>
+</body>
+</html>

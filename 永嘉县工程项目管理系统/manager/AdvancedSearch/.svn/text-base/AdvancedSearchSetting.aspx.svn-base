@@ -1,0 +1,131 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="AdvancedSearchSetting.aspx.vb" Inherits="manager_AdvancedSearch_AdvancedSearchSetting" ValidateRequest="false" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>高级搜索设置</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+    <script language="Javascript" type="text/javascript">
+        //全选，一个页面可以存在多个全选
+        function chk(chk, id) {
+            var oEvent = document.all(id);
+            var chks = oEvent.getElementsByTagName("INPUT");
+            for (var i = 0; i < chks.length; i++) {
+                if (chks[i].type == "checkbox")
+                    chks[i].checked = chk.checked;
+            }
+        }
+
+        function editDropDownList(aid) {
+            window.open('AdvancedSearchDropDownListSetting.aspx?aid=' + aid, '编辑下拉内容', 'height=450, width=500, top=130, left=200, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no')
+        }
+    </script>
+</head>
+<body>
+<center>
+    <form id="form1" runat="server"  style="width:500px">
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>高级搜索设置</span></a></li>
+            </ul>
+        </div>                   
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            表单名称：
+                        </th>
+                        <td width="75%" style="text-align:left">
+                            
+                            <asp:Label ID="LBmkmc" runat="server" Text=""></asp:Label>
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            搜素字段名称：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:TextBox ID="LBsearchTitle" runat="server" Width="176px"></asp:TextBox>&nbsp;                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            搜索类型：</th>
+                        <td  style="text-align:left">
+                            <asp:DropDownList ID="DDLsearchType" runat="server" Width="176px" AutoPostBack=true>
+                                <asp:ListItem Value="typeNumber">数值型</asp:ListItem>
+                                <asp:ListItem Value="typeDate">日期型</asp:ListItem>
+                                <asp:ListItem Value="typeString">字符串型</asp:ListItem>
+                                <asp:ListItem Value="typeDropDown">下拉型</asp:ListItem>
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>
+                            表单节点名：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:DropDownList ID="NodeName" runat="server" Width="176px">
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>
+                            搜索条件设定：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:DropDownList ID="DDLconditionType" runat="server" Width="176px">
+                                <asp:ListItem Value="conditionInterval">区间</asp:ListItem>
+                                <asp:ListItem Value="conditionLike">包含</asp:ListItem>
+                                <asp:ListItem Value="conditionEqual">相等</asp:ListItem>                                
+                            </asp:DropDownList>
+                            <asp:Button ID="ListAdd" runat="server" Text=" 添 加 " CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td  style="text-align:center" colspan="2">
+                            
+                            <asp:Button ID="MoveUp" runat="server" CssClass="btnsubmit" Enabled="False" 
+                                Text="条件上移" />
+                            <asp:Button ID="BtnDel" runat="server" CssClass="btnsubmit" Enabled="true" 
+                                Text="条件删除" />
+                            <asp:Button ID="MoveDown" runat="server" CssClass="btnsubmit" Enabled="False" 
+                                Text="条件下移" />
+                            <br />
+                            <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" 
+                                DataKeyNames="id,orderby" EnableModelValidation="True" PageSize="11" 
+                                SkinID="GVSkin_CoolTable">
+                                <Columns>
+                                    <asp:TemplateField HeaderText="选择">
+                                        <HeaderTemplate>
+                                            <asp:CheckBox ID="CheckBox3" runat="server" onclick="chk(this,'GridView1')" />
+                                        </HeaderTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox1" runat="server" />
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" />
+                                        <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" Width="20px" />
+                                    </asp:TemplateField>
+                                    <asp:BoundField DataField="searchTitle" HeaderText="搜索显示名称" />
+                                    <asp:BoundField DataField="searchNode" HeaderText="搜索节点" />                                                                        
+                                    <asp:BoundField DataField="searchType" HeaderText="搜索类型" />
+                                    <asp:BoundField DataField="conditionType" HeaderText="条件类型" />
+                                    <asp:CommandField ShowSelectButton="True" Visible="False" />
+                                </Columns>
+                            </asp:GridView>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+</center>
+</body>
+</html>

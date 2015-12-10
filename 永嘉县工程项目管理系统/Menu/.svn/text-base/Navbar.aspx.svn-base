@@ -1,0 +1,161 @@
+<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Navbar.aspx.vb" Inherits="Menu_Navbar" %>
+
+<script language="javascript" >
+<!--
+
+var ns6 = document.getElementById && !document.all;
+var ie4 = document.all && navigator.userAgent.indexOf("Opera") == -1;
+var head = "display:''";
+
+if (ie4 || ns6) {
+	document.onclick = checkcontained;
+	var key = "";
+}
+
+function refreshmenu(main, sub) {
+	iscontained = 0;
+	cur = document.getElementById(main);
+	i = 0; 
+
+	while ((ns6 && cur.parentNode) || (ie4 && cur.parentElement)) {
+		if (cur.id == "level1" || cur.id == "foldinglist") {
+			iscontained = (cur.id == "level1") ? 1 : 0;
+			break;
+		}
+		cur = ns6 ? cur.parentNode : cur.parentElement;
+	}
+
+	if (iscontained) {
+		var foldercontent = ns6 ? cur.nextSibling.nextSibling : cur.nextSibling;
+
+		// Collapse all previously openned submenus
+		collapse();
+
+		if (key != "") {
+			document.getElementById(key).className = "menu_level2";
+			key = "";
+		}
+
+		if (foldercontent.style.display == "none") {
+			foldercontent.style.display = "";
+			if (ie4) {
+				cur.firstChild.className = "menu_level12";
+			} else {
+				cur.firstChild.nextSibling.className = "menu_level12";
+			}
+		} else {
+			foldercontent.style.display = "none"
+		}
+	}
+	if (sub) {
+		menu_click(sub);
+	}
+}
+
+function checkcontained(e) {
+	var iscontained = 0;
+	cur = ns6 ? e.target : event.srcElement;
+	i = 0;
+
+	while ((ns6 && cur.parentNode) || (ie4 && cur.parentElement)) {
+		if (cur.id == "level1" || cur.id == "foldinglist") {
+			iscontained = (cur.id == "level1") ? 1 : 0;
+			break;
+		}
+		cur = ns6 ? cur.parentNode : cur.parentElement;
+	}
+
+	if (iscontained) {
+		var foldercontent = ns6 ? cur.nextSibling.nextSibling : cur.nextSibling;
+		// Collapse all previously openned submenues
+		collapse();
+
+		if (key != "") {
+			document.getElementById(key).className = "menu_level2";
+			key = "";
+		}
+
+		if (foldercontent.style.display == "none") {
+			foldercontent.style.display = "";
+			if (ie4) {
+				cur.firstChild.className = "menu_level12";
+			} else {
+				cur.firstChild.nextSibling.className = "menu_level12";
+			}
+		} else {
+			foldercontent.style.display = "none";
+		}
+	}
+}
+
+function collapse() {
+	var top = document.getElementById('level1');
+
+	while (top) {
+		if (top.id == "foldinglist") {
+			top.style.display = "none";
+		}
+		if (ie4) {
+			if (top.id == "level1" && top.firstChild.className == "menu_level12") {
+				top.firstChild.className = "menu_level1";
+			}
+			top = top.nextSibling;
+		} else {
+	 		if (top.id == "level1") {
+				if (top.firstChild.nextSibling.className == "menu_level12") {
+					top.firstChild.nextSibling.className = "menu_level1";
+				}
+			}
+			top = top.nextSibling;
+		}
+	}
+}
+
+function menu_click(name) {
+	if (key != "") {
+		document.getElementById(key).className = "menu_level2";
+	}
+	document.getElementById(name).className="level2_on";
+	key = name;
+}
+
+function mover(obj) {
+	var parent_obj = ns6 ? obj.parentNode : obj.parentElement;
+	var foldercontent = ns6 ? parent_obj.nextSibling.nextSibling : parent_obj.nextSibling;
+	if (foldercontent.style.display == "none") {
+		obj.className = "menu_level1_over";
+	}
+}
+
+function mout(obj) {
+	var parent_obj=ns6? obj.parentNode : obj.parentElement;
+	var foldercontent = ns6 ? parent_obj.nextSibling.nextSibling:parent_obj.nextSibling;
+	if (foldercontent.style.display == "none") {
+		obj.className = "menu_level1";
+	}
+}
+
+function level2_mover(obj) {
+	if (obj.id != key) {
+		obj.className = "level2_over";
+	}
+}
+
+function level2_mout(obj) {
+	if (obj.id != key) {
+		obj.className = "menu_level2";
+	}
+}
+-->
+</SCRIPT>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>µ¼º½²Ëµ¥Ìõ</title>
+    <LINK href="images/style.css" type=text/css rel=stylesheet>
+    <META http-equiv=Content-Type content="text/html; charset=GB2312">
+    <META http-equiv=Pragma content=no-cache>
+</head>
+<body class="mainnav">
+<span id="ShowMenu" runat="server" ></span>
+</body></html>

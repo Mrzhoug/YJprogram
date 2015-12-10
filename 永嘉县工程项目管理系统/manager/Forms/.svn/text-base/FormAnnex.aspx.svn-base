@@ -1,0 +1,58 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="FormAnnex.aspx.vb" Inherits="manager_Forms_FormAnnex" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<script language="javascript" type="text/javascript" >
+<!--
+function refilename(folder,oldfilename,fid) 
+{ 
+    //文件重命名
+	var msgvalue = prompt("请输入要改名的文件名称",oldfilename); 
+	if(msgvalue=="") 
+	{ 
+		alert('要改名的文件名不能为空,请再试一次'); 
+	} 
+	else if(msgvalue==null) { } 
+	else 
+	{ 
+		window.navigate("?Folder=" + escape(folder) + "&OldFileName=" + escape(oldfilename) + "&NewFileName=" + escape(msgvalue) + "&Fid=" + fid); 
+	} 
+}
+
+
+function delfile(folder,delfile,fid)
+{
+	if (confirm('你确认删除文件:' + delfile + '吗?')==true)
+	{   
+	    window.navigate("?DelFileName=" + escape(delfile) + "&Folder=" + escape(folder) + "&Fid=" + fid);
+    }
+}
+
+-->
+</script>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head><title>文件管理</title>
+    
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    <style >
+    <!--
+    a:link{text-decoration:none;}
+    a:visited{text-decoration:none;}
+    a:hover{text-decoration:none;}
+    -->
+    </style>
+    <script language="javascript" src="../../Pub/function.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <form id="form1" runat="server">
+&nbsp;&nbsp;<input type="file" id="FileUpload1" name="FileUpload1" runat="server" style="width:450px;"/>
+<asp:Button ID="Button1" runat="server" Text="上传文件"/>
+<script type="text/javascript" language="javascript" event="onclick" for="<% =Button1.ClientID %>">
+       showProgress();
+</script>
+    <span id="message" runat="server" ></span>
+    </form>
+</body>
+</html>

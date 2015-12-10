@@ -1,0 +1,86 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Default.aspx.vb" Inherits="manager_LCDM_Default" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>流程管理</title>
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+</head>
+<script language="javascript" src="../../Pub/function.js" type="text/javascript"></script>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        <br />
+        <font style="font-size:9pt;">&nbsp;&nbsp;流程名称：<asp:TextBox ID="TextBox5" runat="server" Width="190px"></asp:TextBox>
+        流程说明：<asp:TextBox ID="TextBox6" runat="server" Width="257px"></asp:TextBox>
+        <asp:Button ID="Button1" runat="server" Text="添加流程" />
+        </font>
+        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="LCDM,FLAG" SkinID="GridViewSkin1"
+            DataSourceID="ConnLC" Width="98%" RowHeaderColumn="LCDM" OnSelectedIndexChanged="GridView1_SelectedIndexChanged" OnRowUpdating="GridView1_RowUpdating" CellPadding="4" ForeColor="Black" OnDataBound="GridView1_DataBound" BackColor="White" BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" Font-Size="9pt" AllowPaging="True" HorizontalAlign="Center">
+            <Columns>
+                <asp:BoundField DataField="LCDM" HeaderText="流程代码" InsertVisible="False" ReadOnly="True"
+                    SortExpression="LCDM" >
+                    <ItemStyle HorizontalAlign="Center" Width="70px" />
+                </asp:BoundField>
+                <asp:TemplateField HeaderText="流程名称" SortExpression="LCMC">
+                    <EditItemTemplate>
+                        <asp:TextBox ID="TextBox1" runat="server" Text='<%# Bind("LCMC") %>'></asp:TextBox>
+                    </EditItemTemplate>
+                    <FooterTemplate>
+                        <asp:TextBox ID="TextBox3" runat="server" Text='<%# Bind("LCMC") %>'></asp:TextBox>
+                    </FooterTemplate>
+                    <ItemTemplate>
+                        <asp:Label ID="Label1" runat="server" Text='<%# Bind("LCMC") %>'></asp:Label>
+                    </ItemTemplate>
+                    <ItemStyle HorizontalAlign="Left" />
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="流程说明" SortExpression="LCSM">
+                    <EditItemTemplate>
+                        <asp:TextBox ID="TextBox2" runat="server" Text='<%# Bind("LCSM") %>'></asp:TextBox>
+                    </EditItemTemplate>
+                    <FooterTemplate>
+                        <asp:TextBox ID="TextBox4" runat="server" Text='<%# Bind("LCSM") %>'></asp:TextBox>
+                    </FooterTemplate>
+                    <ItemTemplate>
+                        <asp:Label ID="Label2" runat="server" Text='<%# Bind("LCSM") %>'></asp:Label>
+                    </ItemTemplate>
+                    <ItemStyle HorizontalAlign="Left" />
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="编辑" ShowHeader="False">
+                    <EditItemTemplate>
+                        <asp:LinkButton ID="LinkButton1" runat="server" CausesValidation="True" CommandName="Update"
+                            Text="更新"></asp:LinkButton>
+                        <asp:LinkButton ID="LinkButton2" runat="server" CausesValidation="False" CommandName="Cancel"
+                            Text="取消"></asp:LinkButton>
+                    </EditItemTemplate>
+                    <FooterTemplate>
+                    </FooterTemplate>
+                    <ItemTemplate>
+                        <asp:LinkButton ID="LinkButton1" runat="server" CausesValidation="False" CommandName="Edit"
+                            Text="编辑"></asp:LinkButton>
+                    </ItemTemplate>
+                    <ItemStyle HorizontalAlign="Center" Width="70px" />
+                </asp:TemplateField>
+                <asp:CommandField HeaderText="删除" SelectText="删除" ShowSelectButton="True" >
+                    <ItemStyle HorizontalAlign="Center" Width="35px" />
+                </asp:CommandField>
+                <asp:TemplateField HeaderText="状态维护">
+                    <ItemStyle HorizontalAlign="Center" Width="70px" />
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="显示列">
+                    <ItemStyle HorizontalAlign="Center" Width="65px" />
+                </asp:TemplateField>
+            </Columns>
+            <FooterStyle BackColor="#CCCC99" />
+            <RowStyle BackColor="White" HorizontalAlign="Center" />
+            <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+            <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Center" />
+            <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" />
+            <AlternatingRowStyle BackColor="White" />
+        </asp:GridView>
+        <asp:SqlDataSource ID="ConnLC" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT [LCDM], [LCMC], [LCSM] ,Flag FROM [GY_LCDM] Where (flag = 0 or flag is null)"></asp:SqlDataSource>
+    
+    </div>
+    </form>
+</body>
+</html>

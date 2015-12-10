@@ -1,0 +1,115 @@
+﻿
+Partial Class manager_Forms_FunctionNoLC
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim LCDM As Integer
+    Dim MKDM, XMDM, Fid As Integer
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim likeNew As Integer
+    Dim Cid As Integer
+    Dim moduleName As String
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName()
+        UserID = Base.GetUserID(Login_User)
+
+        Try
+            moduleName = Request("moduleName")
+        Catch ex As Exception
+            moduleName = ""
+        End Try
+
+        If moduleName = "" Then
+            Try
+                LCDM = Request("LCDM")
+            Catch ex As Exception
+                Base.Js.alert(Me, "参数错误或非法访问")
+                Exit Sub
+            End Try
+        Else
+            LCDM = Modules.GetLCDMByMKMC(moduleName)
+            If LCDM = -1 Then
+                Base.Js.alert(Me, "参数错误或非法访问")
+                Exit Sub
+            End If
+
+        End If
+
+        Try
+            likeNew = Request("LikeNew")
+            Cid = Request("Fid")
+        Catch ex As Exception
+            
+        End Try
+
+        '判断是否存在此流程，并得到项目名称
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("SELECT LCMC FROM GY_LCDM where LCDM = " & LCDM, "GY_LCDM")
+        If tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "非法访问!")
+            Exit Sub
+        End If
+        Dim XMMC As String = tb.Rows(0).Item(0)         '因为是无流程,流程名称与项目名称一样
+
+
+        Dim DfileName As String = Base.AutoAddProject_HasNoLC(LCDM, Login_User, "../../")
+        If DfileName = Nothing Then
+            Base.Js.alert(Me, "新建表单出错,请更新模板")
+            Exit Sub
+        End If
+
+        '采用直接输出的主式    
+        Dim StartID As Integer = DfileName.Trim.LastIndexOf("\") + 1
+        Dim EndID As Integer = DfileName.ToLower.Trim.LastIndexOf(".xml")
+        Dim Fid As String = DfileName.Trim.Substring(StartID, EndID - StartID)
+
+        '下面对是否是相似新建进行处理
+        '得到最近的一条记录
+
+        Dim likeFid As Integer
+
+        If likeNew = 1 Then
+            If Cid <> 0 Then
+                tb = Base.DB.Table("SELECT XX_XMJC.FID,GY_XMXX.XMDM FROM GY_XMXX,XX_XMJC where XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" & LCDM & " and (GY_XMXX.XMJD is not null) and fid=" & Cid & "  order by fid desc", "XMXX")
+                If tb.Rows.Count > 0 Then
+                    likeFid = Cid
+                Else
+                    likeFid = 0
+                End If
+            Else
+                tb = Base.DB.Table("SELECT top 1 XX_XMJC.FID,GY_XMXX.XMDM FROM GY_XMXX,XX_XMJC where XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" & LCDM & " and (GY_XMXX.XMJD is not null) and fid<" & Fid & "  order by fid desc", "XMXX")
+                If tb.Rows.Count > 0 Then
+                    '如果有找到.并检测相似新建标志.
+                    likeFid = tb.Rows(0)(0)
+                Else
+                    likeFid = 0
+                End If
+            End If
+            If likeFid <> 0 Then
+                Dim XmlFileName As String = Server.MapPath("../../") & "\FormFolder\" & XMMC & "\" & likeFid & ".xml"
+
+                Base.pub.CreateDir(Server.MapPath("../../") & "\Submit_Temp\CreateTemp\")
+                DfileName = Server.MapPath("../../") & "\Submit_Temp\CreateTemp\" & Fid & ".xml"
+                '暂时存在临时目录下,因为新建.不一定会提交.会产生垃圾文件,所以放在临时目录下先.
+                'DfileName = Server.MapPath("../../") & "\FormFolder\" & XMMC & "\" & Fid & ".xml"
+                If System.IO.File.Exists(XmlFileName) = False Then      '表示模板文件不存在
+                    Base.Js.alert(Me, "相似新建出错.")
+                    Exit Sub
+                End If
+                Try
+                    System.IO.File.Copy(XmlFileName, DfileName, True)
+                Catch ex As Exception
+                    Base.Js.alert(Me, "相似新建出错,可能是权限不够")
+                    Exit Sub
+                End Try
+            End If
+        Else
+            '如果没有找到.表示原来没有记录.当初新建的是第一条块分割
+        End If
+        Base.ClearFormAnnex(Fid, XMMC, Login_User)
+        '当不是相似新建时,传过来的FID就是上一表单传给下一表单的表单ID值.
+        Response.Redirect("../Forms/OpenInfoPath.aspx?FID=" & Fid & "&ImportFID=" & Request("Value"))
+    End Sub
+End Class

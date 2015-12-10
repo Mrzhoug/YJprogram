@@ -1,0 +1,5 @@
+﻿
+Partial Class manager_XJXM_FunctionNavigation
+    Inherits System.Web.UI.Page
+
+End Class

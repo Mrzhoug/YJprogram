@@ -1,0 +1,81 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="xglczt.aspx.vb" Inherits="manager_lctmanage_xglczt" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title></title>
+      <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>  
+     <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+</head>
+<body>
+    <form id="form1" runat="server">
+   
+      <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>添加</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            项目名称：
+                        </th>
+                        <td width="75%">
+                            <asp:Label ID="Label1" runat="server" Text="Label"></asp:Label></td>
+                    </tr>
+                    <tr>
+                        <th>
+                            流程名称：
+                        </th>
+                        <td>                       
+                                <asp:DropDownList ID="ddllcmc" runat="server" AutoPostBack="True">   </asp:DropDownList>
+                        </td>
+                    </tr>                  
+                   
+                      <tr>
+                        <th align="right">
+                            操作部门：
+                        </th>
+                        <td>
+                            <asp:Label ID="lblbm" runat="server" Text="Label"></asp:Label>
+                        </td>
+                    </tr>  
+                      <tr>
+                        <th align="right">
+                            流程状态：
+                        </th>
+                        <td>
+                             <asp:DropDownList ID="ddllczt" runat="server" Visible="true">
+                                 <asp:ListItem Value="1">正常</asp:ListItem>
+                                 <asp:ListItem Value="0">超时</asp:ListItem>
+                             </asp:DropDownList>
+                        </td>
+                    </tr>        
+                    <tr>
+                        <th align="right">
+                            修改说明：
+                        </th>
+                        <td>
+                             <asp:TextBox ID="txtbz" runat="server" Height="91px" TextMode="MultiLine" 
+                                 Width="249px"></asp:TextBox>
+                        </td>
+                    </tr>                      
+                    
+                    <tr>
+                        <td align="center" colspan="2">
+                            <asp:Button ID="Button1" runat="server" Text="确定" CssClass="btnsubmit" />&nbsp;
+                            <input type="button" value="关闭" class="btnsubmit" onclick="window.close();" />        
+                        </td>
+                    </tr>
+                </table>
+                </div>
+    </div>
+    </form>
+</body>
+</html>

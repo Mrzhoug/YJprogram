@@ -1,0 +1,116 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="AdvancedSearchDropDownListSetting.aspx.vb" Inherits="manager_AdvancedSearch_AdvancedSearchDropDownListSetting" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>高级搜索（下拉框内容）设置</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+</head>
+<body>
+<center>
+    <form id="form1" runat="server">
+    
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>高级搜索（下拉框内容）设置</span></a></li>
+            </ul>
+        </div>    
+    
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            表单名称：
+                        </th>
+                        <td width="75%" style="text-align:left">                            
+                            <asp:Label ID="LBmkmc" runat="server" Text=""></asp:Label>                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <th align="right">
+                            搜素字段名称：
+                        </th>
+                        <td width="75%" style="text-align:left">                            
+                            <asp:Label ID="LBsearchTitle" runat="server" Text=""></asp:Label>                            
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th align="right">
+                            表单节点名：
+                        </th>
+                        <td width="75%" style="text-align:left">                            
+                            <asp:Label ID="LBNodeName" runat="server" Text=""></asp:Label>                            
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th align="right">
+                            数据源选择：
+                        </th>
+                        <td width="75%" style="text-align:left">
+                            <asp:RadioButtonList ID="RadioButtonList1" runat="server" 
+                                RepeatDirection="Horizontal">
+                                <asp:ListItem Selected="True" Value="formSource">表单数据源</asp:ListItem>
+                                <asp:ListItem Value="customSource">自定义</asp:ListItem>
+                            </asp:RadioButtonList>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th align="right">
+                            自定义选项：
+                        </th>
+                        <td width="75%" style="text-align:left">
+                            <asp:TextBox ID="txtCondition" runat="server"></asp:TextBox>
+                            <span style="color:Red">*</span><span> 数据源选择为自定义时有效，以逗号隔开条件</span></td>
+                    </tr>
+
+                    <tr>
+                        <th align="right">
+                            数据源：
+                        </th>
+                        <td width="75%" style="text-align:left">                            
+                            
+                            <asp:DropDownList ID="DropDownList1" runat="server" AutoPostBack="True">
+                            </asp:DropDownList>
+                            
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th align="right">
+                            数据源节点名：
+                        </th>
+                        <td width="75%" style="text-align:left">                            
+                            <asp:DropDownList ID="DDLnodeName" runat="server" AutoPostBack="True">
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th align="right">
+                            数据源节点选择：
+                        </th>
+                        <td width="75%" style="text-align:left" runat="server" id="tdNodeSelect">                            
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        
+                        <td width="10%" style="text-align:center" colspan="2">
+                            <asp:Button ID="Button1" runat="server" Text="提 交" CssClass="btnsubmit" />
+                        </td>
+                        
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+</center>
+</body>
+</html>

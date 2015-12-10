@@ -1,0 +1,181 @@
+﻿Imports System.IO
+Partial Class manager_Forms_Function
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim XMDM, MKDM As Integer
+    Dim FID, OpFid As Integer
+    Dim QZSP As Integer     '强制审批的标志
+    Dim Flag As Boolean     '申请审批的标志
+    Dim Login_User As String
+    Dim UserID As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Try
+            XMDM = Request("XMDM")
+            MKDM = Request("MKDM")
+            Flag = Request("flag")
+        Catch ex As Exception
+            Response.Redirect("../blank.aspx?msg=非法访问")
+        End Try
+
+        '直接弹出
+
+        Dim Tb As New Data.DataTable
+        Dim SQL As String
+        '得到进程中的记录,项目状态
+        Tb = Base.DB.Table("SELECT FID,WCSJ,WCBZ,SPBZ,XMZT FROM XX_XMJC WHERE (XMDM = " & XMDM & ") and MKDM=" & MKDM, "XX_XMJC")
+        If Tb.Rows.Count = 0 Then
+            Response.Redirect("../blank.aspx?msg=流程错误,请你重新建立项目")
+        End If
+        Dim XMZT As String = Tb.Rows(0).Item(4)
+        FID = Tb.Rows(0).Item(0)     '得到当前操作的表单号
+
+        '查看关联标志，判断此功能所在的状态是否与前个状态进行关联
+        SQL = "select GLBZ from GY_XMZT where XMZT = " & XMZT & " and GLBZ = 1"
+        Tb = Base.DB.Table(SQL, "GY_XMZT")
+        If Tb.Rows.Count > 0 Then       '表示没有找到关联标志，
+
+            '再列出项目的所有状态名,来找到当前功能的前一状态
+            SQL = "SELECT GY_XMZT.XMZT,GY_XMZT.ZTMC,GY_XMZT.OrderBy "
+            SQL += " FROM  XX_XMJC, GY_XMZT"
+            SQL += " where XX_XMJC.XMZT = GY_XMZT.XMZT"
+            SQL += " and XX_XMJC.XMDM= " & XMDM
+            SQL += " ORDER BY GY_XMZT.OrderBy, GY_XMZT.XMZT"
+            Tb = Base.DB.Table(SQL, "GY_XMZT")
+            Dim i As Integer
+            Dim TempXMZT As String = ""
+            Dim PrevXMZT As String = ""
+            For i = 0 To Tb.Rows.Count - 1
+                If Tb.Rows(i).Item(0) = XMZT Then Exit For
+                TempXMZT += "," & Tb.Rows(i).Item(0)
+            Next
+            If TempXMZT <> "" Then
+                PrevXMZT = TempXMZT.Substring(TempXMZT.LastIndexOf(",") + 1)
+                TempXMZT = TempXMZT.Substring(1)
+            End If
+
+            If PrevXMZT <> "" Then              '表示不是第一次的前置条件
+                '接下来对前一状态的完成情况进行判断。
+                SQL = "select  * from XX_XMJC where XMZT in (" & PrevXMZT & ") and XMDM = " & XMDM & " and (WCBZ = 0 or WCBZ is null)"
+                Tb = Base.DB.Table(SQL, "XX_XMJC")
+                If Tb.Rows.Count > 0 Then
+                    Response.Redirect("../blank.aspx?msg=此功能已经被设为前置状态完成时，才可以打开此功能！")
+                End If
+            End If
+
+            If TempXMZT <> "" Then              '当状态不是不存的情况下.
+                '接下来对当前状态前的所有状态的审批标志进行判断
+                SQL = "select  * from XX_XMJC where XMZT in (" & TempXMZT & ") and XMDM = " & XMDM & " and WCBZ = 1 and ( SPBZ = 1 or SPBZ = 4)"
+                Tb = Base.DB.Table(SQL, "XX_XMJC")
+                If Tb.Rows.Count > 0 Then
+                    Response.Redirect("../blank.aspx?msg=此功能已经被设为前置状态完成时，之前有功能未完成审批！")
+                End If
+            End If
+            
+        End If
+
+        '如果不是发起审批，则直接弹出.
+        If Flag = False Then
+            OpenForms()
+        Else        '表示是发起审批
+            If Page.IsPostBack = False Then
+                'CheckBoxList1.DataBind()
+                Title.Text = "你发起了审批,请选择审批人员"
+                Tb = Base.DB.Table("select YGDM,SPNR from GY_XMSP where xmdm = " & XMDM & " and mkdm=" & MKDM, "GY_XMSP")
+                Dim i As Integer
+                If Tb.Rows.Count > 0 Then       '表示原来的审批内容,进行显示
+                    TextBox1.Text = Tb.Rows(0).Item(1)
+                    For i = 0 To Tb.Rows.Count - 1  '恢复审批人的选择
+                        Text1.Value = Text1.Value & Tb.Rows(i).Item(2) & ","
+                        userlist.Value = userlist.Value & Tb.Rows(i).Item(0) & ","
+                    Next
+                End If
+            End If
+        End If
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        If Flag = True Then     '表示是发起审批,将当前的功能写上审批的标志
+            Base.DB.Query("Update XX_XMJC set SPBZ=4 where FID = " & FID)
+        End If
+        '清除以前所有的当前项目，当前模块的所有审批记录
+        Base.DB.Query("Delete GY_XMSP where XMDM = " & XMDM & " and mkdm=" & MKDM)
+
+        If userlist.Value.Trim.Length <= 0 Then
+            Base.Js.alert(Me, "请选择发送人员！")
+            Exit Sub
+        End If
+
+        Dim YGDM As Integer
+        Dim IdList As String = userlist.Value
+        Dim tmp As String()
+        tmp = IdList.Split(",")
+        Dim i As Integer
+        Dim MsgID As Integer
+
+        For i = 0 To tmp.Length - 1
+            Try
+                YGDM = Convert.ToInt32(tmp(i).ToString)
+            Catch ex As Exception
+                YGDM = 0
+            End Try
+            If Base.DB.Table("select XMDM from GY_XMSP where XMDM=" & XMDM & " and MKDM=" & MKDM & " and YGDM=" & YGDM, "GY_XMSP").Rows.Count = 0 And YGDM <> -1 And YGDM <> 0 Then
+                MsgID = Base.DB.ExeScalar("insert into SendMessage(Title,FromID,Content,TOID,SendDate,LookFlag,msgkind) values('" & Base.SqlFilter(TextBox1.Text) & " '," & UserID & ",'" & Server.HtmlEncode(Base.SqlFilter(TextBox1.Text.Trim)) & "'," & YGDM & ",getdate(),0,2);Select CId from SendMessage where Cid = @@IDENTITY")
+                Base.DB.ExeScalar(" insert into GY_XMSP(xmdm,mkdm,YGDM,SPNR,FQR,SPBZ,ZFBZ,ModifyFlag,msgid) values(" & XMDM & "," & MKDM & ",'" & YGDM & "','" & TextBox1.Text.Trim & "','" & Login_User & "','','',0," & MsgID & ");Select Cid From GY_XMSP where Cid = @@IDENTITY")
+            End If
+        Next
+        Base.Js.closestr(Me, "你的审批请求已经发送给相关人员")
+
+    End Sub
+
+    Protected Sub OpenForms()       '此函数进行打开表单操作
+        Dim Tb As New Data.DataTable
+        Dim WriteFlag As Boolean      '表单可写标志
+        Dim Qx As Integer = Base.GetUserHaveQX(UserID, MKDM)
+        '这里对表单进行处理，判断表单是只读，或是可写的，或是没有权限的。
+        If Qx <= 0 Then
+            Response.Redirect("../blank.aspx?msg=无权打开此表单，请联系管理员")
+        End If
+        If Qx >= 2 Then
+            WriteFlag = True
+        Else
+            WriteFlag = False
+        End If
+
+        '得到 项目代码和模板目录
+        Tb = Base.DB.Table("SELECT XsnDir,MKMC FROM GY_MKXX where MKdm = " & MKDM & " and Nolcdm >0 ", "GY_MKXX")
+        If Tb.Rows.Count = 0 Then
+            Response.Redirect("../blank.aspx?msg=非法访问")
+        End If
+        Dim XsnDir As String = Tb.Rows(0).Item(0).ToString.Trim
+        Dim MKMC As String = Tb.Rows(0).Item(1)
+
+
+        Dim XmlFileName As String = Server.MapPath("../../") & "\TemplateLibrary\" & XsnDir & "\template.xml"
+        Dim DFileName As String = Server.MapPath("../../") & "\FormFolder\" & MKMC & "\" & FID & ".xml"
+        If File.Exists(XmlFileName) = False Then
+            Response.Redirect("../blank.aspx?msg=模板存在问题,你联系管理员,更新此模板!")
+        End If
+
+        Try     '如果原来编辑过.则文件会已经存在,没有编辑过的话,文件不存在.则复制一份
+            If File.Exists(DFileName) = False Then File.Copy(XmlFileName, DFileName)
+        Catch ex As Exception
+            Response.Redirect("../blank.aspx?msg=功能存在问题,你重新新建功能!")
+        End Try
+
+
+        Dim Result As String = Base.AutoFillDate(DFileName, FID, XMDM, Login_User, WriteFlag, "")
+        If Not Result Is Nothing Then               '对自动生成的值进行相应的填写
+            Response.Redirect("../blank.aspx?msg=" & Result)
+        End If
+
+        '新的打开方式，直接输出
+        Response.Redirect("../Forms/OpenInfoPath.aspx?FID=" & FID & "&LC=True")
+    End Sub
+
+   
+End Class

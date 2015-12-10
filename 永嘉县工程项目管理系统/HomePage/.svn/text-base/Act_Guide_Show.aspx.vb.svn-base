@@ -1,0 +1,21 @@
+﻿
+Partial Class HomePage_Act_Guide_Show
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim Cid As Integer
+        Try
+            Cid = Request("Cid")
+        Catch ex As Exception
+            Cid = 0
+        End Try
+
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("select [Content] from Act_Guide where Cid=" & Cid, "dd")
+        If tb.Rows.Count > 0 Then
+            Content.InnerHtml = tb.Rows(0).Item(0)
+        Else
+            Content.InnerHtml = "非法访问!"
+        End If
+    End Sub
+End Class

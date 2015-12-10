@@ -1,0 +1,90 @@
+﻿
+Partial Class HomePage_MyForms
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim RowCount As Integer
+
+    Dim Login_User As String
+    Dim UserID As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        If Base.HomePageUserCheck = False Then
+            Base.Js.closestr(Me, "你还没有登陆,请先登陆")
+            Exit Sub
+        End If
+        Login_User = Session("LoginName").ToString.Trim
+        UserID = Base.GetUserID(Login_User)
+
+        Dim SqlQuerry As String = String.Empty
+        If TextBox1.Text.Trim.Length > 0 Then
+            SqlQuerry = " and MKMC like '%" & Base.SqlFilter(TextBox1.Text) & "%'"
+        End If
+
+        Conn.SelectCommand = "SELECT GY_MKXX.[MKDM], [MKMC] FROM GY_XMXX,XX_XMJC,GY_MKXX where IsWan=1 " & SqlQuerry & " and GY_MKXX.MKDM=XX_XMJC.MKDM and XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null) and GY_XMXX.XMSM='" & Base.SqlFilter(Login_User) & "'"
+        'Conn.SelectCommand = "SELECT [MKDM], [MKMC] FROM [Gy_MKXX] WHERE IsWan=1 " & SqlQuerry & " order by MKDM desc"
+        Dim str As String = String.Empty
+        If Base.HomePageUserCheck = False Then
+            Response.Redirect("Default.aspx")
+            Exit Sub
+        Else
+            Dim tb As New Data.DataTable
+            tb = Base.DB.Table("SELECT YGDM FROM GY_YGDM where DLMC='" & Base.SqlFilter(Session("LoginName")) & "'", "dd")
+            If tb.Rows.Count <= 0 Then
+                Base.Js.alert(Me, "非法用户！", "default.aspx")
+                Exit Sub
+            End If
+        End If
+
+        RowCount = Base.DB.GetRowCount(Conn.SelectCommand, "dd")
+
+    End Sub
+
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        Dim TmpMKDM As Integer
+        Dim Tmp As String
+        Dim TmpLCDM As String
+        For i = 0 To GridView1.Rows.Count - 1
+            TmpMKDM = GridView1.DataKeys(i).Item(0)
+            Try
+                Tmp = Base.DB.ExeScalar("SELECT ShowFunName FROM GY_GROUP_INFO WHERE (ShowFunName IS NOT NULL) AND (ShowFunName <> '') and mkdm = " & TmpMKDM)
+            Catch ex As Exception
+                Tmp = ""
+            End Try
+            If Tmp.Trim.Length > 0 Then
+                GridView1.Rows(i).Cells(0).Text = Tmp
+            End If
+
+
+            Dim Row As Data.DataRow
+            Row = Base.DB.Row("SELECT MKMC,XsnDir,NoLcDM,IsStop FROM GY_MKXX where MKDM =" & TmpMKDM, "GY_MKXX1")
+            If Not Row Is Nothing Then
+                TmpLCDM = Row.Item("NoLcDM").ToString
+            Else
+                TmpLCDM = -1
+            End If
+
+
+            Row = Base.DB.Row("SELECT XX_XMJC.FID,GY_XMXX.XMDM FROM GY_XMXX,XX_XMJC where XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" & TmpLCDM & " and (GY_XMXX.XMJD is not null) and GY_XMXX.XMSM='" & Login_User & "'", "dd")
+            If Row Is Nothing Then
+                GridView1.Rows(i).Cells(1).Text = "<center><a href='javascript:void(0);' onclick=""window.open('Forms/FunctionNOLc.aspx?LCDM=" & TmpLCDM & "','','height=500, width=750, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');"">填写表单</a></center>"
+            Else
+                GridView1.Rows(i).Cells(1).Text = "<center><a href='javascript:void(0);' onclick=""window.open('Forms/OpenInfoPath.aspx?fid=" & Row.Item("FID").ToString.Trim & "','','height=500, width=750, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');"">修改表单</a></center>"
+            End If
+            'GridView1.Rows(i).Cells(1).Text = "<center><a href='javascript:void(0);' onclick=""window.open('Forms/MyFormShow.aspx?MKDM=" & GridView1.DataKeys(i).Item(0) & "','显示表单列表','height=500, width=750, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');"">填写表单</a></center>"
+        Next
+        '由于框架的原因，导致ID变掉，所以进行替换
+        PageBar.InnerHtml = Base.pub.WritePage(GridView1, RowCount).ToString.Replace("Gridview1", "_ctl0$ContentPlaceHolder1$GridView1")
+    End Sub
+
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        GridView1.PageIndex = e.NewSelectedIndex
+        GridView1.DataBind()
+    End Sub
+End Class

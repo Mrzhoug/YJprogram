@@ -1,0 +1,106 @@
+﻿
+Partial Class manager_Desktop_XMSP_List
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim UserKSDM As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        If Not IsPostBack Then
+            '得到用户信息
+            Login_User = Base.GetWebUserName
+            UserID = Base.GetUserID(Login_User)
+            UserKSDM = Base.GetKSDM(UserID)
+
+            Conn.SelectCommand = "SELECT [CID], [XMMC],[KSDM], [MKMC], [YGDM], [SPNR], [SPYJ], [FQR],[FQKS], [SPBZ], [ZFBZ],FQtime,Gy_XMSP.XMDM,Gy_XMSP.MKDM FROM [GY_XMSP],Gy_XMXX,GY_MKXX WHERE  GY_XMSP.XMDM=GY_XMXX.XMDM and GY_XMSP.MKDM=GY_MKXX.MKDM and  ([KSDM] = @KSDM) order by spbz,zfbz,Cid desc "
+            Conn.SelectParameters("KSDM").DefaultValue = UserKSDM
+
+            If TextBox1.Text.Length > 0 Then
+                Dim Sql As String = TextBox1.Text.Trim
+                Conn.SelectCommand = "SELECT [CID], [XMMC],[KSDM], [MKMC], [YGDM], [SPNR], [SPYJ], [FQR],[FQKS], [SPBZ], [ZFBZ],FQtime,Gy_XMSP.XMDM,Gy_XMSP.MKDM FROM [GY_XMSP],Gy_XMXX,GY_MKXX WHERE  GY_XMSP.XMDM=GY_XMXX.XMDM and GY_XMSP.MKDM=GY_MKXX.MKDM and  ([KSDM] = @KSDM) and (MKMC like '%" & Base.SqlFilter(Sql) & "%' or FQR like '%" & Base.SqlFilter(Sql) & "%') order by spbz,zfbz,Cid desc "
+            Else
+                Conn.SelectCommand = "SELECT [CID], [XMMC],[KSDM], [MKMC], [YGDM], [SPNR], [SPYJ], [FQR],[FQKS], [SPBZ], [ZFBZ],FQtime,Gy_XMSP.XMDM,Gy_XMSP.MKDM FROM [GY_XMSP],Gy_XMXX,GY_MKXX WHERE  GY_XMSP.XMDM=GY_XMXX.XMDM and GY_XMSP.MKDM=GY_MKXX.MKDM and  ([KSDM] = @KSDM) order by spbz,zfbz,Cid desc "
+            End If
+            Conn.SelectParameters("KSDM").DefaultValue = UserKSDM
+            ' GridView1.DataBind()
+        End If
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        Response.Redirect("XMSP.aspx?CID=" & GridView1.DataKeys(e.NewSelectedIndex).Item(0))
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs)
+        Dim i As Integer
+        Dim FQR As String = String.Empty
+        Dim FQKS As String = String.Empty
+        Dim SPR As String = String.Empty
+        Dim Dt As DataTable
+        For i = 0 To GridView1.Rows.Count - 1
+            If GridView1.DataKeys(i).Item(2) = 1 Then
+                GridView1.Rows(i).Cells(6).Text = "转发"
+            Else
+                Select Case GridView1.DataKeys(i).Item(1)
+                    Case 0
+                        GridView1.Rows(i).Cells(6).Text = "<font color=red>未处理</a>"
+                    Case 1
+                        GridView1.Rows(i).Cells(6).Text = "审批通过"
+                    Case -1
+                        GridView1.Rows(i).Cells(7).Text = "审批不通过"
+                End Select
+            End If
+
+            FQR = GridView1.Rows(i).Cells(0).Text
+            GridView1.Rows(i).Cells(0).Text = Base.DB.ExeScalar("SELECT YGXM FROM GY_YGDM where DLMC='" & FQR & "'")
+            '& "(" & FQR & ")"
+
+
+            FQKS = GridView1.Rows(i).Cells(1).Text
+            GridView1.Rows(i).Cells(1).Text = Base.DB.ExeScalar("SELECT KSMC FROM GY_KSDM where KSDM=" & FQKS)
+
+            SPR = GridView1.Rows(i).Cells(4).Text
+            GridView1.Rows(i).Cells(4).Text = Base.DB.ExeScalar("SELECT YGXM FROM GY_YGDM where YGDM='" & SPR & "'")
+
+
+
+            'FQKS = GridView1.Rows(i).Cells(1).Text
+            'GridView1.Rows(i).Cells(1).Text = Base.DB.ExeScalar("SELECT KSMC FROM GY_KSDM where KSDM=" & FQKS)
+            'Dt = Base.DB.Table("SELECT KSMC FROM GY_KSDM where KSDM=" & GridView1.Rows(i).Cells(1).Text, "ksmc")
+            'GridView1.Rows(i).Cells(1).Text = Dt.Rows(0).Item(0).ToString
+
+            '显示扩展列
+            Dt = Base.GetShowFieldDate_NoLc(GridView1.DataKeys(i)(3), GridView1.DataKeys(i)(4), 5)
+            If Dt Is Nothing Then
+                GridView1.Rows(i).Cells(8).Text = "记录不存在"
+            Else
+                Dim Str As String
+                Str = "<table border='1' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:98%;border-collapse:collapse;'>"
+                Str += "<tr><td width=60 align=center>" & Dt.Columns(0).ColumnName.Trim & "</td><td>" & Dt.Rows(0).Item(0) & "</td></tr></table>"
+                Str += "<table border='1' id='showrow" & i & "' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:98%;border-collapse:collapse;display:none;'>"
+                Str += "<tr><td width=60 align=center>" & Dt.Columns(1).ColumnName.Trim & "</td><td>" & Dt.Rows(0).Item(1) & "</td></tr>"
+                Str += "<tr><td width=60 align=center>" & Dt.Columns(2).ColumnName.Trim & "</td><td>" & Dt.Rows(0).Item(2) & "</td></tr>"
+                Str += "<tr><td width=60 align=center>" & Dt.Columns(3).ColumnName.Trim & "</td><td>" & Dt.Rows(0).Item(3) & "</td></tr>"
+                Str += "<tr><td width=60 align=center>" & Dt.Columns(4).ColumnName.Trim & "</td><td>" & Dt.Rows(0).Item(4) & "</td></tr>"
+                Str += "</table>"
+                GridView1.Rows(i).Cells(8).Attributes.Add("onclick", "javascript:show('showrow" & i & "');")
+                GridView1.Rows(i).Cells(8).Text = Str
+            End If
+        Next
+    End Sub
+
+    Protected Sub GridView1_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs) Handles GridView1.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            '鼠标效果
+            e.Row.Attributes.Add("onmouseover", "OnMouseOver(this)")
+            e.Row.Attributes.Add("onmouseout", "OnMouseOut(this)")
+            e.Row.Attributes("style") = "Cursor:hand"
+            e.Row.Attributes.Add("OnDblClick", "DbClickEventXMSP(" & GridView1.DataKeys(e.Row.RowIndex).Item(0) & ")")
+            e.Row.Cells(9).Text = "<a href='javascript:void(0);' onclick='DbClickEventXMSP(" & GridView1.DataKeys(e.Row.RowIndex).Item(0) & ")'>查看</a>"
+        End If
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+
+    End Sub
+End Class

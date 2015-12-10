@@ -1,0 +1,40 @@
+﻿<%@ Control Language="VB" AutoEventWireup="false" CodeFile="HomePageNews.ascx.vb" Inherits="HomePage_DefinePart_HomePageNews" %>
+<table id="Table_01" width="580" style="height:195px;" border="0" cellpadding="0" cellspacing="0">
+	<tr style="height:32px;">
+		<td style="background-image:url(images/news_title.gif);">
+		<table height=18 border="0" cellpadding="0" cellspacing="0"><tr><td width=533></td><td width=40 onclick="window.location.href='HomePageNews.aspx'" style="cursor:hand"></td></tr></table>
+		</td>
+	</tr>
+	<tr>
+	<td style="background:url(images/页面2_12.gif);">
+	    <table border="0" cellpadding="0" cellspacing="0" style="font-size:9pt;width:100%;height:30">
+        <tr>
+            <td style="height: 19px; width: 24%;" align="center" valign="middle" >
+                &nbsp;<img src="" id="imgnew" runat="server" height="150" width="180"  /></td>
+            <td width="70%" style="height: 19px" valign=top>
+                <br />
+                <asp:DataList ID="DataList1" runat="server" Width="100%" OnItemDataBound="DataList1_ItemDataBound" Font-Size="9pt">
+                  <itemtemplate>
+                    <table border="0" cellpadding="0" cellspacing="0" style="width: 100%">
+                      <tr>
+                        <td align="center" style="width:7%; height: 16px"><img src="images/news1.gif" /></td>
+                        <td style="width: 69%; height: 16px" align="left"><a href="HomePageNewsShow.aspx?cid=<%#Eval("cid")%>">
+                          <asp:Label ID="title" runat="server" Text='<%# Eval("title") %>' Font-Size="9pt"></asp:Label>
+                        </a> </td>
+                        <td style="width: 24%"><asp:Label ID="uptimelb" runat="server" Text='<%# Eval("update") %>' Font-Size="9pt"></asp:Label>                        </td>
+                      </tr>
+                      <tr>
+                        <td align="center" style="height: 1px"></td>
+                        <td style="height: 1px; background-color: #cccccc;"></td>
+                        <td style="height: 1px;background-color: #cccccc;"></td>
+                      </tr>
+                    </table>
+                  </itemtemplate>
+                  <itemstyle VerticalAlign="Top" />                
+</asp:DataList></td>
+        </tr>
+    </table>
+    </td>
+	</tr>
+	<tr><td><img src="images/页面2_16.gif" alt="" /></td></tr>
+</table>

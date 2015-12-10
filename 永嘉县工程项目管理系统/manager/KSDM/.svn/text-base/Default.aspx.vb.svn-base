@@ -1,0 +1,271 @@
+﻿
+Partial Class manager_KSDM_Default
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim ds As New DataSet
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking("../manager/YGDM/Default.aspx")   '这里对文件进行权限限制,与用户管理权限一致
+
+        If Page.IsPostBack = False Then
+            Create_FirstNode()
+        End If
+
+        If Not TreeView1.SelectedNode Is Nothing Then
+            Conn.SelectCommand = "SELECT [YGDM], [YGXM], [DLMC] FROM [GY_YGDM] WHERE ([QYBZ] = @QYBZ) and SSKS=" & TreeView1.SelectedNode.Value
+        Else
+            Conn.SelectCommand = "SELECT [YGDM], [YGXM], [DLMC] FROM [GY_YGDM] WHERE ([QYBZ] = @QYBZ) and SSKS= -1"
+        End If
+    End Sub
+
+#Region "创建无限级TreeView"
+    Sub Create_FirstNode()
+        Dim i As Integer
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("SELECT ksdm,ksmc,UPks,bz FROM GY_KSDM  where UPKS IS NULL or UPKS=0 order by bz ", "GY_KSDM")
+        For i = 0 To Tb.Rows.Count - 1
+            If Tb.Rows(i)("bz").ToString = "" Then
+                Dim sqlstr As String
+                sqlstr = "update gy_ksdm set bz =" & i & " where ksdm = " & Tb.Rows(i)(0).ToString()
+                Base.DB.Query(sqlstr)
+            End If
+            Dim node1 As New TreeNode(Tb.Rows(i)(1).ToString, Tb.Rows(i)(0))
+            TreeView1.Nodes.Add(node1)
+            create_tree(TreeView1, node1, Tb.Rows(i)(0))
+        Next
+    End Sub
+    Sub create_tree(ByVal TreeView1 As TreeView, ByVal CurrentNode As TreeNode, ByVal UP As String)
+        Dim i As Integer
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("SELECT ksdm,ksmc,UPks,bz FROM GY_KSDM  where UPks='" & UP & "' order by bz ", "GY_KSDM")
+        For i = 0 To tb.Rows.Count - 1
+
+            If tb.Rows(i)("bz").ToString = "" Then
+                Dim sqlstr As String
+                sqlstr = "update gy_ksdm set bz =" & i & " where ksdm = " & tb.Rows(i)(0).ToString()
+                Base.DB.Query(sqlstr)
+            End If
+            Dim node1 As New TreeNode(tb.Rows(i)(1).ToString, tb.Rows(i)(0))
+            CurrentNode.ChildNodes.Add(node1)
+            create_tree(TreeView1, node1, tb.Rows(i)(0))
+        Next
+    End Sub
+#End Region
+
+    Protected Sub TreeView1_SelectedNodeChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TreeView1.SelectedNodeChanged
+        TextBox1.Text = TreeView1.SelectedNode.Text
+        GridView1.DataBind()
+        'If GridView1.Rows.Count = 0 Then
+        '    message1.InnerHtml = "<center>未选中科室或是该科室暂无人员</center>"
+        'Else
+        '    message1.InnerHtml = ""
+        'End If
+        TreeView1.ExpandAll()
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        If TextBox1.Text.Trim.Length < 0 Then
+            Base.Js.alert(Me, "角色名称不能为空!")
+            Exit Sub
+        End If
+        Dim TempNum As Integer
+        TempNum = Base.DB.GetRowCount("SELECT ksdm,ksmc,upks,bz FROM GY_KSDM  where KSMC = '" & Base.SqlFilter(TextBox1.Text) & "' order by ksdm ", "GY_KSDM")
+        If TempNum > 0 Then
+            Base.Js.alert(Me, "角色名称已存在!")
+            Exit Sub
+        End If
+        Dim KSDM As Integer
+        Try
+            If TreeView1.SelectedNode Is Nothing Then
+                KSDM = 0
+            Else
+                KSDM = TreeView1.SelectedNode.Value
+            End If
+
+
+            Dim maxBZ As Integer
+            maxBZ = Base.DB.ExeScalar("select max(bz) from gy_ksdm where upks=" & KSDM)
+            
+            Base.DB.Query("insert into Gy_KSDM(KSMC,upKS,bz) values('" & Base.SqlFilter(TextBox1.Text) & "'," & KSDM & "," & maxBZ + 1 & ")")
+            TreeView1.Nodes.Clear()
+            Create_FirstNode()
+        Catch ex As Exception
+            Base.Js.alert(Me, "添加新角色失败!")
+        End Try
+        TreeView1.ExpandAll()
+    End Sub
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+        If TreeView1.SelectedNode Is Nothing Then
+            Base.Js.alert(Me, "请先选中一个角色")
+            Exit Sub
+        End If
+
+        If TextBox1.Text.Trim.Length = 0 Then
+            Base.Js.alert(Me, "角色名称不能为空!")
+            Exit Sub
+        End If
+        Try
+            Base.DB.Query("update Gy_KSDM set KSMC = '" & Base.SqlFilter(TextBox1.Text) & "' where KSDM = '" & TreeView1.SelectedNode.Value & "'")
+            TreeView1.Nodes.Clear()
+            Create_FirstNode()
+        Catch ex As Exception
+            Base.Js.alert(Me, "修改角色失败!")
+        End Try
+        TreeView1.ExpandAll()
+    End Sub
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+        If TreeView1.SelectedNode Is Nothing Then
+            Base.Js.alert(Me, "请先选中一个角色")
+            Exit Sub
+        End If
+
+        If TreeView1.SelectedNode.ChildNodes.Count > 0 Then
+            Base.Js.alert(Me, "此角色存在下级角色,不能删除,请先删除下级角色!")
+            Exit Sub
+        End If
+
+        Try
+            Base.DB.Query("delete Gy_KSDM where KSDM = '" & TreeView1.SelectedNode.Value & "'")
+            TreeView1.Nodes.Clear()
+            Create_FirstNode()
+        Catch ex As Exception
+            Base.Js.alert(Me, "删除角色失败!")
+        End Try
+        TreeView1.ExpandAll()
+    End Sub
+
+    Protected Sub Button6_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button6.Click
+
+        If TreeView1.SelectedNode Is Nothing Then
+            Base.Js.alert(Me, "请先选中一个角色")
+            Exit Sub
+        End If
+
+        Dim IdList As String = userlist.Value
+        Dim tmp As String()
+        tmp = IdList.Split(",")
+        Dim i, j As Integer
+        Dim YGDM As Int16
+        For i = 0 To tmp.Length - 1
+            Try
+                YGDM = Convert.ToInt32(tmp(i).ToString)
+                Base.DB.Query("update GY_YGDM set SSKS =" & TreeView1.SelectedNode.Value & "  where YGDM=" & YGDM)
+                Dim Result As String = Base.UpdateUserContent(YGDM, 2)
+                If Not Result Is Nothing Then
+                    Base.Js.alert(Me, Result)
+                End If
+            Catch ex As Exception
+            End Try
+        Next
+        userlist.Value = ""
+        GridView1.DataBind()
+
+    End Sub
+
+    Protected Sub Button5_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button5.Click
+        If TreeView1.SelectedNode Is Nothing Then
+            Base.Js.alert(Me, "请先选中一个角色")
+            Exit Sub
+        End If
+        Dim i As Integer
+        Dim ck As New CheckBox
+        For i = 0 To Me.GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                Base.DB.Query("update GY_YGDM set SSKS = 0 where YGDM=" & GridView1.DataKeys(i).Item(0))
+            End If
+        Next
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub Button7_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button7.Click
+        If TreeView1.SelectedNode Is Nothing Then
+            Base.Js.alert(Me, "请先选中一个角色")
+            Exit Sub
+        End If
+
+        Dim ksdm As String = TreeView1.SelectedNode.Value
+        Dim sqlstr As String = "select * from gy_ksdm where ksdm = " & ksdm
+        Dim dt As New DataTable
+
+        Dim upKS As String
+        Dim bz As String
+
+
+        dt = Base.DB.Table(sqlstr, "aa")
+        If dt.Rows.Count > 0 Then
+            upKS = dt.Rows(0)("upks").ToString().Trim()
+            bz = dt.Rows(0)("bz").ToString().Trim()
+        Else
+            Base.Js.alert(Me, "非法参数")
+            Return
+        End If
+
+        sqlstr = "select * from gy_ksdm where upks = " & upKS
+        dt = Base.DB.Table(sqlstr, "bb")
+        Dim allcount As Integer = dt.Rows.Count
+
+
+
+        If Convert.ToInt16(bz) <> dt.Rows.Count - 1 Then
+            sqlstr = "update gy_ksdm set bz = " & bz & " where bz = " & (Convert.ToInt16(bz) + 1) & " and upks = " & upKS
+            Base.DB.Query(sqlstr)
+            sqlstr = "update gy_ksdm set bz = " & (Convert.ToInt16(bz) + 1) & " where ksdm = " & ksdm
+            Base.DB.Query(sqlstr)
+
+            TreeView1.Nodes.Clear()
+            Create_FirstNode()
+            GridView1.DataBind()
+        End If
+
+
+
+        'If TreeView1.SelectedNode.ChildNodes.Count > 0 Then
+        '    Base.Js.alert(Me, "此角色存在下级角色,不能删除,请先删除下级角色!")
+        '    Exit Sub
+        'End If
+    End Sub
+
+    Protected Sub Button8_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button8.Click
+        If TreeView1.SelectedNode Is Nothing Then
+            Base.Js.alert(Me, "请先选中一个角色")
+            Exit Sub
+        End If
+
+        Dim ksdm As String = TreeView1.SelectedNode.Value
+        Dim sqlstr As String = "select * from gy_ksdm where ksdm = " & ksdm
+        Dim dt As New DataTable
+
+        Dim upKS As String
+        Dim bz As String
+
+
+        dt = Base.DB.Table(sqlstr, "aa")
+        If dt.Rows.Count > 0 Then
+            upKS = dt.Rows(0)("upks").ToString().Trim()
+            bz = dt.Rows(0)("bz").ToString().Trim()
+        Else
+            Base.Js.alert(Me, "非法参数")
+            Return
+        End If
+
+        sqlstr = "select * from gy_ksdm where upks = " & upKS
+        dt = Base.DB.Table(sqlstr, "bb")
+        Dim allcount As Integer = dt.Rows.Count
+
+
+
+        If Convert.ToInt16(bz) <> 0 Then
+            sqlstr = "update gy_ksdm set bz = " & bz & " where bz = " & (Convert.ToInt16(bz) - 1) & " and upks = " & upKS
+            Base.DB.Query(sqlstr)
+            sqlstr = "update gy_ksdm set bz = " & (Convert.ToInt16(bz) - 1) & " where ksdm = " & ksdm
+            Base.DB.Query(sqlstr)
+
+            TreeView1.Nodes.Clear()
+            Create_FirstNode()
+            GridView1.DataBind()
+
+        End If
+    End Sub
+End Class

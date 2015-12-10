@@ -1,0 +1,606 @@
+﻿Imports System.Xml
+Partial Class manager_CreateFunction_ShowListModify
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim MKDM As Integer
+    Dim LCDM As Integer
+    Dim LcFlag As Boolean
+    Dim XsnDir As String
+    Dim MKMC As String
+    Dim filename As String
+    Dim Login_User As String
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim i, j As Integer
+        Try
+            MKDM = Request("MKDM")
+        Catch ex As Exception
+            MKDM = 0
+        End Try
+
+        Try
+            LCDM = Request("LCDM")
+        Catch ex As Exception
+            LCDM = 0
+        End Try
+
+        If LCDM = 0 And MKDM = 0 Then
+            Response.Write("参数错误或非法访问")
+            Response.End()
+        End If
+
+        If LCDM = 0 Then
+            '得到LCDM
+            Dim dt As DataTable
+            dt = Base.DB.Table("Select NoLCDM from GY_MKXX where MKDM=" & MKDM, "123")
+            If dt.Rows.Count <= 0 Then
+                Base.Js.alert(Me, "功能不存在，可能已经被删除")
+                Response.End()
+            End If
+            LCDM = dt.Rows(0)("NoLCDM")
+        End If
+
+
+        Dim tb As New Data.DataTable
+        Dim tb1 As New Data.DataTable
+
+        '映射初始化
+        Dim MapXpath As String
+        tb = Base.DB.Table("SELECT MKDM,XsnDir,MKMC,MapXpath FROM GY_MKXX WHERE  MKDM =" & MKDM, "GY_LCDM")
+        If tb.Rows.Count <> 0 Then
+            XsnDir = tb.Rows(0).Item(1).ToString.Trim
+            MKMC = tb.Rows(0).Item(2).ToString.Trim
+            MapXpath = tb.Rows(0)("MapXpath").ToString.Trim
+
+            Conn.SelectParameters("MKDM").DefaultValue = MKDM
+            SqlDataSource1.SelectParameters("MKDM").DefaultValue = MKDM
+
+            filename = Server.MapPath("../../") & "TemplateLibrary\" & XsnDir & "\template.xml"
+            If IO.File.Exists(filename) = False Then
+                Base.Js.alert(Me, "模板存问题,请刷新模板!")
+                Exit Sub
+            End If
+            Dim node As XmlNode = Base.XmlClass.GetXmlFile(filename)
+            
+            If Page.IsPostBack = False Then
+                loadmkmc()
+                loadlist2()
+                Dim ListNodeName As String()
+                Try
+                    ListNodeName = Base.XmlClass.GetNodeNameList(node.ChildNodes(0))
+                Catch ex As Exception
+                    Base.Js.alert(Me, "模板存在问题,请不要最外的重复节添加节点.请修改模板重,重新上传并重新建功能.")
+                    Exit Sub
+                End Try
+                DropDownList4.DataSource = ListNodeName
+                DropDownList1.DataSource = ListNodeName
+                DropDownList2.DataSource = ListNodeName
+                DropDownList3.DataSource = ListNodeName
+
+                DropDownList4.DataBind()
+                DropDownList1.DataBind()
+                DropDownList2.DataBind()
+                DropDownList3.DataBind()
+                '恢复二维映映节点
+                If MapXpath.Trim.Length > 0 Then
+                    For i = 0 To DropDownList4.Items.Count - 1
+                        If DropDownList4.Items(i).Text.ToString.Replace("<", "").Replace(">", "") = MapXpath Then
+                            DropDownList4.SelectedIndex = i
+                            Exit For
+                        End If
+                    Next
+                End If
+                '恢复统计节点
+                tb = Base.DB.Table("Select MapExtName from MapConfig Where IsTotal = 2 and MKDM=" & MKDM, "d")
+                If tb.Rows.Count > 0 Then
+                    For i = 0 To DropDownList4.Items.Count - 1
+                        If DropDownList3.Items(i).Text.ToString.Replace("<", "").Replace(">", "") = tb.Rows(0).Item(0) Then
+                            DropDownList3.SelectedIndex = i
+                            Exit For
+                        End If
+                    Next
+                End If
+            End If
+        Else
+        End If
+
+
+
+        '这里判断LCDM是否有流程
+        tb = Base.DB.Table("SELECT LCMC,LCSM,Flag FROM GY_LCDM where LCDM=" & LCDM, "GY_LCDM")
+        If tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "功能模板有问题!")
+            Response.End()
+        Else
+            If IsDBNull(tb.Rows(0).Item(2)) = True Then
+                LcFlag = True
+            Else
+                If tb.Rows(0).Item(2) = 0 Then              ' Flag=1表示无流程
+                    LcFlag = True
+                Else
+                    LcFlag = False
+                End If
+            End If
+        End If
+        Dim FirstMKDM As Integer = 0
+        If Page.IsPostBack = False Then
+            If LcFlag = False Then
+                '得到无流程的情况下的模块信息里的INFOPATH模板名.
+                tb = Base.DB.Table("select NoLcDM,XsnDir,MKMC,MKDM from [GY_MKXX] where NoLcDM = " & LCDM, "GY_MKXX")
+                If tb.Rows.Count <= 0 Then
+                    Base.Js.alert(Me, "功能模板有问题!")
+                    Exit Sub
+                End If
+                FirstMKDM = tb.Rows(0).Item("MKDM")
+                FormList.Items.Add(New ListItem(tb.Rows(0).Item("MKMC").ToString.Trim, tb.Rows(0).Item("MKDM").ToString.Trim))
+            Else
+                '在有流程的情况找到模块的信息里的INFOPATH模板名
+                tb = Base.DB.Table("SELECT XMZT FROM GY_XMZT WHERE LCDM = " & LCDM, "GY_XMZT")
+                If tb.Rows.Count = 0 Then
+                    Base.Js.closestr(Me, "该流程未找到状态.无法编辑显示列,你先添加状态!")
+                    Exit Sub
+                End If
+
+                For j = 0 To tb.Rows.Count - 1
+                    tb1 = Base.DB.Table("SELECT NoLcDM, XsnDir,MKMC,GY_MKXX.MKDM FROM GY_MKXX,GY_ZTMX WHERE GY_ZTMX.MKDM =GY_MKXX.MKDM  and XMZT = " & tb.Rows(j).Item(0), "d")
+                    For i = 0 To tb1.Rows.Count - 1
+                        FormList.Items.Add(New ListItem(tb1.Rows(i).Item("MKMC").ToString.Trim, tb1.Rows(i).Item("MKDM").ToString.Trim))
+                        If i = 0 And j = 0 Then FirstMKDM = tb1.Rows(i).Item("MKDM")
+                    Next
+                Next
+                If FirstMKDM = 0 Then
+                    Base.Js.closestr(Me, "状态中无功能，请先添加功能!")
+                    Exit Sub
+                End If
+            End If
+            ResetFormNode(FirstMKDM)
+        End If
+
+
+
+        If Page.IsPostBack = False Then
+            '恢复原来的字段样式
+            tb = Base.DB.Table("select LCDM,ShowName,NodeName,FormName from ShowList_LCDM where LCDM = " & LCDM & " order by ID ", "ShowList_LCDM")
+            If tb.Rows.Count = 0 Then
+                For i = 0 To NodeName.Items.Count - 1
+                    If i > 2 Then Exit Sub
+                    Dim Index As Integer = NodeName.Items(i).Text.LastIndexOf(":")
+                    ListBox1.Items.Add(NodeName.Items(i).Text.Substring(Index + 1).Replace("<", "").Replace(">", "") & "   |   " & NodeName.Items(i).Text & "   |   " & FormList.SelectedValue)
+                Next
+            Else
+                For i = 0 To tb.Rows.Count - 1
+                    ListBox1.Items.Add(tb.Rows(i).Item(1).ToString.Trim & "   |   " & tb.Rows(i).Item(2).ToString.Trim & "   |   " & tb.Rows(i).Item("Formname").ToString.Trim)
+                Next
+            End If
+        End If
+        Button4.Attributes.Add("onclick", "return confirm('你确定保存吗？　如果原来存在样式，系统将清除原来的显示样式！')")
+    End Sub
+
+    Protected Sub ListAdd_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles ListAdd.Click
+        If ShowName.Text.Trim.Length = 0 Then
+            Base.Js.alert(Me, "请输入要显示字段的名称．")
+            Exit Sub
+        End If
+        ListBox1.Items.Add(ShowName.Text.Trim & "   |   " & NodeName.SelectedItem.Text & "   |   " & FormList.SelectedValue)
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim TempIndex As Integer = ListBox1.SelectedIndex
+        If TempIndex = -1 Then
+            Base.Js.alert(Me, "你没有选中任何行")
+            Exit Sub
+        End If
+
+        If TempIndex = 0 Then
+            Base.Js.alert(Me, "你所选中的内容已经是第一条记录了,不能再向上移了")
+            Exit Sub
+        End If
+        '开始交换数据
+        Dim TempString As String
+        TempString = ListBox1.Items(TempIndex - 1).Text
+        ListBox1.Items(TempIndex - 1).Text = ListBox1.Items(TempIndex).Text
+        ListBox1.Items(TempIndex).Text = TempString
+        '复位到原来选中的那条记录
+        ListBox1.SelectedIndex = TempIndex - 1
+    End Sub
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+        Dim TempIndex As Integer = ListBox1.SelectedIndex
+        If TempIndex = -1 Then
+            Base.Js.alert(Me, "你没有选中任何行")
+            Exit Sub
+        End If
+
+        If TempIndex = ListBox1.Items.Count - 1 Then
+            Base.Js.alert(Me, "你所选中的内容已经是最后一条记录了,不能再向下移了")
+            Exit Sub
+        End If
+        '开始交换数据
+        Dim TempString As String
+        TempString = ListBox1.Items(TempIndex + 1).Text
+        ListBox1.Items(TempIndex + 1).Text = ListBox1.Items(TempIndex).Text
+        ListBox1.Items(TempIndex).Text = TempString
+        '复位到原来选中的那条记录
+        ListBox1.SelectedIndex = TempIndex + 1
+    End Sub
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+        Dim TempIndex As Integer = ListBox1.SelectedIndex
+        If TempIndex = -1 Then
+            Base.Js.alert(Me, "你没有选中任何行")
+            Exit Sub
+        End If
+        ListBox1.Items.RemoveAt(TempIndex)      '移除
+    End Sub
+
+    Protected Sub Button4_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button4.Click
+        Dim i As Integer
+        Dim TempString As String()
+        '先清除原来的显示样式　
+        Dim TmpFormName As String = ""
+        Base.DB.Query("delete ShowList_LCDM where LCDM = " & LCDM)
+        For i = 0 To ListBox1.Items.Count - 1
+            TempString = ListBox1.Items(i).Text.Split("|")
+            If TempString.Length = 3 Then
+                TmpFormName = TempString(2)
+            Else
+                TmpFormName = ""
+            End If
+            Try
+                Base.DB.Query("insert into ShowList_LCDM(LCDM,ShowName,NodeName,FormName) values(" & LCDM & ",'" & TempString(0).Trim & "','" & TempString(1).Trim & "','" & TmpFormName & "')")
+            Catch ex As Exception
+            End Try
+
+            Dim tb As New Data.DataTable
+            Dim TempStr As String = TempString(1).Trim.Replace("<", "").Replace(">", "")
+            tb = Base.DB.Table("Select AID from MapConfig Where (IsTotal is null or IsTotal =0 ) and MapExtName='" & TempStr & "' and  MKDM=" & MKDM, "dd")
+            CreateMapTables()       '建表
+            If tb.Rows.Count <= 0 Then
+                Base.DB.Query("INSERT INTO MapConfig ([MKDM],[MapExtName],IsTotal) VALUES(" & MKDM & " ,'" & TempStr & "',0)")
+
+                Base.DB.Query("ALTER TABLE " & MKMC & "_MapExt ADD " & TempStr.Replace(":", "") & " nvarchar(100) NULL")          '类里面已经做了容错处理.
+            End If
+
+        Next
+        GridView1.DataBind()
+        Base.Js.alert(Me, "已经保存成功.")
+    End Sub
+
+    Protected Sub FormList_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles FormList.SelectedIndexChanged
+        ResetFormNode(FormList.SelectedValue)
+        FormList.DataBind()
+    End Sub
+
+    ''' <summary>
+    ''' 重设表单节点列表
+    ''' </summary>
+    ''' <remarks></remarks>
+    Sub ResetFormNode(ByVal MKDM As String)
+        Dim FormName As String
+        Dim Row As DataRow = Base.DB.Row("select XsnDir,MKMC,MKDM from [GY_MKXX] where MKDM = " & MKDM, "dd")
+        If Row Is Nothing Then
+            NodeName.Items.Clear()
+            Exit Sub
+        Else
+            FormName = Row.Item("XsnDir").ToString.Trim
+            Dim filename As String = Server.MapPath("../../") & "TemplateLibrary\" & FormName & "\template.xml"
+            If IO.File.Exists(filename) = False Then
+                Base.Js.alert(Me, "模板存问题,请刷新模板!")
+                Exit Sub
+            End If
+            Dim node As XmlNode = Base.XmlClass.GetXmlFile(filename)
+            Dim ListNodeName As String()
+            Try
+                ListNodeName = Base.XmlClass.GetNodeNameList(node.ChildNodes(0))
+            Catch ex As Exception
+                Base.Js.alert(Me, "模板存在问题,请不要最外的重复节添加节点.请修改模板重,重新上传并重新建功能.")
+                Exit Sub
+            End Try
+            NodeName.DataSource = ListNodeName
+            NodeName.DataBind()
+        End If
+    End Sub
+
+    Sub CreateMapTables()
+        '先建立映射表
+        Dim TempSql As String = String.Empty
+        TempSql += "CREATE TABLE [dbo].[" & MKMC & "_Mapping](" & vbCrLf
+        TempSql += "[AID] [numeric](18, 0) IDENTITY(1,1) NOT NULL," & vbCrLf
+        TempSql += "[FID] [numeric](18, 0) NULL )" & vbCrLf
+        Try
+            Base.DB.Query(TempSql)
+        Catch ex As Exception
+            '表示此表已经存在
+            Base.Js.alert(Me, ex.ToString)
+        End Try
+
+        '建立扩展映射表
+        TempSql = "CREATE TABLE [dbo].[" & MKMC & "_MapExt](" & vbCrLf
+        TempSql += "[AID] [numeric](18, 0) IDENTITY(1,1) NOT NULL," & vbCrLf
+        TempSql += "[FID] [numeric](18, 0) NULL," & vbCrLf
+        TempSql += "[my状态] [nvarchar](100) NULL)" '状态，用于筛选
+        Try
+            Base.DB.Query(TempSql)
+        Catch ex As Exception
+            '表示此表已经存在
+            Base.Js.alert(Me, ex.ToString)
+        End Try
+
+        '建立映射统计表
+        TempSql = "CREATE TABLE [dbo].[" & MKMC & "_MapTotal](" & vbCrLf
+        TempSql += "[AID] [numeric](18, 0) IDENTITY(1,1) NOT NULL," & vbCrLf
+        TempSql += "[Total] [numeric](18, 2) NULL )" & vbCrLf
+        Try
+            Base.DB.Query(TempSql)
+        Catch ex As Exception
+            '表示此表已经存在
+            Base.Js.alert(Me, ex.ToString)
+        End Try
+    End Sub
+
+    Protected Sub Button5_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button5.Click
+        Dim tb As New Data.DataTable
+        Dim TempStr As String = DropDownList1.SelectedItem.Text.Trim.Replace("<", "").Replace(">", "")
+        tb = Base.DB.Table("Select AID from MapConfig Where (IsTotal is null or IsTotal =0 ) and MapExtName='" & TempStr & "' and  MKDM=" & MKDM, "dd")
+        If tb.Rows.Count <= 0 Then
+            Base.DB.Query("INSERT INTO MapConfig ([MKDM],[MapExtName],IsTotal) VALUES(" & MKDM & " ,'" & TempStr & "',0)")
+            CreateMapTables()       '建表
+            Base.DB.Query("ALTER TABLE " & MKMC & "_MapExt ADD " & TempStr.Replace(":", "") & " nvarchar(100) NULL")          '类里面已经做了容错处理.
+        End If
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub Button8_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button8.Click
+        Dim tb As New Data.DataTable
+        Dim TempStr As String = DropDownList2.SelectedItem.Text.Trim.Replace("<", "").Replace(">", "")
+        tb = Base.DB.Table("Select AID from MapConfig Where IsTotal = 1 and MapExtName='" & TempStr & "' and  MKDM=" & MKDM, "dd")
+        If tb.Rows.Count <= 0 Then
+            Base.DB.Query("INSERT INTO MapConfig ([MKDM],[MapExtName],IsTotal) VALUES(" & MKDM & " ,'" & TempStr & "',1)")
+            CreateMapTables()       '建表
+            Base.DB.Query("ALTER TABLE " & MKMC & "_MapTotal ADD " & TempStr.Replace(":", "") & " nvarchar(100) NULL")          '类里面已经做了容错处理.
+        End If
+
+        GridView2.DataBind()
+    End Sub
+
+    Protected Sub Button7_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button7.Click
+        Dim tb As New Data.DataTable
+        Dim TempStr As String = DropDownList3.SelectedItem.Text.Trim.Replace("<", "").Replace(">", "")
+        tb = Base.DB.Table("Select AID from MapConfig Where IsTotal = 2 and MapExtName='" & TempStr & "' and  MKDM=" & MKDM, "dd")
+        If tb.Rows.Count <= 0 Then
+            Base.DB.Query("INSERT INTO MapConfig ([MKDM],[MapExtName],IsTotal) VALUES(" & MKDM & " ,'" & TempStr & "',2)")
+        End If
+    End Sub
+
+    Protected Sub Button6_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button6.Click
+        Dim TempNodeName As String = DropDownList4.SelectedItem.Text.Trim.Replace("<", "").Replace(">", "")
+        Base.DB.Query("update GY_MKXX set  MapXpath='" & TempNodeName & "' where MKDM=" & MKDM)
+
+        CreateMapTables()       '建表
+
+        Dim TempSql As String
+        Dim i As Integer
+        Dim node As XmlNode = Base.XmlClass.GetXmlFile(filename)
+        Dim Node2 As XmlNode = Base.XmlClass.FindNode("//" & TempNodeName)
+        If Not Node2 Is Nothing Then
+            '添加字段.
+            For i = 0 To Node2.ChildNodes.Count - 1
+                TempSql = "ALTER TABLE " & MKMC & "_Mapping ADD " & Node2.ChildNodes(i).Name.Replace(":", "") & " nvarchar(100) NULL"
+                Base.DB.Query(TempSql)          '类里面已经做了容错处理.
+            Next
+        End If
+        Base.Js.alert(Me, "设置成功", "ShowListModify.aspx?MKDM=" & MKDM)
+    End Sub
+
+    Protected Sub GridView1_RowDeleting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs) Handles GridView1.RowDeleting
+        Dim CurID As Integer = GridView1.DataKeys(e.RowIndex).Item(0)
+        Dim TempName As String = GridView1.DataKeys(e.RowIndex).Item(1)
+        Conn.DeleteCommand = "Delete from MapConfig where AID=" & CurID
+        Conn.Delete()
+        Base.DB.Query("ALTER TABLE " & MKMC & "_MapExt DROP COLUMN " & TempName.Replace(":", ""))
+
+    End Sub
+
+    Protected Sub GridView2_RowDeleting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs) Handles GridView2.RowDeleting
+        '映射统计节点的删除 
+        Dim CurID As Integer = GridView2.DataKeys(e.RowIndex).Item(0)
+        Dim TempName As String = GridView2.DataKeys(e.RowIndex).Item(1)
+        SqlDataSource1.DeleteCommand = "Delete from MapConfig where AID=" & CurID
+        SqlDataSource1.Delete()
+        Base.DB.Query("ALTER TABLE " & MKMC & "_MapTotal DROP COLUMN " & TempName.Replace(":", ""))
+    End Sub
+
+    Protected Sub Button9_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button9.Click
+
+        Dim dt As New DataTable
+        dt = Base.DB.Table("select * from SynSubmit where fid = " & MKDM & " and ftype like '同步显示列%' and issyn = 0", "dd") '查看库里是不是已经有了一个同步的过程
+        If dt.Rows.Count > 0 Then
+            Base.Js.alert(Me, "同步中...请勿重复递交...")
+        Else
+            Base.DB.Query("Insert into [SynSubmit](FID,[Ftype]) values(" & MKDM & ",'" & Base.SqlFilter("同步显示列|" & MKMC) & "')")
+            If Base.DB.ErrorMessage = Nothing Then
+                Base.Js.alert(Me, "已递交同步...后台正在处理...请稍候..")
+            End If
+        End If
+        'Dim dt As New DataTable
+        'If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+        '    dt = Base.DB.Table("select * from SynSubmit where fid = " & MKDM & " and ftype like '同步XML库%' and issyn = 0", "dd") '查看库里是不是已经有了一个同步的过程
+        '    If dt.Rows.Count > 0 Then
+        '        Base.Js.alert(Me, "同步中...请勿重复递交...")
+        '    Else
+        '        Base.DB.Query("Insert into [SynSubmit](FID,[Ftype]) values(" & MKDM & ",'" & Base.SqlFilter("同步XML库|" & MKMC) & "')")
+        '        If Base.DB.ErrorMessage = Nothing Then
+        '            Base.Js.alert(Me, "已递交同步...后台正在处理...请稍候..")
+        '        End If
+        '    End If
+        'Else
+        '    Dim sqlstr As String = "SELECT XX_XMJC.FID,GY_XMXX.XMDM,XX_XMJC.state FROM GY_XMXX,XX_XMJC where XX_XMJC.MKDM = " & MKDM & " and XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null)  and (state<>-100 or state is null and state<>-17 )"
+        '    dt = Base.DB.Table(sqlstr, "tt")
+        '    If dt.Rows.Count > 0 Then
+        '        Dim i As Integer = 0
+        '        For i = 0 To dt.Rows.Count - 1
+        '            Base.DB.Query("Insert into [SynSubmit](FID,[Ftype]) values(" & dt.Rows(i).Item("FID") & ",'提交')")
+        '        Next
+
+        '        Base.Js.alert(Me, "已递交同步...后台正在处理...请稍候..")
+        '    End If
+
+        'End If
+
+        'dt = Base.DB.Table("select * from SynSubmit where fid = " & MKDM & " and ftype like '同步库%' and issyn = 0", "dd") '查看库里是不是已经有了一个同步的过程
+        'If dt.Rows.Count > 0 Then
+        '    Base.Js.alert(Me, "同步中...请勿重复递交...")
+        'Else
+        '    Base.DB.Query("Insert into [SynSubmit](FID,[Ftype]) values(" & MKDM & ",'" & Base.SqlFilter("同步库|" & MKMC) & "')")
+        '    If Base.DB.ErrorMessage = Nothing Then
+        '        Base.Js.alert(Me, "已递交同步...后台正在处理...请稍候..")
+        '    End If
+        'End If
+    End Sub
+
+    Protected Sub Button10_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button10.Click
+        Dim dt As New DataTable
+        dt = Base.DB.Table("select * from SynSubmit where fid = " & MKDM & " and ftype like '同步XML库%' and issyn = 0", "dd") '查看库里是不是已经有了一个同步的过程
+        If dt.Rows.Count > 0 Then
+            Base.Js.alert(Me, "同步中...请勿重复递交...")
+        Else
+            Base.DB.Query("Insert into [SynSubmit](FID,[Ftype]) values(" & MKDM & ",'" & Base.SqlFilter("同步XML库|" & MKMC) & "')")
+            If Base.DB.ErrorMessage = Nothing Then
+                Base.Js.alert(Me, "已递交同步...后台正在处理...请稍候..")
+            End If
+        End If
+    End Sub
+
+    Protected Sub Button11_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button11.Click
+        Dim dt As New DataTable
+        dt = Base.DB.Table("select * from SynSubmit where fid = " & MKDM & " and ftype like '同步SQL库%' and issyn = 0", "dd") '查看库里是不是已经有了一个同步的过程
+        If dt.Rows.Count > 0 Then
+            Base.Js.alert(Me, "同步中...请勿重复递交...")
+        Else
+            Base.DB.Query("Insert into [SynSubmit](FID,[Ftype]) values(" & MKDM & ",'" & Base.SqlFilter("同步SQL库|" & MKMC) & "')")
+            If Base.DB.ErrorMessage = Nothing Then
+                Base.Js.alert(Me, "已递交同步...后台正在处理...请稍候..")
+            End If
+        End If
+    End Sub
+
+    Protected Sub Button12_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button12.Click
+        Dim dt As New DataTable
+        dt = Base.DB.Table("select * from SynSubmit where fid = " & MKDM & " and ftype like '同步查询数据%' and issyn = 0", "dd") '查看库里是不是已经有了一个同步的过程
+        If dt.Rows.Count > 0 Then
+            Base.Js.alert(Me, "同步中...请勿重复递交...")
+        Else
+            Base.DB.Query("Insert into [SynSubmit](FID,[Ftype]) values(" & MKDM & ",'" & Base.SqlFilter("同步查询数据|" & MKMC) & "')")
+            If Base.DB.ErrorMessage = Nothing Then
+                Base.Js.alert(Me, "已递交同步...后台正在处理...请稍候..")
+            End If
+        End If
+    End Sub
+
+    Private Sub loadmkmc()
+        Dim dt As New Data.DataTable
+        dt = Base.DB.Table("select nolcdm,mkmc from GY_MKXX where nolcdm>0", "dd")
+        DropDownList5.DataTextField = "mkmc"
+        DropDownList5.DataValueField = "nolcdm"
+        DropDownList5.DataSource = dt
+        DropDownList5.DataBind()
+
+    End Sub
+
+    Protected Sub btnfjadd_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnfjadd.Click
+        Try
+            If txtfjname.Text.Trim.Length < 0 Then
+                Base.Js.alert(Me, "名称不能为空")
+                Exit Sub
+            End If
+            Dim lcdm_link As String = ""
+            Dim showname As String = ""
+            Dim columnname As String = ""
+            lcdm_link = DropDownList5.SelectedValue
+            showname = txtfjname.Text
+            columnname = txtshowcol.Text
+            Base.DB.Query("insert into MapConfig_link(mkdm,lcdm_link,showname,columnname) values(" & Base.SqlFilter(MKDM) & ",'" & Base.SqlFilter(lcdm_link) & "','" & Base.SqlFilter(showname) & "','" & Base.SqlFilter(columnname) & "')")
+            ListBox2.Items.Add(showname & "|" & lcdm_link & "|" & columnname & "")
+        Catch ex As Exception
+            Base.Js.alert(Me, "保存失败")
+        End Try
+        Base.Js.alert(Me, "保存成功")
+    End Sub
+
+    Private Sub loadlist2()
+        Dim dt As New DataTable
+        dt = Base.DB.Table("select showname,lcdm_link,columnname from MapConfig_link where mkdm=" & MKDM & " order by IsTotal", "22")
+        If dt.Rows.Count > 0 Then
+            Dim i As Integer
+            For i = 0 To dt.Rows.Count - 1
+                ListBox2.Items.Add(dt.Rows(i)("showname").ToString & "|" & dt.Rows(i)("lcdm_link").ToString & "|" & dt.Rows(i)("columnname").ToString & "")
+            Next
+
+        End If
+    End Sub
+
+    Protected Sub btndown_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btndown.Click
+        Dim TempIndex As Integer = ListBox2.SelectedIndex
+        If TempIndex = -1 Then
+            Base.Js.alert(Me, "你没有选中任何行")
+            Exit Sub
+        End If
+
+        If TempIndex = ListBox2.Items.Count - 1 Then
+            Base.Js.alert(Me, "你所选中的内容已经是最后一条记录了,不能再向下移了")
+            Exit Sub
+        End If
+        '开始交换数据
+        Dim TempString As String
+        TempString = ListBox2.Items(TempIndex + 1).Text
+        ListBox2.Items(TempIndex + 1).Text = ListBox2.Items(TempIndex).Text
+        ListBox2.Items(TempIndex).Text = TempString
+        '复位到原来选中的那条记录
+        ListBox2.SelectedIndex = TempIndex + 1
+    End Sub
+
+    Protected Sub btnup_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnup.Click
+        Dim TempIndex As Integer = ListBox2.SelectedIndex
+        If TempIndex = -1 Then
+            Base.Js.alert(Me, "你没有选中任何行")
+            Exit Sub
+        End If
+
+        If TempIndex = 0 Then
+            Base.Js.alert(Me, "你所选中的内容已经是第一条记录了,不能再向上移了")
+            Exit Sub
+        End If
+        '开始交换数据
+        Dim TempString As String
+        TempString = ListBox2.Items(TempIndex - 1).Text
+        ListBox2.Items(TempIndex - 1).Text = ListBox2.Items(TempIndex).Text
+        ListBox2.Items(TempIndex).Text = TempString
+        '复位到原来选中的那条记录
+        ListBox2.SelectedIndex = TempIndex - 1
+    End Sub
+
+    Protected Sub btndel_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btndel.Click
+        Dim TempIndex As Integer = ListBox2.SelectedIndex
+        If TempIndex = -1 Then
+            Base.Js.alert(Me, "你没有选中任何行")
+            Exit Sub
+        End If
+        ListBox2.Items.RemoveAt(TempIndex)      '移除
+    End Sub
+
+    Protected Sub btnsave_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnsave.Click
+        Dim lcdm_link As String = ""
+        Dim showname As String = ""
+        Dim columnname As String = ""
+        Dim i As Integer
+        Dim TempString As String()
+        Base.DB.Query("delete MapConfig_link where MKDM = " & MKDM)
+        For i = 0 To ListBox2.Items.Count - 1
+            TempString = ListBox2.Items(i).Text.Split("|")
+            lcdm_link = TempString(1)
+            showname = TempString(0)
+            columnname = TempString(2)
+            Base.DB.Query("insert into MapConfig_link(mkdm,lcdm_link,showname,IsTotal,columnname) values(" & Base.SqlFilter(MKDM) & ",'" & Base.SqlFilter(lcdm_link) & "','" & Base.SqlFilter(showname) & "'," & i & ",'" & Base.SqlFilter(columnname) & "')")
+        Next
+    End Sub
+End Class

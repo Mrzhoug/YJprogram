@@ -1,0 +1,54 @@
+INPUT {
+	HEIGHT: 22px
+}
+BODY {
+	FONT-WEIGHT: normal; FONT-SIZE: 9pt; LINE-HEIGHT: 14px; FONT-STYLE: normal; TEXT-DECORATION: none
+}
+P {
+	FONT-WEIGHT: normal; FONT-SIZE: 9pt; FONT-STYLE: normal
+}
+A {
+	FONT-WEIGHT: normal; FONT-SIZE: 9pt; COLOR: #000000; FONT-STYLE: normal; TEXT-DECORATION: none
+}
+A:visited {
+	FONT-WEIGHT: normal; FONT-SIZE: 9pt; FONT-STYLE: normal; TEXT-DECORATION: none
+}
+A:active {
+	FONT-WEIGHT: normal; FONT-SIZE: 9pt; COLOR: red; FONT-STYLE: normal; TEXT-DECORATION: none
+}
+A:hover {
+	FONT-WEIGHT: normal; COLOR: #ff3300; FONT-STYLE: normal; TEXT-DECORATION: underline
+}
+EM {
+	FONT-WEIGHT: normal; FONT-SIZE: 9pt; TEXT-TRANSFORM: none; FONT-STYLE: normal
+}
+I {
+	FONT-WEIGHT: bold; FONT-SIZE: 9pt; FONT-STYLE: italic; FONT-FAMILY: Arial
+}
+BIG {
+	FONT: bold 13pt Times New Roman
+}
+B {
+	FONT-WEIGHT: bold; FONT-SIZE: 9pt; TEXT-DECORATION: none
+}
+TD {
+	FONT-WEIGHT: normal; FONT-SIZE: 9pt; FONT-STYLE: normal
+}
+STRONG {
+	FONT-WEIGHT: bold; FONT-SIZE: 9pt; FONT-FAMILY: "Arial"; TEXT-DECORATION: none
+}
+.doc_txt {
+	BORDER-RIGHT: rgb(255,255,255) 1px solid; BORDER-TOP: rgb(255,255,255) 1px solid; FONT-WEIGHT: normal; BACKGROUND: white; BORDER-LEFT: rgb(255,255,255) 1px solid; COLOR: #000000; BORDER-BOTTOM: 1px solid; FONT-FAMILY: "宋体" FONT-SIZE: 12px
+}
+.doc_txt1 {
+	BORDER-RIGHT: rgb(255,255,255) 1px solid; BORDER-TOP: rgb(255,255,255) 1px solid; FONT-WEIGHT: normal; BACKGROUND: white; BORDER-LEFT: rgb(255,255,255) 1px solid; COLOR: #000000; BORDER-BOTTOM: 1px solid; FONT-FAMILY: "宋体" FONT-SIZE: 12px; TEXT-ALIGN: center
+}
+.doc_txt2 {
+	BORDER-RIGHT: 1px solid; BORDER-TOP: 1px solid; FONT-WEIGHT: normal; BACKGROUND: white; BORDER-LEFT: 1px solid; COLOR: #000000; BORDER-BOTTOM: 1px solid; FONT-FAMILY: "宋体" FONT-SIZE: 12px
+}
+.doc_title {
+	FONT-SIZE: 12pt; COLOR: red; FONT-FAMILY: 黑体; mso-ascii-font-family: 'Times New Roman'
+}
+SELECT {
+	BORDER-RIGHT: white 1px solid; BORDER-TOP: white 1px solid; FONT-WEIGHT: normal; FONT-SIZE: 12px; BACKGROUND: white; BORDER-LEFT: white 1px solid; COLOR: #000000; BORDER-BOTTOM: 1px solid; FONT-FAMILY: 宋体
+}

@@ -1,0 +1,84 @@
+﻿
+Partial Class HomePage_AnnexManage
+    Inherits System.Web.UI.Page
+    Dim UsName As String
+    Dim Base As New Base
+    Dim CompanyID As Integer
+    Dim UsPath As String
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        If Session("LoginName") = "" Then
+            Base.Js.alert(Me, "你未登陆或是登陆超时，请重新登陆！", "default.aspx")
+            Exit Sub
+        End If
+        UsName = Session("LoginName")
+        Dim tb As New DataTable
+        tb = Base.DB.Table("select YGDM from GY_YGDM where DLMC= '" & Base.SqlFilter(UsName) & "'", "dd")
+        If tb.Rows.Count = 0 Then
+            Response.Write("非法调用")
+            Response.End()
+        Else
+            CompanyID = tb.Rows(0)(0)
+            Conn.SelectParameters("CompanyID").DefaultValue = CompanyID
+        End If
+        TextBox1.Enabled = False
+        UsPath = Request.MapPath("./") & "企业公文包\" & UsName & "\附件"
+
+    End Sub
+
+    Protected Sub DropDownList1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles DropDownList1.SelectedIndexChanged
+        If DropDownList1.SelectedIndex = 2 Then
+            TextBox1.Enabled = True
+        Else
+            TextBox1.Enabled = False
+        End If
+        TextBox1.Text = DropDownList1.SelectedItem.Text
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Base.IO.CreateDir(UsPath)
+        If FileUpload1.PostedFile.ContentLength = 0 Then Exit Sub
+        Base.Upload.Sizes = 1000 * 1024
+        Base.Upload.Path = "./企业公文包/" & UsName & "/附件"
+        Base.Upload.FileType = "jpg|gif|bmp|doc|docx|xls|xlsx"
+        If CheckBox1.Checked = True Then
+            Base.Upload.ReWriteFlag = True      '允许改写
+        Else
+            Base.Upload.ReWriteFlag = False
+        End If
+
+        If Base.Upload.FileSaveAs(FileUpload1) = True Then
+            Base.DB.Query("insert into EP_Annex(CompanyID,AnnexName,AnnexPath) values(" & CompanyID & ",'" & Base.SqlFilter(TextBox1.Text) & "','" & Base.SqlFilter(Base.Upload.ReturnFileName) & "')")
+            Base.Js.alert(Me, "上传成功", "AnnexManage.aspx")
+        Else
+            Base.Js.alert(Me, Base.Upload.ReturnMessage)
+        End If
+
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        Dim Url As String = Request.ServerVariables("Url").ToLower
+        Dim CurrentUrl As String = Url.Replace("annexmanage.aspx", "")
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Cells(0).Text = i + 1
+            GridView1.Rows(i).Cells(2).Text = GridView1.Rows(i).Cells(2).Text.Substring(GridView1.Rows(i).Cells(2).Text.LastIndexOf("/"))
+            GridView1.Rows(i).Cells(4).Text = "<a href='" & CurrentUrl & GridView1.DataKeys(i).Item(0) & "' target='_blank'>查看</a>"
+            CType(GridView1.Rows(i).Cells(5).Controls(0), LinkButton).Attributes.Add("onclick", "return confirm('你确定要删除此附件吗?');")
+            GridView1.Rows(i).Cells(6).Text = "<a href='javascript:void(0)' onclick='javascript:copyurl(""" & GridView1.DataKeys(i).Item(0).ToString.Replace("./", "") & """);'>复制URL</a>"
+        Next
+    End Sub
+
+    Protected Sub GridView1_RowDeleted(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeletedEventArgs) Handles GridView1.RowDeleted
+
+    End Sub
+
+    Protected Sub GridView1_RowDeleting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs) Handles GridView1.RowDeleting
+        Dim Index As Integer = e.RowIndex
+        Base.DB.Query("Delete EP_Annex where Uid=" & GridView1.DataKeys(Index).Item(1))
+        Conn.DeleteCommand = "delete EP_Annex where uid=-1"
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+
+    End Sub
+End Class

@@ -1,0 +1,68 @@
+﻿
+Partial Class manager_FileManager_RenameFolder
+    Inherits System.Web.UI.Page
+
+    Dim FileManager As New FileManager
+    Dim UserInfo As New UserInfo
+
+    Dim folderID As Integer
+    Dim userName As String
+    Dim userID As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Try
+            folderID = Convert.ToInt32(Request.QueryString("folderID"))
+        Catch ex As Exception
+            folderID = 0
+        End Try
+
+
+        If folderID = 0 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+        userName = UserInfo.GetWebUserName()
+        userID = UserInfo.GetUserID(userName)
+
+        '如果为公共文件夹的话，需要判断权限
+        If FileManager.IsPublicFolder(folderID) Then
+            If Not FileManager.GetUserPermission(userID, folderID).CanRename Then
+                Response.Write("您没有重命名该文件夹的权利")
+                Response.End()
+            End If
+        End If
+
+        If Not IsPostBack Then
+
+            tb_folderOldName.Text = FileManager.GetFolderName(folderID)
+
+        End If
+
+
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+
+        Dim newFolderName As String
+        newFolderName = DoFilter.SQLFilter(tb_folderNewName.Text)
+
+
+        If FileManager.IsExistFolder_FolderID(userName, folderID, newFolderName) Then
+            DoJS.alert(Me, "该文件夹名已存在")
+            Return
+        Else
+
+            If FileManager.RenameFolder(folderID, newFolderName) Then
+                DoJS.alert(Me, "修改成功")
+            Else
+                DoJS.alert(Me, "修改失败")
+            End If
+
+        End If
+
+
+
+    End Sub
+End Class

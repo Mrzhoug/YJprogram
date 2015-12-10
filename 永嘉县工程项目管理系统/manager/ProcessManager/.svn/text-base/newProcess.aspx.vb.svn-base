@@ -1,0 +1,58 @@
+﻿
+Partial Class manager_ProcessManager_newProcess
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim dt As New DataTable
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim firstMKDM As String
+        Dim i As Integer
+        If Not IsPostBack Then
+            dt = Base.DB.Table("select NoLcDM,XsnDir,MKMC,MKDM from [GY_MKXX] ", "GY_MKXX")
+            If dt.Rows.Count <= 0 Then
+                Base.Js.alert(Me, "功能模板有问题!")
+                Exit Sub
+            End If
+
+            For i = 0 To dt.Rows.Count - 1
+                FormList.Items.Add(New ListItem(dt.Rows(i).Item("MKMC").ToString.Trim, dt.Rows(i).Item("MKDM").ToString.Trim))
+            Next
+
+            firstMKDM = dt.Rows(0).Item("MKDM")
+
+        End If
+    End Sub
+
+    Protected Sub FormList_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles FormList.SelectedIndexChanged
+        TextBox1.Text = FormList.SelectedItem.Text
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        If TextBox1.Text = "" Then
+            Base.Js.alert(Me, "请填入流程名称")
+            Exit Sub
+        End If
+
+
+        Dim processForm As String = FormList.SelectedItem.Value
+        Dim processName As String = TextBox1.Text
+        Dim Enabled As Integer
+        If isEnable.Checked Then
+            Enabled = 1
+        Else
+            Enabled = 0
+        End If
+        dt = Base.DB.Table("select * from process where processName = '" & processName & "' and processForm = '" & processForm & "'", "dd")
+        If dt.Rows.Count <> 0 Then
+            Base.Js.alert(Me, "该表单已创建流程")
+            Exit Sub
+        End If
+        Dim sqlstr As String = "insert into process(processName,processForm,Enabled) values ('" & processName & "','" & processForm & "'," & Enabled & ")"
+        Base.DB.Query(sqlstr)
+
+        dt = Base.DB.Table("select id from process where processName = '" & processName & "' and processForm = '" & processForm & "'", "dd")
+        Response.Write("<script>window.opener.location.href=window.opener.location.href</script>")
+        Base.Js.alert(Me, "添加成功")
+
+    End Sub
+End Class

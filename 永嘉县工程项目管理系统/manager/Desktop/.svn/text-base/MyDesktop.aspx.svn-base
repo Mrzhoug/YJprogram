@@ -1,0 +1,218 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="MyDeskTop.aspx.vb" Inherits="manager_Desktop_MyDeskTop" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>我的桌面</title>    
+    <link rel="Stylesheet" type="text/css" href="../../App_Themes/StyleSheet.css" />
+    <script type="text/javascript" src="../../Pub/function.js"></script>
+    <style type="text/css">
+        .settings {
+            background-image:url(../../images/Ext.UI/icons/fam/folder_wrench.png);
+        }
+        .nav {
+            background-image:url(../../images/Ext.UI/icons/fam/folder_go.png);
+        }
+    </style>
+    <script type="text/javascript" language="javascript" src="../../Pub/jquery-1.8.0.js"></script>
+    <script type="text/javascript" language="javascript" src="../../Pub/jquery.messager.js"></script>
+
+</head>
+<body>
+    
+    <form id="form1" runat="server">
+        &nbsp;
+        <input id="Button3" type="button" value="编写信息" class="btnsubmit" onclick="WriteSendMessage();" />
+        <input id="Button4" type="button" value="内部信息" class="btnsubmit" onclick="javascript:window.parent.addTab('manager/Desktop/ListSendMessage.aspx','内部信息','shortmessage');" />
+        <input id="Button5" type="button" value="内部公告" class="btnsubmit" onclick="javascript:window.parent.addTab('manager/Desktop/ListPublicMessage.aspx','内部公告','publicmessage');" />
+        <input id="Button6" type="button" value="备 忘 录" class="btnsubmit" onclick="javascript:window.parent.addTab('manager/Desktop/Memorandum.aspx','备忘录','Memorandum');" />
+        <input id="Button7" type="button" value="我的文件" class="btnsubmit" onclick="javascript:window.parent.addTab('manager/Personbag/MyFiles.aspx','我的文件','Bag2');" />
+        <input id="Button8" type="button" value="共享列表" class="btnsubmit" onclick="javascript:window.parent.addTab('manager/Personbag/MyshareFiles.aspx','共享列表','Bag3');" />
+        <input id="Button9" type="button" value="订阅信息" class="btnsubmit" onclick="javascript:window.parent.addTab('manager/Desktop/DYList.aspx','订阅信息','dylist');" />
+        <input id="Button10" type="button" value="审阅信息" class="btnsubmit" onclick="javascript:window.parent.addTab('manager/Desktop/XMSP_List.aspx','审阅信息','xmsplist');" />
+        <input id="button2" type="button" value="已发列表" class="btnsubmit" onclick="javascript:window.parent.addTab('manager/Desktop/SendMessageList.aspx','已发列表','sendmessagelist');" />
+<hr style="width:100%" />        
+    &nbsp;&nbsp;关键字：
+        <asp:TextBox ID="TextBox1" runat="server" Width="200px"></asp:TextBox>&nbsp;
+        <asp:Button ID="Button1" runat="server" Text="查 询" CssClass="btnsubmit" />
+        <asp:Button ID="Button33" runat="server" Text="刷 新" CssClass="btnsubmit" />
+        <asp:Button ID="Button2" runat="server" Text="删除所选" CssClass="btnsubmit" />
+        <asp:Button ID="Button11" runat="server" Text="改变状态"  CssClass="btnsubmit" />
+        <asp:DropDownList ID="DropDownList1" runat="server" AutoPostBack="True">
+            <asp:ListItem>短消息</asp:ListItem>
+            <asp:ListItem>分发</asp:ListItem>
+            <asp:ListItem>审阅</asp:ListItem>
+            <asp:ListItem>订阅</asp:ListItem>
+            <asp:ListItem>公告</asp:ListItem>
+            <asp:ListItem Selected="True">全部</asp:ListItem>
+        </asp:DropDownList>&nbsp;
+        <asp:DropDownList ID="DropDownList2" runat="server" AutoPostBack="True">            
+            <asp:ListItem>全部</asp:ListItem>
+            <asp:ListItem Value='1'>已读</asp:ListItem>
+            <asp:ListItem Value='0' Selected="True">未读</asp:ListItem>
+        </asp:DropDownList>        
+        <br />
+        <br />
+<div id="TempDiv">
+    <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="Cid,Msgkind,LookFlag,Content" DataSourceID="Conn" SkinID="GridViewSkin1" Width="98%" AllowPaging="True">
+        <Columns>
+            <asp:TemplateField HeaderText="序号">
+                <HeaderStyle HorizontalAlign="Center" />
+                <ItemStyle HorizontalAlign="Center" Width="30px" />
+                <HeaderTemplate>
+                    <asp:CheckBox ID="CheckBox1" runat="server" onclick="SelectCheckboxAll(this,'GridView1')" />
+                </HeaderTemplate>
+                <ItemTemplate>
+                    <asp:CheckBox ID="CheckBox1" runat="server" />
+                </ItemTemplate>
+            </asp:TemplateField>
+            <asp:TemplateField>
+                <ItemStyle VerticalAlign="Middle" Width="18px" />
+            </asp:TemplateField>
+            <asp:BoundField DataField="Title" HeaderText="标题" SortExpression="Title" ReadOnly="True" >
+                <ItemStyle HorizontalAlign="Center" Width="30%" />
+            </asp:BoundField>
+            
+            <asp:BoundField DataField="FromID" HeaderText="来源" ReadOnly="True">
+                <ItemStyle HorizontalAlign="Center" Width="20%" />
+            </asp:BoundField>
+            <asp:BoundField DataField="SendDate" HeaderText="日期" SortExpression="SendDate" ReadOnly="True" >
+                <HeaderStyle HorizontalAlign="Center" />
+                <ItemStyle HorizontalAlign="Center" Width="15%" />
+            </asp:BoundField>
+            <asp:BoundField DataField="Msgkind" HeaderText="消息类型" SortExpression="Msgkind" ReadOnly="True">
+                <ItemStyle HorizontalAlign="Center" Width="8%" />
+            </asp:BoundField>
+
+            <asp:BoundField DataField="BZ" HeaderText="备注" SortExpression="BZ" NullDisplayText="无" >
+                <ItemStyle HorizontalAlign="Center" Width="13%" />
+            </asp:BoundField>
+            <asp:CommandField ShowEditButton="True" EditText="编辑备注"  >
+                <ItemStyle Width="80px" />
+            </asp:CommandField>
+            <asp:CommandField ShowSelectButton="True" Visible="False" />
+            
+        </Columns>
+        <HeaderStyle HorizontalAlign="Center" />
+        <PagerSettings Visible="False" />
+    </asp:GridView>
+    <table align="center" width="98%" height="26" valign="middle" bgcolor="#EBECEE" ><tr><td id="PageBar" runat="server" align="center"></td></tr></table>
+</div>
+    <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+        SelectCommand="" 
+        UpdateCommand=""
+        >
+    </asp:SqlDataSource>
+    <BGSOUND id="snd" loop="1" src="">
+    </form>
+    
+<script language="javascript" type="text/javascript">
+    initXMLHttp();
+    MyTimer();
+    //getUndoNum();
+    var msgcount = 0;
+    function MyTimer()
+    {
+    	var obj =window.parent.document.getElementById("statbar");
+        var stat = "";
+        stat = GetStreamFile("../../Menu/Online.aspx?" + Math.random());
+        var tmp;
+        tmp = stat.split("|");
+        if (tmp.length <3)
+        {
+            //表示返回值错误,退出
+        }
+        else
+        {
+            var tmpstr = "";
+            if(tmp[0].Trim() == "登出")
+            {
+                var newURL = "../../Logout.aspx";
+                parent.location=newURL;
+            }
+            if (tmp[1].Trim()!="0") 
+            {
+                if (GetCookie("Sunfun_RemindType") == 2) {
+
+                    $.ajax({
+                        type: "post",
+                        url: "../../Menu/MsgDialog.aspx",
+                        data: null,
+                        success: function (msg) {
+                            if (msg != 0) {                                
+                                msgcount = parseInt(msg) + parseInt(msgcount);
+//                                $("#message").remove();
+//                                $.messager.anim('fade', 1000);
+//                                $.messager.show(0, "你有" + msgcount + "条新消息！");
+//                                setTimeout("setTitle1(0)", "1000");
+                            }
+
+                        }
+                    });
+                    
+                }
+                else {
+                    tmpstr = "<a href=\"javascript:window.parent.showdesktop('manager/Desktop/MyDesktop.aspx','信息中心','desktop');\"><img src='Menu/images/SMS.gif' border=0></a>";
+                    if (tmp[2] != CurrentCount) {
+                        ReloadDesktop();              //如果最新的记录与当前显示的记录不一样。则刷新页面。
+                    }
+                }
+            }
+            tmpstr = tmpstr + "<a href='#' onclick='opendialwin()'><img src='images/user.gif' border='0' title='设置' /></a><a href=\"javascript:window.parent.addTab('Menu/OnLinePerson.aspx','在线人员列表','OnLinePerson');\"><span style='font-size:10pt; color:Black;text-decoration: none;vertical-align:text-top'>在线人数</span></a><span style='color:red;font-size:11pt;vertical-align:top'>:" + tmp[0].Trim() + "</font>"; 
+            obj.innerHTML = tmpstr;
+            var timer=setTimeout("MyTimer()",(GetCookie("Sunfun_RefreshTime"))==null?30000:GetCookie("Sunfun_RefreshTime"));
+        }
+    }
+
+
+    
+//    function getUndoNum() {
+//        $.ajax({
+//            type: "post",
+//            url: "../../Menu/MsgDialog.aspx?type=undo",
+//            data: null,
+//            success: function (msg) {
+//                if (msg != 0) {
+//                    
+//                    $("#message").remove();
+//                    $.messager.anim('fade', 1000);
+//                    $.messager.show(0, "你有" + msg + "条未读消息！");
+//                    var _s = document.getElementById("snd");
+//                    _s.src = "../../message.wav";
+//                    setTimeout("setTitle1(0)", "1000");
+//                }
+
+//            }
+//        });
+//    }
+
+//    function setTitle1(times) {
+//        document.title = "标题";
+//        window.focus();
+//        if (times > 20) {
+//            setTimeout("setTitle2(" + times++ + ")", "1000");
+//        }
+
+//    }
+
+//    function setTitle2(times) {
+//        document.title = "";
+//        setTimeout("setTitle1(" + times++ + ")", "1000");
+//    }
+
+
+    //刷新页面
+    function ReloadDesktop()
+    {
+       // window.location.href='MyDesktop.aspx';
+        var obj = document.getElementById("Button33");
+        __doPostBack('Button33', 'submit');
+    }
+</script>
+
+
+</body>
+</html>
+
+
+
+

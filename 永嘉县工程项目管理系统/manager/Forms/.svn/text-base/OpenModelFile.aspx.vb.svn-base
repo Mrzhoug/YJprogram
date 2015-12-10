@@ -1,0 +1,55 @@
+﻿Imports System.IO
+Partial Class manager_Forms_OpenModelFile
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim UserName As String
+    Dim UserId As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        UserName = Base.GetWebUserName
+        UserID = Base.GetUserID(UserName)
+
+        Dim MKDM As Integer
+        Try
+            MKDM = Request("MKDM")
+        Catch ex As Exception
+            MKDM = 0
+        End Try
+        If Base.GetUserHaveQX(UserId, MKDM) > 0 Then
+            Dim tb As New Data.DataTable
+            tb = Base.DB.Table("select XDLJ from GY_MKXX where MKDM=" & MKDM, "GY_MKXX")
+            If tb.Rows.Count > 0 Then
+                Dim FileName As String = Server.MapPath("./") & "..\" & tb.Rows(0)(0).ToString
+                If File.Exists(FileName) = True Then
+                    PrintContent(FileName)
+                Else
+                    Base.Js.alert(Me, "参数错误,文件不存在")
+                End If
+            Else
+                Base.Js.alert(Me, "参数错误")
+            End If
+        Else
+            Base.Js.alert(Me, "你无权打开此功能")
+        End If
+    End Sub
+
+    Sub PrintContent(ByVal FileName As String)
+        Dim stream As FileStream = New FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.Read)
+        Dim Type1 As String
+        Type1 = FileName.Substring(FileName.LastIndexOf("."))
+
+        Try
+            Dim bufSize As Integer = stream.Length
+            Dim buf(bufSize) As Byte
+            Dim bytesRead As Integer = stream.Read(buf, 0, bufSize)
+            Dim UTF8 As Encoding = Encoding.GetEncoding("GB2312")
+            Response.ContentEncoding = UTF8
+            Response.AddHeader("Content-Disposition", "attachment; filename=SunFun" & Type1)
+            Response.AddHeader("Content-Length", bufSize.ToString())
+            Response.OutputStream.Write(buf, 0, bytesRead)
+            Response.End()
+        Catch ex As Exception
+            Base.Js.alert(Me, "打开出错.")
+        End Try
+    End Sub
+End Class

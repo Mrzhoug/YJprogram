@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title>InfoJet Service</title>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <style>
+        td
+        {
+            font-size: 11px;
+            font-family: verdana;
+        }
+        input
+        {
+            font-size: 11px;
+            font-family: verdana;
+        }
+    </style>
+
+    <script>
+        function doLoad() {
+            var unauthArray = window.dialogArguments[1];
+            var unauthUI = '<table align=center height=100%><tr><td colspan=2>Please enter your credentials to connect to the following data source:</td></tr>';
+            for (var i = 0; i < unauthArray.length; i++) {
+                var unauth = unauthArray[i];
+                unauthUI += '<tr><td colspan=2 nowrap=true>';
+                unauthUI += unauth.name + ': ' + unauth.realm + '[' + unauth.auth + ']';
+                unauthUI += '</td></tr>';
+                unauthUI += '<input type=\'hidden\' name=\'xdoc_param_unauth_name' + i + '\' value=\'' + unauth.name + '\'>';
+                unauthUI += '<input type=\'hidden\' name=\'xdoc_param_unauth_auth' + i + '\' value=\'' + unauth.auth + '\'>';
+                unauthUI += '<input type=\'hidden\' name=\'xdoc_param_unauth_realm' + i + '\' value=\'' + unauth.realm + '\'>';
+                unauthUI += '<tr><td width=\'50px\'>Username:</td><td><input style=\'width:390px\' type=\'text\' name=\'xdoc_param_unauth_username' + i + '\'></td></tr>';
+                unauthUI += '<tr><td width=\'50px\'>Password:</td><td><input style=\'width:390px\' type=\'password\' name=\'xdoc_param_unauth_password' + i + '\'></td></tr>';
+            }
+            unauthUI += '<tr><td colspan=2 align=right><input type=\'button\' value=\'    OK    \' onclick=\'reloadForm();\'>&nbsp;&nbsp;<input type=\'button\' value=\' Cancel \' onclick=\'cancelLoad();\'></td></tr>';
+            unauthUI += '</table>';
+            document.body.innerHTML = unauthUI;
+        }
+        function reloadForm() {
+            //CID 0292 //2009.05.28 //Begin
+            var mainDocument = window.dialogArguments[0].document;
+            var xdocForm = mainDocument.getElementById("xdoc_form");
+            //CID 0292 //2009.05.28 //End
+            for (var i = 0; true; i++) {
+
+                var nameField = document.getElementById('xdoc_param_unauth_name' + i);
+                if (nameField != null) {
+                    //CID 0292 //2009.05.28 //Begin
+                    var authField = document.getElementById('xdoc_param_unauth_auth' + i);
+                    var realmField = document.getElementById('xdoc_param_unauth_realm' + i);
+                    var usernameField = document.getElementById('xdoc_param_unauth_username' + i);
+                    var passwordField = document.getElementById('xdoc_param_unauth_password' + i);
+
+                    var nameHtml = "<input type='hidden' name='xdoc_param_unauth_name" + i + "'/>";
+                    var authHtml = "<input type='hidden' name='xdoc_param_unauth_auth" + i + "'/>";
+                    var realmHtml = "<input type='hidden' name='xdoc_param_unauth_realm" + i + "'/>";
+                    var usernameHtml = "<input type='hidden' name='xdoc_param_unauth_username" + i + "'/>";
+                    var passwordHtml = "<input type='hidden' name='xdoc_param_unauth_password" + i + "'/>";
+
+                    window.dialogArguments[0].InfoJet_InsertAdjacentHTMLBeforeEnd(xdocForm, nameHtml);
+                    window.dialogArguments[0].InfoJet_InsertAdjacentHTMLBeforeEnd(xdocForm, authHtml);
+                    window.dialogArguments[0].InfoJet_InsertAdjacentHTMLBeforeEnd(xdocForm, realmHtml);
+                    window.dialogArguments[0].InfoJet_InsertAdjacentHTMLBeforeEnd(xdocForm, usernameHtml);
+                    window.dialogArguments[0].InfoJet_InsertAdjacentHTMLBeforeEnd(xdocForm, passwordHtml);
+
+                    var mainNameField = mainDocument.getElementById('xdoc_param_unauth_name' + i);
+                    var mainAuthField = mainDocument.getElementById('xdoc_param_unauth_auth' + i);
+                    var mainRealmField = mainDocument.getElementById('xdoc_param_unauth_realm' + i);
+                    var mainUsernameField = mainDocument.getElementById('xdoc_param_unauth_username' + i);
+                    var mainPasswordField = mainDocument.getElementById('xdoc_param_unauth_password' + i);
+
+                    mainNameField.value = nameField.value;
+                    mainAuthField.value = authField.value;
+                    mainRealmField.value = realmField.value;
+                    mainUsernameField.value = usernameField.value;
+                    mainPasswordField.value = passwordField.value;
+                    //CID 0292 //2009.05.28 //End
+                }
+                else {
+                    break;
+                }
+            }
+            window.returnValue = 1;
+            window.close();
+        }
+        function cancelLoad() {
+            window.returnValue = 0;
+            window.close();
+        }
+    </script>
+
+</head>
+<body onload='doLoad();' style='background-color: buttonface'>
+    <font face="宋体"></font>
+</body>
+</html>

@@ -1,0 +1,46 @@
+﻿
+Partial Class manager_Register_RegisterUserInfo
+    Inherits System.Web.UI.Page
+
+    Dim RegisterCompanyUser As New RegisterCompanyUser
+
+    Protected Sub Page_Load(sender As Object, e As System.EventArgs) Handles Me.Load
+
+        Dim ID As Integer
+        Try
+            ID = Convert.ToInt32(Request.QueryString("id"))
+        Catch ex As Exception
+            ID = 0
+        End Try
+
+        If ID = 0 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+
+        Dim companyInfo As New MRegisterUser
+
+        companyInfo = RegisterCompanyUser.GetCompanyInfo(ID)
+
+        lb_username.Text = companyInfo.UserName
+        lb_companyName.Text = companyInfo.CompanyName
+        lb_companyNo.Text = companyInfo.CompanyNo
+        lb_companyName.Text = companyInfo.CompanyName
+        lb_companyCreateTime.Text = companyInfo.CompanyCreateTime
+        lb_companyOwner.Text = companyInfo.CompanyOwner
+        lb_companyOwnerTel.Text = companyInfo.CompanyOwnerTel
+        lb_companyContacts.Text = companyInfo.CompanyContacts
+        lb_companyContactsTel.Text = companyInfo.CompanyContactsTel
+        lb_companyAddress.Text = companyInfo.CompanyAddress
+        lb_companyType.Text = companyInfo.CompanyType
+        lb_companyMoney.Text = companyInfo.CompanyMoney
+        lb_peopleNum.Text = companyInfo.PeopleNum
+        lb_peopleNum1.Text = companyInfo.PeopleNum1
+        lb_peopleNum2.Text = companyInfo.PeopleNum2
+        lb_peopleNum3.Text = companyInfo.PeopleNum3
+        Image1.ImageUrl = companyInfo.ImgUrl
+
+
+    End Sub
+End Class

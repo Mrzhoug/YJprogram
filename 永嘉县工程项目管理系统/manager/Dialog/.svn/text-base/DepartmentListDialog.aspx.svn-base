@@ -1,0 +1,89 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="DepartmentListDialog.aspx.vb" Inherits="manager_Dialog_DepartmentListDialog" %>
+<%@ OutputCache Duration="3" VaryByParam="Key" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>部门选择</title>
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>关键字：<input id="Text1" type="text" onkeyup="changes(this);" onchange="changes(this);" style="width:100px;" /></div>
+    <div id="outstr" runat="server"></div>
+    </form>
+</body>
+</html>
+<script language="javascript" type="text/javascript">
+    function changes(obj)
+    {
+        if (obj.value=="") { return;}
+        initXMLHttp();
+        var retstr = GetStreamFile("UserListDialog.aspx?Key=" + escape(obj.value) + "%20&ajax=1");
+        var obj1 = document.getElementById("outstr");
+        if ( retstr!=null )  obj1.innerHTML = retstr;
+    }
+
+    function select1(str,objID)
+    {
+        
+        var obj = window.parent.window.document.getElementById("userlist");
+        var tmpcnt;
+        tmpcnt  = obj.childNodes.length;
+        var IsSelect = 0;
+        
+        for (var i=0 ;i<tmpcnt;i++)
+            {
+                if ( objID == obj.childNodes[i].ID)
+                {
+                   IsSelect = 1; 
+                }
+            }     
+        if (IsSelect ==0 )
+        {
+            var divobj = window.parent.window.document.createElement("span");
+            divobj.innerHTML  ="<span contenteditable='false' id='" + objID + "'>" + str + "</span>";
+            //divobj.ID = objID;
+            obj.appendChild(divobj);
+        }
+//        else
+//        {
+//         alert(obj.innerHTML);   
+//        }
+
+    }
+    
+    
+    function selectKS(str,objID)
+    {
+        
+        var obj = window.parent.window.document.getElementById("userlist");
+        var tmpcnt;
+        tmpcnt  = obj.childNodes.length;
+        var IsSelect = 0;
+
+        for (var i=0 ;i<tmpcnt;i++)
+            {
+            
+            
+            alert(obj.childNodes[i].childNodes[0].innerHTML)
+            
+                if ( str == obj.childNodes[i].ID)
+                {
+                   IsSelect = 1; 
+                }
+            }     
+            
+        if (IsSelect ==0 )
+        {
+        
+            var divobj = window.parent.window.document.createElement("span");
+            divobj.innerHTML  ="<span contenteditable='false' id='" + objID + "'>" + str + "</span>";            
+            //divobj.ID = objID;
+            obj.appendChild(divobj);
+        }
+
+    }
+    
+    </script>

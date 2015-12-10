@@ -1,0 +1,435 @@
+﻿Imports System.Xml
+
+Partial Class manager_Forms_FormListAllConfig
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim LCDM As Integer
+    Dim lcflag As Boolean
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        If Login_User <> "admin" Then
+            Response.Write("只有超级管理员才能使用!")
+            Response.End()
+        End If
+        UserID = Base.GetUserID(Login_User)
+
+        Try
+            LCDM = Request("lcdm")
+        Catch ex As Exception
+            Base.Js.alert(Me, "非法访问!")
+            Response.End()
+        End Try
+
+
+        Dim Row As DataRow = Base.DB.Row("SELECT MKMC,XsnDir,MKDM FROM GY_MKXX where NoLcDM =" & LCDM, "GY_MKXX")
+        If Row Is Nothing Then
+            Response.Write("功能模板有问题!")
+            Response.End()
+        End If
+        Dim MKDM As Integer = Row.Item("MKDM")
+        Dim i As Integer
+        Dim Tb As New DataTable
+        If Page.IsPostBack = False Then
+            '做权限判断.是否有显示列表的权限
+            If Base.CheckListFormQX_LCDM(UserID, LCDM) = True Then
+                filterlist.Items.Add(New ListItem("全部列表", "-11"))
+            End If
+            If Base.GetUserHaveQX(UserID, MKDM) > 0 Then
+                filterlist.Items.Add(New ListItem("我的列表", "-12"))
+            End If
+            filterlist.Items.Add(New ListItem("已收列表", "-13"))
+            filterlist.Items.Add(New ListItem("已发列表", "-14"))
+            filterlist.Items.Add(New ListItem("审阅发起列表", "-15"))
+            filterlist.Items.Add(New ListItem("审阅处理列表", "-16"))
+            filterlist.Items.Add(New ListItem("已完成", "-1"))
+            filterlist.Items.Add(New ListItem("进行中", "0"))
+            filterlist.Items.Add(New ListItem("已取消", "-2"))
+            Tb = Base.DB.Table("Select cid,value from Xconfig where config='表单标签' and lcdm=" & LCDM, "dd")
+
+            For i = 0 To Tb.Rows.Count - 1
+                filterlist.Items.Add(New ListItem(Tb.Rows(i).Item(1), Tb.Rows(i).Item(0)))
+            Next
+            Row = Base.DB.Row("Select value From [Xconfig] where config='列表默认打开方式全局' and lcdm= " & LCDM & " and UserID=" & UserID, "xcofnfig")
+            If Not Row Is Nothing Then
+                Dim TmpKind As Integer = Row.Item("Value")
+                For i = 0 To filterlist.Items.Count - 1
+                    If TmpKind = filterlist.Items(i).Value Then
+                        filterlist.SelectedIndex = i
+                        Exit For
+                    End If
+                Next
+            End If
+
+            Row = Base.DB.Row("Select value From [Xconfig] where config='显示行数全局' and lcdm= " & LCDM & " and UserID=" & UserID, "xconfig")
+            If Not Row Is Nothing Then
+                TextBox2.Text = Row.Item("value")
+            Else
+                TextBox2.Text = 15 '默认为15行
+            End If
+
+            '得到listbox内容
+            getlistbox()
+            getlistbox2()
+
+
+            Dim ShowTb As New Data.DataTable
+            ShowTb = Base.DB.Table("Select ShowName,NodeName from ShowList_LCDM where LCDM = " & LCDM & " order by ID", "ShowList_LCDM")
+            If ShowTb.Rows.Count > 0 Then
+                For i = 0 To ShowTb.Rows.Count - 1
+                    NodeName.Items.Add(New ListItem(ShowTb.Rows(i).Item("showname"), ShowTb.Rows(i).Item("nodename").ToString.Replace("<", "").Replace(">", "").Replace(":", "")))
+                    NodeName2.Items.Add(New ListItem(ShowTb.Rows(i).Item("showname"), ShowTb.Rows(i).Item("showname").ToString.Replace("<", "").Replace(">", "").Replace(":", "").Replace("my", "")))
+                Next
+            End If
+
+            '列表可见性
+            If TypeName.SelectedValue = "排序方式全局" Then
+                sortType.Visible = True
+                DropDownList1.Visible = False
+                TextBox1.Visible = False
+            Else
+                sortType.Visible = False
+                DropDownList1.Visible = True
+                TextBox1.Visible = True
+            End If
+        End If
+
+
+        Dim FirstMKDM As Integer = 0
+        Dim j As Integer
+        Dim tb1 As New DataTable
+        '这里判断LCDM是否有流程
+        Tb = Base.DB.Table("SELECT LCMC,LCSM,Flag FROM GY_LCDM where LCDM=" & LCDM, "GY_LCDM")
+        If Tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "功能模板有问题!")
+            Response.End()
+        Else
+            If IsDBNull(Tb.Rows(0).Item(2)) = True Then
+                lcflag = True
+            Else
+                If Tb.Rows(0).Item(2) = 0 Then              ' Flag=1表示无流程
+                    lcflag = True
+                Else
+                    lcflag = False
+                End If
+            End If
+        End If
+
+       
+
+
+    End Sub
+
+    Sub getlistbox() '得到listbox内容
+        ListBox1.Items.Clear()
+        Dim dt As DataTable
+        dt = Base.DB.Table("Select config,value From [Xconfig] where (config = '排序方式全局' or config = '过滤方式全局') and lcdm= " & LCDM & " and UserID=" & UserID, "xcofnfig")
+        Dim i As Integer = 0
+        If dt.Rows.Count <> 0 Then
+            For i = 0 To dt.Rows.Count - 1
+                ListBox1.Items.Add(dt.Rows(i).Item(0).ToString & "   |   " & dt.Rows(i).Item(1).ToString.Replace("#", "'"))
+            Next
+        End If
+
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim TmpValue As Integer = filterlist.SelectedValue
+        Dim Row As DataRow = Base.DB.Row("Select CID From [Xconfig] where config='列表默认打开方式全局' and lcdm= " & LCDM & " and UserID=" & UserID, "xcofnfig")
+        If Row Is Nothing Then
+            Base.DB.Query("INSERT INTO [Xconfig](UserId,config,value,LCDM) values(" & UserID & ",'列表默认打开方式全局'," & TmpValue & "," & LCDM & ")")
+        Else
+            Base.DB.Query("Update Xconfig set value=" & TmpValue & "  where config='列表默认打开方式全局' and lcdm= " & LCDM & " and UserID=" & UserID)
+        End If
+        Base.Js.alert(Me, "设置成功")
+    End Sub
+
+
+    ''' <summary>
+    ''' 重设表单节点列表
+    ''' </summary>
+    ''' <remarks></remarks>
+    Sub ResetFormNode(ByVal MKDM As String)
+        Dim FormName As String
+        Dim Row As DataRow = Base.DB.Row("select XsnDir,MKMC,MKDM from [GY_MKXX] where MKDM = " & MKDM, "dd")
+        If Row Is Nothing Then
+            NodeName.Items.Clear()
+            Exit Sub
+        Else
+            FormName = Row.Item("XsnDir").ToString.Trim
+            Dim filename As String = Server.MapPath("../../") & "TemplateLibrary\" & FormName & "\template.xml"
+            If IO.File.Exists(filename) = False Then
+                Base.Js.alert(Me, "模板存问题,请刷新模板!")
+                Exit Sub
+            End If
+            Dim node As XmlNode = Base.XmlClass.GetXmlFile(filename)
+            Dim ListNodeName As String()
+            Try
+                ListNodeName = Base.XmlClass.GetNodeNameList(node.ChildNodes(0))
+            Catch ex As Exception
+                Base.Js.alert(Me, "模板存在问题,请不要最外的重复节添加节点.请修改模板重,重新上传并重新建功能.")
+                Exit Sub
+            End Try
+            NodeName.DataSource = ListNodeName
+            NodeName.DataBind()
+        End If
+    End Sub
+
+
+    Protected Sub ListAdd_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles ListAdd.Click
+        Dim itemstr As String
+        If TypeName.SelectedItem.Text = "排序方式" Then
+            itemstr = TypeName.SelectedItem.Text & "   |   " & NodeName.SelectedItem.Value & " " & sortType.SelectedValue
+        Else
+            Dim tempstr As String
+            Dim firstmkdm As String
+            Dim dt As New DataTable
+            Dim str As String
+
+            If DropDownList1.SelectedValue <> "like" Then
+                tempstr = DropDownList1.SelectedValue & " '" & Base.SqlFilter(TextBox1.Text.Trim) & "'"
+            Else
+                tempstr = DropDownList1.SelectedValue & " '%" & Base.SqlFilter(TextBox1.Text.Trim) & "%'"
+            End If
+
+
+            '得到无流程的情况下的模块信息里的INFOPATH模板名.
+            dt = Base.DB.Table("select NoLcDM,XsnDir,MKMC,MKDM from [GY_MKXX] where NoLcDM = " & LCDM, "GY_MKXX")
+            If dt.Rows.Count <= 0 Then
+                Base.Js.alert(Me, "功能模板有问题!")
+                Exit Sub
+            End If
+            firstmkdm = dt.Rows(0).Item("MKMC")
+
+            Try
+                str = "select top 1 * from " & firstmkdm & "_mapext where " & NodeName.SelectedValue.Trim & " " & tempstr
+                dt = Base.DB.Table(str, "dd")
+                itemstr = TypeName.SelectedItem.Text & "   |   " & NodeName.SelectedItem.Value & " " & tempstr
+            Catch ex As Exception
+                Base.Js.alert(Me, "条件错误")
+            End Try
+        End If
+
+
+
+        Dim i As Integer
+        Dim TempString As String()
+        '先清除原来的显示样式　
+        Dim TmpFormName As String = ""
+        Dim TmpValue As String
+
+        TempString = itemstr.Split("|")
+        If TempString.Length = 2 Then
+            TmpFormName = TempString(0).Trim
+            TmpValue = TempString(1).Trim.Replace("'", "#")
+        Else
+            TmpFormName = ""
+        End If
+
+        Try
+            Dim Str As String = "Select CID From [Xconfig] where config='" & TmpFormName & "全局' and lcdm= " & LCDM & " and UserID=" & UserID & " and value ='" & TmpValue.Trim & "'"
+            Dim Row As DataRow = Base.DB.Row("Select CID From [Xconfig] where config='" & TmpFormName & "全局' and lcdm= " & LCDM & " and UserID=" & UserID & " and value ='" & TmpValue.Trim & "'", "xcofnfig")
+            If Row Is Nothing Then
+                Base.DB.Query("INSERT INTO [Xconfig](UserId,config,value,LCDM) values(" & UserID & ",'" & TmpFormName.Trim & "全局','" & TmpValue.Trim & "'," & LCDM & ")")
+                getlistbox()
+            Else
+                Base.DB.Query("Update Xconfig set value='" & TmpValue.Trim & "'  where config='" & TmpFormName.Trim & "全局' and lcdm= " & LCDM & " and UserID=" & UserID & " and value ='" & TmpValue.Trim & "'")
+                getlistbox()
+            End If
+        Catch ex As Exception
+            Base.Js.alert(Me, "设置失败")
+        End Try
+    End Sub
+
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+        Dim TempIndex As Integer = ListBox1.SelectedIndex
+        If TempIndex = -1 Then
+            Base.Js.alert(Me, "你没有选中任何行")
+            Exit Sub
+        End If
+
+        If TempIndex = 0 Then
+            Base.Js.alert(Me, "你所选中的内容已经是第一条记录了,不能再向上移了")
+            Exit Sub
+        End If
+        '开始交换数据
+        Dim TempString As String
+        TempString = ListBox1.Items(TempIndex - 1).Text
+        ListBox1.Items(TempIndex - 1).Text = ListBox1.Items(TempIndex).Text
+        ListBox1.Items(TempIndex).Text = TempString
+        '复位到原来选中的那条记录
+        ListBox1.SelectedIndex = TempIndex - 1
+    End Sub
+
+    Protected Sub Button4_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button4.Click
+        Dim TempIndex As Integer = ListBox1.SelectedIndex
+        If TempIndex = -1 Then
+            Base.Js.alert(Me, "你没有选中任何行")
+            Exit Sub
+        End If
+
+        If TempIndex = ListBox1.Items.Count - 1 Then
+            Base.Js.alert(Me, "你所选中的内容已经是最后一条记录了,不能再向下移了")
+            Exit Sub
+        End If
+        '开始交换数据
+        Dim TempString As String
+        TempString = ListBox1.Items(TempIndex + 1).Text
+        ListBox1.Items(TempIndex + 1).Text = ListBox1.Items(TempIndex).Text
+        ListBox1.Items(TempIndex).Text = TempString
+        '复位到原来选中的那条记录
+        ListBox1.SelectedIndex = TempIndex + 1
+    End Sub
+
+    Protected Sub Button5_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button5.Click
+        Dim TempIndex As Integer = ListBox1.SelectedIndex
+        Dim TmpFormName As String
+        Dim tmpvalue As String
+
+        If TempIndex = -1 Then
+            Base.Js.alert(Me, "你没有选中任何行")
+            Exit Sub
+        End If
+
+        Dim str As String
+        str = ListBox1.Items(TempIndex).Text
+
+        Dim TempString As String()
+        TempString = ListBox1.Items(TempIndex).Text.Split("|")
+        If TempString.Length = 2 Then
+            TmpFormName = TempString(0).Trim
+            tmpvalue = TempString(1).Trim.Replace("'", "#")
+        Else
+            TmpFormName = ""
+        End If
+        'str = "delete from xconfig where config='" & TmpFormName & "' and lcdm= " & LCDM & " and UserID=" & UserID & " and value ='" & tmpvalue.Trim & "'"
+        Base.DB.Query("delete from xconfig where config='" & TmpFormName & "' and lcdm= " & LCDM & " and UserID=" & UserID & " and value ='" & tmpvalue.Trim & "'")
+        getlistbox()
+
+    End Sub
+
+    'Protected Sub Button6_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button6.Click
+    '    Dim i As Integer
+    '    Dim TempString As String()
+    '    '先清除原来的显示样式　
+    '    Dim TmpFormName As String = ""
+    '    Dim TmpValue As String
+
+    '    For i = 0 To ListBox1.Items.Count - 1
+    '        TempString = ListBox1.Items(i).Text.Split("|")
+    '        If TempString.Length = 2 Then
+    '            TmpFormName = TempString(0).Trim
+    '            TmpValue = TempString(1).Trim.Replace("'", "#")
+    '        Else
+    '            TmpFormName = ""
+    '        End If
+    '        Try
+    '            Dim str As String = "Select CID From [Xconfig] where config='" & TmpFormName & "' and lcdm= " & LCDM & " and UserID=" & UserID & " and value ='" & TmpValue.Trim & "'"
+
+    '            Dim Row As DataRow = Base.DB.Row("Select CID From [Xconfig] where config='" & TmpFormName & "' and lcdm= " & LCDM & " and UserID=" & UserID & " and value ='" & TmpValue.Trim & "'", "xcofnfig")
+    '            If Row Is Nothing Then
+    '                Base.DB.Query("INSERT INTO [Xconfig](UserId,config,value,LCDM) values(" & UserID & ",'" & TmpFormName.Trim & "','" & TmpValue.Trim & "'," & LCDM & ")")
+    '            Else
+    '                Base.DB.Query("Update Xconfig set value='" & TmpValue.Trim & "'  where config='" & TmpFormName.Trim & "' and lcdm= " & LCDM & " and UserID=" & UserID & " and value ='" & TmpValue.Trim & "'")
+    '            End If
+    '            Base.Js.alert(Me, "设置成功")
+    '        Catch ex As Exception
+    '            Base.Js.alert(Me, "设置失败")
+    '        End Try
+    '    Next
+    'End Sub
+
+    Protected Sub TypeName_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles TypeName.SelectedIndexChanged
+        '过滤控件可见方式
+        If TypeName.SelectedValue = "排序方式" Then
+            sortType.Visible = True
+            DropDownList1.Visible = False
+            TextBox1.Visible = False
+        Else
+            sortType.Visible = False
+            DropDownList1.Visible = True
+            TextBox1.Visible = True
+        End If
+    End Sub
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+        Dim nums As Integer
+        Try
+            nums = Convert.ToInt32(TextBox2.Text)
+        Catch ex As Exception
+            nums = 0
+        End Try
+
+        If nums = 0 Then
+            Base.Js.alert(Me, "请输入正确的显示行数")
+            Exit Sub
+        End If
+        Dim sqlstr As String
+        Dim Row As DataRow = Base.DB.Row("Select CID From [Xconfig] where config='显示行数全局' and lcdm= " & LCDM & " and UserID=" & UserID, "xcofnfig")
+        If Row Is Nothing Then
+            sqlstr = "insert into xconfig (userid,config,value,lcdm) values (" & UserID & ",'显示行数全局'," & nums & "," & LCDM & ")"
+        Else
+            sqlstr = "update xconfig set value=" & nums & "  where config='显示行数全局' and lcdm= " & LCDM & " and userid=" & UserID
+        End If
+        Base.DB.Query(sqlstr)
+        Base.Js.alert(Me, "设置成功")
+    End Sub
+
+    Protected Sub Button6_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button6.Click
+        If TextBox3.Text <> "" Then
+            Dim itemstr As String
+            itemstr = NodeName2.SelectedItem.Value & " " & DropDownList2.SelectedItem.Value & " " & TextBox3.Text & " " & RadioButtonList1.SelectedValue
+            Try
+                Base.DB.Query("INSERT INTO [Xconfig](UserId,config,value,LCDM) values(" & UserID & ",'字段颜色全局','" & itemstr & "'," & LCDM & ")")
+                getlistbox2()
+            Catch ex As Exception
+                Base.Js.alert(Me, "设置失败")
+            End Try
+        Else
+            Base.Js.alert(Me, "条件不能为空！")
+        End If
+    End Sub
+
+    Sub getlistbox2() '得到listbox内容
+        ListBox2.Items.Clear()
+        Dim dt As DataTable
+        dt = Base.DB.Table("Select config,value From [Xconfig] where config = '字段颜色全局' and lcdm= " & LCDM & " and UserID=" & UserID & "order by value desc", "xcofnfig")
+        Dim i As Integer = 0
+        If dt.Rows.Count <> 0 Then
+            For i = 0 To dt.Rows.Count - 1
+                ListBox2.Items.Add(dt.Rows(i).Item(0).ToString & "   |   " & dt.Rows(i).Item(1).ToString)
+            Next
+        End If
+
+    End Sub
+
+    Protected Sub Button7_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button7.Click
+        Dim TempIndex As Integer = ListBox2.SelectedIndex
+        Dim TmpFormName As String
+        Dim tmpvalue As String
+
+        If TempIndex = -1 Then
+            Base.Js.alert(Me, "你没有选中任何行")
+            Exit Sub
+        End If
+
+        Dim str As String
+        str = ListBox2.Items(TempIndex).Text
+
+        Dim TempString As String()
+        TempString = ListBox2.Items(TempIndex).Text.Split("|")
+        If TempString.Length = 2 Then
+            TmpFormName = TempString(0).Trim
+            tmpvalue = TempString(1).Trim.Replace("'", "#")
+        Else
+            TmpFormName = ""
+        End If
+        'str = "delete from xconfig where config='" & TmpFormName & "' and lcdm= " & LCDM & " and UserID=" & UserID & " and value ='" & tmpvalue.Trim & "'"
+        Base.DB.Query("delete from xconfig where config='" & TmpFormName & "全局' and lcdm= " & LCDM & " and UserID=" & UserID & " and value ='" & tmpvalue.Trim & "'")
+        getlistbox2()
+    End Sub
+End Class

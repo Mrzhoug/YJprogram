@@ -1,0 +1,45 @@
+﻿
+Partial Class Menu_TellphoneCall
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim CID As Integer
+        Try
+            CID = Request("cid")
+        Catch ex As Exception
+            CID = 0
+        End Try
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        '读取系统设置的库名
+        Dim TmpMKMC As String = "客户信息"
+        Dim CInfoKu As String = Base.pub.GetWebConfig("SunfunSoft.Xman.ECP.CustomerInformation.Value").ToString
+        If CInfoKu.Trim.Length > 0 Then
+            TmpMKMC = CInfoKu
+        End If
+
+        Dim tb As New DataTable
+        tb = Base.DB.Table("SELECT MKDM,MKMC,NoLCDM FROM GY_MKXX where MKMC='" & TmpMKMC & "'", "dd")
+        If tb.Rows.Count = 0 Then
+            Response.Write("系统错误，找不到客户信息")
+            Response.End()
+        End If
+        Dim LCDM As Integer = tb.Rows(0)("NOLCDM")
+
+        Dim FID As Integer
+        tb = Base.DB.Table("SELECT FID FROM TelephoneCall WHERE cid=" & CID, "dd")
+        If tb.Rows.Count > 0 Then
+            Base.DB.Query("update TelephoneCall set Looked=1 where CId = " & CID)
+            FID = tb.Rows(0).Item("FID")
+            If FID > 0 Then
+                Response.Redirect("../Manager/Forms/WebInfoPath.aspx?FID=" & FID)
+            Else
+                Response.Redirect("../Manager/Forms/FunctionNoLC.aspx?LCDM=" & LCDM)
+            End If
+        End If
+    End Sub
+End Class

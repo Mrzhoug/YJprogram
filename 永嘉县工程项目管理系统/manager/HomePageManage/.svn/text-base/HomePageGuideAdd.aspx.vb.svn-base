@@ -1,0 +1,52 @@
+﻿
+Partial Class manager_HomePageManage_HomePageGuideAdd
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim CId As Integer
+    Dim UserName As String
+    Dim UserID As Integer
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim sql As String
+        If TextBox1.Text.Trim.Length = 0 Then
+            Base.Js.alert(Me, "标题不能为空!")
+            Exit Sub
+        End If
+
+        If CId > 0 Then
+            sql = "update Act_Guide set [title]='" & TextBox1.Text.Replace("'", "''") & "',content='" & Content.Text.Replace("'", "''") & "' where cid=" & CId
+            Base.DB.Query(sql)
+        Else
+            sql = "insert into Act_Guide (title,[UPtime],content,UserID) values ('" & TextBox1.Text.Replace("'", "''") & "','" & Now() & "','" & Content.Text.Replace("'", "''") & "'," & UserID & ")"
+            Base.DB.Query(sql)
+        End If
+        If Base.DB.ErrorMessage Is Nothing Then
+            Response.Redirect("HomePageGuideList.aspx")
+        Else
+            Base.Js.alert(Me, "添加/修改失败,请联系管理员")
+        End If
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking("../manager/HomePageManage/HomePageGuideList.aspx")
+
+        UserName = Base.GetWebUserName
+        UserID = Base.GetUserID(UserName)
+
+        Try
+            CId = Request("cid")
+        Catch ex As Exception
+            CId = 0
+        End Try
+
+        If CId > 0 And Page.IsPostBack = False Then
+            Dim tb As New Data.DataTable
+            tb = Base.DB.Table("select * from act_Guide where cid=" & CId, "home_news")
+            If tb.Rows.Count > 0 Then
+                TextBox1.Text = tb.Rows(0)("title")
+                Content.Text = tb.Rows(0)("content").ToString
+            End If
+            tb = Nothing
+        End If
+
+    End Sub
+End Class

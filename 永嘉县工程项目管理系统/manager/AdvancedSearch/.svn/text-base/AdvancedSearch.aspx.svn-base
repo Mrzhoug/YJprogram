@@ -1,0 +1,171 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="AdvancedSearch.aspx.vb" Inherits="manager_AdvancedSearch_AdvancedSearch" Theme="SkinFile" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>高级搜索</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+    <link href="../../App_Themes/redmond/jquery.ui.css" type="text/css" rel="Stylesheet"/>
+    <link href="../../App_Themes/colorbox.css" type="text/css" rel="Stylesheet" />
+    
+    <script type="text/javascript" src="../../Pub/jquery-1.8.0.js"></script>
+    <script type="text/javascript" src="../../Pub/jquery.colorbox.js"></script>
+    <script type="text/javascript" src="../../Pub/jquery.ui.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".inputDate").datepicker({
+                /* 区域化周名为中文 */
+                dayNamesMin: ["日", "一", "二", "三", "四", "五", "六"],
+                /* 每周从周一开始 */
+                firstDay: 1,
+                /* 区域化月名为中文习惯 */
+                monthNames: ["1月", "2月", "3月", "4月", "5月", "6月",
+                   "7月", "8月", "9月", "10月", "11月", "12月"],
+                /* 月份显示在年后面 */
+                showMonthAfterYear: true,
+                /* 年份后缀字符 */
+                yearSuffix: "年",
+                /* 格式化中文日期 */
+                dateFormat: "yy-mm-dd"
+            });
+
+
+            $(".checkNum").keypress(function (event) {
+                var keyCode = event.which;
+                if (keyCode == 46 || (keyCode >= 48 && keyCode <= 57))
+                    return true;
+                else
+                    return false;
+            }).focus(function () {
+                this.style.imeMode = 'disabled';
+            }); 
+        });
+
+        
+
+        function goSearch(str) {
+            $('#TBAdvancedSearch', parent.document).val(str);
+            $('#Button1', parent.document).click();
+        }
+
+
+        function getSearchStr() {
+
+            var str = "mkdm=<%=mkdm %>";
+
+            $("input[type='text']").each(function (i) {
+                str += "&" + $(this).attr("id") + "=" + escape(this.value);
+            })
+            $("select").each(function (i) {
+                str += "&" + $(this).attr("id") + "=" + escape(this.value);
+            })
+
+            var message;
+            $.ajax(
+            {
+                type: "post",
+                url: "AdvancedSearchHandler.ashx",
+                data: str,
+                async: false,
+                error: function (request) {
+                    alert("获取搜索数据失败！");
+                },
+                success: function (msg) {                    
+                    goSearch(msg);
+                }
+            }
+            );
+        }
+
+        function selectChange(id, optionnum, conditionID) {        
+            
+            var datestr = "mkdm=<%=mkdm %>&conditionID=" + conditionID;
+            if (optionnum == 0) {
+                var optionID = id + "-" + optionnum;
+                var selectItem = $("#" + optionID + " option:selected").text();
+
+                if (selectItem == "全部") {
+                    resetOptions(id, optionnum);
+                    return;
+                }
+
+                datestr += "&" + optionID + "=" + escape(selectItem);
+            }
+            else {
+            
+                for (var i = 0; i <= optionnum ; i++) {
+                    var optionID = id + "-" + i;
+                    var selectItem = $("#" + optionID + " option:selected").text();
+                    if (selectItem == "全部") {
+                        resetOptions(id, optionnum);
+                        return;
+                    }
+                    datestr += "&" + optionID + "=" + escape(selectItem);
+                }
+            }
+
+            var message;
+            $.ajax(
+            {
+                type: "post",
+                url: "AdvancedSearchDropDonwListHandler.ashx",
+                data: datestr,
+                async: false,
+                error: function (request) {
+                    alert("获取搜索数据失败！");
+                },
+                success: function (msg) {
+                    setOptions(msg, id, optionnum+1);
+                }
+            }
+            );
+        }
+        function resetOptions(id, optionnum) {
+            optionnum++;
+            var optionID = id + "-" + optionnum ;
+            try {
+                while ($("#" + optionID).length != 0) {                    
+                    $("#" + optionID + " option").remove();
+                    $("#" + optionID).append("<option value='全部'>全部</option>");
+                    optionnum++;
+                    optionID = id + "-" + optionnum;
+                }
+            } catch (e) {                
+            }
+        }
+
+        function setOptions(msg, id, optionnum) {
+            var optionID = id + "-" + optionnum;
+            var temp = msg.split(",");
+            $("#" + optionID + " option").remove();
+            $("#" + optionID).append("<option value='全部'>全部</option>");
+            for (var i = 0; i < temp.length; i++) {
+                $("#" + optionID).append("<option value='" + temp[i] + "'>" + temp[i] + "</option>");
+            }
+        }
+    </script>
+</head>
+<body>
+<center>
+    <form id="form1" runat="server"  style="width:500px">
+    
+        <div class="topnav" style=" clear:none;" >
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>高级搜索</span></a></li>
+            </ul>
+        </div>        
+        <div class="main" style="border:none; z-index:1">
+            <div class="formtable" id="tableMain" runat="server">
+                
+            </div>
+           
+        </div>
+        <input type="button" value="提交" class="btnsubmit" id="BtnAdvancedSearch" onclick="getSearchStr()" />
+    </form>
+</center>
+</body>
+</html>

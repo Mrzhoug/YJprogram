@@ -1,0 +1,70 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="UserKS.aspx.vb" Inherits="manager_YGDM_UserKS" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>分配部门</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+    <script language="javascript" type="text/javascript">
+    function Button2_onclick() {
+        window.close();
+    }
+    </script>
+</head>
+<body>
+    <center>
+    <form id="form1" runat="server" style="width:300px">
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>分配部门</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            用户名称：
+                        </th>
+                        <td width="65%" align="left">
+                            <asp:TextBox ID="TextBox1" runat="server"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            登录名称：
+                        </th>
+                        <td align="left">                       
+                            <asp:TextBox ID="TextBox2" runat="server"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="left" style="padding-left:20px;">                        
+                            <asp:TreeView ID="TreeView1" runat="server" BorderColor="Black" BorderStyle="Outset"
+                                BorderWidth="1px" Height="296px" ImageSet="Contacts" NodeIndent="10"
+                                Width="260px" ShowLines="True">
+                                <ParentNodeStyle Font-Bold="True" ForeColor="#5555DD" />
+                                <HoverNodeStyle Font-Underline="False" />
+                                <SelectedNodeStyle Font-Bold="True" Font-Underline="True" ForeColor="Black" HorizontalPadding="0px"
+                                    VerticalPadding="0px" />
+                                <NodeStyle Font-Names="Verdana" Font-Size="8pt" ForeColor="Black" HorizontalPadding="5px"
+                                    NodeSpacing="0px" VerticalPadding="0px" />
+                            </asp:TreeView>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" colspan="2">
+                            <asp:Button ID="Button1" runat="server" Text="确定" CssClass="btnsubmit" />                            
+                            <asp:Button ID="Button2" runat="server" Text="取消" CssClass="btnsubmit" OnClientClick="return cancelBTN_onclick();" />                           
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+    </center>
+</body>
+</html>

@@ -1,0 +1,94 @@
+﻿Imports System.IO
+Partial Class HomePage_mysharefileslist
+    Inherits System.Web.UI.Page
+
+    Dim RootPath As String
+    Dim Base As New Base
+    Dim OpFolder As String = ""
+    Dim OpFolder1 As String = ""
+    Dim OpFolder2 As String = ""
+
+    Sub PrintContent(ByVal FileName As String)
+        Dim stream As FileStream = New FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.Read)
+        Dim Type1 As String
+        Type1 = FileName.Substring(FileName.LastIndexOf("."))
+        Try
+            Dim bufSize As Integer = stream.Length
+            Dim buf(bufSize) As Byte
+            Dim bytesRead As Integer = stream.Read(buf, 0, bufSize)
+            Dim UTF8 As Encoding = Encoding.GetEncoding("GB2312")
+            Response.ContentEncoding = UTF8
+            Response.AddHeader("Content-Disposition", "attachment; filename=SunFun" & Type1)
+            Response.AddHeader("Content-Length", bufSize.ToString())
+            Response.OutputStream.Write(buf, 0, bytesRead)
+            Response.End()
+        Catch ex As Exception
+            Response.Write("打开文件出错,请联系管理员!")
+            Response.End()
+        End Try
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs)
+
+
+        Dim dt As New Data.DataTable
+        Dim dt1 As New Data.DataTable
+        Dim Cid As Integer 'sharefile表中主键id为数值型
+        Dim GiveUser As String '共享文件提供者
+        Dim GetUser As String '共享文件接受者
+        Try
+            cid = Request("id")
+        Catch ex As Exception
+            Base.Js.alert(Me, "非法参数!")
+            Exit Sub
+        End Try
+        dt = Base.DB.Table("select * from sharefile where id=" & cid, "sharefile")
+        If dt.Rows.Count <= 0 Then
+            Base.Js.alert(Me, "非法参数!")
+            Exit Sub
+        End If
+        If dt.Rows(0)("giveuserid") = "" Or IsDBNull(dt.Rows(0)("giveuserid")) Then
+            Base.Js.alert(Me, "非法参数!")
+            Exit Sub
+        End If
+        If dt.Rows(0)("getuserid") = "" Or IsDBNull(dt.Rows(0)("getuserid")) Then
+            Base.Js.alert(Me, "非法参数!")
+            Exit Sub
+        End If
+        If dt.Rows(0)("filepath") = "" Or IsDBNull(dt.Rows(0)("filepath")) Then
+            Base.Js.alert(Me, "非法参数!")
+            Exit Sub
+        End If
+
+        GiveUser = dt.Rows(0)("giveuserid")
+        GetUser = dt.Rows(0)("getuserid")
+        OpFolder1 = dt.Rows(0)("filepath")
+        OpFolder2 = OpFolder1.Substring(OpFolder1.LastIndexOf("\") + 1) '取出路径中的最后一个目录名
+
+        Dim RootPath As String = Request.MapPath("../") & "个人公文包\" & GiveUser & "\" & OpFolder1 & "\" '根目录是提供者的目录
+
+        Dim FileName As String = Server.UrlDecode(Request("FileName"))
+
+        If GetUser.ToLower.IndexOf("|" & Base.GetWebUserName.ToLower) < 0 And GetUser <> "*" Then '判断当前用户是否被提供共享了
+            Response.Write("无权访问,可能文件共享已经被取消!")
+            Response.End()
+        End If
+        If Not FileName Is Nothing Then
+            If File.Exists(RootPath & FileName) = True Then     '关判断文件是否存在
+                If GetUser.ToLower.IndexOf("|" & Base.GetWebUserName.ToLower) >= 0 Or GetUser = "*" Then '判断当前用户是否被提供共享了
+                    PrintContent(RootPath & FileName)
+                Else
+                    Response.Write("无权访问,可能文件共享已经被取消!")
+                    Response.End()
+                End If
+            Else
+                Response.Write("无法找到文件,可能共享文件已经被删除!")
+                Response.End()
+            End If
+        Else
+            Response.Write("非法访问!")
+            Response.End()
+        End If
+    End Sub
+
+End Class

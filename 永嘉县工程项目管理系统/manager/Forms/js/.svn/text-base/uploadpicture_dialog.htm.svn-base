@@ -1,0 +1,145 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title>InfoJet Service</title>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <style>
+        td
+        {
+            font-size: 11px;
+            font-family: verdana;
+        }
+        input
+        {
+            font-size: 11px;
+            font-family: verdana;
+        }
+    </style>
+    <base target="_self">
+</head>
+<body style='padding: 0; margin: 0;' onload="doLoad()">
+
+    <script>
+        //CID 0641 //2010.11.06 //Begin
+        var opener = null;
+        var SelectPictureText = "Please select a picture to upload:";
+        var ReplacePictureText = "Please select a picture to upload and replace the current picture:";
+        //CID 0641 //2010.11.06 //End
+        function doLoad() {
+            document.title = "Insert Picture";
+            var parent = window.dialogArguments[0];
+            //CID 0641 //2010.11.06 //Begin
+            opener = parent;
+            UseLocalResources();
+            //CID 0641 //2010.11.06 //End
+            //CID 0844 //2011.03.24 //Begin
+            var action = parent.InfoJet_ResolveServiceAction();
+            //CID 0844 //2011.03.24 //End
+            document.forms["Uploadform"].action = action;
+
+            var inlinePicture = window.dialogArguments[1];
+            var src = inlinePicture.getAttribute("src");
+            if (src != null && src.length > 0 && src.substring(src.length - 1) != "/") {
+                document.getElementById("UploadTag").innerHTML = ReplacePictureText;
+            } else {
+                document.getElementById("UploadTag").innerHTML = SelectPictureText;
+                document.getElementById("DeleteCheck").disabled = true;
+                document.getElementById("DeleteTag").style.color = "gray";
+            }
+
+            //CID 0033 //2008.06.28 //Begin
+            document.getElementById("formId").value = window.dialogArguments[2];
+            //CID 0033 //2008.06.28 //End
+        }
+        //CID 0641 //2010.11.06 //Begin
+        function UseLocalResources() {
+            var res = opener.InfoJet_LocalResources["UploadPictureDialogResources"];
+            if (res != null) {
+                document.title = res["Title"];
+                document.getElementById("buttonOK").value = res["OK"];
+                document.getElementById("buttonCancel").value = res["Cancel"];
+                SelectPictureText = res["SelectPictureText"];
+                ReplacePictureText = res["ReplacePictureText"];
+                document.getElementById("DeleteTag").innerHTML = res["DeletePictureText"];
+            }
+        }
+        //CID 0641 //2010.11.06 //End
+        function doDeleteCheck(source) {
+            if (source.checked) {
+                document.getElementById("UploadFile").disabled = true;
+                document.getElementById("UploadTag").style.color = "gray";
+            } else {
+                document.getElementById("UploadFile").disabled = false;
+                document.getElementById("UploadTag").style.color = "";
+            }
+        }
+        function doOK() {
+            if (document.getElementById("DeleteCheck").checked) {
+                var parent = window.dialogArguments[0];
+                var link = window.dialogArguments[1];
+                link.src = "";
+                //CID 0664 //2010.11.18 //Begin
+                var fieldId = "xdoc" + parent.InfoJet_GetElementId(link);
+                var file = parent.InfoJet_GetWriteOnlyField(fieldId);
+                file.value = "";
+                //CID 0664 //2010.11.18 //End
+                //CID 1422 //2012.10.31 //Begin
+                if (parent.InfoJet_EnablePlaceholderUI) {
+                    parent.InfoJet_PostbackOnControl(link);
+                } else {
+                    //CID 0496 //2010.02.05 //Begin
+                    parent.InfoJet_UpdateXDocumentDOM(file);
+                    //CID 0496 //2010.02.05 //End
+                    //CID 0861 //2011.04.12 //Begin
+                    var psvi = parent.InfoJet_GetPSVI(link);
+                    if (psvi != null && psvi.type == "base64Binary" && psvi.nillable == "false") {
+                        parent.InfoJet_AddSchemaError(link.id);
+                        parent.InfoJet_ShowSchemaError(link.id);
+                    }
+                    parent.setTimeout("InfoJet_RelayoutFieldStyles();InfoJet_ShowFieldBorder( document.getElementById('" + link.id + "'), 'xdoc_field_focus' );", 100);
+                    //CID 0861 //2011.04.13 //End
+                }
+                //CID 1422 //2012.10.31 //End
+                window.close();
+            } else {
+                document.forms["Uploadform"].submit();
+            }
+        }
+    </script>
+
+    <table align="center" height="100%">
+        <form action='' name='Uploadform' method='post' enctype='multipart/form-data'>
+        <input type='hidden' name='xdoc_param_command' value='Update_File' id="Hidden1">
+        <input type='hidden' name='xdoc_param_uploadfile_type' value='xImage' id="Hidden2">
+        <input type='hidden' name='xdoc_param_form_id' value='' id="formId">
+        <tr>
+            <td>
+                <div id='UploadTag' style="display: inline">
+                    Please select a picture to upload:</div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type='file' name='UploadFile' id='UploadFile' style='width: 456px'>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="checkbox" name="operation" id="DeleteCheck" onclick="doDeleteCheck(this);"><div
+                    id='DeleteTag' style='display: inline;'>
+                    Delete the Current Picture.</div>
+            </td>
+        <tr>
+        <tr>
+            <td align="right">
+                <input type='button' id='buttonOK' value='    OK    ' onclick='doOK();'>&nbsp;&nbsp;<input type='button' id='buttonCancel'
+                        value=' Cancel ' onclick='window.close();' id="Button1" name="Button1">
+            </td>
+        </tr>
+        </form>
+    </table>
+</body>
+</html>

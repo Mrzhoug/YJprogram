@@ -1,0 +1,126 @@
+﻿Imports System.Xml
+Imports System.IO
+Partial Class manager_ImeSetting_Default
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Cells(0).Text = i + 1
+        Next
+    End Sub
+
+    Protected Sub GridView1_RowDeleting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs) Handles GridView1.RowDeleting
+        Dim CId As Integer = GridView1.DataKeys(e.RowIndex).Item(0)
+        Try
+            Conn.DeleteCommand = "delete  ImeSetting where Cid=" & CId
+            Conn.Delete()
+        Catch ex As Exception
+            Base.Js.alert(Me, "删除出错，请与管理员联系")
+            Conn.DeleteCommand = "delete imesetting where cid= -1"
+            Conn.Delete()
+        End Try
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        If TextBox1.Text.Trim.Length = 0 Or TextBox2.Text.Trim.Length = 0 Then
+            Base.Js.alert(Me, "表单库名和节点名称不能为空！请输入完整！")
+            Exit Sub
+        End If
+        Base.DB.Query("insert into  ImeSetting(KuName,NodeName) values('" & TextBox1.Text.Trim.Replace("'", "''") & "','" & TextBox2.Text.Trim.Replace("'", "''") & "')")
+        If Not Base.DB.ErrorMessage Is Nothing Then
+            Base.Js.alert(Me, "添加失败")
+        End If
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+        Dim TopStr As String
+        TopStr = "[Description]" & vbCrLf
+        TopStr = TopStr & "Name=圣火" & vbCrLf
+        TopStr = TopStr & "MaxCodes=6" & vbCrLf
+        TopStr = TopStr & "MaxElement=2" & vbCrLf
+        TopStr = TopStr & "UsedCodes=abcdefghijklmnopqrstuvwxyz" & vbCrLf
+        TopStr = TopStr & "WildChar=?" & vbCrLf
+        TopStr = TopStr & "NumRules=3" & vbCrLf
+        TopStr = TopStr & "[Rule]" & vbCrLf
+        TopStr = TopStr & "ce2=p11+p12+p21+p22" & vbCrLf
+        TopStr = TopStr & "ce3=p11+p21+p22+p31" & vbCrLf
+        TopStr = TopStr & "ca4=p11+p21+p31+p41" & vbCrLf
+        TopStr = TopStr & "[Text]" & vbCrLf
+
+        Dim i, j As Integer
+        Dim KuName, NodeName As String
+        Dim RootPath As String = Server.MapPath("../../FormFolder/")
+        Dim TempPath As String
+        Dim TempNode As XmlNode
+        Dim NodeValue As String
+        For i = 0 To GridView1.Rows.Count - 1
+            KuName = GridView1.Rows(i).Cells(1).Text
+            NodeName = GridView1.Rows(i).Cells(2).Text
+            TempPath = RootPath & KuName.Trim & ".库.xml"
+            If System.IO.File.Exists(TempPath) = False Then
+                Base.Js.alert(Me, KuName & " 库不存在，请确认！")
+                Exit Sub
+            End If
+            Base.XmlClass.GetXmlFile(TempPath)
+            Dim Node2 As XmlNodeList
+            Try
+                Node2 = Base.XmlClass.FindNodes("//" & NodeName.Trim)
+            Catch ex As Exception
+                Base.Js.alert(Me, "节点名称[" & NodeName & "]非法，请确认")
+                Exit Sub
+            End Try
+            If Node2.Count > 0 Then
+                For j = 0 To Node2.Count - 1
+                    TempNode = Node2.Item(j)
+                    If Not TempNode.ChildNodes(0).Value Is Nothing Then
+                        Try
+                            NodeValue = TempNode.ChildNodes(0).Value.Replace(" ", "")
+                            If NodeValue.Trim.Length > 6 Then
+                                NodeValue = NodeValue.Trim.Replace(" ", "").Substring(0, 6)
+                            End If
+                            NodeValue = Base.pub.GetPY(NodeValue)
+                            If NodeValue.Trim.Length > 0 Then
+                                TopStr = TopStr & TempNode.ChildNodes(0).Value.Replace(" ", "") & NodeValue & vbCrLf
+                            End If
+                        Catch ex As Exception
+                        End Try
+                    End If
+                Next
+            End If
+        Next
+        Dim TempFile As String = Server.MapPath("../../FormFolder/_sunfun-system-temp/") & "guweb" & Now.Ticks.ToString.Replace(".", "") & ".TXT"
+        Try
+            Base.pub.Text_File_SaveAs(TempFile, TopStr, Encoding.Unicode)
+        Catch ex As Exception
+            Base.Js.alert(Me, "生成失败，文件被占用，你重新按生成！")
+            Exit Sub
+        End Try
+        PrintContent(TempFile)
+
+    End Sub
+
+    Sub PrintContent(ByVal FileName As String)
+        Dim stream As FileStream = New FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.Read)
+        Try
+            Dim bufSize As Integer = stream.Length
+            Dim buf(bufSize) As Byte
+            Dim bytesRead As Integer = stream.Read(buf, 0, bufSize)
+            Dim GB2312 As Encoding = Encoding.GetEncoding("GB2312")
+            Response.ContentEncoding = GB2312
+            Response.AddHeader("Content-Disposition", "attachment; filename=guwb.txt")
+            Response.AddHeader("Content-Length", bufSize.ToString())
+            Response.OutputStream.Write(buf, 0, bytesRead)
+            Response.End()
+        Catch ex As Exception
+            Base.Js.alert(Me, "打开出错.")
+        End Try
+    End Sub
+
+End Class

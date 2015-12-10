@@ -1,0 +1,95 @@
+﻿
+Partial Class manager_FileManager_MoveFolderHandler
+    Inherits System.Web.UI.Page
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim currentFolderID As Integer
+        Dim toFolderID As Integer
+
+
+        Try
+            currentFolderID = Convert.ToInt32(Request("currentFolderID"))
+        Catch ex As Exception
+            currentFolderID = -1
+        End Try
+
+
+        Try
+            toFolderID = Convert.ToInt32(Request("toFolderID"))
+        Catch ex As Exception
+            toFolderID = -1
+        End Try
+
+
+        If currentFolderID = -1 Or toFolderID = -1 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+        Dim UserInfo As New UserInfo
+        Dim userName As String
+        userName = UserInfo.GetWebUserName()
+        Dim userID As Integer
+        userID = UserInfo.GetUserID(userName)
+
+
+        Dim FileManager As New FileManager
+
+
+        Dim currentFolderName As String = FileManager.GetFolderName(currentFolderID)
+        Dim currentFolderPath As String = FileManager.GetFolderPath(currentFolderID, userName)
+
+
+        Dim targetFolderName As String = FileManager.GetFolderName(toFolderID)
+        Dim targetFolderPath As String = FileManager.GetFolderPath(toFolderID, userName)
+
+
+
+        Dim UserPermissions As New MPublicFolderPermissions
+        UserPermissions = FileManager.GetUserPermission(userID, currentFolderID)
+
+        '如果要移动的为公共文件夹，那么对其可移动的权限进行判断
+        If FileManager.IsPublicFolder(currentFolderID) Then
+
+            '如果目标文件夹不为公共文件夹，那么判断是否有删除的权限
+            If FileManager.IsPublicFolder(toFolderID) Then
+
+
+                If Not UserPermissions.CanDelete Then
+                    Response.Write("您不能将该公共文件夹移动至非公共文件夹下！")
+                    Response.End()
+                End If
+
+            End If
+
+
+            If Not UserPermissions.CanMove Then
+                Response.Write("您没有移动该公共文件夹的权利！")
+                Response.End()
+            End If
+        End If
+
+        '如果移动目标位公共文件夹，那么对目标文件夹 可上传权限进行判断
+        If FileManager.IsPublicFolder(toFolderID) Then
+            If Not UserPermissions.CanCreateFolder Then
+                Response.Write("您没有向该公共文件夹移动文件夹的权利！")
+                Response.End()
+            End If
+        End If
+
+        If System.IO.Directory.Exists(targetFolderPath + currentFolderName + "\") Then
+            Response.Write("目标文件夹下存在同名文件夹，移动失败！")
+            Response.End()
+        End If
+
+
+        If FileManager.MoveFolder(currentFolderID, toFolderID, userName, userID) Then
+            Response.Write("移动成功")
+        Else
+            Response.Write("移动失败")
+        End If
+
+
+
+    End Sub
+End Class

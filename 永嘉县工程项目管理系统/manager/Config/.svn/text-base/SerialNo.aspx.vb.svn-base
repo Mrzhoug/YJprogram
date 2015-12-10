@@ -1,0 +1,87 @@
+﻿
+Partial Class manager_Config_SerialNo
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+        Base.Checking()        '这里对文件进行权限限制
+    End Sub
+
+    
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+
+        Dim KindName As String = TextBox1.Text.Trim
+        If KindName.Length > 200 Or KindName.Length = 0 Then
+            Base.Js.alert(Me, "序列名称应该在1~200之间，请确认!")
+            Exit Sub
+        End If
+
+        Dim KindAbout As String = TextBox2.Text.Trim
+        If KindAbout.Length > 500 Or KindAbout.Length = 0 Then
+            Base.Js.alert(Me, "序列说明应该在1~500之间，请确认!")
+            Exit Sub
+        End If
+
+        Dim TopNo As String = TextBox3.Text.Trim
+        If TopNo.Length > 20 Then
+            Base.Js.alert(Me, "序列前部应该在0~20之间，请确认!")
+            Exit Sub
+        End If
+
+        Dim ButtonNo As String = TextBox4.Text.Trim
+        If ButtonNo.Length > 20 Then
+            Base.Js.alert(Me, "序列末部应该在0~20之间，请确认!")
+            Exit Sub
+        End If
+
+        Dim StartNO As Integer
+        Try
+            StartNO = TextBox5.Text
+        Catch ex As Exception
+            Base.Js.alert(Me, "开始序号非法，必需是数字!")
+            Exit Sub
+        End Try
+        Dim DateFlag As Integer
+        If CheckBox1.Checked = True Then
+            DateFlag = 1
+        Else
+            DateFlag = 0
+        End If
+
+        '检测是否存在
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("Select KindName From Serial_Kind where KindName='" & Base.SqlFilter(KindName) & "'", "ddgsa")
+        If tb.Rows.Count > 0 Then
+            Base.Js.alert(Me, KindName & "已经存在,请使用其他序列名")
+            Exit Sub
+        End If
+        '做插入动作
+        Base.DB.Query("INSERT INTO [Serial_Kind]([KindName],[KindAbout],[TopNo],[ButtonNo],[StartNO],[DateFlag]) VALUES('" & Base.SqlFilter(KindName) & "','" & Base.SqlFilter(KindAbout) & "','" & Base.SqlFilter(TopNo) & "','" & Base.SqlFilter(ButtonNo) & "'," & StartNO & "," & DateFlag & ")")
+        If Base.DB.ErrorMessage Is Nothing Then
+            Base.Js.alert(Me, "添加成功!", "SerialNo.aspx")
+        Else
+            Response.Write(Base.DB.ErrorMessage)
+            Response.End()
+            Base.Js.alert(Me, "添加失败，请联系管理员!")
+        End If
+        GridView1.DataBind()
+
+    End Sub
+
+    Protected Sub GridView1_RowUpdating(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewUpdateEventArgs) Handles GridView1.RowUpdating
+
+    End Sub
+
+    Protected Sub GridView1_RowDeleting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs) Handles GridView1.RowDeleting
+        '删除
+        Dim KindID As Integer = GridView1.DataKeys(e.RowIndex).Item(0)
+        Conn.DeleteCommand = "Delete Serial_Kind where KindID = " & KindID
+        Conn.Delete()
+        GridView1.DataBind()
+    End Sub
+End Class

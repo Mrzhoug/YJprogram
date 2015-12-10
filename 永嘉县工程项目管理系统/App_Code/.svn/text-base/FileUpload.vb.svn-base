@@ -1,0 +1,290 @@
+Imports Microsoft.VisualBasic
+Imports System.Data.SqlClient
+Public Class FileUpload
+    Inherits System.Web.UI.Page
+    Private _path As String
+    Private _fileType As String
+    Private _sizes As Integer
+    Private _ReturnFileName As String = Nothing     '返回成功后的文件名
+    Private _ReturnMessage As String = Nothing      '返回提示信息
+    Private _ReWriteFlag As Boolean = False
+    Private _AutoCreateFileName As Boolean = False      '是否自动生成文件名
+    ' 初始化变量
+    Public Sub New()
+        _path = "/uploadimages/" ' //上传路径
+        _fileType = "pjpeg|gif|bmp|jpg"
+        _sizes = 200 * 1024 '//传文件的大小,默认200KB
+        _ReWriteFlag = False        '设置默认情况下,文件为不可重写
+        _AutoCreateFileName = False
+    End Sub
+
+    WriteOnly Property ReWriteFlag() As Boolean
+        Set(ByVal value As Boolean)
+            _ReWriteFlag = value.ToString.ToLower
+        End Set
+    End Property
+
+    '设置上传路径,如:uploadimages\
+    WriteOnly Property Path() As String
+        Set(ByVal value As String)
+            _path = value & "/"
+        End Set
+    End Property
+
+    WriteOnly Property AutoCreateFileName() As Boolean
+        Set(ByVal value As Boolean)
+            _AutoCreateFileName = value
+        End Set
+    End Property
+
+    '得到最终返回的用户名
+    ReadOnly Property ReturnFileName() As String
+        Get
+            Return _ReturnFileName
+        End Get
+    End Property
+
+    '得到最终返回的提示信息
+    ReadOnly Property ReturnMessage() As String
+        Get
+            Return _ReturnMessage
+        End Get
+    End Property
+
+    '设置上传文件大小,单位为KB
+    WriteOnly Property Sizes() As Integer
+        Set(ByVal value As Integer)
+            _sizes = value * 1024
+        End Set
+    End Property
+
+
+    ' 设置上传文件的类型,如:jpg|gif|bmp 
+    WriteOnly Property FileType() As String
+        Set(ByVal value As String)
+            _fileType = value
+        End Set
+    End Property
+
+
+    '/// 上传图片
+    '/// 
+    '/// 上传控件名称
+    '/// true则以当前时间创建文件夹,false则为设置的文件夹
+    '/// 返回上传图片的相对路径
+    Public Function FileSaveAs(ByVal name As System.Web.UI.WebControls.FileUpload, ByVal creatDirectory As Boolean) As String
+
+        Try
+            Dim FilePath As String = ""
+
+            '//以当前时间修改图片的名字或创建文件夹的名字
+            Dim modifyFileName As String = DateTime.Now.Year.ToString() + DateTime.Now.Month.ToString() + DateTime.Now.Day.ToString() + DateTime.Now.Hour.ToString() + DateTime.Now.Minute.ToString() + DateTime.Now.Second.ToString() + DateTime.Now.Millisecond.ToString()
+            '//获得站点的物理路径
+            Dim uploadFilePath As String
+            '    //如果为true则以当前时间创建文件夹,否则为设置的文件夹
+            If (creatDirectory) Then
+                uploadFilePath = System.Web.HttpContext.Current.Server.MapPath(".") & "\" + DateTime.Now.Year.ToString() + DateTime.Now.Month.ToString() + DateTime.Now.Day.ToString() & "\"
+            Else
+                uploadFilePath = System.Web.HttpContext.Current.Server.MapPath(".") & _path
+            End If
+            '//获得文件的上传的路径
+            Dim imgSize As Int64 = name.PostedFile.ContentLength
+
+            '//判断上传文件是否为空
+            If (imgSize = 0) Then
+                _ReturnMessage = "您没有上传数据呀，是不是搞错了呀!"
+                Return Nothing
+            End If
+            '//获得文件扩展名
+            Dim tFileType As String = name.PostedFile.ContentType
+            '//获得上传文件的大小
+            Dim strLen As Long = name.PostedFile.ContentLength
+            '//分解允许上传文件的格式
+            Dim temp As String() = _fileType.Split("|")
+            '//设置上传的文件是否是允许的格式
+            Dim flag As Boolean = False
+            '//判断上传文件大小
+            If (strLen >= _sizes) Then
+                _ReturnMessage = "上传的图片不能大于" + _sizes + "KB"
+                Return Nothing
+            End If
+
+            '//判断上传的文件是否是允许的格式
+            Dim i
+            For i = 0 To UBound(temp)
+                If temp(i) = tFileType Then
+                    flag = True
+                    Exit For
+                End If
+            Next
+
+            '//如果为真允许上传,为假则不允许上传
+            If Not flag Then
+
+                message("目前本系统支持的格式为:" + _fileType)
+                Return Nothing
+            End If
+            Dim dir As System.IO.DirectoryInfo = New System.IO.DirectoryInfo(uploadFilePath)
+            '//判断文件夹否存在,不存在则创建
+            If Not dir.Exists Then
+                dir.Create()
+            End If
+
+            FilePath = uploadFilePath + modifyFileName + "." + tFileType
+            name.PostedFile.SaveAs(FilePath)
+            FilePath = _path + modifyFileName + "." + tFileType
+
+            Return FilePath
+
+
+        Catch ex As Exception
+
+            ' //异常
+            message("出现未知错误！")
+            Return Nothing
+        End Try
+    End Function
+
+    Private Sub Message(ByVal msg As String, ByVal url As String)
+        System.Web.HttpContext.Current.Response.Write(" alert('" + msg + "');window.location='" + url + "' ")
+    End Sub
+
+    Public Sub Message(ByVal msg As String)
+        System.Web.HttpContext.Current.Response.Write("<script language=javascript>alert('" & msg & "'); </script>")
+    End Sub
+
+    '=====================================================================
+    '窗体代码省略
+    '上传文件,保存的文件名与原来的文件名相同
+    Public Function FileSaveAs(ByVal name As System.Web.UI.WebControls.FileUpload) As Boolean
+        '定义postedfile文件是储存用户上载的文件
+        Dim postedfile As HttpPostedFile = name.PostedFile
+        '定义一个变量储存用户上载文件的大小
+        '对文件进行必要的检测
+        Dim Check_Result As String
+        Check_Result = File_Check(postedfile)
+        If Check_Result <> "" Then
+            _ReturnMessage = Check_Result
+            _ReturnFileName = Nothing
+            Return False
+        Else
+            Dim strImgType As String = postedfile.ContentType
+            Dim filesplit() As String = Split(strImgType, "/")
+            filesplit = Split(postedfile.FileName, "\")
+            '取得上传文件的文件名
+            Dim FileName As String
+            If _AutoCreateFileName = True Then
+                FileName = Now.ToShortDateString.Replace("-", "") & System.DateTime.Now.ToString.Replace(".", "") & "." & postedfile.FileName.Substring(postedfile.FileName.LastIndexOf(".") + 1)
+            Else
+                filename = filesplit(filesplit.Length - 1)
+            End If
+            Try
+                If PostFileSave(postedfile, FileName) Is Nothing Then
+                    _ReturnMessage = "你要上传的文件名,已经存在! "
+                    _ReturnFileName = Nothing
+                    Return False
+                End If
+            Catch ex As Exception
+                _ReturnMessage = "当前路径不正确,请确定"
+                _ReturnFileName = Nothing
+                Return False
+            End Try
+            _ReturnFileName = _path & filename
+            _ReturnMessage = "上传成功"
+            Return True
+        End If
+
+    End Function
+
+    '上传文件,改变文件名.
+    Public Function FileSaveAs(ByVal name As System.Web.UI.WebControls.FileUpload, ByVal FileName As String) As Boolean
+        '定义postedfile文件是储存用户上载的文件
+        Dim postedfile As HttpPostedFile = name.PostedFile
+
+        '对文件进行必要的检测
+        Dim Check_Result As String
+        Check_Result = File_Check(postedfile)
+        If Check_Result <> "" Then
+            _ReturnMessage = Check_Result
+            _ReturnFileName = Nothing
+            Return False
+        Else
+            Try
+                If PostFileSave(postedfile, FileName) Is Nothing Then
+                    _ReturnMessage = "你要上传的文件名,已经存在! "
+                    _ReturnFileName = Nothing
+                    Return False
+                End If
+            Catch ex As Exception
+                _ReturnMessage = "当前路径不正确,请确定"
+                _ReturnFileName = Nothing
+                Return False
+            End Try
+            _ReturnFileName = _path & FileName
+            _ReturnMessage = "上传成功"
+            Return True
+        End If
+
+    End Function
+
+
+    Function PostFileSave(ByVal PostedFile As HttpPostedFile, ByVal Save_File_Name As String) As String
+        '做保存操作
+        Dim Save_File As String
+        Save_File = System.Web.HttpContext.Current.Server.MapPath(_path).Replace("\", "/") & Save_File_Name
+        If _ReWriteFlag = False And IO.File.Exists(Save_File) = True Then
+            Return Nothing
+        Else
+            PostedFile.SaveAs(Save_File)
+            Return Save_File
+        End If
+    End Function
+
+    Function File_Check(ByVal PostedFile As HttpPostedFile)
+        '定义一个变量储存用户上载文件的大小
+        Dim intImgSize As Int32
+        Dim Temp1 As String = ""
+        intImgSize = PostedFile.ContentLength               '获取用户上传文件的大小
+        If intImgSize <> 0 Then                             '如果要上传的文件不为空
+            If intImgSize > _sizes Then                     '检测文件是否过大, 则禁止上传
+                Temp1 = "你上传的文件过大,最大不能超过" & _sizes & "K"
+            Else
+
+                'Dim strImgType As String = PostedFile.ContentType   '定义一个变量储存用户上传文件的文件类型
+                'Dim filesplit() As String = Split(strImgType, "/")
+                'strImgType = filesplit(filesplit.Length - 1)       '根据原文件的格式,得到扩展名
+
+                Dim StrImgType As String
+                StrImgType = PostedFile.FileName.Substring(PostedFile.FileName.LastIndexOf(".") + 1).ToLower        '得到上传时原文件的扩展名
+                If strImgType.Trim = "" Then strImgType = "空" '过滤掉无扩展名的文件
+                Dim temp As String() = _fileType.Split("|")
+                Dim flag As Boolean = False
+                Dim i
+                For i = 0 To UBound(temp)
+                    If temp(i).ToLower = StrImgType Then
+                        flag = True
+                        Exit For
+                    End If
+                Next
+                If Not flag Then
+                    Temp1 = "目前本系统支持的格式为:" + _fileType + "\n你现在上传的文件格式为:" + strImgType
+                End If
+            End If
+        Else
+            Temp1 = "你没有选中任何文件!"
+        End If
+        File_Check = Temp1
+    End Function
+
+End Class
+
+
+
+
+  
+
+
+
+
+
+

@@ -1,0 +1,37 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="LookSendMessage.aspx.vb" Inherits="HomePage_LookSendMessage" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>查看短消息</title>
+    <link href="../../images/MenuStyle.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <form id="form1" runat="server">
+ <table border='1' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:98%;border-collapse:collapse;' cellpadding="4" cellspacing=1>
+            <tr>
+                <td colspan="3" align="center" height="26">
+                    <b>短消息查看</b></td>
+            </tr>
+            <tr>
+                <td style="width: 175px">
+                    &nbsp;From：<asp:Label ID="FormID" runat="server" Text="Label" Width="121px"></asp:Label></td>
+                <td style="width: 10px">
+                    </td>
+                <td style="width: 198px">
+                    &nbsp;Date：<asp:Label ID="Date1" runat="server" Text="Label" Width="147px"></asp:Label></td>
+            </tr>
+            <tr>
+                <td style="height: 21px;" colspan="3">
+                    &nbsp;标题：<asp:Label ID="Title" runat="server" Text="Label" Width="510px"></asp:Label></td>
+            </tr>
+            <tr>
+                <td colspan="3" valign="top" style="height: 76px">
+                    &nbsp;消息内容：<br />
+                    &nbsp;<asp:Label ID="Content" runat="server" Height="56px" Text="Label" Width="556px"></asp:Label></td>
+            </tr>
+        </table>
+    </form>
+</body>
+</html>

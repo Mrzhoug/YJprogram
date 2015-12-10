@@ -1,0 +1,218 @@
+﻿Imports System.Xml
+
+Partial Class manager_AdvancedSearch_AdvancedSearch
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim dt As New DataTable
+    Dim sqlstr As String
+
+    Public mkdm As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Dim i As Integer
+        Try
+            mkdm = Convert.ToInt32(Request.QueryString("mkdm"))
+        Catch ex As Exception
+            mkdm = 0
+        End Try
+
+        If mkdm = 0 Then
+            Response.Write("非法参数")
+            Response.End()
+        End If
+
+        sqlstr = "select * from AdvancedSearchSetting where mkdm = " & mkdm & " order by orderby"
+        dt = Base.DB.Table(sqlstr, "dd")
+
+        If dt.Rows.Count = 0 Then
+            Response.Write("暂未设置高级搜素")
+            Response.End()
+        End If
+
+        Dim str As String = String.Empty
+        str += "<table width=""100%"" cellspacing=""0"" cellpadding=""0"" border=""0"">"
+
+
+        For i = 0 To dt.Rows.Count - 1
+            str += "    <tr>"
+            str += "        <th align=""right"">"
+            str += "               " & dt.Rows(i).Item("searchTitle")
+            str += "        </th>"
+            str += "        <td width=""75%"" style=""text-align:left"">"
+            Dim id As Integer = Convert.ToInt32(dt.Rows(i).Item("id"))
+            Dim condtionType As String = dt.Rows(i).Item("conditionType")
+            Dim searchType As String = dt.Rows(i).Item("searchType")
+
+            If condtionType = "conditionInterval" Then '表示为区间型搜索
+                If searchType = "typeDate" Then
+                    str += "<input type=""text"" id=""textboxIntervalFrom" & i & """  readonly=""true"" class=""inputDate""  />"
+                    str += " - "
+                    str += "<input type=""text"" id=""textboxIntervalTo" & i & """  readonly=""true"" class=""inputDate""   />"
+                ElseIf searchType = "typeNumber" Then
+                    str += "<input type=""text"" id=""textboxIntervalFrom" & i & """  class=""checkNum"" />"
+                    str += " - "
+                    str += "<input type=""text"" id=""textboxIntervalTo" & i & """ class=""checkNum""  />"
+                Else
+                    str += "<input type=""text"" id=""textboxIntervalFrom" & i & """  />"
+                    str += " - "
+                    str += "<input type=""text"" id=""textboxIntervalTo" & i & """ />"
+                End If
+            Else
+                If searchType = "typeDate" Then
+                    str += "<input type=""text"" id=""textbox" & i & """ readonly=""true"" class=""inputDate""/>"
+                    If selSearchConditionType(dt.Rows(i).Item("conditionType")) = "相等" Then
+                        str += "<span style=""color:red"">&nbsp;&nbsp;*相等</span>"
+                    End If
+                    If selSearchConditionType(dt.Rows(i).Item("conditionType")) = "包含" Then
+                        str += "<span style=""color:red"">&nbsp;&nbsp;*相似</span>"
+                    End If
+                ElseIf searchType = "typeDropDown" Then
+                    Dim tempdt As New DataTable
+                    tempdt = Base.DB.Table("select * from AdvancedSearchDropDownListSetting where SearchSettingID=" & id, "dd")
+                    If tempdt.Rows.Count > 0 Then
+                        
+                        Dim sourceMKDM As Integer
+                        Try
+                            sourceMKDM = Convert.ToInt32(tempdt.Rows(0).Item("SourceFormID"))
+                        Catch ex As Exception
+                            sourceMKDM = 0
+                        End Try
+
+
+                        If sourceMKDM <> 0 Then
+
+
+
+                            Dim sourceMKMC As String = Base.GetMKMCByMKDM(sourceMKDM)
+
+                            '获取数据源节点名
+                            Dim SourceNodeNameStr As String = tempdt.Rows(0).Item("SourceNodeName").ToString()
+                            '获取数据源选择节点
+                            Dim SourceNodeSelectStr As String = tempdt.Rows(0).Item("SourceNodeSelect").ToString()
+                            '分割选择节点
+                            Dim temp() As String = SourceNodeSelectStr.Split(",")
+
+                            '获取最新的配置表用于生成下拉框数据
+                            Dim sqlstr As String
+                            sqlstr = "select top 1 * from gy_xmxx where xmmc='" & sourceMKMC & "' and xmjd is not null and xmjd <> '已删除' order by xmdm desc"
+                            Dim sourcedt As New DataTable
+                            sourcedt = Base.DB.Table(sqlstr, "dd")
+
+                            '表单路径
+                            Dim path As String = Server.MapPath("../../") & "FormFolder\" & sourceMKMC & "\"
+                            If sourcedt.Rows.Count > 0 Then
+                                path = path & sourcedt.Rows(0).Item("xmdm").ToString & ".xml"
+                            End If
+
+                            'xml的筛选
+                            Dim xmlDoc As New XmlDocument
+                            Dim namespaces As XmlNamespaceManager
+                            Dim tempnodelist As XmlNodeList
+                            xmlDoc.Load(path)
+                            namespaces = Base.GetXmlNamespaceManager(xmlDoc)
+
+                            Dim xpath As String = "//" & SourceNodeNameStr & "//" & temp(0)
+
+                            tempnodelist = xmlDoc.DocumentElement.SelectNodes(xpath, namespaces) '得到XPATH中要求的字段
+
+
+                            For j As Integer = 0 To temp.Length - 1
+                                If j <> temp.Length - 1 Then
+                                    str += "<select id=""option" & i & "-" & j & """ onchange=""selectChange('option" & i & "'," & j & "," & id & ")"">"
+                                Else
+                                    str += "<select id=""option" & i & "-" & j & """>"
+                                End If
+
+
+
+                                str += "    <option value=""全部"">全部</option>"
+                                If j = 0 Then
+                                    For m As Integer = 0 To tempnodelist.Count - 1
+                                        str += "    <option value=""" & tempnodelist.Item(m).InnerText & """>" & tempnodelist.Item(m).InnerText & "</option>"
+                                    Next
+                                End If
+                                str += "</select>"
+                            Next
+
+                        Else
+
+                            Dim customSource As String
+                            customSource = tempdt.Rows(0).Item("CustomSoruceText").ToString()
+
+                            Dim customSources() As String
+                            customSources = customSource.Split(",")
+
+                            str += "<select id=""option" & i & "-0"">"
+                            str += "    <option value=""全部"">全部</option>"
+                            For m As Integer = 0 To customSources.Length - 1
+                                str += "    <option value=""" & customSources(m) & """>" & customSources(m) & "</option>"
+                            Next
+
+                            str += "</select>"
+
+                        End If
+
+
+
+
+                    End If
+
+                ElseIf searchType = "typeNumber" Then
+                    str += "<input type=""text"" id=""textbox" & i & """ class=""checkNum"" />"
+                    If selSearchConditionType(dt.Rows(i).Item("conditionType")) = "相等" Then
+                        str += "<span style=""color:red"">&nbsp;&nbsp;*相等</span>"
+                    End If
+                    If selSearchConditionType(dt.Rows(i).Item("conditionType")) = "包含" Then
+                        str += "<span style=""color:red"">&nbsp;&nbsp;*相似</span>"
+                    End If
+                Else
+
+                    str += "<input type=""text"" id=""textbox" & i & """  />"
+                    If selSearchConditionType(dt.Rows(i).Item("conditionType")) = "相等" Then
+                        str += "<span style=""color:red"">&nbsp;&nbsp;*相等</span>"
+                    End If
+                    If selSearchConditionType(dt.Rows(i).Item("conditionType")) = "包含" Then
+                        str += "<span style=""color:red"">&nbsp;&nbsp;*相似</span>"
+                    End If
+                End If
+            End If
+            str += "            "
+            str += "        </td>"
+            str += "    </tr>"
+        Next
+        str += "</table>"
+
+        tableMain.InnerHtml = str
+    End Sub
+
+    Function selSearchType(ByVal str As String) As String
+        Select Case str
+            Case "typeNumber"
+                Return "数值型"
+            Case "typeDate"
+                Return "日期型"
+            Case "typeString"
+                Return "字符串型"
+            Case Else
+                Return ""
+        End Select
+    End Function
+
+
+    Function selSearchConditionType(ByVal str As String) As String
+        Select Case str
+            Case "conditionInterval"
+                Return "区间"
+            Case "conditionLike"
+                Return "包含"
+            Case "conditionEqual"
+                Return "相等"
+            Case "conditionNotEqual"
+                Return "不相等"
+            Case Else
+                Return ""
+        End Select
+    End Function
+
+End Class

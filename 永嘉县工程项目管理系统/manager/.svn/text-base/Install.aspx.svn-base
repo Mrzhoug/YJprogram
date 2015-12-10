@@ -1,0 +1,27 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Install.aspx.vb" Inherits="manager_Install" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>无标题页</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        <asp:TextBox ID="TextBox1" runat="server" TextMode="Password" Width="32px"></asp:TextBox>
+        <asp:Button ID="Button1" runat="server" Text=" 开始创建数据库" style="height: 21px" />&nbsp;
+        <asp:Button ID="Button2" runat="server" Text="初始化数据" />
+        <br />
+        <asp:Button ID="Button4" runat="server" Text="修正权限组空值" />&nbsp;<asp:Button ID="Button5"
+            runat="server" Text="测试映射扩展属性" /><br />
+        <br />
+        <br />
+        <asp:Button ID="Button6" runat="server" Text="添加考勤功能" /><br />
+        <asp:TextBox ID="TextBox2" runat="server" Height="128px" TextMode="MultiLine" Width="368px"></asp:TextBox>
+        <br />
+        <asp:Button ID="Button3" runat="server" Text="批量用户导入" />
+        格式：姓名,用户</div>
+    </form>
+</body>
+</html>

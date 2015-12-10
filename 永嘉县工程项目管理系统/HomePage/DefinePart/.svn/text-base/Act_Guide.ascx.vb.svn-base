@@ -1,0 +1,22 @@
+﻿
+Partial Class HomePage_DefinePart_Act_Guide
+    Inherits System.Web.UI.UserControl
+    Dim Base As New Base
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Cells(0).Text = i + 1
+            GridView1.Rows(i).Cells(1).Text = "<a href='Act_Guide_Show.aspx?Cid=" & GridView1.DataKeys(i).Item(0) & "'>" & GridView1.Rows(i).Cells(1).Text & "</a>"
+        Next
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+    End Sub
+End Class

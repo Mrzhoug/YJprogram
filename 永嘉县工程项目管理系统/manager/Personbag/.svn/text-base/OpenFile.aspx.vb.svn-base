@@ -1,0 +1,70 @@
+﻿Imports System.IO
+Partial Class manager_Personbag_OpenFile
+    Inherits System.Web.UI.Page
+    Dim RootPath As String
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+        Dim FileName As Integer
+        Try
+            FileName = Server.UrlDecode(Request("FileName"))
+        Catch ex As Exception
+            FileName = -1
+        End Try
+
+        Dim FilePath As String = Request.MapPath("../../PersonalFolders" & FileName)
+        Dim msgID As String = Request("msgid")
+        Dim TempFolder As String = Server.MapPath("../../") & "\PersonalFolders\MessageAttachment\" & msgID '附件临时存放的文件夹
+
+        If Directory.GetFiles(TempFolder).Length = 0 Then '没有的话在临时文件夹里找。
+            TempFolder = Server.MapPath("../../" & "PersonalFolders/" & Login_User & "/临时文件夹/MessageAttachment/" & msgID & "\")
+        End If
+
+        Dim MyFiles As String()
+        MyFiles = Directory.GetFiles(TempFolder)
+        If FileName >= 0 Then
+            If File.Exists(MyFiles(FileName)) = True Then     '关判断文件是否存在
+                PrintContent(MyFiles(FileName))
+            Else
+                Base.Js.alert(Me, "文件可能已经不存在，请确认。")
+            End If
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' 文件输出
+    ''' </summary>
+    ''' <param name="FileName"></param>
+    ''' <remarks></remarks>
+    Sub PrintContent(ByVal FileName As String)
+        Dim stream As FileStream = New FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.Read)
+        'Dim Type1 As String
+        'Type1 = FileName.Substring(FileName.LastIndexOf("."))
+        Dim DownFileName As String
+        Dim idx As Integer = FileName.LastIndexOf("\")
+        If idx > 0 Then
+            DownFileName = FileName.Substring(idx + 1)
+        Else
+            DownFileName = FileName
+        End If
+
+        Try
+            Dim bufSize As Integer = stream.Length
+            Dim buf(bufSize) As Byte
+            Dim bytesRead As Integer = stream.Read(buf, 0, bufSize)
+            Dim UTF8 As Encoding = Encoding.GetEncoding("GB2312")
+            Response.ContentEncoding = UTF8
+            Response.AddHeader("Content-Disposition", "attachment; filename=" & HttpUtility.UrlEncode(DownFileName, Encoding.UTF8))
+            Response.AddHeader("Content-Length", bufSize.ToString())
+            Response.OutputStream.Write(buf, 0, bytesRead)
+            Response.End()
+        Catch ex As Exception
+            Base.Js.alert(Me, "打开出错.")
+        End Try
+    End Sub
+End Class

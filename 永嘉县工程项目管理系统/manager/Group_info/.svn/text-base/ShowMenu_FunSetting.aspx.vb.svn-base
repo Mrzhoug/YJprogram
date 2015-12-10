@@ -1,0 +1,142 @@
+﻿
+Partial Class manager_Group_info_ShowMenu_FunSetting
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim GroupID As Integer
+    Dim GroupKind As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking("../manager/Group_info/group.aspx")
+        '此功能,无论哪里调用.用户一定要有模块权限管理才能有此权限
+
+        Try
+            GroupID = Request("group_id")
+        Catch ex As Exception
+            GroupID = 0
+        End Try
+
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("select Group_Name,Group_Kind from [GY_GROUP] where GROUP_ID=" & GroupID, "Gy_Group")
+        If Tb.Rows.Count = 0 Then
+            Base.Js.closestr(Me, "没有您想修改的组，请从正确途径打开些网页！")
+        Else
+            TGroup_name.InnerHtml = Tb.Rows(0)(0).ToString.Trim
+            If IsDBNull(Tb.Rows(0)(1)) = True Then
+                GroupKind = 0
+            Else
+                GroupKind = Tb.Rows(0)(1)
+            End If
+        End If
+
+        If GroupKind = 0 Then
+            GridView1.Columns(1).Visible = False
+            GridView1.Columns(3).Visible = False
+        End If
+
+        Conn1.SelectParameters("GroupID").DefaultValue = GroupID
+        Conn2.SelectParameters("GroupID").DefaultValue = GroupID
+        Dim SqlQuerry As String = TextBox1.Text.Trim
+        If SqlQuerry.Length > 0 Then
+            Conn2.SelectCommand = "SELECT [MKDM], [MKMC], [XsnDir] FROM [GY_MKXX] where MKDM not in (select MKDM from Gy_Group_Info where Group_Id = @GroupID) and  MKMC like '%" & SqlQuerry & "%'"
+        Else
+            Conn2.SelectCommand = "SELECT [MKDM], [MKMC], [XsnDir] FROM [GY_MKXX] where MKDM not in (select MKDM from Gy_Group_Info where Group_Id = @GroupID) "
+        End If
+    End Sub
+
+    Protected Sub btn_del_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btn_del.Click
+        '去除功能
+        Dim ck As CheckBox
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                Conn1.DeleteCommand = "delete GY_Group_Info where CId=" & GridView1.DataKeys(i).Item(0)
+                Conn1.Delete()
+            End If
+        Next
+        GridView1.DataBind()
+        GridView2.DataBind()
+    End Sub
+
+    Protected Sub btn_add_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btn_add.Click
+        '添加功能
+        Dim i As Integer
+        Dim ck As New CheckBox
+        For i = 0 To Me.GridView2.Rows.Count - 1
+            ck = GridView2.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                If Base.DB.GetRowCount("select Cid from GY_Group_Info where GROUP_ID=" & GroupID & " and MKDM = " & GridView2.DataKeys(i)(0), "GY_Group_Info") < 1 Then
+                    Try
+                        Conn2.InsertCommand = "Insert into Gy_Group_Info(Group_Id,MKDM,ShowFunName) values(" & GroupID & "," & GridView2.DataKeys(i)(0) & ",'" & GridView2.DataKeys(i)(1) & "')"
+                        Conn2.Insert()
+                    Catch ex As Exception
+                        Base.Js.alert(Me, "添加出错。请联系管理员!")
+                    End Try
+                End If
+            End If
+        Next
+        GridView1.DataBind()
+        GridView2.DataBind()
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+
+    End Sub
+
+    Protected Sub GridView1_RowUpdating(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewUpdateEventArgs) Handles GridView1.RowUpdating
+        Dim ShowName As String = e.NewValues(0)
+        Conn1.UpdateCommand = "Update Gy_Group_Info set ShowFunName='" & ShowName & "' where Cid=" & GridView1.DataKeys(e.RowIndex).Item(0)
+        Conn1.Update()
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub MoveUp_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles MoveUp.Click
+        Dim SelectIndex As Integer = GridView1.SelectedIndex
+        Dim i, OrderBy As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            OrderBy = (i + 1) * 10
+            If i = SelectIndex Then OrderBy -= 15
+            Base.DB.Query("Update GY_GROUP_INFO set Orderby=" & OrderBy & " where Cid = " & GridView1.DataKeys(i).Item(0))
+        Next
+        GridView1.SelectedIndex -= 1
+        If GridView1.SelectedIndex = 0 Then MoveUp.Enabled = False
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub MoveDown_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles MoveDown.Click
+        Dim SelectIndex As Integer = GridView1.SelectedIndex
+        Dim i, OrderBy As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            OrderBy = (i + 1) * 10
+            If i = SelectIndex Then OrderBy += 15
+            Base.DB.Query("Update GY_GROUP_INFO set Orderby=" & OrderBy & " where Cid = " & GridView1.DataKeys(i).Item(0))
+        Next
+        GridView1.SelectedIndex += 1
+        If GridView1.SelectedIndex = GridView1.Rows.Count - 1 Then MoveDown.Enabled = False
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        '主要是在绑定的情况下，得不到SelectedIndex 所以在这里设置一下。再绑定一下。
+        GridView1.SelectedIndex = e.NewSelectedIndex
+        GridView1.DataBind()
+        If e.NewSelectedIndex > 0 Then MoveUp.Enabled = True Else MoveUp.Enabled = False
+        If e.NewSelectedIndex < GridView1.Rows.Count - 1 Then MoveDown.Enabled = True Else MoveDown.Enabled = False
+    End Sub
+
+    Protected Sub GridView1_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs) Handles GridView1.RowDataBound
+        
+        If e.Row.RowType = DataControlRowType.DataRow And GridView1.EditIndex = -1 Then
+            '鼠标效果
+            e.Row.Attributes("style") = "Cursor:hand"
+            'e.Row.Attributes.Add("Onclick", "javascript:__doPostBack('Gridview1','Select$" & e.Row.RowIndex & "')")
+            e.Row.Cells(1).Attributes.Add("Onclick", "javascript:__doPostBack('Gridview1','Select$" & e.Row.RowIndex & "')")
+            e.Row.Cells(2).Attributes.Add("Onclick", "javascript:__doPostBack('Gridview1','Select$" & e.Row.RowIndex & "')")
+            'e.Row.Cells(3).Attributes.Add("Onclick", "javascript:__doPostBack('Gridview1','Select$" & e.Row.RowIndex & "')")
+        End If
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        GridView2.DataBind()
+    End Sub
+End Class

@@ -1,0 +1,45 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ShowList.aspx.vb" Inherits="HomePage_XJXM_ShowList" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>Untitled Page</title>
+    <link href="../../images/MenuStyle.css" rel="stylesheet" type="text/css" />
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    <script language="javascript" src="../../Pub/function.js" type="text/javascript"></script>
+<style type="text/css">
+  <!--
+  tr             {height: 20;}
+  tr.over        {font-size: 9pt; color: #ffffff; background-color: #000080; cursor: default;}
+  tr.out         {font-size: 9pt; color: #000000; background-color: #D4D0C8; cursor: default;}
+  div.rm_div     {position: absolute; filter: Alpha(Opacity='95'); display: none; background-color: #D4D0C8; border: 2px outset #FFFFFF;width: 0; height: 0;padding:1}
+  hr.sperator    {width:95%;border: 1px inset #FFFFFF;}
+  -->
+  </style>
+</head>
+<body>
+    <form id="form1" runat="server" >
+        <br /><nobr>&nbsp;&nbsp;查询关键字:<asp:TextBox id="TextBox1" runat="server" Width="115px"></asp:TextBox> 
+<asp:Button id="Button1" onclick="Button1_Click" runat="server" Text=" 查 询 "></asp:Button>&nbsp; 
+<asp:Button id="Button3" runat="server" Text="刷新列表"></asp:Button>&nbsp;<!--        <asp:CheckBox ID="AutoUpdate" runat="server" AutoPostBack="True" OnCheckedChanged="AutoUpdate_CheckedChanged"
+            Text="更新架构" />
+        <asp:CheckBox ID="spbz" runat="server" AutoPostBack="True" Text="申请审阅" />
+        <asp:CheckBox ID="LookSP" runat="server" AutoPostBack="True" Text="查看审阅" /> 
+--></nobr>
+        &nbsp;
+        <asp:GridView ID="GridView1" runat="server" Width="98%" AllowPaging="True" BackColor="White" BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" PageSize="15" AllowSorting="True" Font-Size="11pt" ForeColor="Black" HorizontalAlign=Center AutoGenerateColumns="False" DataKeyNames="FID,xmdm" >
+            <FooterStyle BackColor="#CCCC99" />
+            <RowStyle BackColor="White" />
+            <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+            <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Center" />
+            <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" HorizontalAlign="Center" Wrap="False" />
+            <AlternatingRowStyle BackColor="White" />
+            <PagerSettings Visible="False" />
+        </asp:GridView>
+        <table align=center width=98% height=26 valign=middle bgcolor=#e0e0e0 ><tr><td id=PageBar runat=server align=center></td></tr></table>
+        &nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp; &nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+    </form>
+</body>
+</html>
+

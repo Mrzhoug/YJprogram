@@ -1,0 +1,108 @@
+<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Logo.aspx.vb" Inherits="Menu_Logo" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>头文件</title>
+    <LINK href="images/style.css" type=text/css rel=stylesheet>
+    <META http-equiv=Content-Type content="text/html; charset=GB2312">
+</head>
+<script type="text/javascript" language="javascript">
+<!--
+
+function newImage(arg) {
+if (document.images) {
+rslt = new Image();
+rslt.src = arg;
+return rslt;
+}
+}
+
+function changeImages() {
+if (document.images && (preloadFlag == true)) {
+for (var i=0; i<changeImages.arguments.length; i+=2) {
+document[changeImages.arguments[i]].src = changeImages.arguments[i+1];
+}
+}
+}
+
+var preloadFlag = false;
+function preloadImages() {
+if (document.images) {
+help_over = newImage("images/help_over.gif");
+support_over = newImage("images/support_over.gif");
+wizard_over = newImage("images/wizard_over.gif");
+console_over = newImage("images/console_over.gif");
+logout_over = newImage("images/logout_over.gif");
+preloadFlag = true;
+}
+}
+
+// -->
+</script>
+<body onload="preloadImages();">
+    <form id="form1" runat="server">
+        <table cellspacing="0" cellpadding="0" width="100%" border="0">
+        <tr>
+            <td colspan="2" style="height:1pt; background-image:url(images/toplinepattern.gif)"></td>
+        </tr>
+        <tr bgcolor="#074f47">
+            <td align="left" height="36" width="80%" id="logo1" runat="server">
+                <img height="36" alt="" src="images/logo_100A.gif" width="460" />
+            </td>
+            <td align="center">
+                <table cellspacing="0" cellpadding="0" width="77" border="0">
+                <tr valign="top">
+                    <td><a onmouseover="changeImages('support', 'images/support_over.gif'); return true;" onmouseout="changeImages('support', 'images/support.gif'); return true;" 
+                        href="http://www.sunfunsoft.com/CInfo.aspx" target="_blank">
+                        <img title="联系客户支持" alt="联系客户支持" src="images/support.gif" name="support" /></a>
+                    </td>
+                    <td><a id="online_help" onmouseover="changeImages('help', 'images/help_over.gif'); return true;" onmouseout="changeImages('help', 'images/help.gif'); return true;" 
+                        href="http://www.sunfunsoft.com/help.aspx" target="_blank">
+                        <img title="在线帮助" alt="在线帮助" src="images/help.gif" name="help" /></a>
+                    </td>
+                    <td><a onmouseover="changeImages('wizard', 'images/wizard_over.gif'); return true;" onmouseout="changeImages('wizard', 'images/wizard.gif'); return true;" 
+                        href="javascript:desktopconfig()"><img title="桌面配置" alt="对桌面进行配置" src="images/wizard.gif" name="wizard" /></a>
+                    </td>
+                    <td><a onmouseover="changeImages('console', 'images/console_over.gif'); return true;" onmouseout="changeImages('console', 'images/console.gif'); return true;" 
+                        href="javascript:openDesktop()"><img title="我的桌面" alt="我的桌面" src="images/console.gif" name="console" /></a>
+                    </td>
+                    <td><a onmouseover="changeImages('log', 'images/logout_over.gif'); return true;" onmouseout="changeImages('log', 'images/logout.gif'); return true;" href="javascript:logout()">
+                        <img title="注销" alt="退出系统" src="images/logout.gif" name="log"></a>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td background="images/metalbar.gif" colspan="2">
+                <img height="15" src="images/spacer.gif" width="8" alt="" />
+            </td>
+        </tr>
+        </table>
+    
+<script language="JavaScript" type="text/javascript" >
+
+function openDesktop()
+{
+var newURL = "../manager/Desktop/MyDesktop.aspx";
+parent.main.location=newURL;
+//window.open(newURL,"","scrollbars,width=680,height=440,top=100,left=200");
+}
+
+function desktopconfig()
+{
+    var newURL = "../manager/Desktop/DesktopConfig.aspx";
+    window.open(newURL,"","resizable,scrollbars,width=540,height=440,top=100,left=200");
+}
+
+function logout()
+{
+    var newURL = "../Logout.aspx";
+    parent.location=newURL;
+}
+</script>
+    </form>
+</body>
+</html>

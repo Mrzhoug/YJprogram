@@ -1,0 +1,19 @@
+<HTML><HEAD>
+<META http-equiv=Pragma content=no-cache>
+<LINK href="images/style.css" type=text/css rel=stylesheet>
+<META http-equiv=Content-Type content="text/html; charset=GB2312">
+<META content="MSHTML 6.00.2900.2180" name=GENERATOR></HEAD>
+<BODY class=footer>
+<TABLE class=footer cellSpacing=0 cellPadding=0>
+  <TBODY>
+  <TR nowrap>
+    <TD vAlign=top width="85%" height=19></TD>
+    <TD id=vdom_sep noWrap></TD>
+    <TD id=vdom_title noWrap></TD>
+    <TD id=vdom_val></TD>
+    <TD noWrap>&nbsp;<IMG height=19 src="images/footer_separator.gif" 
+      width=4> 
+    </TD>
+    <TD id=refresh_uptime noWrap><NOBR></NOBR></TD>
+    <TD vAlign=top height="19" width="289"></TD></TR></TBODY></TABLE>
+</BODY></HTML>

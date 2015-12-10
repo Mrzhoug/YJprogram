@@ -1,0 +1,635 @@
+Imports Microsoft.VisualBasic
+Imports System
+Imports System.Web.UI
+Imports System.Web.UI.Page
+Imports System.Text
+Imports System.Web.UI.WebControls
+Imports System.Web.Security
+Imports System.Collections
+Imports System.ComponentModel
+Imports System.Data
+Imports System.Drawing
+Imports System.Web
+Imports System.Web.SessionState
+Imports System.Web.UI.HtmlControls
+Imports System.IO
+Public Class Pub
+
+
+#Region "图片操作函数,包括<片生成缩略图><文字水印><图片水印>等功能"
+    Function makeSLT(ByVal CurrentPath As String, ByVal oldImageFileName As String, ByVal newImageFileName As String, ByVal ThumbImageMaxSize As Integer) As Boolean
+        '图片生成缩略图的函数
+        ' CurrentPath为操作的路径, 
+        ' oldImageFileName 为操作的源文件
+        ' newImageFilenName 为操作的目标文件
+        If ThumbImageMaxSize <= 0 Then Return False
+        If CurrentPath.Length <= 0 Then Return False
+        If oldImageFileName.Length <= 0 Then Return False
+        If newImageFileName.Length <= 0 Then Return False
+        Try
+            Dim objImage As System.Drawing.Image
+            objImage = System.Drawing.Image.FromFile(CurrentPath & oldImageFileName)
+            Dim orgWidth As Int16 = objImage.Width
+            Dim orgHeight As Int16 = objImage.Height
+            Dim newWidth, newHeight As Int64
+            If orgWidth > orgHeight Then
+                newWidth = ThumbImageMaxSize
+                newHeight = (orgHeight * newWidth) / orgWidth
+            Else
+                newHeight = ThumbImageMaxSize
+                newWidth = (orgWidth * newHeight) / orgHeight
+            End If
+
+            Dim oimg As System.Drawing.Image = System.Drawing.Image.FromFile(CurrentPath & oldImageFileName)
+
+            Dim nimg As System.Drawing.Image = oimg.GetThumbnailImage(newWidth, newHeight, Nothing, IntPtr.Zero)
+            System.Web.HttpContext.Current.Response.Clear()
+            Dim outs As Drawing.Bitmap = New Drawing.Bitmap(nimg)
+            '处理图像质量()
+            Dim codecs As Drawing.Imaging.ImageCodecInfo() = Drawing.Imaging.ImageCodecInfo.GetImageEncoders()
+            Dim ici As Drawing.Imaging.ImageCodecInfo = Nothing
+            For Each codec As Drawing.Imaging.ImageCodecInfo In codecs
+                If codec.MimeType = "image/jpeg" Then
+                    ici = codec
+                End If
+            Next
+
+            Dim ep As Drawing.Imaging.EncoderParameters = New Drawing.Imaging.EncoderParameters
+            ep.Param(0) = New Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, CLng(100))
+            outs.Save(CurrentPath & newImageFileName, ici, ep)
+            Return True
+        Catch e As Exception
+            Return False
+        End Try
+    End Function
+
+    Sub Add_WaterText_Image(ByVal path As String, ByVal AddText As String)
+        '//加文字水印，注意，这里的代码和以下加图片水印的代码不能共存 
+        Dim image As System.Drawing.Image = System.Drawing.Image.FromFile(path)
+        Dim g As Graphics = Graphics.FromImage(image)
+        g.DrawImage(image, 0, 0, image.Width, image.Height)
+        Dim f As Font = New Font("Verdana", 32)
+        Dim b As Brush = New SolidBrush(Color.White)
+        AddText = AddText.Trim()
+        g.DrawString(AddText, f, b, 10, 10)
+        g.Dispose()
+        '//保存加水印过后的图片,删除原始图片 
+        If File.Exists(path) Then
+            File.Delete(path)
+        End If
+        image.Save(path)
+        image.Dispose()
+    End Sub
+
+    Sub Add_WaterPic_Image(ByVal path As String, ByVal WaterPicPath As String)
+        '//加图片水印 
+        Dim image As System.Drawing.Image = System.Drawing.Image.FromFile(path)
+        Dim CopyImage As System.Drawing.Image = System.Drawing.Image.FromFile(WaterPicPath)
+        Dim g As Graphics = Graphics.FromImage(image)
+        g.DrawImage(CopyImage, New Rectangle(image.Width - CopyImage.Width, image.Height - CopyImage.Height, CopyImage.Width, CopyImage.Height), 0, 0, CopyImage.Width, CopyImage.Height, GraphicsUnit.Pixel)
+        g.Dispose()
+        '//保存加水印过后的图片,删除原始图片 
+        If File.Exists(path) Then
+            File.Delete(path)
+        End If
+        image.Save(path)
+        image.Dispose()
+    End Sub
+
+#End Region
+
+
+#Region "对IO目录以及文件相关操作的函数"
+    Public Function CreateDir(ByVal Path As String) As Boolean
+        If Directory.Exists(Path) = False Then
+            Directory.CreateDirectory(Path)
+            Return True
+        Else    '表示文件夹已经存在
+            Return False
+        End If
+    End Function
+
+    Public Sub DelDir(ByVal path As String)
+        If Directory.Exists(path) = True Then
+            Dim filelist As String() = Directory.GetFileSystemEntries(path)
+            Dim i
+            For i = 0 To filelist.GetUpperBound(0)
+                If Directory.Exists(filelist(i)) = True Then
+                    DelDir(filelist(i))
+                Else
+                    File.Delete(filelist(i))
+                End If
+            Next
+            Directory.Delete(path)
+        End If
+    End Sub
+
+    Public Sub CopyDir(ByVal srcPath As String, ByVal aimPath As String)
+        '对整个目录的复制
+        'Dim Directory As IO.Directory
+        'Dim Path As IO.Path
+        'Dim File As IO.File
+
+        '// 检查目标目录是否以目录分割字符结束如果不是则添加之
+        If aimPath(aimPath.Length - 1) <> Path.DirectorySeparatorChar Then aimPath += Path.DirectorySeparatorChar
+        '// 判断目标目录是否存在如果不存在则新建之
+        If Directory.Exists(aimPath) = False Then Directory.CreateDirectory(aimPath)
+        '// 得到源目录的文件列表，该里面是包含文件以及目录路径的一个数组
+        '// 如果你指向copy目标文件下面的文件而不包含目录请使用下面的方法
+        '// string[] fileList = Directory.GetFiles(srcPath);
+        Dim filelist As String() = Directory.GetFileSystemEntries(srcPath)
+        '// 遍历所有的文件和目录
+        Dim i
+        For i = 0 To filelist.GetUpperBound(0)
+            If Directory.Exists(filelist(i)) = True Then
+                CopyDir(filelist(i), aimPath + Path.GetFileName(filelist(i)))
+            Else
+                File.Copy(filelist(i), aimPath + Path.GetFileName(filelist(i)), True)
+            End If
+        Next
+        Return
+    End Sub
+#End Region
+
+
+#Region "对文本文件进行读写操作的函数集"
+
+    Function Text_File_Read(ByVal FileName As String) As String
+        Dim TempStr As String
+        TempStr = ""
+        If Not IO.File.Exists(FileName) Then
+            Console.WriteLine("{0} does not exist.", FileName)
+            Text_File_Read = "文件" & FileName & "不存在"
+            Exit Function
+        End If
+
+        Using sr As IO.StreamReader = IO.File.OpenText(FileName)
+
+            Dim inputs As String
+            inputs = sr.ReadLine()
+            While Not inputs Is Nothing
+                TempStr = TempStr & inputs & Chr(13) & Chr(10)
+                inputs = sr.ReadLine()
+            End While
+            sr.Close()
+        End Using
+        Text_File_Read = TempStr
+    End Function
+
+    Function Text_File_Save(ByVal FileName As String, ByVal Str As String, ByVal Encode As Encoding) As Boolean
+        '有编码转换功能
+        If IO.File.Exists(FileName) Then            '文件已经存在，返回错误信息
+            Text_File_Save = False
+            Exit Function
+        End If
+        Using sw As IO.StreamWriter = New IO.StreamWriter(FileName, False, Encode)  '当False为True是.向文件添加内容
+            sw.Write(Str)           ' 写入文件
+            sw.Close()
+        End Using
+        Text_File_Save = True
+    End Function
+
+    Function Text_File_Save(ByVal FileName As String, ByVal Str As String) As Boolean
+        If IO.File.Exists(FileName) Then            '文件已经存在，返回错误信息
+            Text_File_Save = False
+            Exit Function
+        End If
+        Using sw As IO.StreamWriter = New IO.StreamWriter(FileName)
+            sw.Write(Str)           ' 写入文件
+            sw.Close()
+        End Using
+        Text_File_Save = True
+    End Function
+
+    Function Text_File_SaveAs(ByVal FileName As String, ByVal Str As String, ByVal Encode As Encoding) As Boolean
+        Using sw As IO.StreamWriter = New IO.StreamWriter(FileName, False, Encode)
+            sw.Write(Str)           ' 写入文件
+            sw.Close()
+        End Using
+
+        Text_File_SaveAs = True
+    End Function
+#End Region
+
+    Function EnCodeToGb2312(ByVal Str As String) As String
+        '没用
+        Dim gb2312info As String
+
+        gb2312info = String.Empty
+        Dim utf8, gb2312 As Encoding
+        utf8 = Encoding.UTF8
+        gb2312 = Encoding.GetEncoding("gb2312")
+
+        '// Convert the string into a byte[].
+        Dim unicodeBytes As Byte() = utf8.GetBytes(Str)
+        '// Perform the conversion from one encoding to the other.
+        Dim asciiBytes As Byte() = Encoding.Convert(utf8, gb2312, unicodeBytes)
+
+        '// Convert the new byte[] into a char[] and then into a string.
+        '// This is a slightly different approach to converting to illustrate
+        '// the use of GetCharCount/GetChars.
+        Dim asciiChars(gb2312.GetCharCount(asciiBytes, 0, asciiBytes.Length)) As Char
+        gb2312.GetChars(asciiBytes, 0, asciiBytes.Length, asciiChars, 0)
+        gb2312info = New String(asciiChars)
+
+        ' Create two different encodings.
+
+        EnCodeToGb2312 = gb2312info
+    End Function
+
+    ''' <summary>
+    ''' 将Base64的内容转换成文件（附件，图片）
+    ''' </summary>
+    ''' <param name="Base64Str"></param>
+    ''' <param name="SaveFileName"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function SaveBase64ToFile(ByVal Base64Str As String, ByVal SaveFileName As String) As String
+        If Base64Str Is Nothing Then Return Nothing
+
+        Dim FileTempName() As Byte    '临时的文件名字节位
+        Dim BodyData() As Byte      '用来存储转换后的内容
+
+        Try
+            BodyData = System.Convert.FromBase64String(Base64Str)
+            '头24个位置为INFOPATH添加上去的内容.
+            '查找文件名的位置
+            Dim Zcount As Int16 = 0
+            Dim BodyIndex As Integer = 0
+            Dim j As Integer
+            For j = 0 To BodyData.Length - 1
+                If j >= 24 Then
+                    If BodyData.GetValue(j) = 0 Then
+                        Zcount += 1
+                    Else
+                        Zcount = 0
+                    End If
+                    If Zcount = 3 Then
+                        BodyIndex = j
+                        Exit For
+                    End If
+                End If
+            Next
+
+            '得到文件名.
+            Dim FileTempName1 As New IO.MemoryStream()
+            FileTempName1.Write(BodyData, 24, BodyIndex - 24)
+            FileTempName = FileTempName1.ToArray
+
+            '得到文件的内容
+            Dim stream As New IO.MemoryStream()
+            stream.Write(BodyData, BodyIndex + 1, BodyData.Length - BodyIndex - 1)
+            BodyData = stream.ToArray()
+            stream.Close()
+
+            Dim fs As System.IO.FileStream = New System.IO.FileStream(SaveFileName, System.IO.FileMode.Create)
+            Dim bw As System.IO.BinaryWriter = New System.IO.BinaryWriter(fs)
+            bw.Write(BodyData)
+            bw.Close()
+            fs.Close()
+            Return Encoding.Unicode.GetString(FileTempName)
+        Catch ex As Exception
+            '表示节点中的内容不是BASE64的.
+            Return Nothing
+        End Try
+    End Function
+
+
+#Region "列出目录文件列表ListBox操作函数"
+
+    Public Function HideFileList(ByVal FileList As ListBox, ByVal HideValue As String) As Boolean
+        '将目录文件列表ListBox中的一些扩展名的文件隐藏掉,用|来分开
+        Dim i, j
+        Dim TempValue
+        TempValue = HideValue.Split("|")
+        i = 0
+        While i <= FileList.Items.Count - 1
+            For j = 0 To UBound(TempValue)
+                If FileList.Items(i).Text.IndexOf(TempValue(j)) > -1 Then
+                    FileList.Items.RemoveAt(i)
+                    i -= 1              '还原I的值,因为删除了一条记录
+                End If
+            Next
+            i = i + 1
+        End While
+        HideFileList = True
+    End Function
+
+    Public Function ChangeDir(ByVal CurrentPath As String, ByVal FileList As ListBox, ByVal RootPath As String) As String
+        '改变ListBox中目录路径,得到新的目录文件列表
+        Dim ParentPath As String
+        If (FileList.SelectedItem.Text = "返回上级目录") Then               '//返回上级目录
+            If Left(CurrentPath, 1) = "\" Then CurrentPath = RootPath & CurrentPath
+            ParentPath = Directory.GetParent(CurrentPath).ToString()
+            LoadDir(ParentPath, FileList, RootPath)
+            ChangeDir = ParentPath.Replace(RootPath, "")
+        Else                                                                '//打开目录
+            ChangeDir = LoadDir(FileList.SelectedItem.Text, FileList, RootPath)
+        End If
+    End Function
+
+    Public Function LoadDir(ByVal FullPath As String, ByVal FileList As ListBox, ByVal RootPath As String) As String
+        '将目录文件列表存于ListBox里.并按RootPath去掉路径前面的部分.以相对路径显示
+        Dim Values As New ArrayList
+        Dim MyFiles, MyDirs As String()
+        If Left(FullPath, 3) = "文件:" Or Left(FullPath, 3) = "目录:" Then FullPath = FullPath.Substring(3)
+        If Left(FullPath, 1) = "\" Then FullPath = RootPath & FullPath '得到是相对路径则转成绝对路径
+        Try
+            MyFiles = Directory.GetFiles(FullPath)          '//得到该目录下所有文件
+        Catch
+            LoadDir = FullPath.Replace(RootPath, "")
+            Exit Function
+        End Try
+        If (FullPath.ToUpper <> RootPath.ToUpper) Then                    '//若不是顶级目录，增加“返回上级目录”选项 
+            Values.Add("返回上级目录")
+        End If
+        Dim i
+        Values.AddRange(MyFiles)                            '//加入文件
+        MyDirs = Directory.GetDirectories(FullPath)         '//得到该目录下所有目录
+        Values.AddRange(MyDirs)                             '//加入目录
+
+        For i = 0 To Values.Count - 1
+            If i <= MyFiles.GetUpperBound(0) Then
+                Values(i) = "文件:" & Values(i).replace(RootPath, "")
+            Else
+                Values(i) = "目录:" & Values(i).replace(RootPath, "")
+            End If
+        Next
+        If Values.Count > 0 Then Values(0) = Values(0).replace("文件:返回上级目录", "返回上级目录").replace("目录:返回上级目录", "返回上级目录")
+        FileList.DataSource = Values                        '//设置数据源
+        FileList.DataBind()                                 '//绑定数据
+        LoadDir = FullPath.Replace(RootPath, "")
+    End Function
+
+
+    Public Function ChangeDir1(ByVal CurrentPath As String, ByVal FileList As ListBox, ByVal RootPath As String) As String
+        '改变ListBox中目录路径,得到新的目录文件列表
+        Dim ParentPath As String
+        If (FileList.SelectedItem.Text = "返回上级目录") Then               '//返回上级目录
+            If Left(CurrentPath, 1) = "\" Then CurrentPath = RootPath & CurrentPath
+            ParentPath = Directory.GetParent(CurrentPath).ToString()
+            LoadDir1(ParentPath, FileList, RootPath)
+            ChangeDir1 = ParentPath.Replace(RootPath, "")
+        Else                                                                '//打开目录
+            ChangeDir1 = LoadDir1(FileList.SelectedItem.Text, FileList, RootPath)
+        End If
+    End Function
+
+    Public Function LoadDir1(ByVal FullPath As String, ByVal FileList As ListBox, ByVal RootPath As String) As String
+        '将目录文件列表存于ListBox里.并按RootPath去掉路径前面的部分.以相对路径显示
+        Dim Values As New ArrayList
+        Dim MyDirs As String()
+        If Left(FullPath, 3) = "文件:" Or Left(FullPath, 3) = "目录:" Then FullPath = FullPath.Substring(3)
+        If Left(FullPath, 1) = "\" Then FullPath = RootPath & FullPath '得到是相对路径则转成绝对路径
+        
+        If (FullPath.ToUpper <> RootPath.ToUpper) Then                    '//若不是顶级目录，增加“返回上级目录”选项 
+            Values.Add("返回上级目录")
+        End If
+        Dim i As Integer
+        MyDirs = Directory.GetDirectories(FullPath)         '//得到该目录下所有目录
+        Values.AddRange(MyDirs)                             '//加入目录
+
+        For i = Values.Count - 1 To 0 Step -1
+            If Values(i).replace(RootPath, "") <> "\分发临时文件夹" And Values(i).replace(RootPath, "") <> "\临时附件文件夹" Then
+                Values(i) = "目录:" & Values(i).replace(RootPath, "")
+            Else
+                Values.RemoveAt(i)
+            End If
+        Next
+        If Values.Count > 0 Then Values(0) = Values(0).replace("目录:返回上级目录", "返回上级目录")
+        FileList.DataSource = Values                        '//设置数据源
+        FileList.DataBind()                                 '//绑定数据
+        LoadDir1 = FullPath.Replace(RootPath, "")
+    End Function
+#End Region
+
+    Public Function GetWebConfig(ByVal names As String) As String
+        If System.Configuration.ConfigurationManager.AppSettings(names) Is Nothing Then
+            Return ""
+        Else
+            Return System.Configuration.ConfigurationManager.AppSettings(names)
+        End If
+    End Function
+
+    Public Function GetConnectionString(ByVal names As String) As String
+        Return System.Web.Configuration.WebConfigurationManager.ConnectionStrings(names).ConnectionString
+    End Function
+
+    Function WritePage(ByVal TempGrid As GridView, ByVal MaxPageCount As Integer) As String
+        '显示分页的信息(因为自带的只能显示部分功能)
+        '完全采用系统自带功能实现．
+        '在GridView的标签后面添加控件<table align=center width=98% height=26 valign=middle bgcolor=#e0e0e0 ><tr><td id=PageBar runat=server align=center></td></tr></table>
+        '再想办法得到未分页前的最大页数，然在Data_bound中添加这个函数 PageBar.InnerHtml = Base.Pub.Write(Gridview,MaxPage)
+        Dim Ret As String = String.Empty
+        Dim RowCount As Integer = TempGrid.Rows.Count
+        Dim PageIndex As Integer = TempGrid.PageIndex + 1
+        Dim PageCount As Integer = TempGrid.PageCount
+        Ret = "<span style='font-size:9pt;'>总记录数:" + MaxPageCount.ToString + "    每页:" + TempGrid.PageSize.ToString + "条     页数:" + PageIndex.ToString + "/" + PageCount.ToString + "    "
+        If (PageIndex > 1) Then
+            Ret += "<a href=""javascript:__doPostBack('Gridview1','Page$First')"">首页</a>  <a href=""javascript:__doPostBack('Gridview1','Page$Prev')"">上页</a> "
+        Else
+            Ret += "首页  上页 "
+        End If
+
+        '------------------------------------------------------------------------------------
+        '此部分为中间的显示页码数，规则是当前页的前后五页
+        Dim StartPage As Integer
+        Dim EndPage As Integer
+        If PageIndex > 5 Then
+            StartPage = PageIndex - 5
+        Else
+            StartPage = 1
+        End If
+        If PageIndex + 5 > PageCount Then
+            EndPage = PageCount
+        Else
+            EndPage = PageIndex + 5
+        End If
+        Dim i As Integer
+        For i = StartPage To EndPage
+            If i = PageIndex Then
+                Ret += "<b>" & i.ToString & "</b> "
+            Else
+                Ret += "<a href=""javascript:__doPostBack('Gridview1','Page$" & i & "')"">" & i & "</a>" & " "
+            End If
+        Next
+        '-------------------------------------------------------------------------------------
+
+        If (PageIndex < PageCount) Then
+            Ret += "  <a href=""javascript:__doPostBack('Gridview1','Page$Next')"">下页</a>  <a href=""javascript:__doPostBack('Gridview1','Page$Last')"">尾页</a>"
+        Else
+            Ret += "  下页  尾页"
+        End If
+
+        '--------------------------------------------------------------------------------------
+        '以下是输入页码，进行换行的部分'
+        Ret += "&nbsp;<input id='PageNum__Gpc' onkeydown='if(!KeyIsNumber(event.keyCode))  {  return false; }' type='text' size='2' style='border-style:Groove;font-size:8pt;width:25px;' /><a href='#' onclick='javascript:CheckPageNum()'>跳转</a>" '<input id='GOTO' type='button' value='GO' onclick='CheckPageNum()' />"        'JAVASCRIPT部分，用来限制输入框的输入值，以及对输入值进行换页处理
+        Ret += vbCrLf & "<script language=""javascript"">" & vbCrLf
+        Ret += " var MaxPage=" & PageCount.ToString & ";" & vbCrLf
+        Ret += "function KeyIsNumber(KeyCode)" & vbCrLf
+        Ret += "{ //如果输入的字符是在0-9之间，或者是backspace、DEL键" & vbCrLf
+        Ret += "if(((KeyCode>47)&&(KeyCode<58))||(KeyCode==8)||(KeyCode==46)||((KeyCode>95)&&(KeyCode<105)))" & vbCrLf
+        Ret += "{ return true;  }" & vbCrLf
+        Ret += "else" & vbCrLf
+        Ret += "{ return false; }" & vbCrLf
+        Ret += "}" & vbCrLf
+        Ret += "function CheckPageNum()" & vbCrLf
+        Ret += "{ var obj = document.getElementById(""PageNum__Gpc"");" & vbCrLf
+        Ret += "if ((obj.value!='')&&(obj.value!=0)&&(obj.value<=MaxPage))" & vbCrLf
+        Ret += "{" & vbCrLf
+        Ret += "try{" & vbCrLf
+        Ret += "__doPostBack('Gridview1','Page$'+obj.value);    }" & vbCrLf
+        Ret += "catch(err) {}" & vbCrLf
+        Ret += "}" & vbCrLf
+        Ret += "}" & vbCrLf & "</script>" & vbCrLf
+        '-------------------------------------------------------------------
+
+        Return Ret & "</span>"
+    End Function
+
+    Function WritePage2(ByVal TempGrid As GridView, ByVal MaxPageCount As Integer)
+        '显示分页的信息(因为自带的只能显示部分功能)
+        '完全采用系统自带功能实现．
+        '在GridView的标签后面添加控件<table align=center width=98% height=26 valign=middle bgcolor=#e0e0e0 ><tr><td id=PageBar runat=server align=center></td></tr></table>
+        '再想办法得到未分页前的最大页数，然在Data_bound中添加这个函数 PageBar.InnerHtml = Base.Pub.Write(Gridview,MaxPage)
+        Dim Ret As String = String.Empty
+        Dim RowCount As Integer = TempGrid.Rows.Count
+        Dim PageIndex As Integer = TempGrid.PageIndex + 1
+        Dim PageCount As Integer = TempGrid.PageCount
+        Ret = "<span style='font-size:9pt;'>总记录数:" + MaxPageCount.ToString + "    每页:" + TempGrid.PageSize.ToString + "条     页数:" + PageIndex.ToString + "/" + PageCount.ToString + "    "
+        If (PageIndex > 1) Then
+            Ret += "<a href=""javascript:__doPostBack('Gridview2','Page$First')"">首页</a>  <a href=""javascript:__doPostBack('Gridview2','Page$Prev')"">上页</a> "
+        Else
+            Ret += "首页  上页 "
+        End If
+
+        '------------------------------------------------------------------------------------
+        '此部分为中间的显示页码数，规则是当前页的前后五页
+        Dim StartPage As Integer
+        Dim EndPage As Integer
+        If PageIndex > 5 Then
+            StartPage = PageIndex - 5
+        Else
+            StartPage = 1
+        End If
+        If PageIndex + 5 > PageCount Then
+            EndPage = PageCount
+        Else
+            EndPage = PageIndex + 5
+        End If
+        Dim i As Integer
+        For i = StartPage To EndPage
+            If i = PageIndex Then
+                Ret += "<b>" & i.ToString & "</b> "
+            Else
+                Ret += "<a href=""javascript:__doPostBack('Gridview2','Page$" & i & "')"">" & i & "</a>" & " "
+            End If
+        Next
+        '-------------------------------------------------------------------------------------
+
+        If (PageIndex < PageCount) Then
+            Ret += "  <a href=""javascript:__doPostBack('Gridview2','Page$Next')"">下页</a>  <a href=""javascript:__doPostBack('Gridview2','Page$Last')"">尾页</a>"
+        Else
+            Ret += "  下页  尾页"
+        End If
+
+        '--------------------------------------------------------------------------------------
+        '以下是输入页码，进行换行的部分'
+        Ret += "&nbsp;<input id='PageNum__Gpc' onkeydown='if(!KeyIsNumber(event.keyCode))  {  return false; }' type='text' size='2' style='border-style:Groove;font-size:8pt;height:18px;' /><a href='#' onclick='javascript:CheckPageNum()'>跳转</a>" '<input id='GOTO' type='button' value='GO' style='font-size:9pt;height:18px;width:25px;' onclick='CheckPageNum()' />"
+        'JAVASCRIPT部分，用来限制输入框的输入值，以及对输入值进行换页处理
+        Ret += vbCrLf & "<script language=""javascript"">" & vbCrLf
+        Ret += " var MaxPage=" & PageCount.ToString & ";" & vbCrLf
+        Ret += "function KeyIsNumber(KeyCode)" & vbCrLf
+        Ret += "{ //如果输入的字符是在0-9之间，或者是backspace、DEL键" & vbCrLf
+        Ret += "if(((KeyCode>47)&&(KeyCode<58))||(KeyCode==8)||(KeyCode==46)||((KeyCode>95)&&(KeyCode<105)))" & vbCrLf
+        Ret += "{ return true;  }" & vbCrLf
+        Ret += "else" & vbCrLf
+        Ret += "{ return false; }" & vbCrLf
+        Ret += "}" & vbCrLf
+        Ret += "function CheckPageNum()" & vbCrLf
+        Ret += "{ var obj = document.getElementById(""PageNum__Gpc"");" & vbCrLf
+        Ret += "if ((obj.value!='')&&(obj.value!=0)&&(obj.value<=MaxPage))" & vbCrLf
+        Ret += "{" & vbCrLf
+        Ret += "try{" & vbCrLf
+        Ret += "__doPostBack('Gridview2','Page$'+obj.value);    }" & vbCrLf
+        Ret += "catch(err) {}" & vbCrLf
+        Ret += "}" & vbCrLf
+        Ret += "}" & vbCrLf & "</script>" & vbCrLf
+        '-------------------------------------------------------------------
+
+        Return Ret & "</span>"
+    End Function
+
+
+    Function GetPyChar(ByVal TempChar As Char) As String
+        Dim tmp As Int64
+        tmp = 65536 + Asc(TempChar)
+        If (tmp >= 45217 And tmp <= 45252) Then
+            GetPyChar = "A"
+        ElseIf (tmp >= 45253 And tmp <= 45760) Then
+            GetPyChar = "B"
+        ElseIf (tmp >= 45761 And tmp <= 46317) Then
+            GetPyChar = "C"
+        ElseIf (tmp >= 46318 And tmp <= 46825) Then
+            GetPyChar = "D"
+        ElseIf (tmp >= 46826 And tmp <= 47009) Then
+            GetPyChar = "E"
+        ElseIf (tmp >= 47010 And tmp <= 47296) Then
+            GetPyChar = "F"
+        ElseIf (tmp >= 47297 And tmp <= 47613) Then
+            GetPyChar = "G"
+        ElseIf (tmp >= 47614 And tmp <= 48118) Then
+            GetPyChar = "H"
+        ElseIf (tmp >= 48119 And tmp <= 49061) Then
+            GetPyChar = "J"
+        ElseIf (tmp >= 49062 And tmp <= 49323) Then
+            GetPyChar = "K"
+        ElseIf (tmp >= 49324 And tmp <= 49895) Then
+            GetPyChar = "L"
+        ElseIf (tmp >= 49896 And tmp <= 50370) Then
+            GetPyChar = "M"
+        ElseIf (tmp >= 50371 And tmp <= 50613) Then
+            GetPyChar = "N"
+        ElseIf (tmp >= 50614 And tmp <= 50621) Then
+            GetPyChar = "O"
+        ElseIf (tmp >= 50622 And tmp <= 50905) Then
+            GetPyChar = "P"
+        ElseIf (tmp >= 50906 And tmp <= 51386) Then
+            GetPyChar = "Q"
+        ElseIf (tmp >= 51387 And tmp <= 51445) Then
+            GetPyChar = "R"
+        ElseIf (tmp >= 51446 And tmp <= 52217) Then
+            GetPyChar = "S"
+        ElseIf (tmp >= 52218 And tmp <= 52697) Then
+            GetPyChar = "T"
+        ElseIf (tmp >= 52698 And tmp <= 52979) Then
+            GetPyChar = "W"
+        ElseIf (tmp >= 52980 And tmp <= 53640) Then
+            GetPyChar = "X"
+        ElseIf (tmp >= 53689 And tmp <= 54480) Then
+            GetPyChar = "Y"
+        ElseIf (tmp >= 54481 And tmp <= 62289) Then
+            GetPyChar = "Z"
+        Else   '如果不是中文，则不处理   
+            'GetPyChar = TempChar
+            GetPyChar = ""
+        End If
+    End Function
+
+    Function GetPY(ByVal str As String) As String
+        Dim i As Int64
+        Dim TempStr As String = String.Empty
+        Dim TempChar As String
+        str = str.Replace(" ", "")  '先去除空格
+        For i = 1 To Len(str)
+            TempChar = GetPyChar(Mid(str, i, 1))
+            If TempChar.ToString.Trim.Length = 0 Then
+                '当原来的内容出现英文的时候.去掉,此记录不做编码
+                TempStr = ""
+                Exit For
+            End If
+            TempStr = TempStr & TempChar
+        Next
+        Return TempStr
+    End Function
+End Class

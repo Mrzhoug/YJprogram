@@ -1,0 +1,77 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="PublicMsgModify.aspx.vb" Inherits="manager_Config_PublicMsgModify" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>修改公告</title>
+    <link href="../../images/Styles.css" type="text/css" />
+</head>
+<body>
+    <form id="form1" runat="server">
+    <span id="back" runat="server"></span>
+    <div><font style="font-size:9pt;">
+    <br />
+        <table style="width: 771px">
+            <tr>
+                <td style="width: 1783px; height: 21px" align="right">
+                    发布者：</td>
+                <td style="width: 1087px; height: 21px">
+                    <asp:TextBox ID="User" runat="server" Width="156px"></asp:TextBox>
+                    日期：<asp:TextBox ID="PDate" runat="server"></asp:TextBox></td>
+                <td rowspan="3" style="width: 725px" valign="top">
+                    <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+                        SelectCommand="Select GY_YGDM.YGXM,PublicMessageLookLog.LookDate From PublicMessageLookLog,GY_YGDM where GY_YGDM.YGDM = PublicMessageLookLog.UserID and PublicMessageLookLog.MessageID = @MessageID">
+                        <SelectParameters>
+                            <asp:Parameter DefaultValue="-1" Name="MessageID" />
+                        </SelectParameters>
+                    </asp:SqlDataSource>
+                    <asp:Panel ID="Panel1" runat="server" GroupingText="查看记录：" Height="50px" Width="250px" EnableViewState="False">
+                        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" BackColor="White" SkinID="GridViewSkin1"
+                        BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" DataSourceID="Conn"
+                        ForeColor="Black" Width="248px" Font-Size="9pt">
+                        <FooterStyle BackColor="#CCCC99" />
+                        <Columns>
+                            <asp:BoundField DataField="YGXM" HeaderText="账号" SortExpression="YGXM" />
+                            <asp:BoundField DataField="LookDate" HeaderText="查看日期" SortExpression="LookDate" />
+                        </Columns>
+                        <RowStyle BackColor="White" />
+                        <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+                        <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Right" />
+                        <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" />
+                        <AlternatingRowStyle BackColor="White" />
+                    </asp:GridView>
+                    </asp:Panel>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 1783px" align="right">
+                    标题：</td>
+                <td style="width: 1087px">
+                    <asp:TextBox ID="Title" runat="server" Width="350px"></asp:TextBox></td>
+            </tr>
+            <tr>
+                <td style="width: 1783px; height: 38px;" align="right">
+                    内容：</td>
+                <td style="width: 1087px; height: 38px;">
+                    <asp:TextBox ID="Content" runat="server" Height="325px" Width="350px" TextMode="MultiLine"></asp:TextBox></td>
+            </tr>
+            <tr>
+                <td style="width: 1783px; height: 3px;" align="right">
+                    </td>
+                <td style="width: 1087px; height: 3px;" align="right">
+                    <table width="100%">
+                        <tr>
+                            <td style="height: 26px" colspan="2" align=center >
+                                <asp:Button ID="Button1" runat="server" Text="保存修改" OnClick="Button1_Click" />
+                                &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+                                <input id="Button2" type="button" value=" 返  回 " onclick="window.history.back(-1);" /></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+</font>    
+    </div>
+    </form>
+</body>
+</html>
+

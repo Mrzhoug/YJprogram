@@ -1,0 +1,164 @@
+﻿
+Partial Class HomePage_Forms_FormXd_NoLc
+    Inherits System.Web.UI.Page
+
+
+    Dim Base As New Base
+    Dim XMDM, MKDM As Integer
+    Dim FID As Integer
+    Dim Login_User As String
+    Dim WUserID As Integer
+    Dim OweUser As String
+    Dim MKMC As String
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs)
+        '此文件为无流程的审批功能，与有流程的是分离的。
+        If Base.HomePageUserCheck = False Then
+            Base.Js.alert(Me, "请先登陆,再填写表单")
+            Exit Sub
+        End If
+        Login_User = Session("LoginName")
+        Dim Tb As New Data.DataTable
+        tb = Base.DB.Table("SELECT Cid FROM EnterprisesTable where UserName='" & Login_User & "'", "EnterprisesTable")
+        If tb.Rows.Count > 0 Then
+            WUserID = Tb.Rows(0)(0)
+        Else
+            Base.Js.alert(Me, "非法访问")
+            Exit Sub
+        End If
+
+        Try
+            FID = Request("FID")
+        Catch ex As Exception
+            Base.Js.alert(Me, "非法访问")
+            Exit Sub
+        End Try
+
+        Dim SQL As String
+        '得到进程中的记录,项目状态
+        Tb = Base.DB.Table("SELECT FID,MKDM,XMDM FROM XX_XMJC WHERE Fid = " & FID, "XX_XMJC")
+        If Tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "流程错误,请你重新建立项目" & "SELECT FID,MKDM,XMDM FROM XX_XMJC WHERE Fid = " & FID)
+            Exit Sub
+        End If
+        XMDM = Tb.Rows(0)(2)
+        MKDM = Tb.Rows(0)(1)
+
+        Tb = Base.DB.Table("SELECT XMSM FROM XX_XMJC,GY_XMXX WHERE Gy_XMXX.XMDM=XX_XMJC.XMDM and  (FID = " & FID & ")", "dd")
+        If Tb.Rows.Count > 0 Then
+            OweUser = Tb.Rows(0)(0)
+        Else
+            Base.Js.alert(Me, "流程错误,请与管理员联系")
+            Exit Sub
+        End If
+
+        '判断是否是有流程的申请审批
+        Tb = Base.DB.Table("select NoLcDm,MKMC from  GY_MKXX where MKDM = " & MKDM, "GY_MKXX")
+        If Tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "非法访问")
+            Exit Sub
+        Else
+            If IsDBNull(Tb.Rows(0)(0)) = True Then
+                '返回空值，表示是有流程的。 
+                Base.Js.alert(Me, "非法访问")
+                Exit Sub
+            End If
+        End If
+        MKMC = Tb.Rows(0)(1)
+
+        '过滤掉当前用户名.防止提交给自己审阅
+        'Conn.SelectCommand = "SELECT * FROM [GY_YGDM] where YGDM<>" & UserID
+
+
+        If Page.IsPostBack = False Then
+            DropDownList1.DataBind()
+            DropDownList1.Items.Add(New ListItem("未分类人员", "Other"))
+            Conn.SelectCommand = "SELECT * FROM [GY_YGDM] where YGDM=-1"
+            If DropDownList1.Items.Count > 0 Then
+                DropDownList1.SelectedIndex = 0
+                If DropDownList1.SelectedValue = "Other" Then
+                    Conn.SelectCommand = "SELECT * FROM [GY_YGDM] where SSKS is null "
+                Else
+                    Conn.SelectCommand = "SELECT * FROM [GY_YGDM] where SSKS=" & DropDownList1.SelectedValue
+                End If
+                CheckBoxList1.DataBind()
+            End If
+
+            Title.Text = "你发起了修订,请选择修订人员"
+            'Tb = Base.DB.Table("select GY_XMxd.YGDM,Xdtext,FQR,YGXM from GY_XMXd,GY_YGDM where GY_YGDM.YGDM=GY_XMXd.YGDM and  GY_XMXd.fid = " & FID, "GY_XMSP")
+            'If Tb.Rows.Count > 0 Then       '表示原来的审阅内容,进行显示
+            '    CheckBoxList2.DataSource = Tb
+            '    CheckBoxList2.DataBind()
+            'End If
+        End If
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs)
+        '如果是外网的用户发起.则给外网的用户发送信息.
+        '先给所有者发信息
+        Dim Title, Content As String
+        Title = "[" & MKMC & "]" & Server.HtmlEncode(TextBox1.Text.Replace("'", "''"))
+        Content = Title & "<br>[<a href=""../Forms/OpenInfoPath.aspx?FID=" & FID & """>打开表单</a>] [<a href=""../XJXM/ShowAbout_XMXD_NoLc.aspx?SID=" & FID & """>查看意见</a>]"
+        If Title.Length >= 200 Then Title.Substring(0, 199)
+        If Content.Length >= 500 Then Content.Substring(0, 499)
+
+        '       Base.DB.Query("insert into SendMessage(Title,FromUser,Content,TOUser,SendDate,LookFlag) values('" & Title & "','" & Login_User & "','" & Content & "','" & OweUser & "','" & Date.Now & "',0)")
+        '       Base.DB.Query("INSERT INTO [Gy_XmXd]([Fid],[YGDM] ,[XdText] ,[FQR],[XdBZ]) VALUES (" & FID & "," & UserID & ",'" & TextBox1.Text.Trim & "'," & UserID & ",0)")
+        Dim i As Integer
+        For i = 0 To CheckBoxList2.Items.Count - 1
+            Base.DB.Query("INSERT INTO [Gy_XmXd]([Fid],[YGDM] ,[XdText] ,[FQR],[XdBZ]) VALUES (" & FID & "," & CheckBoxList2.Items(i).Value.Trim & ",'" & TextBox1.Text.Trim & "'," & WUserID & ",1)")
+            If Base.DB.ErrorMessage Is Nothing Then
+                Response.Write("dd")
+            Else
+                Response.Write("INSERT INTO [Gy_XmXd]([Fid],[YGDM] ,[XdText] ,[FQR],[XdBZ]) VALUES (" & FID & "," & CheckBoxList2.Items(i).Value.Trim & ",'" & TextBox1.Text.Trim & "'," & WUserID & ",1)")
+            End If
+            Base.DB.Query("insert into SendMessage(Title,FromUser,Content,TOUser,SendDate,LookFlag) values('" & Title & "','" & Login_User & "','" & Content & "','" & CheckBoxList2.Items(i).Value.Trim & "','" & Date.Now & "',0)")
+        Next
+        Base.Js.alert(Me, "你的修订请求已经发送给相关人员！", "WebInfoPath.aspx?Fid=" & FID)
+
+    End Sub
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs)
+        Response.Redirect("WebInfoPath.aspx?Fid=" & FID)
+    End Sub
+
+    Protected Sub DropDownList1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+        If DropDownList1.SelectedValue = "Other" Then
+            Conn.SelectCommand = "SELECT * FROM [GY_YGDM] where (SSKS is null or SSKS =0) "
+        Else
+            Conn.SelectCommand = "SELECT * FROM [GY_YGDM] where SSKS=" & DropDownList1.SelectedValue
+        End If
+        CheckBoxList1.DataBind()
+    End Sub
+
+    Protected Sub Button4_Click(ByVal sender As Object, ByVal e As System.EventArgs)
+        Dim i As Int16
+        For i = 0 To CheckBoxList1.Items.Count - 1
+            CheckBoxList2.Items.Add(CheckBoxList1.Items(i))
+        Next
+        CheckBoxList1.Items.Clear()
+    End Sub
+
+    Protected Sub Button6_Click(ByVal sender As Object, ByVal e As System.EventArgs)
+        CheckBoxList2.Items.Clear()
+    End Sub
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs)
+        Dim i As Int16
+        For i = CheckBoxList1.Items.Count - 1 To 0 Step -1
+            If CheckBoxList1.Items(i).Selected = True Then
+                CheckBoxList2.Items.Add(CheckBoxList1.Items(i))
+                CheckBoxList1.Items.RemoveAt(i)
+            End If
+        Next
+    End Sub
+
+    Protected Sub Button5_Click(ByVal sender As Object, ByVal e As System.EventArgs)
+        Dim i As Int16
+        For i = CheckBoxList2.Items.Count - 1 To 0 Step -1
+            If CheckBoxList2.Items(i).Selected = True Then
+                CheckBoxList2.Items.RemoveAt(i)
+            End If
+        Next
+    End Sub
+
+End Class

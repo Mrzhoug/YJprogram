@@ -1,0 +1,41 @@
+﻿
+Partial Class Public_ExportExcel
+    Inherits System.Web.UI.Page
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim TmpTb As New DataTable
+        Dim QUERY As String = ""
+        Try
+            QUERY = Server.UrlDecode(Request.Form("Submit").ToString)
+        Catch ex As Exception
+            QUERY = ""
+        End Try
+
+        If QUERY.Trim.Length = 0 Then
+            Response.Write("../../manager/Blank.aspx?msg=内容为空")
+            Response.End()
+        End If
+
+        Dim ExpDB As String = Server.MapPath("../")
+
+        Dim TempOpDir As String = ExpDB & "Submit_Temp/"
+        Dim OutFileName As String = "Excel." & System.DateTime.Now.ToString.Replace(".", "") & ".xls"
+        If IO.File.Exists(ExpDB & "/ExampleDB.xls") = False Then
+            Response.Write("../../manager/Blank.aspx?msg=环境错误，请与管理员联系")
+            Response.End()
+        End If
+        Try
+            IO.File.Copy(ExpDB & "/ExampleDB.xls", TempOpDir & OutFileName, True)
+        Catch ex As Exception
+            Response.Write("../../manager/Blank.aspx?msg=对目录没有写的权限。复制文件出错")
+            Response.End()
+        End Try
+
+        Dim e1 As New SunfunExcel(TempOpDir & OutFileName)
+        e1.SaveExcel2(QUERY)
+
+        Response.Write("../../Submit_Temp/" & OutFileName)
+        Response.End()
+
+    End Sub
+End Class

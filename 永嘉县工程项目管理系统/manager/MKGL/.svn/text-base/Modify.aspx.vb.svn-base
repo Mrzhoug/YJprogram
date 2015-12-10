@@ -1,0 +1,125 @@
+﻿
+Partial Class manager_MKGL_Modify
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim i, k, mkdm As Integer
+    Dim RootPath As String
+    Dim P As Integer
+    Protected Sub cmd_modify_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles cmd_modify.Click
+        Dim mk_url As String
+
+        If RadioButton3.Checked = True Then
+            If URL.Text.Substring(1, 6).ToLower = "ttp://" Or URL.Text.Substring(1, 7).ToLower = "ttps://" Then
+                mk_url = URL.Text.Trim
+            Else
+                mk_url = "http://" & URL.Text.Trim
+            End If
+        Else
+            If TNEW_MK_url.Text.Trim = "" Then
+                If TOLD_mk_url.Text.Trim <> "" Then
+                    If Base.DB.ExeSql("update [GY_MKXX] set MKMC='" & TMK_name.Text.Trim & "' where MKDM=" & mkdm) > 0 Then
+                        Base.Js.CloseGoTo(Me, "修改成功！", "index.aspx?Page=" & P)
+                        Exit Sub
+                    End If
+                Else
+                    Base.Js.alert(Me, "你没有做任务修改")
+                    Exit Sub
+                End If
+            Else
+                mk_url = "../manager" & TNEW_MK_url.Text.Replace("\", "/")
+            End If
+        End If
+
+
+
+        If RadioButton2.Checked = True Then mk_url = mk_url.Replace("../manager", "../ApplicationTemplateLibrary")
+        If Base.DB.ExeSql("update [GY_MKXX] set MKMC='" & TMK_name.Text.Trim & "', XDLJ='" & mk_url & "',WLLJ='" & RootPath & "\" & Replace(mk_url, "/", "\") & "' where MKDM=" & mkdm) > 0 Then
+            Base.Js.CloseGoTo(Me, "修改成功！", "index.aspx?Page=" & P)
+        End If
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking("../manager/mkgl/index.aspx") '用来对文件进么权限判断.因为这个功能是前一功能的子功能.所以这样子处理
+
+
+        mkdm = Request.QueryString("mkdm")
+        Try
+            P = Request("Page")
+        Catch ex As Exception
+            P = 0
+        End Try
+        '得到根目录
+        RootPath = Request.MapPath("./")
+        RootPath = RootPath.Substring(0, RootPath.LastIndexOf("manager") + 7)
+        If Not Page.IsPostBack Then
+            Dim Tb As New Data.DataTable
+
+            Tb = Base.DB.Table("select MKMC,XDLJ from [GY_MKXX] where MKDM=" & mkdm, "GY_MKXX")
+            If Tb.Rows.Count <= 0 Then
+                Base.Js.CloseGoTo(Me, "非法访问！", "index.aspx?Page=" & P)
+                Exit Sub
+            End If
+            TMK_name.Text = Trim(Tb.Rows(0)(0))
+            Dim OldUrl As String = Trim(Tb.Rows(0)(1))
+            If OldUrl.IndexOf("./ApplicationTemplateLibrary/") > 0 Then
+                OldUrl = OldUrl.Replace("../ApplicationTemplateLibrary/", "\").Replace("/", "\")
+                RadioButton2.Checked = True
+                ListBox1.Visible = True
+                URL.Visible = False
+                RootPath = RootPath.Replace("manager", "ApplicationTemplateLibrary")
+                TNEW_MK_url.Text = Base.pub.LoadDir(RootPath, ListBox1, RootPath)
+            End If
+            If OldUrl.IndexOf("./manager/") > 0 Then
+                OldUrl = OldUrl.Replace("../manager/", "\").Replace("/", "\")
+                RadioButton1.Checked = True
+                TNEW_MK_url.Text = Base.pub.LoadDir(RootPath, ListBox1, RootPath)
+                Base.pub.HideFileList(ListBox1, ".vb|.resx")
+            End If
+            If OldUrl.IndexOf("ttp://") > 0 Then
+                RadioButton3.Checked = True
+                ListBox1.Visible = False
+                URL.Visible = True
+                URL.Text = OldUrl
+            End If
+            TOLD_mk_url.Text = OldUrl
+            URL.Visible = False
+        End If
+    End Sub
+
+    Protected Sub ListBox1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles ListBox1.SelectedIndexChanged
+        If RadioButton1.Checked = True Then
+            RootPath = RootPath.Replace("ApplicationTemplateLibrary", "manager")
+        End If
+        If RadioButton2.Checked = True Then
+            RootPath = RootPath.Replace("manager", "ApplicationTemplateLibrary")
+        End If
+
+        TNEW_MK_url.Text = Base.pub.ChangeDir(TNEW_MK_url.Text, ListBox1, RootPath)
+        Base.pub.HideFileList(ListBox1, ".vb|.resx")
+    End Sub
+
+    Protected Sub RadioButton1_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles RadioButton1.CheckedChanged
+        If RadioButton1.Checked = True Then
+            ListBox1.Visible = True
+            URL.Visible = False
+            RootPath = RootPath.Replace("ApplicationTemplateLibrary", "manager")
+            TNEW_MK_url.Text = Base.pub.LoadDir(RootPath, ListBox1, RootPath)
+        End If
+    End Sub
+
+    Protected Sub RadioButton2_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles RadioButton2.CheckedChanged
+        If RadioButton2.Checked = True Then
+            ListBox1.Visible = True
+            URL.Visible = False
+            RootPath = RootPath.Replace("manager", "ApplicationTemplateLibrary")
+            TNEW_MK_url.Text = Base.pub.LoadDir(RootPath, ListBox1, RootPath)
+        End If
+    End Sub
+
+    Protected Sub RadioButton3_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles RadioButton3.CheckedChanged
+        If RadioButton3.Checked = True Then
+            ListBox1.Visible = False
+            URL.Visible = True
+        End If
+    End Sub
+End Class

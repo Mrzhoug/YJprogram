@@ -1,0 +1,178 @@
+﻿Imports System.IO
+Partial Class manager_CreateFunction_Default
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim RootPath As String
+    Dim LCMC As String
+    Dim CurrentUrl As String
+    Dim WorkingDirectory As String
+    Dim MaxPage As Integer
+    Dim Ds As New Data.DataSet
+
+
+    Function HaveErrDoSomeThing(ByVal Path As String, ByVal msg As String) As Boolean
+        '当发生错时.进行相应的清理操作,因为要清理干净,所以如果出现错误也继续执行
+        On Error Resume Next
+        Dim XmlFileName As String = Path & "\" & LCMC & ".xml"
+        File.Delete(XmlFileName)
+        File.Delete(Path & "\" & LCMC & ".库.xml")
+        IO.Directory.Delete(Path & "\" & LCMC)
+        Base.DB.Query("delete GY_LCDM Where lcmc = '" & LCMC & "',lcsm='" & LCMC & "',flag=0")
+        Base.Js.alert(Me, msg)
+    End Function
+
+    Sub SearchGV()
+        Dim i As Integer
+        Dim SearchStr As String = TextBox2.Text.Trim
+        For i = ds.Tables(0).Rows.Count - 1 To 0 Step -1
+            If ds.Tables(0).Rows(i)(1).ToString.IndexOf(SearchStr) = -1 Then
+                ds.Tables(0).Rows.RemoveAt(i)
+            End If
+        Next
+        MaxPage = Ds.Tables(0).Rows.Count
+        GridView1.DataSource = Ds
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        Dim XsnFile As String = GridView1.Rows(e.NewSelectedIndex).Cells(2).Text.Trim
+        Dim NewDir As String = GridView1.Rows(e.NewSelectedIndex).Cells(1).Text.Trim
+        NewDir = Left(NewDir, Len(NewDir) - 4)
+
+        '建目录，用来测试原来的文件目录是否在
+        If Base.IO.CreateDir(RootPath & "/" & NewDir) = True Then      '表示创建成功，原来空．则再解压一次
+            '解压文件
+            Base.IO.ExtractFilesFromXSN(XsnFile, RootPath & "/" & NewDir, WorkingDirectory)
+            System.Threading.Thread.Sleep(1000)
+        End If
+
+        Dim Root As String = Server.MapPath("../../") & "TemplateLibrary\" & NewDir
+        Dim Node As System.Xml.XmlNode
+        If File.Exists(Root & "/manifest.xsf") = False Then
+            Base.Js.alert(Me, "功能存在问题")
+            Exit Sub
+        End If
+        Node = Base.XmlClass.GetXmlFile(Root & "/manifest.xsf")
+        Dim i As Integer
+        Dim NodeLt As System.Xml.XmlNodeList
+        NodeLt = Base.XmlClass.FindNodes("//xsf:view")
+        If NodeLt Is Nothing Then
+            Base.Js.alert(Me, "模板结构错误:你检查模板!")
+        Else
+            View1.Items.Clear()
+            For i = 0 To NodeLt.Count - 1
+                View1.Items.Add(NodeLt.Item(i).Attributes("name").Value)
+            Next
+        End If
+        TextBox1.Text = NewDir
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking()        '这里对文件进行权限限制
+
+        '得到当前路径的实际路径　
+        WorkingDirectory = Request.MapPath("./")
+        WorkingDirectory = WorkingDirectory.Substring(0, Len(WorkingDirectory) - 1)
+
+        RootPath = Request.MapPath("../../") & "TemplateLibrary\"
+        RootPath = RootPath.Substring(0, RootPath.Length - 1)
+        '得到当前的ＵＲＬ路径        
+        Dim Url As String = Request.ServerVariables("Url").ToLower
+        Dim Host As String = Request.ServerVariables("http_host")
+        CurrentUrl = Url.Replace("manager/createfunction/xsn_model.aspx", "TemplateLibrary/")
+
+        Base.IO.CreateDir(RootPath)
+
+        Ds = Base.IO.CreateDataSetFromFileList(RootPath)
+        If TextBox2.Text.Length > 0 Then
+            SearchGV()
+        End If
+        MaxPage = Ds.Tables(0).Rows.Count
+        GridView1.DataSource = Ds
+        If Not Page.IsPostBack Then
+            GridView1.DataBind()
+        End If
+    End Sub
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub Button1_Click1(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim TempPathV As String = RootPath.Replace("TemplateLibrary", "FormFolder")
+        If GridView1.SelectedIndex <= 0 Then
+            Base.Js.alert(Me, "当前无模板文件,请先到[表单模板库]中上传模板文件,再添加功能表单")
+            Exit Sub
+        End If
+        Dim NewDir As String = GridView1.DataKeys(GridView1.SelectedIndex).Item(0)
+        NewDir = Left(NewDir, Len(NewDir) - 4)
+        If GridView1.SelectedIndex < 0 Then
+            Base.Js.alert(Me, "你还没有选中要添加功能的模板!")
+            Exit Sub
+        End If
+
+        LCMC = TextBox1.Text.Trim
+        If LCMC.Length <= 0 Then                '当没有输入时.默认用模板名来做为功能名
+            LCMC = NewDir
+        End If
+
+        '1.检测目录是否已经存在,模块信息表中是否存在,提示退出
+        If Base.DB.GetRowCount("select * from [GY_MKXX] where MKMC='" & LCMC & "'", "dd") > 0 Then
+            Base.Js.alert(Me, "此功能模块名已经存在")
+            Exit Sub
+        End If
+
+        '2创建目录
+        If Base.pub.CreateDir(TempPathV & "\" & LCMC) = False Then
+            '表示原来的目录已经存在.以数据库为准
+        End If
+
+        '3.判断表单数据模板是否为合法.不合法则删除表单数据模板和流程目录.
+        Dim XmlFileName As String = RootPath & "\" & NewDir & "\template.xml"
+
+        Dim Result As String = Base.CheckFormData(XmlFileName)
+        If Not Result Is Nothing Then       '表示检测表单表,不合法
+            HaveErrDoSomeThing(TempPathV, Result)
+            Exit Sub
+        End If
+
+        '4.复制数据模板与库文件到相应的表单目录
+        If File.Exists(TempPathV & "\" & LCMC & ".库.xml") = True Then
+            Try
+                File.Delete(TempPathV & "\" & LCMC & ".库.xml")
+                File.Copy(XmlFileName, TempPathV & "\" & LCMC & ".库.xml")
+            Catch ex As Exception
+                HaveErrDoSomeThing(TempPathV, "目录已经存在一个库文件，而且现在被人占用，无法创建！")
+                Exit Sub
+            End Try
+        Else
+            File.Copy(XmlFileName, TempPathV & "\" & LCMC & ".库.xml")
+        End If
+
+
+
+        '清除库中的所有节点．但是问题是，如果清除了．命名空间也取消了．
+        'Node1 = Base.XmlClass.GetXmlFile(TempPathV & "\" & LCMC & ".库.xml")
+        'Base.XmlClass.ClearAllNode()
+
+        '5.在数据库中写入模块信息
+        RootPath = Request.MapPath("./")
+        RootPath = RootPath.Substring(0, RootPath.LastIndexOf("manager") + 7)
+        Dim mk_url As String = "../FormFolder/" & LCMC & ".xml"
+        If Base.DB.ExeSql("insert into [GY_MKXX](MKMC, WLLJ, XDLJ,DisplayOrder,XsnDir,[View]) values('" & LCMC & "','" & RootPath & "\" & Replace(mk_url, "/", "\") & "','" & mk_url & "', 99,'" & NewDir & "','" & View1.SelectedValue & "')") > 0 Then
+            Base.Js.alert(Me, "添加成功")
+        Else
+            HaveErrDoSomeThing(TempPathV, "写表失败")
+        End If
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Attributes.Add("onmouseover", "OnMouseOver(this)")
+            GridView1.Rows(i).Attributes.Add("onmouseout", "OnMouseOut(this)")
+        Next
+        PageBar.InnerHtml = Base.pub.WritePage(GridView1, MaxPage)
+    End Sub
+End Class

@@ -1,0 +1,115 @@
+﻿
+Partial Class manager_Forms_AutoAddNewForms
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Dim LCDM As Integer
+        Dim contentxml As New SunFun.Xmlclass
+        Dim formxml As New SunFun.Xmlclass
+        Dim Login_User As String
+        Dim UserID As Integer
+        Dim i As Integer
+
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Try
+            LCDM = (Request("LCDM"))
+        Catch ex As Exception
+            Response.Write("参数LCDM错误")
+            Response.End()
+        End Try
+
+        Try
+            contentxml.xmlDoc.LoadXml(Request("content"))
+        Catch ex As Exception
+            Response.Write(Request("content"))
+            Response.Write("参数CONTENT错误")
+            Response.End()
+        End Try
+
+        '判断是否存在此流程，并得到项目名称
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("SELECT LCMC FROM GY_LCDM where LCDM = " & LCDM, "GY_LCDM")
+        If tb.Rows.Count = 0 Then
+            Response.Write("非法访问!")
+            Exit Sub
+        End If
+        Dim XMMC As String = tb.Rows(0).Item(0)         '因为是无流程,流程名称与项目名称一样
+        Dim DfileName As String = Base.AutoAddProject_HasNoLC(LCDM, Login_User, "../../")
+        If DfileName = Nothing Then
+            Base.Js.alert(Me, "新建表单出错,请更新模板")
+            Exit Sub
+        End If
+
+        formxml.xmlDoc.Load(DfileName)
+        For i = 0 To contentxml.xmlDoc.ChildNodes(0).ChildNodes.Count - 1
+            Dim nodeName As String
+
+            Dim a As System.Xml.XmlNodeList
+
+            nodeName = contentxml.xmlDoc.ChildNodes(0).ChildNodes(i).Name
+            nodeName = "my:" & nodeName
+            Try
+                If formxml.xmlDoc.GetElementsByTagName(nodeName).Count = 1 Then
+                    formxml.xmlDoc.GetElementsByTagName(nodeName).Item(0).InnerXml = contentxml.xmlDoc.ChildNodes(0).ChildNodes(i).InnerXml
+                Else
+                    Response.Write("输入参数错误，" & nodeName & "未找到！")
+                    Response.End()
+                End If
+            Catch ex As Exception
+            End Try
+        Next
+
+        formxml.xmlDoc.Save(DfileName)
+
+        '表单入库操作
+        Dim fidPath As String
+        Dim formFolderPath As String
+        Dim fid As String
+        Dim OpDir As String = Server.MapPath("../../") & "FormFolder/"
+        Dim xmdm As String
+
+       
+        fidPath = DfileName
+        fid = fidPath.Split("\")(fidPath.Split("\").Length - 1).Replace(".xml", "")
+        formFolderPath = fidPath.Replace("Submit_Temp\CreateTemp", "FormFolder\" & XMMC)
+        Try
+            System.IO.File.Copy(fidPath, formFolderPath)
+
+
+            tb = Base.DB.Table("select * from xx_xmjc where fid=" & fid, "dd")
+            If tb.Rows.Count > 0 Then
+                xmdm = tb.Rows(0).Item("XMDM")
+            Else
+                Response.Write("获取XMDM失败！")
+                Response.End()
+            End If
+
+
+            If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLMapping").ToLower <> "true" And Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.Synchronization").ToLower <> "true" Then
+                Base.XmlDataToDB(fid, OpDir)      '数据入库,进行查询之用
+            End If
+            Try
+                '改变表单状态，用以显示
+                Base.DB.Query("update gy_xmxx set xmjd = '已完成' where xmdm = " & xmdm)
+                Base.DB.Query("update xx_xmjc set state = '0' where xmdm = " & xmdm)
+            Catch ex As Exception
+
+            End Try
+
+            Dim LibraryPath As String
+            LibraryPath = System.AppDomain.CurrentDomain.BaseDirectory & "\FormFolder\"
+            Base.UpdateMapping(fid)
+
+            FormInfo.SubmitForm(fid)
+            'Base.SynSubmit(fid, "提交")
+        Catch ex As Exception
+            Response.Write("表单同步失败!")
+            Response.End()
+        End Try
+        Response.Write("保存成功！")
+    End Sub
+End Class

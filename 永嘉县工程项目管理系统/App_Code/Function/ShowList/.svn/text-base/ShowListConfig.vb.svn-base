@@ -1,0 +1,164 @@
+﻿Imports Microsoft.VisualBasic
+Imports System.Collections.Generic
+
+Public Class ShowListConfig
+
+    ''' <summary>
+    ''' 获取所有显示列配置
+    ''' </summary>
+    ''' <param name="LCDM"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetShowListColumns(ByVal LCDM As Integer) As List(Of MShowListItem)
+
+        Dim sqlstr As String
+        sqlstr = "select LCDM,ShowName,NodeName from ShowList_LCDM where LCDM = " + LCDM.ToString()
+
+        Dim dt As New DataTable
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("ShowListConfig---GetShowListItems 失败", ex.ToString())
+        End Try
+
+
+        Dim list As New List(Of MShowListItem)
+
+        Dim i As Integer
+        For i = 0 To dt.Rows.Count - 1
+            Dim item As New MShowListItem
+            item.LCDM = LCDM
+            item.ShowName = dt.Rows(i).Item("ShowName").ToString()
+            item.NodeName = dt.Rows(i).Item("NodeName").ToString()
+            list.Add(item)
+        Next
+
+
+        If list.Count = 0 Then
+            Dim defaultItem As New MShowListItem
+
+            defaultItem.NodeName = "<my:表单号>"
+            defaultItem.ShowName = "表单号"
+            list.Add(defaultItem)
+
+            defaultItem.NodeName = "<my:状态>"
+            defaultItem.ShowName = "状态"
+            list.Add(defaultItem)
+
+            defaultItem.NodeName = "<my:操作者>"
+            defaultItem.ShowName = "操作者"
+            list.Add(defaultItem)
+        End If
+        Return list
+    End Function
+
+    ''' <summary>
+    ''' 根据显示列名称获取显示列对应节点
+    ''' </summary>
+    ''' <param name="LCDM"></param>
+    ''' <param name="showName"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetShowNodeName(ByVal LCDM As Integer, ByVal showName As String) As String
+        Dim sqlstr As String
+        sqlstr = "select top 1 NodeName from ShowList_LCDM where LCDM = " + LCDM.ToString() + " and showName = '" + showName + "'"
+
+        Dim nodeName As String = String.Empty
+        Try
+            nodeName = SqlHelper.ExecuteScalar(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("ShowListConfig---GetShowListNodeName 失败", ex.ToString())
+        End Try
+
+        If Not String.IsNullOrEmpty(nodeName) Then
+            Return nodeName.Replace("<", "").Replace(">", "")
+        Else
+            Return nodeName
+        End If
+
+    End Function
+
+
+    ''' <summary>
+    ''' 获取显示列表按钮配置
+    ''' </summary>
+    ''' <param name="LCDM"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetShowListButtonConfig(ByVal LCDM As Integer) As List(Of MShowListButtonConfig)
+        Dim configStr As String
+        configStr = SystemConfig.ReadConfig("表单列表页按钮配置", LCDM)
+
+        Dim list As New List(Of MShowListButtonConfig)
+        If configStr.Length > 0 Then
+            Dim configTemp() As String = configStr.Split(",")
+
+            '置顶
+            If configTemp(0) = "0" Then
+                Dim item As New MShowListButtonConfig
+                item.ControlID = "btn_setTop"
+                item.CanShow = False
+                list.Add(item)
+            End If
+
+            '分发
+            If configTemp(1) = "0" Then
+                Dim item As New MShowListButtonConfig
+                item.ControlID = "btn_send"
+                item.CanShow = False
+                list.Add(item)
+            End If
+
+            '锁定
+            If configTemp(2) = "0" Then
+                Dim item As New MShowListButtonConfig
+                item.ControlID = "btn_lock"
+                item.CanShow = False
+                list.Add(item)
+            End If
+
+            '下拉操作
+            If configTemp(3) = "0" Then
+                Dim item As New MShowListButtonConfig
+                item.ControlID = "ddl_operations"
+                item.CanShow = False
+                list.Add(item)
+            End If
+
+            '列表类型过滤
+            If configTemp(4) = "0" Then
+                Dim item As New MShowListButtonConfig
+                item.ControlID = "ddl_showListType"
+                item.CanShow = False
+                list.Add(item)
+            End If
+
+            '标签
+            If configTemp(5) = "0" Then
+                Dim item As New MShowListButtonConfig
+                item.ControlID = "ddl_tags"
+                item.CanShow = False
+                list.Add(item)
+            End If
+
+            '高级搜索
+            If configTemp(6) = "0" Then
+                Dim item As New MShowListButtonConfig
+                item.ControlID = "btn_advanceSearch"
+                item.CanShow = False
+                list.Add(item)
+            End If
+
+            '高级搜索重置条件
+            If configTemp(6) = "0" Then
+                Dim item As New MShowListButtonConfig
+                item.ControlID = "btn_resetAdvanceSearch"
+                item.CanShow = False
+                list.Add(item)
+            End If
+        End If
+
+        Return list
+    End Function
+
+End Class

@@ -1,0 +1,24 @@
+﻿
+Partial Class HomePage_Forms_Questionnaire
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim DH As String = TextBox1.Text.Trim
+        If DH.Length <> 10 Then
+            Base.Js.alert(Me, "单号为10位数字串，请确定输入单号的合法性")
+            Exit Sub
+        End If
+        Dim idx As Integer = DH.IndexOf("0")
+        If idx > 0 Then
+            DH = DH.Substring(idx + 1)
+        End If
+
+        Dim MKDM As Integer = 1734
+        Dim Row As Data.DataRow = Base.DB.Row("SELECT FID FROM XX_XMJC where mkdm=" & MKDM & " and fid=" & DH, "dd")
+        If Row Is Nothing Then
+            Base.Js.alert(Me, "无效的单号，请重输")
+            Exit Sub
+        End If
+        Response.Redirect("Questionnaire2.aspx?pid=---------------------------------------------------------------------------------------------------------------------------------------&fid=" & DH)
+    End Sub
+End Class

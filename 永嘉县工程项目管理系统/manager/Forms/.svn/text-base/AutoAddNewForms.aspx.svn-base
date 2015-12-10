@@ -1,0 +1,2 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="AutoAddNewForms.aspx.vb" Inherits="manager_Forms_AutoAddNewForms" ValidateRequest="false" %>
+

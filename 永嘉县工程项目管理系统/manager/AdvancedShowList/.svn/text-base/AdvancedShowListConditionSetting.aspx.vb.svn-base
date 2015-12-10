@@ -1,0 +1,186 @@
+﻿
+Partial Class manager_AdvancedShowList_AdvancedShowListConditionSetting
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+
+    Dim dt As New DataTable
+    Dim sqlstr As String
+    Dim mkdm As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Try
+            mkdm = Convert.ToInt32(Request.QueryString("MKDM"))
+        Catch ex As Exception
+            mkdm = 0
+        End Try
+
+        If mkdm = 0 Then
+            Response.Write("非法参数")
+            Response.End()
+        End If
+
+        sqlstr = "select * from gy_mkxx where mkdm = " & mkdm
+        dt = Base.DB.Table(sqlstr, "dd")
+
+
+        If dt.Rows.Count = 0 Then
+            Response.Write("非法参数")
+            Response.End()
+        End If
+
+        Dim mkmc As String = String.Empty
+        Dim xdlj As String = String.Empty
+        Dim xsnDir As String = String.Empty
+        Dim canCount As Boolean = False
+        Try
+            mkmc = dt.Rows(0).Item("mkmc").ToString()
+            xdlj = dt.Rows(0).Item("xdlj").ToString()
+            xsnDir = dt.Rows(0).Item("xsnDir").ToString()
+            canCount = Convert.ToBoolean(dt.Rows(0).Item("view").ToString())
+        Catch ex As Exception
+            Response.Write("非法参数")
+            Response.End()
+        End Try
+        
+
+        LBmkmc.Text = mkmc
+        LBFatherMKMC.Text = xsnDir
+
+        If Not IsPostBack Then
+            Dim fatherMKDM As Integer = Base.GetMKDM(xsnDir)
+
+            ResetFormNode(fatherMKDM)
+
+            bind()
+        End If
+
+
+
+
+    End Sub
+
+
+
+    Sub bind()
+        Dim sqlstr As String
+        sqlstr = "select * from AdvancedShowListSetting where mkdm=" & mkdm
+
+        dt = Base.DB.Table(sqlstr, "dd")
+        GridView1.DataSource = dt
+        GridView1.DataBind()
+    End Sub
+
+
+    Protected Sub DDLNoticeType_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles DDLConditionType.SelectedIndexChanged
+        If DDLConditionType.SelectedValue = "typeDate" Then
+            Dim item As New ListItem
+            item.Value = "before"
+            item.Text = "提前(天)"
+            DDLSymbol.Items.Add(item)
+
+            Dim item1 As New ListItem
+            item1.Value = "after"
+            item1.Text = "延后(天)"
+            DDLSymbol.Items.Add(item1)
+
+        Else
+            DDLSymbol.Items.Remove(DDLSymbol.Items.FindByText("延后(天)"))
+            DDLSymbol.Items.Remove(DDLSymbol.Items.FindByText("提前(天)"))
+
+
+
+            If DDLConditionType.SelectedValue = "typeSystem" Then
+
+
+
+                Dim item As New ListItem
+                item.Value = "userRealName"
+                item.Text = "用户名"
+                DDLSymbol.Items.Add(item)
+
+                Dim item1 As New ListItem
+                item1.Value = "userLoginName"
+                item1.Text = "登录名"
+                DDLSymbol.Items.Add(item1)
+
+                TBCondition.Visible = False
+
+            Else
+
+                DDLSymbol.Items.Remove(DDLSymbol.Items.FindByText("用户名"))
+                DDLSymbol.Items.Remove(DDLSymbol.Items.FindByText("登录名"))
+
+
+                TBCondition.Visible = True
+
+            End If
+
+
+
+
+
+        End If
+    End Sub
+
+
+    Sub ResetFormNode(ByVal MKDM As String)
+        Dim dt As New DataTable
+        dt = Base.DB.Table("SELECT distinct([MapExtName]) FROM [MapConfig] WHERE ([MKDM] = " & MKDM & ") ", "dd")
+
+        Dim ListNodeName As String()
+        ReDim ListNodeName(dt.Rows.Count - 1)
+        For i As Integer = 0 To dt.Rows.Count - 1
+            ListNodeName(i) = dt.Rows(i).Item("MapExtName").ToString()
+        Next
+
+
+        DDLNodeList.DataSource = ListNodeName
+        DDLNodeList.DataBind()
+    End Sub
+
+    Protected Sub BTNadd_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles BTNadd.Click
+        Dim conditionNode As String
+        Dim conditionType As String
+        Dim conditionSymbol As String
+        Dim conditionText As String
+
+        conditionNode = DDLNodeList.SelectedItem.Value
+        conditionType = DDLConditionType.SelectedItem.Value
+        conditionSymbol = DDLSymbol.SelectedItem.Value
+        conditionText = Base.SqlFilter(TBCondition.Text)
+
+
+        If conditionText.Length = 0 And DDLConditionType.SelectedValue <> "typeSystem" Then
+            Base.Js.alert(Me, "请输入条件")
+            Return
+        End If
+
+        sqlstr = "insert into AdvancedShowListSetting (mkdm,conditionNode,conditionType,conditionSymbol,conditionText) values (" & mkdm & ",'" & conditionNode & "','" & conditionType & "','" & conditionSymbol & "','" & conditionText & "')"
+
+        Base.DB.Query(sqlstr)
+
+        Base.Js.alert(Me, "设置成功")
+        bind()
+
+
+
+
+    End Sub
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+        Dim i As Integer
+        Dim ck As CheckBox
+        Dim id As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                id = GridView1.DataKeys(i).Values("ID")
+                Base.DB.Query("delete from AdvancedShowListSetting where id = " & id)
+            End If
+        Next
+
+        Base.Js.alert(Me, "删除成功")
+        bind()
+    End Sub
+End Class

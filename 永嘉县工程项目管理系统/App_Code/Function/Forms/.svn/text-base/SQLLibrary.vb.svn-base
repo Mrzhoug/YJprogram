@@ -1,0 +1,998 @@
+﻿Imports Microsoft.VisualBasic
+Imports System.Xml
+Imports System.Data.SqlClient
+Imports System.Collections.Generic
+
+Public Class SQLLibrary
+
+    Dim BasePath As String = System.AppDomain.CurrentDomain.BaseDirectory
+
+#Region "SQLXML记录操作函数"
+
+    ''' <summary>
+    ''' 同步整个记录表
+    ''' </summary>
+    ''' <param name="mkmc"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function AddLibraryData(ByVal mkmc As String) As Boolean
+
+        Dim sqlstr As String
+
+        Dim tableName As String
+        tableName = FormatTableName(mkmc)
+
+        '检测是否已存在库
+        If Not CheckLibraryExist(mkmc) Then
+            If Not CreateLibraryTable(mkmc) Then
+                Return False
+            End If
+        Else
+            '若已存在，则删除原来的表（删除数据运行速度太慢，所以直接删除整个表后重新创建）
+            If Not DeleteLibraryTable(mkmc) Then
+                Return False
+            Else
+                '重新创建表
+                If Not CreateLibraryTable(mkmc) Then
+                    Return False
+                End If
+            End If
+
+        End If
+
+        '获取所有有效的表单
+        sqlstr = "SELECT XX_XMJC.FID,XX_XMJC.MKDM FROM GY_MKXX,XX_XMJC,GY_XMXX where  XX_XMJC.XMDM = GY_XMXX.XMDM  and (GY_XMXX.XMJD is not null) and XX_XMJC.MKDM = GY_MKXX.MKDM And GY_MKXX.MKMC='" & mkmc.Replace("'", "''") & "' and GY_XMXX.XMJD != '已删除' order by Fid desc"
+
+        Dim dt As New DataTable
+
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+
+        Dim i As Integer
+        For i = 0 To dt.Rows.Count - 1
+            Dim fid As Integer = Convert.ToInt32(dt.Rows(i)("fid"))
+            Dim xmlFilePath As String
+            xmlFilePath = BasePath & "\\FormFolder\\" & mkmc & "\\" & fid & ".xml"
+
+            If System.IO.File.Exists(xmlFilePath) Then
+                Try
+                    Dim xmlDoc As New XmlDocument
+                    xmlDoc.Load(xmlFilePath)
+                    xmlDoc = FormatXMLDoc(xmlDoc)
+
+                    '插入该XML到数据库XML库中
+                    sqlstr = "insert into " + tableName + " (formID,xmldoc,xmltext) values (@formID,@xmldoc,@xmltext)"
+                    Dim params As SqlParameter() = New SqlParameter() {New SqlParameter("@formID", fid), New SqlParameter("@xmldoc", xmlDoc.InnerXml), New SqlParameter("@xmltext", xmlDoc.InnerText)}
+
+                    Dim result As Integer
+                    result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, params)
+
+                Catch ex As Exception
+                    DoLog.LogGlobalServiceToFile("SQLLibrary---AddLibraryData 添加FID为：" & fid & "的表单 失败", ex.ToString())
+                End Try
+            Else
+                DoLog.LogGlobalServiceToFile("SQLLibrary---AddLibraryData 表单文件不存在 失败", xmlFilePath)
+            End If
+
+
+        Next
+        Return True
+    End Function
+
+
+    ''' <summary>
+    ''' 添加一条记录到XML库中
+    ''' </summary>
+    ''' <param name="fid"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function AddLibraryData(ByVal fid As Integer) As Boolean
+        '表名称
+        Dim tableName As String = String.Empty
+
+        Dim mkmc As String
+        Dim xmdm As Integer
+
+        Dim sqlstr As String
+        sqlstr = "select XX_XMJC.MKDM,MKMC from XX_XMJC,GY_MKXX where XX_XMJC.MKDM=GY_MKXX.MKDM and FID=" & fid
+
+
+        '根据FID获取表单数据
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+        If dt.Rows.Count = 0 Then
+            '如果没有信息，则直接返回错误
+            Return False
+        Else
+            '赋值表名称，格式为MKMC+"_Library"
+            mkmc = dt.Rows(0)("mkmc").ToString()
+            tableName = FormatTableName(mkmc)
+            xmdm = Convert.ToInt32(dt.Rows(0)("MKDM"))
+        End If
+
+        '若原来表不存在，则进行新建
+        If Not CheckLibraryExist(mkmc) Then
+            If Not CreateLibraryTable(mkmc) Then
+                Return False
+            End If
+        End If
+
+
+        Dim xmlFilePath As String
+        xmlFilePath = BasePath & "\\FormFolder\\" & mkmc & "\\" & fid & ".xml"
+
+
+        If System.IO.File.Exists(xmlFilePath) Then
+            Dim xmlDoc As New XmlDocument
+
+            Try
+                xmlDoc.Load(xmlFilePath)
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SQLLibrary---AddLibraryData 添加一条记录到XML库中失败,FID为：" & fid & "", ex.ToString())
+                Return False
+            End Try
+
+            xmlDoc = FormatXMLDoc(xmlDoc)
+
+            '判断原先是否有该信息
+            sqlstr = "select formID from " + tableName + " where formID = " + fid.ToString()
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+            Dim result As Integer
+
+            If dt.Rows.Count > 0 Then
+                '有的话则进行更新
+                sqlstr = "update " + tableName + " set xmldoc = @xmldoc,xmltext=@xmltext where formID = @formID"
+                Dim params As SqlParameter() = New SqlParameter() {New SqlParameter("@formID", fid.ToString()), New SqlParameter("@xmldoc", xmlDoc.InnerXml), New SqlParameter("@xmltext", xmlDoc.InnerText)}
+                'sqlstr = "delete from " + tableName + " where formID = " + fid.ToString()
+                result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, params)
+            Else
+                '插入该XML到数据库XML库中
+                sqlstr = "insert into " + tableName + " (formID,xmldoc,xmltext) values (@formID,@xmldoc,@xmltext)"
+
+                Dim params As SqlParameter() = New SqlParameter() {New SqlParameter("@formID", fid.ToString()), New SqlParameter("@xmldoc", xmlDoc.InnerXml), New SqlParameter("@xmltext", xmlDoc.InnerText)}
+
+                result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, params)
+            End If
+
+            If (result > 0) Then
+                Return True
+            Else
+                Return False
+            End If
+        Else
+            Return False
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 删除SQLXML库中某一条记录
+    ''' </summary>
+    ''' <param name="fid"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function DelLibraryData(ByVal fid As Integer) As Boolean
+        Dim tableName As String = String.Empty
+
+        Dim mkmc As String
+        Dim xmdm As Integer
+
+        Dim sqlstr As String
+        sqlstr = "select XX_XMJC.MKDM,MKMC from XX_XMJC,GY_MKXX where XX_XMJC.MKDM=GY_MKXX.MKDM and FID=" & fid
+
+
+        '根据FID获取表单数据
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+        If dt.Rows.Count = 0 Then
+            '如果没有信息，则直接返回错误
+            Return False
+        Else
+            '赋值表名称，格式为MKMC+"_Library"
+            mkmc = dt.Rows(0)("mkmc").ToString()
+            tableName = FormatTableName(mkmc)
+            xmdm = Convert.ToInt32(dt.Rows(0)("MKDM"))
+        End If
+
+        '如果不存在表，则重新新建
+        If Not CheckLibraryExist(fid) Then
+            CreateLibraryTable(mkmc)
+        End If
+
+        Dim result As Integer
+        Try
+            sqlstr = "delete from " + tableName + " where formID = " + fid.ToString()
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SQLLibrary---DelLibraryData 失败", ex.ToString())
+            Return False
+        End Try
+
+        If (result > 0) Then
+            Return True
+        Else
+            Return False
+        End If
+
+    End Function
+
+
+#End Region
+
+#Region "SQLXML库操作函数"
+    ''' <summary>
+    ''' 创建SQL XML库
+    ''' </summary>
+    ''' <param name="mkmc">模块名称</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function CreateLibraryTable(ByVal mkmc As String) As Boolean
+        Dim tableName As String
+        tableName = FormatTableName(mkmc)
+
+        Dim sqlstr As String = String.Empty
+
+        '创建表
+        sqlstr += "CREATE TABLE " + tableName + "("
+        sqlstr += "[ID] [int] IDENTITY(1,1) NOT NULL,"
+        sqlstr += "[FormID] [int] NULL,"
+        sqlstr += "[XmlDoc] [xml] NULL,"
+        sqlstr += "[XmlText] [text] NULL,"
+        sqlstr += "[TopNum] [int] NULL,"
+        sqlstr += "[IsLock] [int] NULL "
+        sqlstr += "CONSTRAINT [PK_" + tableName + "] PRIMARY KEY CLUSTERED "
+        sqlstr += "("
+        sqlstr += "	[ID] ASC"
+        sqlstr += ")WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]"
+        sqlstr += ") ON [PRIMARY] TEXTIMAGE_ON [PRIMARY];"
+
+        'XML主索引
+        sqlstr += "create primary xml index IPXML_XMLTable_XMLCol on " + tableName + "(XmlDoc);"
+
+        'XML路径辅助索引
+        sqlstr += "create xml index IXML_XMLTable_XMLCol_Path on " + tableName + "(XmlDoc)"
+        sqlstr += "using xml index IPXML_XMLTable_XMLCol for path;"
+
+        'XML属性辅助索引
+        sqlstr += "create xml index IXML_XMLTable_XMLCol_Property on " + tableName + "(XmlDoc)"
+        sqlstr += "using xml index IPXML_XMLTable_XMLCol for Property;"
+
+        'XML内容辅助索引
+        sqlstr += "create xml index IXML_XMLTable_XMLCol_value on " + tableName + "(XmlDoc)"
+        sqlstr += "using xml index IPXML_XMLTable_XMLCol for value;"
+
+        Try
+            Dim result As Integer = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+            If result = -1 Then
+                Return True
+            Else
+                Return False
+            End If
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SQLLibrary---CreateLibraryTable 失败", ex.ToString())
+            Return False
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' 删除SQL XML库
+    ''' </summary>
+    ''' <param name="mkmc">模块名称</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function DeleteLibraryTable(ByVal mkmc As String) As Boolean
+        Dim tableName As String
+        tableName = FormatTableName(mkmc)
+
+        Dim sqlstr As String = String.Empty
+
+        sqlstr = "DROP TABLE " + tableName
+        Try
+            Dim result As Integer = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+            If result = -1 Then
+                Return True
+            Else
+                Return False
+            End If
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SQLLibrary---DeleteLibraryTable 失败", ex.ToString())
+            Return False
+        End Try
+
+    End Function
+
+
+    ''' <summary>
+    ''' 根据FID判读数据库中是否存在XML库
+    ''' </summary>
+    ''' <param name="mkmc">模块名称</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function CheckLibraryExist(ByVal mkmc As String) As Boolean
+        '表名称
+        Dim tableName As String
+        tableName = FormatTableName(mkmc)
+
+        Dim sqlstr As String
+        sqlstr = "select * from sysobjects where id = object_id('" & tableName & "') and xtype='u'"
+
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+        If dt.Rows.Count > 0 Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+
+
+    ''' <summary>
+    ''' 根据FID判读数据库中是否存在XML库
+    ''' </summary>
+    ''' <param name="fid">FID</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function CheckLibraryExist(ByVal fid As Integer) As Boolean
+
+        '表名称
+        Dim tableName As String = String.Empty
+
+        Dim sqlstr As String
+        sqlstr = "select XX_XMJC.MKDM,MKMC from XX_XMJC,GY_MKXX where XX_XMJC.MKDM=GY_MKXX.MKDM and FID=" & fid
+
+        '根据FID获取表单数据
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        If dt.Rows.Count = 0 Then
+            '如果没有信息，则直接返回错误
+            Return False
+        Else
+            '赋值表名称，格式为MKMC+"_Library"
+            tableName = FormatTableName(dt.Rows(0)("mkmc").ToString())
+        End If
+
+        '获取数据库中是否有该表
+        sqlstr = "select * from sysobjects where id = object_id('" & tableName & "') and xtype='u'"
+
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+        If dt.Rows.Count > 0 Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+#End Region
+
+#Region "SQLXML查询方法"
+
+   
+
+
+    ''' <summary>
+    ''' 查询
+    ''' </summary>
+    ''' <param name="mkmc">模块名称</param>
+    ''' <param name="xpath">XPATH</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function Query(ByVal mkmc As String, ByVal xpath As String) As XmlDocument
+
+        '表名称
+        Dim tableName As String
+        tableName = FormatTableName(mkmc)
+
+        Dim sqlstr As String = FormatSQLStringQuery(tableName, xpath)
+
+        Dim dt As New DataTable
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("查询语句出错,查询表单内为：" + tableName + "，查询语句为:" + xpath, ex.ToString())
+            Return FromatReturnXml("查询出错")
+        End Try
+
+
+        Dim xmlDoc As New XmlDocument
+        xmlDoc = GetTemplateXML(mkmc)
+
+        Dim xmlDocStr As String = String.Empty
+        If dt.Rows.Count > 0 Then
+            Dim i As Integer
+            For i = 0 To dt.Rows.Count - 1
+                xmlDocStr += dt.Rows(i)(0).ToString().Trim
+            Next
+        Else
+            xmlDocStr = String.Empty
+        End If
+
+        xmlDoc.DocumentElement.InnerXml = xmlDocStr
+
+        Return xmlDoc
+    End Function
+
+    Function QuerySingleXMLStr(ByVal mkmc As String, ByVal xpath As String, ByVal formID As Integer) As String
+        '表名称
+        Dim tableName As String
+        tableName = FormatTableName(mkmc)
+
+        Dim sqlstr As String = FormatSQLStringQuery(tableName, xpath, formID)
+
+        Dim dt As New DataTable
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("查询语句出错,查询表单内为：" + tableName + "，查询语句为:" + xpath, ex.ToString())
+            Return String.Empty
+        End Try
+
+        Return dt.Rows(0)(0).ToString()
+    End Function
+
+
+
+    ''' <summary>
+    ''' 获取最后一个节点内容
+    ''' </summary>
+    ''' <param name="mkmc"></param>
+    ''' <param name="xpath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function QueryLastData(ByVal mkmc As String, ByVal xpath As String) As XmlDocument
+        '表名称
+        Dim tableName As String
+        tableName = FormatTableName(mkmc)
+
+        Dim sqlstr As String = FormatSQLStringQueryLastData(tableName, xpath)
+
+        Dim dt As New DataTable
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("查询语句出错,查询表单内为：" + tableName + "，查询语句为:" + xpath, ex.ToString())
+            Return FromatReturnXml("查询出错")
+        End Try
+
+        Dim xmlDoc As New XmlDocument
+        xmlDoc = GetTemplateXML(mkmc)
+
+        Dim xmlDocStr As String = String.Empty
+        If dt.Rows.Count > 0 Then
+            Dim i As Integer
+            For i = 0 To dt.Rows.Count - 1
+                xmlDocStr += dt.Rows(i)(0).ToString().Trim
+            Next
+        Else
+            xmlDocStr = String.Empty
+        End If
+
+        xmlDoc.DocumentElement.InnerXml = xmlDocStr
+
+        Return xmlDoc
+    End Function
+
+
+    ''' <summary>
+    ''' 统计数量
+    ''' </summary>
+    ''' <param name="mkmc">模块名称</param>
+    ''' <param name="xpath">XPATH</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function QueryCount(ByVal mkmc As String, ByVal xpath As String) As XmlDocument
+        Dim tableName As String
+        tableName = FormatTableName(mkmc)
+
+        Dim sqlstr As String = FormatSQLStringQueryCount(tableName, xpath)
+
+        Dim dt As New DataTable
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("QueryCount查询语句出错,查询表单内为：" + tableName + "，查询语句为:" + xpath, ex.ToString())
+            Return FromatReturnXml("查询出错")
+        End Try
+
+        Return FromatReturnXml(dt.Rows(0).Item(0))
+    End Function
+
+    ''' <summary>
+    ''' 查询某个节点中内容的总和（节点内容必须为数字）
+    ''' </summary>
+    ''' <param name="mkmc"></param>
+    ''' <param name="xpath"></param>
+    ''' <returns>xpath为空时，返回表单数量</returns>
+    ''' <remarks></remarks>
+    Function QuerySum(ByVal mkmc As String, ByVal xpath As String) As XmlDocument
+        Dim tableName As String
+        tableName = FormatTableName(mkmc)
+
+        Dim sqlstr As String = FormatSQLStringQuerySum(tableName, xpath)
+
+        Dim dt As New DataTable
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+            DoLog.LogErrorToFile("", sqlstr)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("QuerySum查询语句出错,查询表单内为：" + tableName + "，查询语句为:" + xpath, ex.ToString())
+            Return FromatReturnXml("查询语句错误")
+        End Try
+
+        If IsDBNull(dt.Rows(0).Item(0)) Then
+            Return FromatReturnXml("0")
+        Else
+            Return FromatReturnXml(dt.Rows(0).Item(0))
+        End If
+
+
+    End Function
+
+
+    ''' <summary>
+    ''' 对重复节进行分页查询
+    ''' </summary>
+    ''' <param name="mkmc"></param>
+    ''' <param name="xpath"></param>
+    ''' <param name="pageSize"></param>
+    ''' <param name="currentPage"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function QueryNodesByPage(ByVal mkmc As String, ByVal xpath As String, ByVal pageSize As Integer, ByVal currentPage As Integer) As XmlDocument
+
+
+        Dim xmlDoc As New XmlDocument
+        xmlDoc = Query(mkmc, xpath)
+
+        Dim xmlDocStr As String = String.Empty
+
+        Dim childNodeCount As Integer = xmlDoc.DocumentElement.ChildNodes.Count
+
+        Dim maxPage As Integer = 0
+        If childNodeCount = 1 Then
+            maxPage = 1
+        Else
+            '获取最大页数
+            Dim tempMaxPage As Double = childNodeCount / pageSize
+            maxPage = childNodeCount / pageSize
+            If tempMaxPage > maxPage Then
+                maxPage += 1
+            End If
+        End If
+
+        '如果当前页大于最大页数，则返回空
+        If currentPage > maxPage Then
+            xmlDocStr = String.Empty
+        Else
+            Dim startIndex As Integer
+            Dim endIndex As Integer
+
+            startIndex = (currentPage - 1) * pageSize
+            endIndex = currentPage * pageSize - 1
+
+            '如果是最后一页，而且总体数量小于页面最大数量，防止空错误对 endindex赋值为总体数量
+            If childNodeCount - 1 < endIndex Then
+                endIndex = childNodeCount - 1
+            End If
+
+            Dim i As Integer
+            For i = startIndex To endIndex
+                xmlDocStr += xmlDoc.DocumentElement.ChildNodes(i).OuterXml
+            Next
+
+        End If
+        xmlDoc.DocumentElement.InnerXml = xmlDocStr
+        Return xmlDoc
+    End Function
+
+
+    ''' <summary>
+    ''' 对2个不同表进行查询（一对多关系）
+    ''' </summary>
+    ''' <param name="keyName1"></param>
+    ''' <param name="mkmc1"></param>
+    ''' <param name="xpath1"></param>
+    ''' <param name="mkmc2"></param>
+    ''' <param name="keyName2"></param>
+    ''' <param name="xpath2"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function QueryDateOneToMore(ByVal keyName1 As String, ByVal mkmc1 As String, ByVal xpath1 As String, ByVal keyName2 As String, ByVal mkmc2 As String, ByVal xpath2 As String) As XmlDocument
+        Dim tableName1, tableName2 As String
+        tableName1 = FormatTableName(mkmc1)
+        tableName2 = FormatTableName(mkmc2)
+        Dim sqlstr1 As String = FormatSQLUnioQueryString(tableName1, keyName1, xpath1)
+        Dim sqlstr2 As String = FormatSQLUnioQueryString(tableName2, keyName2, xpath2)
+
+        If sqlstr1 = String.Empty Or sqlstr2 = String.Empty Then
+            Return FromatReturnXml("查询语句错误")
+        End If
+
+
+        Dim dt1, dt2 As New DataTable
+        '获取关键字字段
+        Try
+            dt1 = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr1, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("QueryDateUion查询语句出错,查询表单内为：" + tableName1 + "，查询语句为:" + xpath1, ex.ToString() + ",查询关键字为:" + keyName1)
+            Return FromatReturnXml("查询语句错误")
+        End Try
+
+        Try
+            dt2 = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr2, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("QueryDateUion查询语句出错,查询表单内为：" + tableName2 + "，查询语句为:" + xpath2, ex.ToString() + ",查询关键字为:" + keyName2)
+            Return FromatReturnXml("查询语句错误")
+        End Try
+
+
+        Dim dic As New Dictionary(Of Integer, List(Of Integer))
+
+        Dim xmlStr As String = String.Empty
+
+        For Each dt1Item As DataRow In dt1.Rows
+
+            Dim content As String = dt1Item("content").ToString()
+            Dim dt2XmlStr As String = String.Empty
+
+            For Each dt2Item As DataRow In dt2.Rows
+                If dt1Item("keyValue") = dt2Item("keyValue") Then
+                    dt2XmlStr += "     " + dt2Item("content").ToString()
+                End If
+            Next
+            If Not String.IsNullOrEmpty(dt2XmlStr) Then
+                xmlStr += "<Model>" + vbCrLf
+                xmlStr += "     <" + mkmc1 + ">" + vbCrLf
+                xmlStr += "     " + content
+                xmlStr += "     </" + mkmc1 + ">" + vbCrLf
+                xmlStr += "     <" + mkmc2 + ">" + vbCrLf
+                xmlStr += dt2XmlStr
+                xmlStr += "     </" + mkmc2 + ">" + vbCrLf
+                xmlStr += "</Model>" + vbCrLf
+            End If
+        Next
+
+
+        Dim returnXML As XmlDocument = FromatReturnXml("Result")
+        returnXML.DocumentElement.InnerXml = xmlStr
+        Return returnXML
+    End Function
+
+
+#End Region
+
+#Region "其他公共函数"
+
+    ''' <summary>
+    ''' 获取XML模版，用以对查询的返回
+    ''' </summary>
+    ''' <param name="mkmc"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function GetTemplateXML(ByVal mkmc As String) As XmlDocument
+        '通过模块名称获取模版名称
+        Dim sqlstr As String
+        sqlstr = "select xsndir from gy_mkxx where mkmc = '" & mkmc & "'"
+
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+        Dim xsndir As String
+        If dt.Rows.Count > 0 Then
+            xsndir = dt.Rows(0).Item(0).ToString().Trim()
+            Dim xmlDoc As New XmlDocument
+            xmlDoc.PreserveWhitespace = False
+            xmlDoc.Load(BasePath + "\\TemplateLibrary\\" + xsndir + "\\template.xml")
+            Return xmlDoc
+        Else
+            Return Nothing
+        End If
+    End Function
+
+
+    ''' <summary>
+    ''' 获取查询内容
+    ''' </summary>
+    ''' <param name="xpath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function Xpath_GetQueryContent(ByVal xpath As String) As String
+        Dim rx As Regex
+
+        '由于条件中可能包含"[]"等特殊字符，首先去除条件
+        rx = New Regex("'[^']+'", RegexOptions.Multiline)
+        xpath = rx.Replace(xpath, "")
+
+        '正则表达式，去除[]及[]中内容
+        rx = New Regex("\[[^\]]+\]", RegexOptions.Multiline)
+        xpath = rx.Replace(xpath, "")
+        Return xpath
+    End Function
+
+
+    ''' <summary>
+    ''' 格式化查询xpath（将查询条件中的单引号变为双引号）
+    ''' </summary>
+    ''' <param name="xpath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function Xpath_Format(ByVal xpath As String) As String
+
+        '如果搜索包含contains模糊查询关键字，那么需要对XPATH语句进行处理，在contains搜索字段后加入[1]（表示搜索该节点内容），防止XMLSQL查询出现空序列的问题
+        If xpath.ToLower().IndexOf("contains") <> -1 Then
+            Dim mc As MatchCollection = Regex.Matches(xpath, "(?<=contains\()[^,]+", RegexOptions.Multiline)
+            For Each match As Match In mc
+
+                Dim mcMy As MatchCollection = Regex.Matches(match.Value, "(?=my:)[^/]+", RegexOptions.Multiline)
+
+
+                For Each matchMY As Match In mcMy
+                    xpath = xpath.Replace(matchMY.Value, matchMY.Value + "[1]")
+                Next
+
+            Next
+        End If
+
+
+        If xpath.IndexOf("translate") Then
+
+            Dim i As Integer
+
+            '如果xpath中有number转换内容，那么先替换NUMBER
+            If xpath.IndexOf("number") Then
+                '匹配number关键字
+                Dim mc_number As MatchCollection = Regex.Matches(xpath, "(?=number\()[^)]+\)\)", RegexOptions.Multiline)
+                Dim mc_number_content As MatchCollection = Regex.Matches(xpath, "(?<=number\()[^)]+\)", RegexOptions.Multiline)
+
+                For i = 0 To mc_number.Count - 1
+                    xpath = xpath.Replace(mc_number(i).Value, mc_number_content(i).Value)
+                Next
+            End If
+
+
+            '匹配translate关键字
+            Dim mc_translate As MatchCollection = Regex.Matches(xpath, "(?=translate\()[^)]+\)")
+
+            '匹配translate中内容
+            Dim mc_translate_content As MatchCollection = Regex.Matches(xpath, "(?<=translate\()[^,]+")
+
+            '替换content内容
+            For i = 0 To mc_translate.Count - 1
+                xpath = xpath.Replace(mc_translate(i).Value, mc_translate_content(i).Value)
+            Next
+        End If
+
+        xpath = xpath.Replace("'", """")
+        Return xpath
+    End Function
+
+    ''' <summary>
+    ''' 格式化普通查询语句
+    ''' </summary>
+    ''' <param name="tableName"></param>
+    ''' <param name="XPath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function FormatSQLStringQuery(ByVal tableName As String, ByVal XPath As String) As String
+        Dim sqlstr As String = String.Empty
+
+        Dim queryCondition As String = Xpath_Format(XPath)
+
+        sqlstr += ";with xmlnamespaces('http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28' as my)"
+        If XPath.Trim.Length > 0 Then
+            sqlstr += Environment.NewLine
+            sqlstr += " select temp.c.query('.') "
+            sqlstr += " from " + tableName + ""
+            sqlstr += " cross apply"
+            sqlstr += " " + tableName + ".xmldoc.nodes('" + queryCondition + "') as temp(c)"
+            sqlstr += " order by formid desc"
+        Else
+            sqlstr += Environment.NewLine
+            sqlstr += " select temp.c.query('.')"
+            sqlstr += " from " + tableName + ""
+            sqlstr += " cross apply"
+            sqlstr += " " + tableName + ".xmldoc.nodes('./node()/*') as temp(c)"
+            sqlstr += " order by formid desc"
+        End If
+
+        Return sqlstr
+    End Function
+
+
+
+    ''' <summary>
+    ''' 格式化普通查询语句
+    ''' </summary>
+    ''' <param name="tableName"></param>
+    ''' <param name="XPath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function FormatSQLStringQuery(ByVal tableName As String, ByVal XPath As String, ByVal formID As Integer) As String
+        Dim sqlstr As String = String.Empty
+
+        Dim queryContent As String = Xpath_GetQueryContent(XPath)
+        If XPath.Trim.Length > 0 Then
+            sqlstr += ";with xmlnamespaces('http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28' as my)"
+            sqlstr += Environment.NewLine
+            sqlstr += " select temp.c.query('" + queryContent + "') "
+            sqlstr += " from " + tableName + ""
+            sqlstr += " where formid =" + formID.ToString()
+        End If
+        Return sqlstr
+    End Function
+
+
+    ''' <summary>
+    ''' 获取查询最新数据的SQLSTR
+    ''' </summary>
+    ''' <param name="tableName"></param>
+    ''' <param name="XPath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function FormatSQLStringQueryLastData(ByVal tableName As String, ByVal XPath As String) As String
+        Dim sqlstr As String = String.Empty
+
+        Dim queryCondition As String = Xpath_Format(XPath)
+
+        sqlstr += ";with xmlnamespaces('http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28' as my)"
+        If XPath.Trim.Length > 0 Then
+            sqlstr += Environment.NewLine
+            sqlstr += " select top 1 temp.c.query('.') "
+            sqlstr += " from " + tableName + ""
+            sqlstr += " cross apply"
+            sqlstr += " " + tableName + ".xmldoc.nodes('" + queryCondition + "') as temp(c)"
+            sqlstr += " order by formid desc"
+        Else
+            sqlstr += Environment.NewLine
+            sqlstr += " select top 1 temp.c.query('.')"
+            sqlstr += " from " + tableName + ""
+            sqlstr += " cross apply"
+            sqlstr += " " + tableName + ".xmldoc.nodes('./node()/*') as temp(c)"
+            sqlstr += " order by formid desc"
+        End If
+        Return sqlstr
+    End Function
+
+    ''' <summary>
+    ''' 获取查询数据总数的SQLSTR
+    ''' </summary>
+    ''' <param name="tableName"></param>
+    ''' <param name="XPath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function FormatSQLStringQueryCount(ByVal tableName As String, ByVal XPath As String) As String
+        Dim sqlstr As String = String.Empty
+
+        Dim queryCondition As String = Xpath_Format(XPath)
+
+        sqlstr += ";with xmlnamespaces('http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28' as my)"
+        If XPath.Trim.Length > 0 Then
+            sqlstr += Environment.NewLine
+            sqlstr += " select count(formID)  "
+            sqlstr += " from " + tableName + ""
+            sqlstr += " cross apply"
+            sqlstr += " " + tableName + ".xmldoc.nodes('" + queryCondition + "') as temp(c)"
+        Else
+            sqlstr += Environment.NewLine
+            sqlstr += " select count(formID) "
+            sqlstr += " from " + tableName + ""
+            sqlstr += " cross apply"
+            sqlstr += " " + tableName + ".xmldoc.nodes('./node()/*') as temp(c)"
+        End If
+        Return sqlstr
+    End Function
+
+    ''' <summary>
+    ''' 查询某个节点中内容的总和（必须为数字类型节点）
+    ''' </summary>
+    ''' <param name="tableName"></param>
+    ''' <param name="xpath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function FormatSQLStringQuerySum(ByVal tableName As String, ByVal xpath As String) As String
+        Dim sqlstr As String = String.Empty
+
+        Dim queryCondition As String = Xpath_Format(xpath)
+
+        sqlstr += ";with xmlnamespaces('http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28' as my)"
+        If xpath.Trim.Length > 0 Then
+            sqlstr += Environment.NewLine
+            sqlstr += " select sum(temp.c.value('./.','float'))  "
+            sqlstr += " from " + tableName + ""
+            sqlstr += " cross apply"
+            sqlstr += " " + tableName + ".xmldoc.nodes('" + queryCondition + "') as temp(c)"
+        Else
+            sqlstr += Environment.NewLine
+            sqlstr += " select count(formID) "
+            sqlstr += " from " + tableName + ""
+            sqlstr += " cross apply"
+            sqlstr += " " + tableName + ".xmldoc.nodes('./node()/*') as temp(c)"
+        End If
+        Return sqlstr
+    End Function
+
+    Function FormatSQLUnioQueryString(ByVal tableName As String, ByVal keyName As String, ByVal xpath As String) As String
+        Dim sqlstr As String = String.Empty
+        Dim queryCondition As String = Xpath_Format(xpath)
+
+        If xpath.Trim.Length > 0 Then
+            sqlstr += ";with xmlnamespaces('http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28' as my)"
+            sqlstr += Environment.NewLine
+            sqlstr += " select " + tableName + ".xmldoc.value('(//" + keyName + ")[1]','varchar(max)') as keyValue,"
+            sqlstr += " temp.c.query('.') as content,"
+            sqlstr += " formID "
+            sqlstr += " from " + tableName + ""
+            sqlstr += " cross apply"
+            sqlstr += " " + tableName + ".xmldoc.nodes('" + queryCondition + "') as temp(c)"
+            sqlstr += " where " + tableName + ".xmldoc.value('(//" + keyName + ")[1]','varchar(max)') != ''"
+        End If
+
+        Return sqlstr
+    End Function
+
+
+
+
+    ''' <summary>
+    ''' 格式化入库名称
+    ''' </summary>
+    ''' <param name="mkmc"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function FormatTableName(ByVal mkmc As String) As String
+        '过滤特殊字符
+        mkmc = mkmc.Replace("-", "_")
+        Return mkmc & "_Library"
+    End Function
+
+    ''' <summary>
+    ''' 格式化XML文档
+    ''' </summary>
+    ''' <param name="xmlDoc"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function FormatXMLDoc(ByVal xmlDoc As XmlDocument) As XmlDocument
+        Dim xmlDocStr As String
+        xmlDocStr = xmlDoc.InnerXml
+        xmlDocStr = xmlDocStr.Replace("<?xml version=""1.0"" encoding=""UTF-8""?>", String.Empty)
+        xmlDoc.LoadXml(xmlDocStr)
+        Return xmlDoc
+    End Function
+
+    ''' <summary>
+    ''' 格式化返回XML
+    ''' </summary>
+    ''' <param name="resultStr"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function FromatReturnXml(ByVal resultStr As String) As XmlDocument
+        Dim xmlDoc As New XmlDocument
+        xmlDoc.LoadXml("<Result/>")
+        xmlDoc.DocumentElement.InnerText = resultStr
+        Return xmlDoc
+    End Function
+
+    ''' <summary>
+    ''' sql过滤
+    ''' </summary>
+    ''' <param name="Str"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function SqlFilter(ByVal Str As String) As String
+        Dim Fy_In As String = "exec|insert|select|delete|update|master|truncate|char|declare"      '注每个后面加个空格
+        Dim TempSqlin As String()
+        TempSqlin = Fy_In.Split("|")
+        Str = Str.Replace("'", "''")
+        Dim i As Integer
+        For i = 0 To TempSqlin.Length - 1
+            Str = Str.Replace(TempSqlin(i), "")
+        Next
+        Return Str
+    End Function
+#End Region
+
+End Class

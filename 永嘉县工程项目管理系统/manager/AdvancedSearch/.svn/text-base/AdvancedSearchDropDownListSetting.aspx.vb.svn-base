@@ -1,0 +1,285 @@
+﻿
+Partial Class manager_AdvancedSearch_AdvancedSearchDropDownListSetting
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim dt As New DataTable
+    Dim aid As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Try
+            aid = Convert.ToInt32(Request.QueryString("aid"))
+        Catch ex As Exception
+            aid = 0
+        End Try
+
+        If aid = 0 Then
+            Response.Write("非法参数")
+            Response.End()
+        End If
+
+        dt = Base.DB.Table("select * from [AdvancedSearchSetting] where id = " & aid & " and searchType = 'typeDropDown'", "dd")
+
+        If dt.Rows.Count = 0 Then
+            Response.Write("非法参数")
+        End If
+
+        LBmkmc.Text = Base.GetMKMCByMKDM(dt.Rows(0).Item("mkdm"))
+        LBsearchTitle.Text = dt.Rows(0).Item("searchTitle")
+        LBNodeName.Text = dt.Rows(0).Item("searchNode")
+
+        If IsPostBack = False Then
+            'DropDownList1.Visible = False
+            dt = Base.DB.Table("SELECT [MKDM], [MKMC] FROM [GY_MKXX] Where (NoLCDM is not null and NoLCDM <> 0)", "dd")
+
+
+            For i As Integer = 0 To dt.Rows.Count - 1
+                Dim item As New ListItem
+                item.Value = dt.Rows(i).Item("mkdm")
+                item.Text = dt.Rows(i).Item("mkmc")
+                DropDownList1.Items.Add(item)
+            Next
+        End If
+
+
+        If IsPostBack Then
+            If Not DDLnodeName.Items.Count = 0 Then
+                Dim selectedNode As String = DDLnodeName.SelectedItem.Text
+                Dim filename As String = Server.MapPath("../../") & "TemplateLibrary\" & DropDownList1.SelectedItem.Text & "\template.xml"
+                Base.XmlClass.xmlDoc.Load(filename)
+
+                Dim nodes As System.Xml.XmlNodeList = Base.XmlClass.FindNodes("//" & selectedNode & "") '得到区域列表
+
+                For i As Integer = 0 To nodes.Count - 1
+                    Dim nodeInfo As New NodeInfo
+                    nodeInfo = getChildNodes(nodes(i))
+                    Dim m As Integer = 0
+                    '当同时存在 普通节点 与 重复节点 时执行
+                    While nodeInfo.DuplicateNodeList.Count <> 0 Or nodeInfo.NormalNodeList.Count <> 0
+
+                        If nodeInfo.NormalNodeList.Count > 0 Then
+                            '声明一个下拉框
+                            Dim DDL As New DropDownList
+                            DDL.ID = "ddl" & m.ToString()
+                            Dim item1 As New ListItem
+                            item1.Text = ""
+                            item1.Value = 0
+                            DDL.Items.Add(item1)
+
+                            For j As Integer = 0 To nodeInfo.NormalNodeList.Count - 1
+                                Dim item As New ListItem
+                                item.Text = CType(nodeInfo.NormalNodeList.Item(j), System.Xml.XmlNode).Name
+                                item.Value = CType(nodeInfo.NormalNodeList.Item(j), System.Xml.XmlNode).ParentNode.Name
+                                DDL.Items.Add(item)
+                            Next
+                            tdNodeSelect.Controls.Add(DDL)
+                        End If
+                        '如果有重复列，那么获取重复类中的内容
+                        If nodeInfo.DuplicateNodeList.Count > 0 Then
+                            nodeInfo = getChildNodes(nodeInfo.DuplicateNodeList.Item(0))
+                        Else
+                            '没有 那么清空所有的内容，循环结束
+                            nodeInfo.NormalNodeList.Clear()
+                            nodeInfo.DuplicateNodeList.Clear()
+                        End If
+                        m = m + 1
+                    End While
+                Next
+            End If
+        End If
+    End Sub
+
+    'Protected Sub CheckBox1_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles CheckBox1.CheckedChanged
+    '    If CheckBox1.Checked Then
+    '        DropDownList1.Visible = True
+    '        TextBox1.Visible = False
+    '    Else
+    '        DropDownList1.Visible = False
+    '        TextBox1.Visible = True
+    '    End If
+    'End Sub
+
+    Protected Sub DropDownList1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles DropDownList1.SelectedIndexChanged
+        'Base.Js.alert(Me, DropDownList1.SelectedItem.Text)
+        DDLnodeName.Items.Clear()
+        ResetFormNode(DDLnodeName, DropDownList1.SelectedValue)
+    End Sub
+
+    Sub ResetFormNode(ByVal nodeName As DropDownList, ByVal MKDM As String)
+        Dim FormName As String
+        Dim Row As DataRow = Base.DB.Row("select XsnDir,MKMC,MKDM from [GY_MKXX] where MKDM = " & MKDM, "dd")
+        If Row Is Nothing Then
+            NodeName.Items.Clear()
+            Exit Sub
+        Else
+            FormName = Row.Item("XsnDir").ToString.Trim
+            Dim filename As String = Server.MapPath("../../") & "TemplateLibrary\" & FormName & "\template.xml"
+            If IO.File.Exists(filename) = False Then
+                Base.Js.showalert(Me, "模板存问题,请刷新模板!")
+                Exit Sub
+            End If
+            Dim node As System.Xml.XmlNode = Base.XmlClass.GetXmlFile(filename)
+            Dim ListNodeName As String()
+            Dim tempstr As String()
+            Try
+                tempstr = Base.XmlClass.GetNodeNameList(node.ChildNodes(0))
+                ReDim ListNodeName(tempstr.Length - 1)
+                Dim i As Integer = 0
+                For i = 0 To tempstr.Length - 1
+                    'ListNodeName(i) = tempstr(i).Replace("<", "").Replace(">", "")
+                    Dim item As New ListItem
+                    item.Text = tempstr(i).Replace("<", "").Replace(">", "")
+
+                    item.Value = tempstr(i).Replace("<", "").Replace(">", "")
+                    nodeName.Items.Add(item)
+                Next
+            Catch ex As Exception
+                Base.Js.alert(Me, "模板存在问题,请不要最外的重复节添加节点.请修改模板重,重新上传并重新建功能.")
+                Exit Sub
+            End Try
+        End If
+    End Sub
+
+
+    Function getChildNodes(ByVal nodes As System.Xml.XmlNode) As NodeInfo
+        Dim str As String
+
+        Dim nodeInfo As New NodeInfo
+        Dim nodeListNormal As New ArrayList
+        Dim nodeListDuplicate As New ArrayList
+
+        Dim returnNode As System.Xml.XmlNode = Nothing
+
+        str = nodes.Name & "共有" & nodes.ChildNodes.Count & "个子节点:"
+
+        If nodes.HasChildNodes Then
+            For i As Integer = 0 To nodes.ChildNodes.Count - 1
+                str += nodes.ChildNodes(i).Name
+
+                If nodes.ChildNodes(i).HasChildNodes Then
+                    returnNode = nodes.ChildNodes(i)
+                    If nodes.ChildNodes(i).ChildNodes(0).NodeType = System.Xml.XmlNodeType.Text Then
+                        nodeListNormal.Add(nodes.ChildNodes(i))
+                        str += vbCrLf
+                    Else
+                        nodeListDuplicate.Add(nodes.ChildNodes(i))
+
+                        Dim stra As String = nodes.ChildNodes(i).Name
+                        str += "(重复列表)" + vbCrLf
+                    End If
+
+
+                Else
+                    nodeListNormal.Add(nodes.ChildNodes(i))
+                    str += vbCrLf
+                End If
+            Next
+        End If
+        nodeInfo.NormalNodeList = nodeListNormal
+        nodeInfo.DuplicateNodeList = nodeListDuplicate
+        'Response.Write(str)
+        Return nodeInfo
+    End Function
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+
+        If RadioButtonList1.SelectedValue = "formSource" Then
+            Dim count As Integer = tdNodeSelect.Controls.Count
+            Dim str As String = String.Empty
+            Dim strparent As String = String.Empty
+            For i As Integer = 0 To count - 1
+
+                Try
+                    If CType(tdNodeSelect.Controls.Item(i), DropDownList).SelectedItem.Text <> "" Then
+                        str = str & CType(tdNodeSelect.Controls.Item(i), DropDownList).SelectedItem.Text
+                        strparent = strparent & CType(tdNodeSelect.Controls.Item(i), DropDownList).SelectedItem.Value
+                        If i <> count - 1 Then
+                            str = str & ","
+                            strparent = strparent & ","
+                        End If
+                    End If
+                Catch ex As Exception
+
+                End Try
+            Next
+
+            If str = "" Then
+                Base.Js.alert(Me, "请至少选择一个数据源节点")
+                Exit Sub
+            End If
+
+            Dim sqlstr As String
+
+            dt = Base.DB.Table("select * from AdvancedSearchDropDownListSetting where SearchSettingID = " & aid, "dd")
+            If dt.Rows.Count > 0 Then
+                sqlstr = "update AdvancedSearchDropDownListSetting set SourceFormID='" & DropDownList1.SelectedItem.Value & "',SourceNodeName='" & DDLnodeName.SelectedItem.Text & "',SourceNodeSelect='" & str & "',SourceNodeParentName='" & strparent & "' where SearchSettingID=" & aid
+                Base.DB.Query(sqlstr)
+                Base.Js.alert(Me, "更新成功")
+            Else
+                sqlstr = "insert into AdvancedSearchDropDownListSetting (SearchSettingID,SourceFormID,SourceNodeName,SourceNodeSelect,SourceNodeParentName) values (" & aid & ",'" & DropDownList1.SelectedItem.Value & "','" & DDLnodeName.SelectedItem.Text & "','" & str & "','" & strparent & "')"
+                Base.DB.Query(sqlstr)
+                Base.Js.alert(Me, "新建成功")
+            End If
+
+        Else
+            Dim customSource As String
+            customSource = Base.SqlFilter(txtCondition.Text)
+
+            If customSource.Length = 0 Then
+                Base.Js.alert(Me, "请输入至少一个条件")
+                Exit Sub
+            End If
+
+            Dim sqlstr As String
+            dt = Base.DB.Table("select * from AdvancedSearchDropDownListSetting where SearchSettingID = " & aid, "dd")
+            If dt.Rows.Count > 0 Then
+                sqlstr = "delete * from AdvancedSearchDropDownListSetting where SearchSettingID=" & aid
+                Base.DB.Query(sqlstr)
+            End If
+
+            sqlstr = "insert into AdvancedSearchDropDownListSetting (SearchSettingID,CustomSoruceText) values (" & aid & ",'" & customSource & "')"
+            Base.DB.Query(sqlstr)
+            Base.Js.alert(Me, "修改成功")
+
+
+        End If
+
+        
+    End Sub
+
+
+
+
+
+
+
+
+    Class NodeInfo
+
+        Private _normalNodeList As ArrayList
+        Public Property NormalNodeList() As ArrayList
+            Get
+                Return _normalNodeList
+            End Get
+            Set(ByVal value As ArrayList)
+                _normalNodeList = value
+            End Set
+        End Property
+
+
+        Private _duplicateNodeList As ArrayList
+        Public Property DuplicateNodeList() As ArrayList
+            Get
+                Return _duplicateNodeList
+            End Get
+            Set(ByVal value As ArrayList)
+                _duplicateNodeList = value
+            End Set
+        End Property
+
+
+    End Class
+
+
+    
+End Class

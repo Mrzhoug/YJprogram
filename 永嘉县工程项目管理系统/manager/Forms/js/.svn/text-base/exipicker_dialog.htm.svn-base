@@ -1,0 +1,265 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title>InfoJet Service</title>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <style>
+        td
+        {
+            font-size: 11px;
+            font-family: verdana;
+        }
+        input
+        {
+            font-size: 11px;
+            font-family: verdana;
+        }
+        .header
+        {
+            float:left;
+            background-color:#F2F2F2;
+            padding:3px;
+        }
+        .row1
+        {
+            float:left;
+            background-color:#F9F9F9;
+            padding:3px;
+        }
+        .row2
+        {
+            float:left;
+            background-color:white;
+            padding:3px;
+        }
+    </style>
+    <base target="_self">
+</head>
+<body style='padding: 0; margin: 0; background-color: buttonface;'  onload="DoLoad()" align="center">
+    <script>
+        var parent = null;
+        var exiId = null;
+        var multiItem = "0";
+        var ednName = null;
+        var resultItems = null;
+        var NoResultText = "No results were found to match your search item. Please enter a new term or less specific term.";
+        var FindingText = "Finding...";
+        function DoLoad() {
+            document.title = "Select Item";
+            parent = window.dialogArguments[0];
+            parent.InfoJet_CurrentDialog = window;
+            exiId = window.dialogArguments[1];
+            multiItem = window.dialogArguments[2];
+            UseLocalResources();
+            //CID 0748 //2010.12.29 //Begin
+            var dialogTitle = window.dialogArguments[3];
+            if (dialogTitle != null && dialogTitle.length > 0) {
+                document.title = dialogTitle;
+            }
+            document.getElementById("buttonImage").src = parent.InfoJet_WebContext + "images/infojet_search.gif";
+            //CID 0748 //2010.12.29 //End
+            DoSearch();
+        }
+        function UseLocalResources() {
+            var res = parent.InfoJet_LocalResources["EXIPickerDialogResources"];
+            if (res != null) {
+                document.title = res["Title"];
+                document.getElementById("buttonOK").value = res["OK"];
+                document.getElementById("buttonCancel").value = res["Cancel"];
+                //CID 0748 //2010.12.29 //Begin
+                document.getElementById("findLabel").innerHTML = res["Find"];
+                //CID 0748 //2010.12.29 //End
+                NoResultText = res["NoResultText"];
+                FindingText = res["FindingText"];
+            }
+        }
+        function DoSearch() {
+            document.getElementById("message").innerHTML = FindingText;
+            document.getElementById("buttonFind").disabled = true;
+            var searchEXIItemsForm = document.forms["SearchEXIItemsForm"];
+            searchEXIItemsForm.xdoc_param_xsn_uri.value = parent.document.getElementById("xdoc_param_xsn_uri").value;
+            searchEXIItemsForm.xdoc_param_action.value = parent.document.getElementById("xdoc_param_action").value;
+            searchEXIItemsForm.xdoc_param_ajax_bracket.value = parent.document.getElementById("xdoc_param_ajax_bracket").value;
+            searchEXIItemsForm.xdoc_param_form_id.value = parent.document.getElementById("xdoc_param_form_id").value;
+            searchEXIItemsForm.xdoc_param_exi_id.value = exiId;
+            searchEXIItemsForm.xdoc_param_exi_search_text.value = document.getElementById("searchText").value;
+            //parent.InfoJet_MoveProgress2CentralPosition();
+            parent.InfoJet_Submit(document.getElementById("SearchEXIItemsFormContainer"));
+        }
+        function DoOK() {
+            var xml = "<Items>";
+            for (var index in resultItems.Rows) {
+                var isSelected = false;
+                if (multiItem == "4294967295") {
+                    var checkbox = document.getElementById("checkbox" + index);
+                    if (checkbox.checked) {
+                        isSelected = true;
+                    }
+                } else {
+                    var radio = document.getElementById("radio" + index);
+                    if (radio.checked) {
+                        isSelected = true;
+                    }
+                }
+                if (isSelected) {
+                    var item = resultItems.Rows[index];
+                    xml += "<Item>";
+                    //CID 0750 //2010.12.29 //Begin
+                    xml += "<Id1>" + item.Id1 + "</Id1>";
+                    xml += "<Id2>" + item.Id2 + "</Id2>";
+                    xml += "<Id3>" + item.Id3 + "</Id3>";
+                    xml += "<Id4>" + item.Id4 + "</Id4>";
+                    xml += "<Id5>" + item.Id5 + "</Id5>";
+                    xml += "<DisplayName>" + item.DisplayName + "</DisplayName>";
+                    //CID 0750 //2010.12.29 //End
+                    xml += "<EIR>" + item.EIR + "</EIR>";
+                    xml += "</Item>";
+                }
+            }
+            xml += "</Items>";
+            window.returnValue = xml;
+            window.close();
+        }
+        function DoCancel() {
+            window.close();
+        }
+        function ShowItems(items) {
+            resultItems = items;
+            //CID 0748 //2010.12.29 //Begin
+            if (items != null && items.Message != null && items.Message.length > 0) {
+                document.getElementById("message").innerHTML = items.Message;
+                //CID 0828 //2011.03.10 //Begin
+                document.getElementById("searchText").focus();
+                //CID 0828 //2011.03.10 //End
+            }
+            else {
+                if (items == null || items.Rows == null || items.Rows.length <= 0) {
+                    document.getElementById("message").innerHTML = NoResultText;
+                } else {
+                    document.getElementById("message").innerHTML = "";
+                }
+            }
+            //CID 0748 //2010.12.29 //End
+            
+            var headers = document.getElementById("headers");
+            headers.innerHTML = "";
+            var totalWidth = "100%";
+            //CID 0748 //2010.12.29 //if
+            //CID 0750 //2010.12.29 //Columns
+            if (items.Columns) {
+                totalWidth = (40 + 165 * items.Columns.length) + "px";
+                var opWidth = "27px";
+                var colWidth = "165px";
+                if (items.Columns.length == 1) {
+                    totalWidth = "100%";
+                    opWidth = "10%";
+                    colWidth = "80%";
+                }
+                if (items.Columns.length == 2) {
+                    totalWidth = "100%";
+                    opWidth = "10%";
+                    colWidth = "40%";
+                }
+                headers.style.width = totalWidth;
+                var headerHTML = "<div class='header' style='width:" + opWidth + "'>&nbsp;</div>";
+                for (var index in items.Columns) {
+                    headerHTML = headerHTML + "<div class='header' style='width:" + colWidth + ";'>" + items.Columns[index].Name + "</div>";
+                }
+                headerHTML = headerHTML + "<div style='clear:left;'></div>";
+                headers.innerHTML = headerHTML;
+            }
+
+            var rows = document.getElementById("rows");
+            rows.innerHTML = "";
+            rows.style.width = totalWidth;
+            //CID 0748 //2010.12.29 //if
+            if (items.Rows) {
+                var templateHTML = "<div class='row' style='width:#OpWidth#;padding:0px;text-align:center;'>#Selection#</div>#Fields#<div style='clear:left;'></div>";
+                for (var index in items.Rows) {
+                    var row = items.Rows[index];
+                    var html = templateHTML;
+                    if (multiItem == "4294967295") {
+                        html = html.replace("#Selection#", "<input type='checkbox' id='checkbox" + index + "' name='selection' index='" + index + "'/>");
+                    } else {
+                        html = html.replace("#Selection#", "<input type='radio' id='radio" + index + "' name='selection' index='" + index + "'/>");
+                    }
+                    html = html.replace("#OpWidth#", opWidth);
+                    var fieldsHtml = "";
+                    for (var fieldIndex in row.Fields) {
+                        var field = row.Fields[fieldIndex];
+                        fieldsHtml = fieldsHtml + "<div class='row' style='width:" + colWidth + "'>" + field + "</div>";
+                    }
+                    html = html.replace("#Fields#", fieldsHtml);
+                    if (parseInt(index) % 2 == 0) {
+                        html = html.replace(new RegExp("row", "gm"), "row1");
+                    } else {
+                        html = html.replace(new RegExp("row", "gm"), "row2");
+                    }
+                    parent.InfoJet_InsertAdjacentHTMLBeforeEnd(rows, html);
+                }
+            }
+            //CID 0828 //2011.03.10 //Begin
+            document.getElementById("searchText").focus();
+            //CID 0828 //2011.03.10 //End
+        }
+        //CID 0701 //2010.11.08 //Begin
+        function EnableFindButton() {
+            document.getElementById("message").innerHTML = "";
+            document.getElementById("buttonFind").disabled = false;
+        }
+        //CID 0701 //2010.11.08 //End
+        //CID 0828 //2011.03.10 //Begin
+        function OnSearchTextKeyDown(event, control) {
+            event = parent.InfoJet_GetEvent(event);
+            if (event.keyCode == 13) {
+                DoSearch();
+            }
+        }
+        //CID 0828 //2011.03.10 //End
+    </script>
+    <table align="center" height="100%" width="552px" style="margin-left:8px;" align="center" cellpadding="0" cellspacing="0">
+        <form id="SearchEXIItemsForm" method="post">
+            <div id="SearchEXIItemsFormContainer" style="display:none;">
+                <input type="hidden" name="xdoc_param_command" value="Update_SearchEXIItems"/>
+                <input type="hidden" name="xdoc_param_xsn_uri" value=""/>
+                <input type="hidden" name="xdoc_param_action" value=""/>
+                <input type="hidden" name="xdoc_param_ajax_bracket" value=""/>
+                <input type="hidden" name="xdoc_param_form_id" value=""/>
+                <input type="hidden" name="xdoc_param_exi_id" value=""/>
+                <input type="hidden" name="xdoc_param_exi_search_text" value=""/>
+            </div>
+        </form>
+        <tr>
+            <td style="vertical-align:middle;">
+                <span type="text" id="findLabel">Find</span>
+                <span style="border:1px solid gray;background-color:white;">
+                    <input type="text" id="searchText" style="border:none;width:62%;height:19px;" onkeydown="return OnSearchTextKeyDown(event, this);"/>
+                    <button id="buttonFind" style="background-color: white;border:0;width:18px;height:18px;margin-right:-2px;" onclick="DoSearch();">
+                        <img id="buttonImage" border="0" src="" />
+                    </button>
+                </span>
+                <br>
+                <div id="message" style="color:Red;">&nbsp;</div>
+            </td>
+        </tr>
+        <tr style="height:80%">
+            <td colspan="3" valign="top" style="border:1px solid gray;background-color:White;">
+                <div style="width:552px;height:100%;overflow:scroll">
+                    <div id="headers" style="background-color:#F2F2F2;">
+                    </div>
+                    <div id="rows">
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td align="right" colspan="3">
+                <input type='button' id='buttonOK' value='    OK    ' onclick="DoOK();">&nbsp;&nbsp;<input type='button' id='buttonCancel' value=' Cancel ' onclick='DoCancel();'>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

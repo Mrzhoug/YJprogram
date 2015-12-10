@@ -1,0 +1,73 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ListPublicMessage.aspx.vb" Inherits="manager_Desktop_ListPublicMessage"  Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>公告列表</title>
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    <script language="javascript" type="text/javascript" >
+     <!--
+     function xx()
+     {
+       document.getElementById('tdxx').className='dmenu';
+       document.getElementById('tdgg').className='dback';
+     }
+     
+      function gg()
+     {
+       document.getElementById('tdxx').className='dback';
+       document.getElementById('tdgg').className='dmenu';
+     }
+     
+     function mouserout()
+     {
+       document.getElementById('tdxx').className='dback';
+       document.getElementById('tdgg').className='dback';
+     }
+     -->
+    </script>
+</head>
+<script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+<body>
+    <form id="form1" runat="server">
+    <div>
+     <table id="bt" border="0" cellpadding="0" cellspacing="0">
+      <tr align="center" height="35ps"><td >
+          &nbsp;&nbsp;&nbsp;
+      </td>
+       <td width="70ps" id="tdxx" class="dback" onclick="BackDesktop(0);" onmouseout="mouserout()" onmousemove="xx();this.style.cursor='hand';"><a href='javascript:void(0);' onclick="BackDesktop(0);" onmouseover="xx();" style="text-decoration: none;color: #0099cc;" hidefocus="hideFocus">信息中心</a></td>
+      <td width="70ps" id="tdgg" class="dback" onclick="WritePublicMessage();" onmouseout="mouserout()" onmousemove="gg();this.style.cursor='hand';"><a href='javascript:void(0);' onclick="WritePublicMessage();" onmouseover="gg();" style="text-decoration: none;color: #0099cc;" hidefocus="hideFocus">编写公告</a></td>
+     </tr>
+      </table>
+        <asp:GridView ID="GridView1" runat="server" AllowPaging="True" AutoGenerateColumns="False" SkinID="GVSkin_ShowPage"
+            BackColor="White" BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px"
+            CellPadding="4" DataKeyNames="Cid,YGDM" DataSourceID="Conn" ForeColor="Black"
+            HorizontalAlign="Center" Width="98%" Font-Size="9pt" OnDataBound="GridView1_DataBound" OnRowDeleting="GridView1_RowDeleting">
+            <FooterStyle BackColor="#CCCC99" />
+            <Columns>
+                <asp:BoundField DataField="YGXM" HeaderText="发布者" SortExpression="YGXM" >
+                    <ItemStyle HorizontalAlign="Center" Width="100px" />
+                </asp:BoundField>
+                <asp:BoundField DataField="Title" HeaderText="标题" SortExpression="Title" />
+                <asp:BoundField DataField="SendDate" HeaderText="日期" SortExpression="SendDate" >
+                    <ItemStyle HorizontalAlign="Center" Width="120px" />
+                </asp:BoundField>
+                <asp:TemplateField HeaderText="编辑">
+                    <ItemStyle Width="30px" />
+                </asp:TemplateField>
+                <asp:CommandField HeaderText="删除" ShowDeleteButton="True" >
+                    <ItemStyle Width="30px" />
+                </asp:CommandField>
+            </Columns>
+            <RowStyle BackColor="White" />
+            <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+            <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Right" />
+            <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" />
+            <AlternatingRowStyle BackColor="White" />
+        </asp:GridView>
+        <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="select * from SendMessage,GY_YGDM where SendMessage.FromID=GY_YGDM.YGDM and TOID=0 and msgkind=4 order by cid desc " DeleteCommand="DELETE FROM SendMessage WHERE Cid =-1">
+        </asp:SqlDataSource>
+    </div>
+    </form>
+</body>
+</html>

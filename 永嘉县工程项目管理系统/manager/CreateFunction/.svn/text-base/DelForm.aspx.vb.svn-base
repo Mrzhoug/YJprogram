@@ -1,0 +1,154 @@
+﻿Imports System.IO
+Partial Class manager_CreateFunction_DelForm
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim MaxPage As Integer
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+        GridView1.SelectedIndex = -1
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            'CType(GridView1.Rows(i).Cells(4).Controls(0), LinkButton).Attributes.Add("onclick", "return confirm('你确认删除此表单吗? 数据文件将会被删除!');")
+            GridView1.Rows(i).Attributes.Add("onmouseover", "OnMouseOver(this)")
+            GridView1.Rows(i).Attributes.Add("onmouseout", "OnMouseOut(this)")
+
+            'GridView1.Rows(i).Cells(5).Text = "<a href=''>扩展属性设置</a>"
+            'GridView1.Rows(i).Cells(5).Text = "<a href='javascript:void(0)' onclick=""window.open('../XJXM/MappingExpansion.aspx?MKDM=" & GridView1.DataKeys(i).Item(0) & "','自定义显示列','height=400, width=650, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no');"">扩展属性设置</a>"
+            GridView1.Rows(i).Cells(5).Text = "<a href='javascript:void(0)' onclick=""window.open('../CreateFunction/ShowListModify.aspx?MKDM=" & GridView1.DataKeys(i).Item(0) & "','自定义显示列','height=750, width=550, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no');"">设置</a>"
+            GridView1.Rows(i).Cells(6).Text = "<a href='javascript:void(0)' onclick=""window.open('../Config/NoLc.aspx?MKDM=" & GridView1.DataKeys(i).Item(0) & "','表单属性设置','height=700, width=660, top=50, left=350, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no');"">详细设置</a>"
+
+            If GridView1.DataKeys(i).Item(2).ToString = "1" Then
+                GridView1.Rows(i).Cells(7).Text = "<font color='red'>[外]</font>"
+            End If
+
+            If GridView1.DataKeys(i).Item(3).ToString = "1" Then
+                GridView1.Rows(i).Cells(7).Text += "<font color='red'>[停]</font>"
+            Else
+                If GridView1.Rows(i).Cells(7).Text = "" Then
+                    GridView1.Rows(i).Cells(7).Text = "<center>--</center>"
+                End If
+            End If
+
+        Next
+        PageBar.InnerHtml = Base.pub.WritePage(GridView1, MaxPage)
+    End Sub
+
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking()        '这里对文件进行权限限制
+        Dim SqlStr As String = String.Empty
+        Dim SearchStr As String = TextBox1.Text.Trim
+        If SearchStr.Length > 0 Then
+            SqlStr = "SELECT [MKDM], [MKMC], [XDLJ],NoLCDM,IsWan,IsStop FROM [GY_MKXX] Where (NoLCDM is not null and NoLCDM <> 0) and mkmc like '%" & SearchStr & "%'"
+        Else
+            SqlStr = "SELECT [MKDM], [MKMC], [XDLJ],NoLCDM,IsWan,IsStop FROM [GY_MKXX] Where (NoLCDM is not null and NoLCDM <> 0)"
+        End If
+        Conn.SelectCommand = SqlStr
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table(SqlStr, "Maxpage")
+        MaxPage = Tb.Rows.Count
+        Button2.Attributes.Add("onclick", "return confirm('你确认删除所选表单库吗? 删除后将不可恢复!');")
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging1(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        Dim index As Integer = e.NewSelectedIndex
+        Try
+            Dim MKDM As Integer = GridView1.DataKeys(index).Item(0)
+            Base.DB.Query("delete GY_GROUP_INFO where MKDM = " & MKDM)   '删除状态明细表
+            Base.DB.Query("delete GY_ZTMX where MKDM = " & MKDM)   '删除状态明细表
+            Base.DB.Query("delete XX_XMJC where MKDM = " & MKDM)    '删除状态进程表
+            Base.DB.Query("delete GY_MKXX Where MKDM =" & MKDM)     '删除模板信息表
+            Base.DB.Query("delete GY_LCDM Where LCDM = " & GridView1.DataKeys(index).Item(1))
+        Catch ex As Exception
+            Base.Js.alert(Me, "删除记录失败!")
+        End Try
+
+        Try
+            '开始删除文件以及生成的文件
+            Dim MC As String = GridView1.Rows(index).Cells(1).Text
+            Dim Path As String = Server.MapPath("../../FormFolder")
+            Base.pub.DelDir(Path & "\" & MC)
+            File.Delete(Path & "\" & MC & ".xml")
+            File.Delete(Path & "\" & MC & ".库.xml")
+        Catch ex As Exception
+        End Try
+
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+        Dim i As Integer
+        Dim ck As New CheckBox
+        For i = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                Dim index As Integer = i
+                Try
+                    Dim MKDM As Integer = GridView1.DataKeys(index).Item(0)
+                    Base.DB.Query("delete GY_GROUP_INFO where MKDM = " & MKDM)   '删除状态明细表
+                    Base.DB.Query("delete GY_ZTMX where MKDM = " & MKDM)   '删除状态明细表
+                    Base.DB.Query("delete XX_XMJC where MKDM = " & MKDM)    '删除状态进程表
+                    Base.DB.Query("delete GY_MKXX Where MKDM =" & MKDM)     '删除模板信息表
+                    Base.DB.Query("delete GY_LCDM Where LCDM = " & GridView1.DataKeys(index).Item(1))
+                Catch ex As Exception
+                    Base.Js.alert(Me, "删除记录失败!")
+                End Try
+
+                Try
+                    '开始删除文件以及生成的文件
+                    Dim MC As String = GridView1.Rows(index).Cells(1).Text
+                    Dim Path As String = Server.MapPath("../../FormFolder")
+                    Base.pub.DelDir(Path & "\" & MC)
+                    File.Delete(Path & "\" & MC & ".xml")
+                    File.Delete(Path & "\" & MC & ".库.xml")
+                Catch ex As Exception
+                End Try
+            End If
+        Next
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+        Dim i As Integer
+        Dim ck As New CheckBox
+        For i = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                If GridView1.DataKeys(i).Item(2).ToString = "1" Then
+                    Base.DB.Query("update GY_MKXX set IsWan=0 where MKDM=" & GridView1.DataKeys(i).Item(0))
+                Else
+                    Base.DB.Query("update GY_MKXX set IsWan=1 where MKDM=" & GridView1.DataKeys(i).Item(0))
+                End If
+            End If
+        Next
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub Button4_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button4.Click
+        Dim i As Integer
+        Dim ck As New CheckBox
+        For i = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                If GridView1.DataKeys(i).Item(3).ToString = "1" Then
+                    Base.DB.Query("update GY_MKXX set IsStop=0 where MKDM=" & GridView1.DataKeys(i).Item(0))
+                Else
+                    Base.DB.Query("update GY_MKXX set IsStop=1 where MKDM=" & GridView1.DataKeys(i).Item(0))
+                End If
+            End If
+        Next
+        GridView1.DataBind()
+    End Sub
+End Class

@@ -1,0 +1,74 @@
+﻿Imports Microsoft.VisualBasic
+Imports System.Xml
+Imports System.IO
+
+
+Public Class DoLog
+
+
+    ''' <summary>
+    ''' 记录后台同步服务
+    ''' </summary>
+    ''' <param name="errortips"></param>
+    ''' <param name="err"></param>
+    ''' <remarks></remarks>
+    Public Shared Sub LogGlobalServiceToFile(ByVal errortips As String, ByVal err As String)
+
+        Dim rootPath As String
+        rootPath = System.AppDomain.CurrentDomain.BaseDirectory + "/ErrorLog/GlobalService/"
+        LogErrorToFile(rootPath, errortips, err)
+
+    End Sub
+
+    ''' <summary>
+    ''' 记录错误信息
+    ''' </summary>
+    ''' <param name="errortips">错误类型</param>
+    ''' <param name="err">错误信息</param>
+    ''' <remarks></remarks>
+    Public Shared Sub LogErrorToFile(ByVal errortips As String, ByVal err As String)
+        Dim rootPath As String
+        rootPath = System.AppDomain.CurrentDomain.BaseDirectory + "/ErrorLog/"
+        LogErrorToFile(rootPath, errortips, err)
+    End Sub
+
+    ''' <summary>
+    ''' 记录错误信息
+    ''' </summary>
+    ''' <param name="className">类名</param>
+    ''' <param name="functionName">功能函数名</param>
+    ''' <param name="tips">错误说明</param>
+    ''' <param name="err">错误信息</param>
+    ''' <remarks></remarks>
+    Public Shared Sub LogErrorToFile(ByVal className As String, ByVal functionName As String, ByVal tips As String, ByVal err As String)
+        Dim rootPath As String
+        rootPath = System.AppDomain.CurrentDomain.BaseDirectory + "/ErrorLog/"
+        Dim errortips As String
+        errortips = functionName & "中的" & functionName & "类出错：" & tips
+        LogErrorToFile(rootPath, errortips, err)
+    End Sub
+
+    ''' <summary>
+    ''' 记录错误信息
+    ''' </summary>
+    ''' <param name="rootPath">错误日志文件夹</param>
+    ''' <param name="errortips">错误类型</param>
+    ''' <param name="err">错误信息</param>
+    ''' <remarks></remarks>
+    Public Shared Sub LogErrorToFile(ByVal rootPath As String, ByVal errortips As String, ByVal err As String)
+        Dim dt As DateTime = DateTime.Now
+        Dim path As String = rootPath & dt.ToString("yyyy-MM") & "/" & dt.ToString("yyyyMMdd") & ".log"
+        Dim folderPath As String = rootPath & dt.ToString("yyyy-MM") & "/"
+
+        If Directory.Exists(folderPath) = False Then
+            Directory.CreateDirectory(folderPath)
+        End If
+
+        Dim sw As New StreamWriter(path, True, Encoding.GetEncoding("gb2312"))
+        sw.AutoFlush = True
+        sw.WriteLine(((Environment.NewLine + "[" & dt & "]=" & errortips & "--") + Environment.NewLine & err) + Environment.NewLine)
+        sw.Flush()
+        sw.Close()
+    End Sub
+
+End Class

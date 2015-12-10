@@ -1,0 +1,27 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="System_User.aspx.vb" Inherits="manager_YGDM_System_User" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>添加账号</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        用 户 名：<asp:TextBox ID="UserName" runat="server" Enabled="False"></asp:TextBox><br />
+        新 密 码：<input id="Password1" style="width: 148px" type="password" runat=server  />
+        <asp:RequiredFieldValidator ID="RequiredFieldValidator1" runat="server" ControlToValidate="Password1"
+            ErrorMessage="*"></asp:RequiredFieldValidator><br />
+        确认密码：<input id="Password2" style="width: 148px" type="password" runat=server  />
+        <asp:RequiredFieldValidator ID="RequiredFieldValidator2" runat="server" ControlToValidate="Password2"
+            ErrorMessage="*"></asp:RequiredFieldValidator><br />
+        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+        <asp:CompareValidator ID="CompareValidator1" runat="server" ControlToCompare="Password1"
+            ControlToValidate="Password2" ErrorMessage="两次密码输入不一致"></asp:CompareValidator><br />
+        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+        <asp:Button ID="Button1" runat="server" Text=" 设 置 " OnClick="Button1_Click" />
+        <input id="Reset1" type="reset" value=" 重 设 " /></div>
+    </form>
+</body>
+</html>

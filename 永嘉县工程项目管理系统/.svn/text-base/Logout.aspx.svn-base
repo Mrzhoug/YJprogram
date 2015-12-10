@@ -1,0 +1,18 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Logout.aspx.vb" Inherits="Logout" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>注销</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <center><br /><br />
+        <div>请关闭此窗口,完成注销<br />
+            <br />
+            [<a href="javascript:void(0)" onclick="javascript:window.close(-1);">关闭窗口]</a></div>
+    </center>
+    </form>
+</body>
+</html>

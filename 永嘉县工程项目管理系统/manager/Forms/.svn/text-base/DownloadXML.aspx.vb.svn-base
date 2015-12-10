@@ -1,0 +1,15 @@
+﻿
+Partial Class manager_Forms_DownloadXML
+    Inherits System.Web.UI.Page
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim fileName As String = Context.Request.Params("FileName")
+        If fileName Is Nothing Then
+            fileName = "NewForm.xml"
+        End If
+        Dim form As InfoJetSoft.Service.InfoJetForm = InfoJetSoft.Service.InfoJetService.ReloadForm(Context, "")
+        Dim xml As String = form.Xml.Trim()
+        Response.ContentEncoding = Encoding.UTF8
+        Response.Write(xml)
+    End Sub
+End Class

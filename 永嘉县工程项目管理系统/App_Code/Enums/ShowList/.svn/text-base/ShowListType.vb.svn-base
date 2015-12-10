@@ -1,0 +1,19 @@
+﻿Imports Microsoft.VisualBasic
+
+''' <summary>
+''' 显示列类型枚举
+''' </summary>
+''' <remarks></remarks>
+Public Enum ShowListType
+    AllList = 1
+    MyList = 2
+    MyDraft = 3
+    RecevieList = 4
+    SendList = 5
+    CheckSendList = 6
+    CheckRecevieList = 9
+    DoneList = 10
+    DoingList = 11
+    CancelList = 12
+End Enum
+

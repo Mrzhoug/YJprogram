@@ -1,0 +1,91 @@
+﻿
+Partial Class manager_Forms_FormAnnexHandler
+    Inherits System.Web.UI.Page
+
+    Dim Base As New Base
+
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Response.ContentType = "text/plain"
+        Response.Charset = "utf-8"
+
+        Dim file As HttpPostedFile = Request.Files("Filedata")
+
+        Dim fid As Integer
+        Try
+            fid = Convert.ToInt32(Request("fid"))
+        Catch ex As Exception
+            fid = 0
+        End Try
+
+        If fid = 0 Then
+            Response.Write("0")
+            Response.End()
+        End If
+
+        Dim remarks As String
+        remarks = Request("filetype")
+
+        Dim username As String
+        username = Base.GetWebUserName
+        Dim userid As Integer
+        userid = Base.GetUserID(username)
+
+
+        Dim mkmc As String
+        Dim mkdm As String
+        Dim dt As New DataTable
+        '根据ＦＩＤ得到相关的信息        
+        dt = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir,GY_MKXX.MKDM,XX_XMJC.XMDM,[View] FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & fid & ")", "XX_XMJC")
+        If dt.Rows.Count = 0 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+        mkmc = dt.Rows(0).Item(1).ToString.Trim
+        mkdm = dt.Rows(0).Item(3).ToString.Trim
+
+        Dim qx As Integer
+        qx = Base.GetUserHaveQX(userid, mkdm)
+
+
+        Dim RootPath As String = Request.MapPath("../../") & "FormFolder\" & mkmc & "\Annex\" & fid & "\"
+        Base.IO.CreateDir(RootPath) '如果目录不存在,则建立
+
+
+        Dim filename As String = file.FileName
+        'Dim filenames() As String = filename.Split(".")
+        'If filenames.Length <> 2 Then
+        '    Response.Write("0")
+        '    Response.End()
+        'Else
+        '    filename = filenames(0) & Date.Now.ToString("yyyyMMddhhmmss") & "." & filenames(1)
+        'End If
+
+        Dim fileInfo As New IO.FileInfo(RootPath & filename)
+
+
+
+        If Not file Is Nothing Then
+            file.SaveAs(RootPath & filename)
+
+            Dim sqlstr As String
+            Dim path As String = "FormFolder\" & mkmc & "\Annex\" & fid & "\" & filename
+
+
+            sqlstr = "select * from annexupload where fid=" & fid & " and filename='" & filename & "' and (isdel is null or isdel = 'false')"
+            dt = Base.DB.Table(sqlstr, "123")
+            If dt.Rows.Count > 0 Then
+                sqlstr = "update annexupload set userid='" & userid & "',path = '" & path & "',uploadtime='" & Now.ToString() & "',remarks='" & remarks & "',filesize='" & fileInfo.Length & "' where cid=" & dt.Rows(0).Item(0).ToString()
+            Else
+                sqlstr = "insert into annexupload (fid,userid,filename,path,uploadtime,filetype,remarks,filesize) values ('" & fid & "','" & userid & "','" & filename & "','" & path & "','" & Date.Now.ToString() & "','" & fileInfo.Extension & "','" & remarks & "','" & fileInfo.Length & "')"
+            End If
+            Base.DB.Query(sqlstr)
+            Response.Write("1")
+        Else
+            Response.Write("0")
+        End If
+
+
+
+    End Sub
+End Class

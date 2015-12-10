@@ -1,0 +1,127 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Questionnaire2.aspx.vb" Inherits="HomePage_Forms_Questionnaire2" %>
+
+<html>
+<head id="Head1" runat="server">
+    <title>Web方式打开表单</title>
+    <link rel="stylesheet" type="text/css" href="../../images/Ext.UI/resources/css/ext-all.css" />
+    <script type="text/javascript" src="../../images/Ext.UI/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="../../images/Ext.UI/ext-all.js"></script>
+    <script type="text/javascript" src="../../images/Ext.UI/TabCloseMenu.js"></script>
+    <script type="text/javascript" src="../../pub/function.js"></script>
+    
+    <style type="text/css">
+        TD { FONT-SIZE: 8.5pt; LINE-HEIGHT: 180%; FONT-FAMILY: "verdana", "Helvetica", "sans-serif" }
+	    A:link { FONT-SIZE: 8.5pt; COLOR: #000000; FONT-FAMILY: "verdana", "Helvetica", "sans-serif"; TEXT-DECORATION: none }
+	    A:hover { FONT-SIZE: 8.5pt; COLOR: #b84e07; FONT-FAMILY: "verdana", "Helvetica", "sans-serif"; TEXT-DECORATION: underline }
+	    A:visited { FONT-SIZE: 8.5pt; COLOR: #000000; FONT-FAMILY: "verdana", "Helvetica", "sans-serif"; TEXT-DECORATION: none }
+	</style>
+    <link rel="stylesheet" type="text/css" media="all" href="../../Manager/Forms/js/calendar-win2k-cold-1.css"	title="win2k-cold-1" />
+    <script type="text/javascript" src="../../Manager/Forms/js/calendar.js"></script>
+	<script type="text/javascript" src="../../Manager/Forms/js/calendar-en.js"></script>
+	<script type="text/javascript" src="../../Manager/Forms/js/calendar-setup.js"></script>
+	<script type="text/javascript" src="../../Manager/Forms/js/infojet.js"></script>
+</head>
+
+<body onload="InfoJet_Init();" style="margin:0;">
+    <form name="xmlForm" action="../../submit.aspx" method="post">
+    <div id="toolbar"></div><br />
+    <input id="FileName" type="hidden" name="FileName" runat="server" />
+    <input id="FID" type="hidden" name="FID" runat="server" />
+    <center>
+        <asp:Label id="xDocContent" runat="server">xDocContent</asp:Label>&nbsp;<br />
+    </center>
+    </form>
+<span id="clientscript" runat="server"></span>
+
+<script language="javascript" type="text/javascript">
+   
+	var tb = new Ext.Toolbar();
+    tb.render('toolbar');
+
+    // They can also be referenced by id in or components
+    tb.add("-",
+    {
+    	icon: '../../images/Ext.UI/icons/fam/add.gif', 
+    	iconCls: 'blist',
+        text: '保存表单&nbsp;',
+        handler: onItemClick
+    },"-"
+     );
+     
+     function onItemClick(item){
+        switch (item.text)
+        {
+        case '保存表单&nbsp;': doDownload();    break; 
+        }
+    }
+//});
+
+
+if (toolbar==false)
+{
+    show("toolbar");
+}
+</script>
+</body>
+</html>
+
+
+
+<script type="text/javascript" language="javascript">
+    function doDownload()
+    {
+        if (InfoJet_IsValid()==false)
+        {
+            alert("请将必填项填完(带红星的输入框)!");
+            return false;
+        }
+        document.forms( "xmlForm" ).action = "Questionnaire3.aspx";
+        document.forms( "xmlForm" ).submit();
+    }
+  
+  
+</script>
+
+<script type="text/javascript">
+<!-- 
+var winWidth = 0;
+   var winHeight = 0;
+   function findDimensions() //函数：获取尺寸
+   {
+   //获取窗口宽度
+   if (window.innerWidth)
+   winWidth = window.innerWidth;
+   else if ((document.body) && (document.body.clientWidth))
+   winWidth = document.body.clientWidth;
+   //获取窗口高度
+   if (window.innerHeight)
+   winHeight = window.innerHeight;
+   else if ((document.body) && (document.body.clientHeight))
+   winHeight = document.body.clientHeight;
+   //通过深入Document内部对body进行检测，获取窗口大小
+   if (document.documentElement && document.documentElement.clientHeight && document.documentElement.clientWidth)
+   {
+   winHeight = document.documentElement.clientHeight;
+   winWidth = document.documentElement.clientWidth;
+   }
+        //结果输出至两个文本框
+        //document.form1.availHeight.value= winHeight;
+        //document.form1.availWidth.value= winWidth;
+        var obj = document.getElementById("xdoc_view");
+        //alert(obj.clientWidth);
+        window.moveTo(1,1);
+        if (obj.clientWidth +70 < 720) 
+        {
+            window.resizeTo(720,winHeight + 60);
+        }
+        else
+        {
+            window.resizeTo(obj.clientWidth + 70,winHeight + 60);
+        }
+   }
+   findDimensions();
+   //调用函数，获取数值
+   //window.onresize=findDimensions;
+
+//-->
+</script>

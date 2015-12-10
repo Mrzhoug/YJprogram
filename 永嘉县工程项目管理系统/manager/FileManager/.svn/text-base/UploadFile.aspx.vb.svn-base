@@ -1,0 +1,29 @@
+﻿
+Partial Class manager_FileManager_UploadFile
+    Inherits System.Web.UI.Page
+
+    Public belongFolderID As String
+
+    Dim UserInfo As New UserInfo
+    Dim FileManager As New FileManager
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        belongFolderID = Request("belongFolderID")
+
+        Dim userName As String = UserInfo.GetWebUserName()
+        Dim userID As Integer = UserInfo.GetUserID(userName)
+
+
+        If FileManager.IsPublicFolder(belongFolderID) Then
+            If Not (FileManager.GetUserPermission(userID, belongFolderID).CanUpload) Then
+                Response.Write("您没有上传文件的权利")
+                Response.End()
+            End If
+        End If
+
+        
+
+
+
+    End Sub
+End Class

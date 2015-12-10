@@ -1,0 +1,1875 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+此文件由 Microsoft Office InfoPath 自动创建和修改。
+如果在 InfoPath 中修改表单模板，则在 InfoPath 以外对文件所做的更改可能会丢失。
+-->
+<xsf:xDocumentClass xmlns:xdExtension="http://schemas.microsoft.com/office/infopath/2003/xslt/extension" trustSetting="automatic" solutionVersion="1.0.0.2669" productVersion="12.0.0" solutionFormatVersion="2.0.0.0" publishUrl="http://localhost:20886/永嘉县工程项目管理系统/TemplateLibrary/项目基本信息.xsn" name="urn:schemas-microsoft-com:office:infopath:i-j-Q-:-myXSD-2006-05-23T07-44-28"  xmlns:xsf="http://schemas.microsoft.com/office/infopath/2003/solutionDefinition" xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:xd="http://schemas.microsoft.com/office/infopath/2003" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xdUtil="http://schemas.microsoft.com/office/infopath/2003/xslt/Util" xmlns:xdXDocument="http://schemas.microsoft.com/office/infopath/2003/xslt/xDocument" xmlns:xdMath="http://schemas.microsoft.com/office/infopath/2003/xslt/Math" xmlns:xdDate="http://schemas.microsoft.com/office/infopath/2003/xslt/Date" xmlns:my="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28" xmlns:ns3="http://schemas.microsoft.com/office/infopath/2003/myXSD" xmlns:tr="http://schemas.microsoft.com/office/infopath/2003/sample/TravelRequest" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:ns2="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-30T00:40:51" xmlns:ns1="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-07-20T06:01:42" xmlns:ns4="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-08-12T00:41:12" xmlns:ns5="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-08-14T01:23:01" xmlns:dfs="http://schemas.microsoft.com/office/infopath/2003/dataFormSolution" xmlns:tns="http://tempuri.org/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:ns6="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xdEnvironment="http://schemas.microsoft.com/office/infopath/2006/xslt/environment" xmlns:xdUser="http://schemas.microsoft.com/office/infopath/2006/xslt/User" xmlns:xsf2="http://schemas.microsoft.com/office/infopath/2006/solutionDefinition/extensions">
+	<xsf:package>
+		<xsf:files>
+			<xsf:file name="myschema.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28"></xsf:property>
+					<xsf:property name="editability" type="string" value="full"></xsf:property>
+					<xsf:property name="rootElement" type="string" value="Xman"></xsf:property>
+					<xsf:property name="useOnDemandAlgorithm" type="string" value="yes"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="template.xml"></xsf:file>
+			<xsf:file name="sampledata.xml">
+				<xsf:fileProperties>
+					<xsf:property name="fileType" type="string" value="sampleData"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="view4.xsl">
+				<xsf:fileProperties>
+					<xsf:property name="lang" type="string" value="2052"></xsf:property>
+					<xsf:property name="mode" type="string" value="156"></xsf:property>
+					<xsf:property name="componentId" type="string" value="1760"></xsf:property>
+					<xsf:property name="xmlToEditName" type="string" value="1171"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="______.dll">
+				<xsf:fileProperties>
+					<xsf:property name="fileType" type="string" value="rootAssembly"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema15.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/dataFormSolution"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="工程结算"></xsf:property>
+					<xsf:property name="rootElement" type="string" value="myFields"></xsf:property>
+					<xsf:property name="useOnDemandAlgorithm" type="string" value="yes"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema16.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://tempuri.org/"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="工程结算"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema17.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="工程结算"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="____4.xml">
+				<xsf:fileProperties>
+					<xsf:property name="dataObject" type="string" value="工程结算"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema18.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/dataFormSolution"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="竣工决算"></xsf:property>
+					<xsf:property name="rootElement" type="string" value="myFields"></xsf:property>
+					<xsf:property name="useOnDemandAlgorithm" type="string" value="yes"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema19.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://tempuri.org/"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="竣工决算"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema20.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="竣工决算"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="____5.xml">
+				<xsf:fileProperties>
+					<xsf:property name="dataObject" type="string" value="竣工决算"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema27.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/dataFormSolution"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="工程信息"></xsf:property>
+					<xsf:property name="rootElement" type="string" value="myFields"></xsf:property>
+					<xsf:property name="useOnDemandAlgorithm" type="string" value="yes"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema28.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://tempuri.org/"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="工程信息"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema29.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="工程信息"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="____7.xml">
+				<xsf:fileProperties>
+					<xsf:property name="dataObject" type="string" value="工程信息"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema24.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/dataFormSolution"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="工程物资信息"></xsf:property>
+					<xsf:property name="rootElement" type="string" value="myFields"></xsf:property>
+					<xsf:property name="useOnDemandAlgorithm" type="string" value="yes"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema25.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://tempuri.org/"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="工程物资信息"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema26.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="工程物资信息"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="______1.xml">
+				<xsf:fileProperties>
+					<xsf:property name="dataObject" type="string" value="工程物资信息"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="GetFromAnnexListNew3.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/dataFormSolution"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="GetFromAnnexListNew"></xsf:property>
+					<xsf:property name="rootElement" type="string" value="myFields"></xsf:property>
+					<xsf:property name="useOnDemandAlgorithm" type="string" value="yes"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="GetFromAnnexListNew4.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://tempuri.org/"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="GetFromAnnexListNew"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="GetFromAnnexListNew5.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="dataObject" type="string" value="GetFromAnnexListNew"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="GetFromAnnexListNew1.xml">
+				<xsf:fileProperties>
+					<xsf:property name="dataObject" type="string" value="GetFromAnnexListNew"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/dataFormSolution"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="开工报告"></xsf:property>
+					<xsf:property name="rootElement" type="string" value="myFields"></xsf:property>
+					<xsf:property name="useOnDemandAlgorithm" type="string" value="yes"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema1.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://tempuri.org/"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="开工报告"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema2.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="开工报告"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="____.xml">
+				<xsf:fileProperties>
+					<xsf:property name="dataObject" type="string" value="开工报告"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema6.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/dataFormSolution"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="竣工报告"></xsf:property>
+					<xsf:property name="rootElement" type="string" value="myFields"></xsf:property>
+					<xsf:property name="useOnDemandAlgorithm" type="string" value="yes"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema7.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://tempuri.org/"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="竣工报告"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema8.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="竣工报告"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="____2.xml">
+				<xsf:fileProperties>
+					<xsf:property name="dataObject" type="string" value="竣工报告"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema45.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/dataFormSolution"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="工程验收"></xsf:property>
+					<xsf:property name="rootElement" type="string" value="myFields"></xsf:property>
+					<xsf:property name="useOnDemandAlgorithm" type="string" value="yes"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema46.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://tempuri.org/"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="工程验收"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema47.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="工程验收"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="____13.xml">
+				<xsf:fileProperties>
+					<xsf:property name="dataObject" type="string" value="工程验收"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema9.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/dataFormSolution"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="物资申请"></xsf:property>
+					<xsf:property name="rootElement" type="string" value="myFields"></xsf:property>
+					<xsf:property name="useOnDemandAlgorithm" type="string" value="yes"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema10.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://tempuri.org/"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="物资申请"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema11.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="物资申请"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="____3.xml">
+				<xsf:fileProperties>
+					<xsf:property name="dataObject" type="string" value="物资申请"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema12.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/dataFormSolution"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="物资领料"></xsf:property>
+					<xsf:property name="rootElement" type="string" value="myFields"></xsf:property>
+					<xsf:property name="useOnDemandAlgorithm" type="string" value="yes"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema13.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://tempuri.org/"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="物资领料"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="auxdomschema14.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="物资领料"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="____6.xml">
+				<xsf:fileProperties>
+					<xsf:property name="dataObject" type="string" value="物资领料"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="addlczt.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://schemas.microsoft.com/office/infopath/2003/dataFormSolution"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="addlczt"></xsf:property>
+					<xsf:property name="rootElement" type="string" value="myFields"></xsf:property>
+					<xsf:property name="useOnDemandAlgorithm" type="string" value="yes"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="addlczt1.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="namespace" type="string" value="http://tempuri.org/"></xsf:property>
+					<xsf:property name="dataObject" type="string" value="addlczt"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="addlczt2.xsd">
+				<xsf:fileProperties>
+					<xsf:property name="dataObject" type="string" value="addlczt"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+			<xsf:file name="addlczt.xml">
+				<xsf:fileProperties>
+					<xsf:property name="dataObject" type="string" value="addlczt"></xsf:property>
+				</xsf:fileProperties>
+			</xsf:file>
+		</xsf:files>
+	</xsf:package>
+	<xsf:importParameters enabled="yes" useScriptHandler="no"></xsf:importParameters>
+	<xsf:views default="主页">
+		<xsf:view name="主页" caption="主页">
+			<xsf:editing>
+				<xsf:xmlToEdit name="建设进度备注_581" item="/my:Xman/my:RootNode/my:内容/my:初设阶段/my:建设进度备注">
+					<xsf:editWith type="plainMultiline" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="现场勘查时间_587" item="/my:Xman/my:RootNode/my:内容/my:初设阶段/my:现场勘查时间">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="初设完成时间_589" item="/my:Xman/my:RootNode/my:内容/my:初设阶段/my:初设完成时间">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="初设审查时间_591" item="/my:Xman/my:RootNode/my:内容/my:初设阶段/my:初设审查时间">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="初设图纸交付时间_594" item="/my:Xman/my:RootNode/my:内容/my:初设阶段/my:初设图纸交付时间">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="初设出图时间_593" item="/my:Xman/my:RootNode/my:内容/my:初设阶段/my:初设出图时间">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="初设内审时间_597" item="/my:Xman/my:RootNode/my:内容/my:初设阶段/my:初设内审时间">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="初设市公司审查时间_601" item="/my:Xman/my:RootNode/my:内容/my:初设阶段/my:初设市公司审查时间">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="初设批复时间_603" item="/my:Xman/my:RootNode/my:内容/my:初设阶段/my:初设批复时间">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="施工单位_631" item="/my:Xman/my:RootNode/my:内容/my:施工单位">
+					<xsf:editWith autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="建设截止年限_665" item="/my:Xman/my:RootNode/my:内容/my:初设阶段/my:建设截止年限">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="建设起始年限_664" item="/my:Xman/my:RootNode/my:内容/my:初设阶段/my:建设起始年限">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="施工单位_699" item="/my:Xman/my:RootNode/my:内容/my:施工单位">
+					<xsf:editWith autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="施工单位_728" item="/my:Xman/my:RootNode/my:内容/my:施工单位">
+					<xsf:editWith autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="施工单位_768" item="/my:Xman/my:RootNode/my:内容/my:施工单位">
+					<xsf:editWith autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="施工单位_770" item="/my:Xman/my:RootNode/my:内容/my:施工单位">
+					<xsf:editWith autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="施工单位_804" item="/my:Xman/my:RootNode/my:内容/my:初设阶段/my:施工单位">
+					<xsf:editWith autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="实际完成时间_807" item="/my:Xman/my:RootNode/my:内容/my:施工阶段/my:实际完成时间">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="项目开工时间_820" item="/my:Xman/my:RootNode/my:内容/my:施工阶段/my:项目开工时间">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="竣工草图出图时间_824" item="/my:Xman/my:RootNode/my:内容/my:施工阶段/my:竣工草图出图时间">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="土建标化完成时间_825" item="/my:Xman/my:RootNode/my:内容/my:施工阶段/my:土建标化完成时间">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="施工单位_870" item="/my:Xman/my:RootNode/my:内容/my:初设阶段/my:施工单位">
+					<xsf:editWith autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="计划完成时间_872" item="/my:Xman/my:RootNode/my:内容/my:施工阶段/my:计划完成时间">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="审查时间_874" item="/my:Xman/my:RootNode/my:内容/my:施工阶段/my:审查时间">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="施工计划上报时间_873" item="/my:Xman/my:RootNode/my:内容/my:施工阶段/my:施工计划上报时间">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="施工单位_917" item="/my:Xman/my:RootNode/my:内容/my:初设阶段/my:施工单位">
+					<xsf:editWith autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="停电计划列表_1078" item="/my:Xman/my:RootNode/my:内容/my:施工阶段/my:停电计划组/my:停电计划列表" container="/my:Xman/my:RootNode/my:内容/my:施工阶段">
+					<xsf:editWith caption="停电计划列表" xd:autogeneration="template" component="xCollection">
+						<xsf:fragmentToInsert>
+							<xsf:chooseFragment innerFragment="my:停电计划组/my:停电计划列表">
+								<my:停电计划组>
+									<my:停电计划列表>
+										<my:停电计划上报时间></my:停电计划上报时间>
+									</my:停电计划列表>
+								</my:停电计划组>
+							</xsf:chooseFragment>
+						</xsf:fragmentToInsert>
+					</xsf:editWith>
+				</xsf:xmlToEdit>
+				<xsf:xmlToEdit name="停电计划上报时间_1079" item="/my:Xman/my:RootNode/my:内容/my:施工阶段/my:停电计划组/my:停电计划列表/my:停电计划上报时间">
+					<xsf:editWith proofing="no" autoComplete="no" component="xField"></xsf:editWith>
+				</xsf:xmlToEdit>
+			</xsf:editing>
+			<xsf:unboundControls>
+				<xsf:button name="CTRL644_6"></xsf:button>
+				<xsf:button name="CTRL69_7"></xsf:button>
+				<xsf:button name="CTRL23"></xsf:button>
+				<xsf:button name="CTRL166"></xsf:button>
+				<xsf:button name="CTRL8_1"></xsf:button>
+				<xsf:button name="CTRL170"></xsf:button>
+				<xsf:button name="CTRL1_3"></xsf:button>
+				<xsf:button name="CTRL321"></xsf:button>
+				<xsf:button name="CTRL341"></xsf:button>
+				<xsf:button name="CTRL_XZYZDW"></xsf:button>
+				<xsf:button name="CTRL1_SendToZG"></xsf:button>
+				<xsf:button name="CTRL_Add"></xsf:button>
+				<xsf:button name="CTRL_Del"></xsf:button>
+				<xsf:button name="CTRL557"></xsf:button>
+				<xsf:button name="CTRL569"></xsf:button>
+				<xsf:button name="CTRL_OpenCustormer"></xsf:button>
+				<xsf:button name="CTRL_CreateCustormer"></xsf:button>
+				<xsf:button name="CTRL_Openlct"></xsf:button>
+				<xsf:button name="CTRL802_6"></xsf:button>
+				<xsf:button name="CTRL803_6">
+					<xsf:ruleSetAction ruleSet="ruleSet_336"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="CTRL804_6"></xsf:button>
+				<xsf:button name="CTRL805"></xsf:button>
+				<xsf:button name="CTRL840"></xsf:button>
+				<xsf:button name="CTRL834_6"></xsf:button>
+				<xsf:button name="CTRL835"></xsf:button>
+				<xsf:button name="CTRL839"></xsf:button>
+				<xsf:button name="CTRL845"></xsf:button>
+				<xsf:button name="CTRL844"></xsf:button>
+				<xsf:button name="CTRL855"></xsf:button>
+				<xsf:button name="CTRL850"></xsf:button>
+				<xsf:button name="CTRL849"></xsf:button>
+				<xsf:button name="CTRL854"></xsf:button>
+				<xsf:button name="CTRL861"></xsf:button>
+				<xsf:button name="CTRL860"></xsf:button>
+				<xsf:button name="CTRL866"></xsf:button>
+				<xsf:button name="CTRL865"></xsf:button>
+				<xsf:button name="CTRL875"></xsf:button>
+				<xsf:button name="CTRL876"></xsf:button>
+				<xsf:button name="CTRL877"></xsf:button>
+				<xsf:button name="CTRL950"></xsf:button>
+				<xsf:button name="CTRL961"></xsf:button>
+				<xsf:button name="CTRL962"></xsf:button>
+				<xsf:button name="CTRL963"></xsf:button>
+				<xsf:button name="CTRL964"></xsf:button>
+				<xsf:button name="CTRL965"></xsf:button>
+				<xsf:button name="CTRL966"></xsf:button>
+				<xsf:button name="CTRL970"></xsf:button>
+				<xsf:button name="CTRL969"></xsf:button>
+				<xsf:button name="btn_SetUpZb"></xsf:button>
+				<xsf:button name="btn_SetUpHt"></xsf:button>
+				<xsf:button name="CTRL997"></xsf:button>
+				<xsf:button name="btn_Getzb"></xsf:button>
+				<xsf:button name="btn_Check"></xsf:button>
+				<xsf:button name="CTRL1008"></xsf:button>
+				<xsf:button name="CTRL1020"></xsf:button>
+				<xsf:button name="btn_SetUpRw"></xsf:button>
+				<xsf:button name="btn_save"></xsf:button>
+				<xsf:button name="CTRL1056"></xsf:button>
+				<xsf:button name="CTRL1072"></xsf:button>
+				<xsf:button name="CTRL1169"></xsf:button>
+				<xsf:button name="CTRL1117"></xsf:button>
+				<xsf:button name="CTRL1091"></xsf:button>
+				<xsf:button name="CTRL1119"></xsf:button>
+				<xsf:button name="CTRL1134"></xsf:button>
+				<xsf:button name="CTRL1188"></xsf:button>
+				<xsf:button name="btn_GetSg"></xsf:button>
+				<xsf:button name="btn_GetInformation"></xsf:button>
+				<xsf:button name="btn_GetZbInformation">
+					<xsf:ruleSetAction ruleSet="ruleSet_361"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="btn_GetSgInformation">
+					<xsf:ruleSetAction ruleSet="ruleSet_362"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="btn_GetJsInformation">
+					<xsf:ruleSetAction ruleSet="ruleSet_363"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="CTRL1198"></xsf:button>
+				<xsf:button name="CTRL1207"></xsf:button>
+				<xsf:button name="CTRL1208"></xsf:button>
+				<xsf:button name="CTRL1209"></xsf:button>
+				<xsf:button name="CTRL1210"></xsf:button>
+				<xsf:button name="CTRL1228"></xsf:button>
+				<xsf:button name="CTRL1219"></xsf:button>
+				<xsf:button name="btn_SetUpYs">
+					<xsf:ruleSetAction ruleSet="ruleSet_384"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="CTRL1231"></xsf:button>
+				<xsf:button name="btn_SetUpJs">
+					<xsf:ruleSetAction ruleSet="ruleSet_381"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="btn_SetUpJgJs">
+					<xsf:ruleSetAction ruleSet="ruleSet_380"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="CTRL1247"></xsf:button>
+				<xsf:button name="CTRL1260"></xsf:button>
+				<xsf:button name="CTRL1278"></xsf:button>
+				<xsf:button name="CTRL1304"></xsf:button>
+				<xsf:button name="CTRL1305"></xsf:button>
+				<xsf:button name="CTRL1311"></xsf:button>
+				<xsf:button name="CTRL1306"></xsf:button>
+				<xsf:button name="CTRL1322"></xsf:button>
+				<xsf:button name="CTRL1323"></xsf:button>
+				<xsf:button name="CTRL1330"></xsf:button>
+				<xsf:button name="CTRL1331"></xsf:button>
+				<xsf:button name="btn_Check1"></xsf:button>
+				<xsf:button name="btn_Check3"></xsf:button>
+				<xsf:button name="btn_Check4"></xsf:button>
+				<xsf:button name="btn_Check6"></xsf:button>
+				<xsf:button name="btn_Check2"></xsf:button>
+				<xsf:button name="btn_Check5"></xsf:button>
+				<xsf:button name="btn_CheckJues">
+					<xsf:ruleSetAction ruleSet="ruleSet_364"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="btn_CheckJs">
+					<xsf:ruleSetAction ruleSet="ruleSet_365"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="btn_CheckYs">
+					<xsf:ruleSetAction ruleSet="ruleSet_366"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="btn_CheckRw"></xsf:button>
+				<xsf:button name="btn_CheckZb"></xsf:button>
+				<xsf:button name="btn_CheckHt"></xsf:button>
+				<xsf:button name="btn_SetUpWzXq">
+					<xsf:ruleSetAction ruleSet="ruleSet_383"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="CTRL1448"></xsf:button>
+				<xsf:button name="CTRL1449"></xsf:button>
+				<xsf:button name="CTRL1447"></xsf:button>
+				<xsf:button name="CTRL1450"></xsf:button>
+				<xsf:button name="btn_CheckWz">
+					<xsf:ruleSetAction ruleSet="ruleSet_372"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="CTRL1475"></xsf:button>
+				<xsf:button name="CTRL1476"></xsf:button>
+				<xsf:button name="CTRL1477"></xsf:button>
+				<xsf:button name="CTRL1478"></xsf:button>
+				<xsf:button name="CTRL1479"></xsf:button>
+				<xsf:button name="CTRL1480"></xsf:button>
+				<xsf:button name="CTRL1481"></xsf:button>
+				<xsf:button name="CTRL1482"></xsf:button>
+				<xsf:button name="CTRL1503"></xsf:button>
+				<xsf:button name="CTRL1504"></xsf:button>
+				<xsf:button name="CTRL1508"></xsf:button>
+				<xsf:button name="CTRL1507"></xsf:button>
+				<xsf:button name="CTRL1509"></xsf:button>
+				<xsf:button name="CTRL1512"></xsf:button>
+				<xsf:button name="CTRL1513"></xsf:button>
+				<xsf:button name="CTRL1514"></xsf:button>
+				<xsf:button name="CTRL1515"></xsf:button>
+				<xsf:button name="CTRL1516"></xsf:button>
+				<xsf:button name="btn_SetUpGc">
+					<xsf:ruleSetAction ruleSet="ruleSet_389"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="btn_CheckGc">
+					<xsf:ruleSetAction ruleSet="ruleSet_390"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="CTRL1537"></xsf:button>
+				<xsf:button name="CTRL1538"></xsf:button>
+				<xsf:button name="btn_OpenAnnexZzCl"></xsf:button>
+				<xsf:button name="btn_OpenAnnexCsTz"></xsf:button>
+				<xsf:button name="btn_OpenAnnexCsSc"></xsf:button>
+				<xsf:button name="btn_OpenAnnexSgTz"></xsf:button>
+				<xsf:button name="btn_OpenAnnexFaSc"></xsf:button>
+				<xsf:button name="btn_OpenAnnexCsNs"></xsf:button>
+				<xsf:button name="btn_OpenAnnexCsScSGS"></xsf:button>
+				<xsf:button name="btn_CheckAnnexZzCl"></xsf:button>
+				<xsf:button name="btn_CheckAnnexCsTz"></xsf:button>
+				<xsf:button name="btn_CheckAnnexCsSc"></xsf:button>
+				<xsf:button name="btn_CheckAnnexCsScSGS"></xsf:button>
+				<xsf:button name="btn_CheckAnnexSgTz"></xsf:button>
+				<xsf:button name="btn_CheckAnnexFaSc"></xsf:button>
+				<xsf:button name="btn_CheckAnnexCsNs"></xsf:button>
+				<xsf:button name="btn_OpenAnnexSgFj"></xsf:button>
+				<xsf:button name="btn_CheckAnnexSgFj"></xsf:button>
+				<xsf:button name="btn_CheckAnnexSgFaSc"></xsf:button>
+				<xsf:button name="btn_OpenAnnexSgFaSc"></xsf:button>
+				<xsf:button name="btn_OpenAnnexJgCt"></xsf:button>
+				<xsf:button name="btn_CheckAnnexJgCt"></xsf:button>
+				<xsf:button name="btn_CheckAnnexTdJh"></xsf:button>
+				<xsf:button name="btn_OpenAnnexTdJh"></xsf:button>
+				<xsf:button name="CTRL1627"></xsf:button>
+				<xsf:button name="CTRL1647"></xsf:button>
+				<xsf:button name="CTRL1648"></xsf:button>
+				<xsf:button name="CTRL1626"></xsf:button>
+				<xsf:button name="CTRL1646"></xsf:button>
+				<xsf:button name="CTRL1645"></xsf:button>
+				<xsf:button name="btn_CheckKg">
+					<xsf:ruleSetAction ruleSet="ruleSet_398"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="btn_SetUpKgBg">
+					<xsf:ruleSetAction ruleSet="ruleSet_397"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="CTRL1671"></xsf:button>
+				<xsf:button name="CTRL1672"></xsf:button>
+				<xsf:button name="btn_CheckJsBg">
+					<xsf:ruleSetAction ruleSet="ruleSet_401"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="btn_SetUpJgBg">
+					<xsf:ruleSetAction ruleSet="ruleSet_402"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="btn_SetUpWzLl">
+					<xsf:ruleSetAction ruleSet="ruleSet_407"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="btn_SetUpWzSq">
+					<xsf:ruleSetAction ruleSet="ruleSet_405"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="CTRL1677"></xsf:button>
+				<xsf:button name="CTRL1678"></xsf:button>
+				<xsf:button name="btn_SetUp"></xsf:button>
+				<xsf:button name="btn_CheckWzSq">
+					<xsf:ruleSetAction ruleSet="ruleSet_410"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="CTRL1690"></xsf:button>
+				<xsf:button name="CTRL1691"></xsf:button>
+				<xsf:button name="CTRL1693"></xsf:button>
+				<xsf:button name="CTRL1703"></xsf:button>
+				<xsf:button name="CTRL1704"></xsf:button>
+				<xsf:button name="CTRL1700"></xsf:button>
+				<xsf:button name="CTRL1701"></xsf:button>
+				<xsf:button name="btn_CheckWzLl">
+					<xsf:ruleSetAction ruleSet="ruleSet_415"></xsf:ruleSetAction>
+				</xsf:button>
+				<xsf:button name="CTRL1705"></xsf:button>
+				<xsf:button name="CTRL1706"></xsf:button>
+				<xsf:button name="CTRL1752"></xsf:button>
+				<xsf:button name="btn_OpenLct"></xsf:button>
+			</xsf:unboundControls>
+			<xsf:mainpane transform="view4.xsl"></xsf:mainpane>
+			<xsf:menuArea name="msoStructuralEditingContextMenu">
+				<xsf:button action="xCollection::remove" xmlToEdit="停电计划列表_1078" caption="删除 停电计划列表" showIf="immediate"></xsf:button>
+				<xsf:button action="xCollection::insert" xmlToEdit="停电计划列表_1078" caption="插入 停电计划列表" showIf="immediate"></xsf:button>
+			</xsf:menuArea>
+		</xsf:view>
+	</xsf:views>
+	<xsf:applicationParameters application="InfoPath Design Mode">
+		<xsf:solutionProperties lastOpenView="view4.xsl" fullyEditableNamespace="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28" lastVersionNeedingTransform="1.0.0.2657" automaticallyCreateNodes="no" scriptLanguage="managedCode"></xsf:solutionProperties>
+	</xsf:applicationParameters>
+	<xsf:submit caption="提交(&amp;B)" disableMenuItem="no" onAfterSubmit="keepOpen" showStatusDialog="yes">
+		<xsf:useHttpHandler method="POST" href="http://localhost:20886/永嘉县工程项目管理系统/Submit.aspx"></xsf:useHttpHandler>
+	</xsf:submit>
+	<xsf:documentSchemas>
+		<xsf:documentSchema rootSchema="yes" location="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28 myschema.xsd"></xsf:documentSchema>
+	</xsf:documentSchemas>
+	<xsf:fileNew>
+		<xsf:initialXmlDocument caption="项目基本信息" href="template.xml"></xsf:initialXmlDocument>
+	</xsf:fileNew>
+	<xsf:dataObjects>
+		<xsf:dataObject name="工程验收" schema="auxdomschema45.xsd" initOnLoad="no">
+			<xsf:query>
+				<xsf:webServiceAdapter wsdlUrl="http://localhost/Service.asmx?WSDL" queryAllowed="yes" submitAllowed="no" name="工程验收">
+					<xsf:operation name="GetData" soapAction="http://tempuri.org/GetData" serviceUrl="http://localhost/Service.asmx">
+						<xsf:input source="____13.xml"></xsf:input>
+					</xsf:operation>
+				</xsf:webServiceAdapter>
+			</xsf:query>
+		</xsf:dataObject>
+		<xsf:dataObject name="工程结算" schema="auxdomschema15.xsd" initOnLoad="no">
+			<xsf:query>
+				<xsf:webServiceAdapter wsdlUrl="http://localhost/Service.asmx?WSDL" queryAllowed="yes" submitAllowed="no" name="工程结算">
+					<xsf:operation name="GetData" soapAction="http://tempuri.org/GetData" serviceUrl="http://localhost/Service.asmx">
+						<xsf:input source="____4.xml"></xsf:input>
+					</xsf:operation>
+				</xsf:webServiceAdapter>
+			</xsf:query>
+		</xsf:dataObject>
+		<xsf:dataObject name="竣工决算" schema="auxdomschema18.xsd" initOnLoad="no">
+			<xsf:query>
+				<xsf:webServiceAdapter wsdlUrl="http://localhost/Service.asmx?WSDL" queryAllowed="yes" submitAllowed="no" name="竣工决算">
+					<xsf:operation name="GetData" soapAction="http://tempuri.org/GetData" serviceUrl="http://localhost/Service.asmx">
+						<xsf:input source="____5.xml"></xsf:input>
+					</xsf:operation>
+				</xsf:webServiceAdapter>
+			</xsf:query>
+		</xsf:dataObject>
+		<xsf:dataObject name="工程物资信息" schema="auxdomschema24.xsd" initOnLoad="no">
+			<xsf:query>
+				<xsf:webServiceAdapter wsdlUrl="http://localhost/Service.asmx?WSDL" queryAllowed="yes" submitAllowed="no" name="工程物资信息">
+					<xsf:operation name="GetData" soapAction="http://tempuri.org/GetData" serviceUrl="http://localhost/Service.asmx">
+						<xsf:input source="______1.xml"></xsf:input>
+					</xsf:operation>
+				</xsf:webServiceAdapter>
+			</xsf:query>
+		</xsf:dataObject>
+		<xsf:dataObject name="工程信息" schema="auxdomschema27.xsd" initOnLoad="no">
+			<xsf:query>
+				<xsf:webServiceAdapter wsdlUrl="http://localhost/Service.asmx?WSDL" queryAllowed="yes" submitAllowed="no" name="工程信息">
+					<xsf:operation name="GetData" soapAction="http://tempuri.org/GetData" serviceUrl="http://localhost/Service.asmx">
+						<xsf:input source="____7.xml"></xsf:input>
+					</xsf:operation>
+				</xsf:webServiceAdapter>
+			</xsf:query>
+		</xsf:dataObject>
+		<xsf:dataObject name="GetFromAnnexListNew" schema="GetFromAnnexListNew3.xsd" initOnLoad="no">
+			<xsf:query>
+				<xsf:webServiceAdapter wsdlUrl="http://localhost/Service.asmx?WSDL" queryAllowed="yes" submitAllowed="no" name="GetFromAnnexListNew">
+					<xsf:operation name="GetFromAnnexListNew" soapAction="http://tempuri.org/GetFromAnnexListNew" serviceUrl="http://localhost/Service.asmx">
+						<xsf:input source="GetFromAnnexListNew1.xml"></xsf:input>
+					</xsf:operation>
+				</xsf:webServiceAdapter>
+			</xsf:query>
+		</xsf:dataObject>
+		<xsf:dataObject name="开工报告" schema="auxdomschema.xsd" initOnLoad="no">
+			<xsf:query>
+				<xsf:webServiceAdapter wsdlUrl="http://localhost/Service.asmx?WSDL" queryAllowed="yes" submitAllowed="no" name="开工报告">
+					<xsf:operation name="GetData" soapAction="http://tempuri.org/GetData" serviceUrl="http://localhost/Service.asmx">
+						<xsf:input source="____.xml"></xsf:input>
+					</xsf:operation>
+				</xsf:webServiceAdapter>
+			</xsf:query>
+		</xsf:dataObject>
+		<xsf:dataObject name="竣工报告" schema="auxdomschema6.xsd" initOnLoad="no">
+			<xsf:query>
+				<xsf:webServiceAdapter wsdlUrl="http://localhost/Service.asmx?WSDL" queryAllowed="yes" submitAllowed="no" name="竣工报告">
+					<xsf:operation name="GetData" soapAction="http://tempuri.org/GetData" serviceUrl="http://localhost/Service.asmx">
+						<xsf:input source="____2.xml"></xsf:input>
+					</xsf:operation>
+				</xsf:webServiceAdapter>
+			</xsf:query>
+		</xsf:dataObject>
+		<xsf:dataObject name="物资申请" schema="auxdomschema9.xsd" initOnLoad="no">
+			<xsf:query>
+				<xsf:webServiceAdapter wsdlUrl="http://localhost/Service.asmx?WSDL" queryAllowed="yes" submitAllowed="no" name="物资申请">
+					<xsf:operation name="GetData" soapAction="http://tempuri.org/GetData" serviceUrl="http://localhost/Service.asmx">
+						<xsf:input source="____3.xml"></xsf:input>
+					</xsf:operation>
+				</xsf:webServiceAdapter>
+			</xsf:query>
+		</xsf:dataObject>
+		<xsf:dataObject name="物资领料" schema="auxdomschema12.xsd" initOnLoad="no">
+			<xsf:query>
+				<xsf:webServiceAdapter wsdlUrl="http://localhost/Service.asmx?WSDL" queryAllowed="yes" submitAllowed="no" name="物资领料">
+					<xsf:operation name="GetData" soapAction="http://tempuri.org/GetData" serviceUrl="http://localhost/Service.asmx">
+						<xsf:input source="____6.xml"></xsf:input>
+					</xsf:operation>
+				</xsf:webServiceAdapter>
+			</xsf:query>
+		</xsf:dataObject>
+		<xsf:dataObject name="addlczt" schema="addlczt.xsd" initOnLoad="no">
+			<xsf:query>
+				<xsf:webServiceAdapter wsdlUrl="http://localhost/Service.asmx?WSDL" queryAllowed="yes" submitAllowed="no" name="addlczt">
+					<xsf:operation name="addlczt" soapAction="http://tempuri.org/addlczt" serviceUrl="http://localhost/Service.asmx">
+						<xsf:input source="addlczt.xml"></xsf:input>
+					</xsf:operation>
+				</xsf:webServiceAdapter>
+			</xsf:query>
+		</xsf:dataObject>
+	</xsf:dataObjects>
+	<xsf:ruleSets>
+		<xsf:ruleSet name="ruleSet_11">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:指导师" expression="xdXDocument:GetDOM(&quot;员工信息录入&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/tr:员工基本信息/ns3:基本信息/ns3:姓名[../ns2:用户名 = xdXDocument:get-DOM()/my:Xman/my:RootNode/my:标题/my:操作者]"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_14">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_15">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="../../my:初设阶段/my:当前名称型号" expression="my:备用说明"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_17">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:初设阶段/my:采购方式" expression="&quot;协议&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_18">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:初设阶段/my:采购方式" expression="&quot;招标&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_23">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:dialogBoxExpressionAction>"99999"</xsf:dialogBoxExpressionAction>
+				<xsf:assignmentAction targetField="my:RootNode/my:初设阶段/my:填报单位" expression="&quot;666&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_24">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_25">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_26">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_27">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_28">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_29">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_34">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_35">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_36">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:closeDocumentAction promptToSaveChanges="no"></xsf:closeDocumentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_37">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_38">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:初设阶段/my:设计流程计划跟踪单组/my:设计部_完成" expression="&quot;yes&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_39">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:closeDocumentAction promptToSaveChanges="no"></xsf:closeDocumentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_40">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:closeDocumentAction promptToSaveChanges="no"></xsf:closeDocumentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_52">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:申请信息/my:出车地点" expression="my:部门"></xsf:assignmentAction>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_53">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_56">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_58">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:申请信息/my:到达地点" expression="my:部门"></xsf:assignmentAction>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_59">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_60">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:派车信息/my:派车信息表/my:车牌号" expression="xdXDocument:GetDOM(&quot;车辆信息&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:车辆牌号"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="my:RootNode/my:派车信息/my:派车信息表/my:车型" expression="xdXDocument:GetDOM(&quot;车辆信息&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:车辆类型"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="my:RootNode/my:派车信息/my:派车信息表/my:车辆ID" expression="xdXDocument:GetDOM(&quot;车辆信息&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:标题/my:表单号"></xsf:assignmentAction>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition="xdXDocument:GetDOM(&quot;车辆信息&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:核定载客人数 = &quot;&quot; or xdXDocument:GetDOM(&quot;车辆信息&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:核定载客人数 = &quot;/&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:派车信息/my:派车信息表/my:载货人量" expression="xdXDocument:GetDOM(&quot;车辆信息&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:核定载质量"></xsf:assignmentAction>
+			</xsf:rule>
+			<xsf:rule caption="规则 3" condition="xdXDocument:GetDOM(&quot;车辆信息&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:核定载质量 = &quot;&quot; or xdXDocument:GetDOM(&quot;车辆信息&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:核定载质量 = &quot;/&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:派车信息/my:派车信息表/my:载货人量" expression="xdXDocument:GetDOM(&quot;车辆信息&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:核定载客人数"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_65">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_67">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="../../my:其它/my:当前页" expression="&quot;主页&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_69">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="../../my:其它/my:当前页" expression="&quot;主页&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_70">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="../../my:其它/my:当前页" expression="&quot;车队长审批&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_71">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="../../my:其它/my:当前页" expression="&quot;车队长审批&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_72">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_73">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_74">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_75">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_76">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="../../my:其它/my:当前页" expression="&quot;市车辆调度中心&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_78">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_79">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_85">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_89">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:派车信息/my:派车信息表/my:车牌号" expression="my:初设阶段/my:车辆牌号"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:派车信息/my:派车信息表/my:车型" expression="my:初设阶段/my:车辆类型"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:派车信息/my:派车信息表/my:车辆ID" expression="my:标题/my:表单号"></xsf:assignmentAction>
+			</xsf:rule>
+			<xsf:rule caption="规则 5" condition="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其它/my:当前页 = &quot;主页&quot; or xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其它/my:当前页 = &quot;&quot;" isEnabled="yes"></xsf:rule>
+			<xsf:rule caption="规则 6" condition="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其它/my:当前页 = &quot;车队长审批&quot;" isEnabled="yes"></xsf:rule>
+			<xsf:rule caption="规则 7" condition="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其它/my:当前页 = &quot;突发&quot;" isEnabled="yes"></xsf:rule>
+			<xsf:rule caption="规则 8" condition="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其它/my:当前页 = &quot;市车辆调度中心&quot;" isEnabled="yes"></xsf:rule>
+			<xsf:rule caption="规则 4" condition="my:初设阶段/my:核定载客人数 = &quot;&quot; or my:初设阶段/my:核定载客人数 = &quot;/&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:派车信息/my:派车信息表/my:载货人量" expression="my:初设阶段/my:核定载质量"></xsf:assignmentAction>
+			</xsf:rule>
+			<xsf:rule caption="规则 3" condition="my:初设阶段/my:核定载质量 = &quot;&quot; or my:初设阶段/my:核定载质量 = &quot;/&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:派车信息/my:派车信息表/my:载货人量" expression="my:初设阶段/my:核定载客人数"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_90">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:派车信息/my:派车信息表/my:驾驶员" expression="my:初设阶段/my:姓名"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:派车信息/my:派车信息表/my:驾驶员ID" expression="my:标题/my:表单号"></xsf:assignmentAction>
+			</xsf:rule>
+			<xsf:rule caption="视图切换" condition="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其它/my:当前页 = &quot;主页&quot; or xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其它/my:当前页 = &quot;&quot;" isEnabled="yes"></xsf:rule>
+			<xsf:rule caption="规则 2" condition="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其它/my:当前页 = &quot;车队长审批&quot;" isEnabled="yes"></xsf:rule>
+			<xsf:rule caption="规则 3" condition="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其它/my:当前页 = &quot;突发&quot;" isEnabled="yes"></xsf:rule>
+			<xsf:rule caption="规则 4" condition="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其它/my:当前页 = &quot;市车辆调度中心&quot;" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_91">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="../../my:其它/my:当前页" expression="&quot;市车辆调度中心&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_98">
+			<xsf:rule caption="规则 1" condition="my:其他/my:点击按钮1 != &quot;查勘情况&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;查勘情况&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition="my:其他/my:点击按钮1 = &quot;查勘情况&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_99">
+			<xsf:rule caption="规则 1" condition="my:其他/my:点击按钮1 != &quot;项目预算&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;项目预算&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition="my:其他/my:点击按钮1 = &quot;项目预算&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_100">
+			<xsf:rule caption="规则 1" condition="my:其他/my:点击按钮1 != &quot;项目合同&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;项目合同&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition=". = &quot;项目合同&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_110">
+			<xsf:rule caption="规则 1" condition="my:客户主管意见 = &quot;不正确&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:客户主管意见" expression="&quot;不正确&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_111">
+			<xsf:rule caption="规则 1" condition="my:客户主管意见 = &quot;正确&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:客户主管意见" expression="&quot;正确&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_112">
+			<xsf:rule caption="规则 1" condition="my:其他/my:点击按钮1 != &quot;查勘情况&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;查勘情况&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition="my:其他/my:点击按钮1 = &quot;查勘情况&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_113">
+			<xsf:rule caption="规则 1" condition="my:其他/my:点击按钮1 != &quot;项目预算&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;项目预算&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition="my:其他/my:点击按钮1 = &quot;项目预算&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_114">
+			<xsf:rule caption="规则 1" condition="my:其他/my:点击按钮1 != &quot;项目合同&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;项目合同&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition=". = &quot;项目合同&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_126">
+			<xsf:rule caption="规则 1" condition="my:RootNode/my:内容/my:初设阶段/my:创建时间 = &quot;&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:内容/my:初设阶段/my:创建时间" expression="xdDate:Today()"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="my:RootNode/my:内容/my:初设阶段/my:表单ID" expression="my:RootNode/my:标题/my:表单号"></xsf:assignmentAction>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:点击按钮" expression="&quot;初设阶段&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+			<xsf:rule caption="logo" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:logo" expression="concat(my:RootNode/my:标题/my:备用1, &quot;/images/gwlogo.png&quot;)"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_151">
+			<xsf:rule caption="规则 1" condition="my:其他/my:点击按钮1 = &quot;财务管理&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition="my:其他/my:点击按钮1 != &quot;财务管理&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;财务管理&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_195">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:初设阶段/my:客户编号" expression="my:客户编号"></xsf:assignmentAction>
+				<xsf:switchViewAction view="主页"></xsf:switchViewAction>
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:初设阶段/my:联系人" expression="my:联系/my:联系人"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_198">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮2" expression="&quot;设计正确&quot;"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮" expression="&quot;设计正确&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_199">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:点击按钮2" expression="&quot;设计正确&quot;"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:点击按钮" expression="&quot;设计正确&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_202">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮2" expression="&quot;设计正确&quot;"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮" expression="&quot;设计正确&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_211">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_212">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_213">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_214">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_215">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_216">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_217">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_225">
+			<xsf:rule caption="规则 1" condition="my:其他/my:点击按钮1 != &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;详细信息&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition="my:其他/my:点击按钮1 = &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_226">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_227">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_228">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_229">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_230">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_231">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_232">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_233">
+			<xsf:rule caption="规则 1" condition="my:其他/my:点击按钮1 != &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;详细信息&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition="my:其他/my:点击按钮1 = &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_234">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;预算表&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_235">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;项目合同&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_236">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;结算表&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_237">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;验收单&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_238">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;系统接入&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_239">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;财务管理&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_240">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;采购申请&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_241">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_242">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_243">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_244">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_245">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_246">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_247">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_248">
+			<xsf:rule caption="规则 1" condition="my:其他/my:点击按钮1 != &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;详细信息&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition="my:其他/my:点击按钮1 = &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_249">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_250">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_251">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_252">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_253">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_254">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_255">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_256">
+			<xsf:rule caption="规则 1" condition="my:其他/my:点击按钮1 != &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;详细信息&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition="my:其他/my:点击按钮1 = &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮1" expression="&quot;&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_258">
+			<xsf:rule caption="规则 1" condition="my:RootNode/my:其他/my:点击按钮1 != &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:点击按钮1" expression="&quot;详细信息&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition="my:RootNode/my:其他/my:点击按钮1 = &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:点击按钮1" expression="&quot;&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_259">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:switchViewAction view="主页"></xsf:switchViewAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_260">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;预算表&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_261">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;项目合同&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_262">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;结算表&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_263">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;验收单&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_264">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;系统接入&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_265">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;财务管理&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_266">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;采购申请&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_267">
+			<xsf:rule caption="规则 1" condition="my:RootNode/my:其他/my:点击按钮1 != &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:点击按钮1" expression="&quot;详细信息&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition="my:RootNode/my:其他/my:点击按钮1 = &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:点击按钮1" expression="&quot;&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_268">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:switchViewAction view="主页"></xsf:switchViewAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_269">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;预算表&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_270">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;项目合同&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_271">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;结算表&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_272">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;验收单&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_273">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;系统接入&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_274">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;财务管理&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_275">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;采购申请&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_276">
+			<xsf:rule caption="规则 1" condition="my:RootNode/my:其他/my:点击按钮1 != &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:点击按钮1" expression="&quot;详细信息&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition="my:RootNode/my:其他/my:点击按钮1 = &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:点击按钮1" expression="&quot;&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_277">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:switchViewAction view="主页"></xsf:switchViewAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_278">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;预算表&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_279">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;项目合同&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_280">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;结算表&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_281">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;验收单&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_282">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;系统接入&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_283">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;财务管理&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_284">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;采购申请&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_285">
+			<xsf:rule caption="规则 1" condition="my:RootNode/my:其他/my:点击按钮1 != &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:点击按钮1" expression="&quot;详细信息&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition="my:RootNode/my:其他/my:点击按钮1 = &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:点击按钮1" expression="&quot;&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_286">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:switchViewAction view="主页"></xsf:switchViewAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_287">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;预算表&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_288">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;项目合同&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_289">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;结算表&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_290">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;验收单&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_291">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;系统接入&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_292">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;财务管理&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_293">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;采购申请&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_294">
+			<xsf:rule caption="规则 1" condition="my:RootNode/my:其他/my:点击按钮1 != &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:点击按钮1" expression="&quot;详细信息&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition="my:RootNode/my:其他/my:点击按钮1 = &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:点击按钮1" expression="&quot;&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_295">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;预算表&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_296">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;项目合同&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_297">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;结算表&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_298">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;验收单&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_299">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;系统接入&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_300">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;财务管理&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_301">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;采购申请&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_302">
+			<xsf:rule caption="规则 1" condition="my:RootNode/my:其他/my:点击按钮1 != &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:点击按钮1" expression="&quot;详细信息&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition="my:RootNode/my:其他/my:点击按钮1 = &quot;详细信息&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:点击按钮1" expression="&quot;&quot;"></xsf:assignmentAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_303">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;预算表&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_304">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;项目合同&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_305">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;结算表&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_306">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;验收单&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_307">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;系统接入&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_308">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;财务管理&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_309">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;采购申请&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_311">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_312">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_313">
+			<xsf:rule caption="规则 2" condition="my:查询次数 = &quot;0&quot;" isEnabled="yes">
+				<xsf:dialogBoxMessageAction>请先查询是否已存在该客户！</xsf:dialogBoxMessageAction>
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:点击按钮" expression="&quot;新增&quot;"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="../my:初设阶段/my:业主单位" expression="my:cx单位"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_314">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:点击按钮" expression="&quot;&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_315">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:switchViewAction view="主页"></xsf:switchViewAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_316">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:点击按钮" expression="&quot;&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_318">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_319">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_320">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:exitRuleSet></xsf:exitRuleSet>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_321">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_325">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_326">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_327">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_328">
+			<xsf:rule caption="规则 1" isEnabled="yes"></xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_329">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:Annexid" expression="附件ID"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:mkmc" expression="&quot;项目基本信息&quot;"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:username" expression="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:标题/my:操作者"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_330">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:Annexid" expression="xdXDocument:GetDOM(&quot;GetFromAnnexListNew&quot;)/dfs:myFields/dfs:dataFields/tns:GetFromAnnexListNewResponse/tns:GetFromAnnexListNewResult/附件/文件/附件ID"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:mkmc" expression="&quot;项目基本信息&quot;"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:username" expression="my:RootNode/my:标题/my:操作者"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_331">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:Annexid" expression="xdXDocument:GetDOM(&quot;GetFromAnnexListNew&quot;)/dfs:myFields/dfs:dataFields/tns:GetFromAnnexListNewResponse/tns:GetFromAnnexListNewResult/附件/文件/附件ID"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:mkmc" expression="&quot;项目基本信息&quot;"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:username" expression="my:RootNode/my:标题/my:操作者"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_332">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:Annexid" expression="附件ID"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:mkmc" expression="&quot;项目基本信息&quot;"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:username" expression="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:标题/my:操作者"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_333">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:Annexid" expression="xdXDocument:GetDOM(&quot;GetFromAnnexListNew&quot;)/dfs:myFields/dfs:dataFields/tns:GetFromAnnexListNewResponse/tns:GetFromAnnexListNewResult/附件/文件/附件ID"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:mkmc" expression="&quot;项目基本信息&quot;"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:username" expression="my:RootNode/my:标题/my:操作者"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_334">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:Annexid" expression="附件ID"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:mkmc" expression="&quot;项目基本信息&quot;"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="xdXDocument:GetDOM(&quot;DelAnnex&quot;)/dfs:myFields/dfs:queryFields/tns:DelAnnex/tns:username" expression="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:标题/my:操作者"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_335">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="." expression="&quot;·1&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_336">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮" expression="&quot;初设阶段&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_349">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;任务单&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_350">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;任务单&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_354">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;任务单&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_355">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;任务单&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_357">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;任务单&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_358">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:RootNode/my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;任务单&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:初设阶段/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_361">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮" expression="&quot;招标阶段&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_362">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮" expression="&quot;施工阶段&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_363">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:点击按钮" expression="&quot;结算阶段&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_364">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_365">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_366">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_370">
+			<xsf:rule caption="规则 1" condition=". = &quot;项目归档&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="../my:项目归档日期" expression="xdDate:Today()"></xsf:assignmentAction>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition=". = &quot;项目未归档&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="../my:项目归档日期" expression="&quot;&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_372">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_380">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="../../my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;竣工决算&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_381">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="../../my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;竣工决算&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_383">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_384">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="../../my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;竣工决算&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_386">
+			<xsf:rule caption="规则 1" condition=". != &quot;&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="../my:施工负责人" expression="xdXDocument:GetDOM(&quot;施工单位&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:内容/my:主要联系人[../my:单位名称 = xdXDocument:get-DOM()/my:Xman/my:RootNode/my:内容/my:初设阶段/my:施工单位]"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="../my:施工负责人联系电话" expression="xdXDocument:GetDOM(&quot;施工单位&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:内容/my:联系电话[../my:单位名称 = xdXDocument:get-DOM()/my:Xman/my:RootNode/my:内容/my:初设阶段/my:施工单位]"></xsf:assignmentAction>
+			</xsf:rule>
+			<xsf:rule caption="规则 2" condition=". = &quot;&quot;" isEnabled="yes">
+				<xsf:assignmentAction targetField="../my:施工负责人" expression="&quot;&quot;"></xsf:assignmentAction>
+				<xsf:assignmentAction targetField="../my:施工负责人联系电话" expression="&quot;&quot;"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_389">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;竣工决算&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_390">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_397">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="../../my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;竣工决算&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_398">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_401">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_402">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="../../my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;竣工决算&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_405">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="../../my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;工程物资信息&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_407">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="../../my:其他/my:打开ID" expression="xdXDocument:GetDOM(&quot;工程物资信息&quot;)/dfs:myFields/dfs:dataFields/tns:GetDataResponse/tns:GetDataResult/my:Xman/my:RootNode/my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_410">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+		<xsf:ruleSet name="ruleSet_415">
+			<xsf:rule caption="规则 1" isEnabled="yes">
+				<xsf:assignmentAction targetField="xdXDocument:get-DOM()/my:Xman/my:RootNode/my:其他/my:打开ID" expression="my:内容/my:表单ID"></xsf:assignmentAction>
+			</xsf:rule>
+		</xsf:ruleSet>
+	</xsf:ruleSets>
+	<xsf:domEventHandlers>
+		<xsf:domEventHandler match="/my:Xman/my:RootNode">
+			<xsf:ruleSetAction ruleSet="ruleSet_11"></xsf:ruleSetAction>
+		</xsf:domEventHandler>
+		<xsf:domEventHandler match="/my:Xman/my:RootNode/my:内容/my:初设阶段/my:年度">
+			<xsf:ruleSetAction ruleSet="ruleSet_335"></xsf:ruleSetAction>
+		</xsf:domEventHandler>
+		<xsf:domEventHandler match="/my:Xman/my:RootNode/my:内容/my:结算阶段/my:项目归档">
+			<xsf:ruleSetAction ruleSet="ruleSet_370"></xsf:ruleSetAction>
+		</xsf:domEventHandler>
+		<xsf:domEventHandler match="/my:Xman/my:RootNode/my:内容/my:初设阶段/my:施工单位">
+			<xsf:ruleSetAction ruleSet="ruleSet_386"></xsf:ruleSetAction>
+		</xsf:domEventHandler>
+	</xsf:domEventHandlers>
+	<xsf:calculations></xsf:calculations>
+	<xsf:extensions>
+		<xsf:extension name="SolutionDefinitionExtensions">
+			<xsf2:solutionDefinition runtimeCompatibility="client" allowClientOnlyCode="no">
+				<xsf2:solutionPropertiesExtension branch="share">
+					<xsf2:share formName="web嵌套里改变字段值" path="E:\杜军的文件\sunfunxman\表单测试\web嵌套里改变字段值.xsn" accessPath="E:\杜军的文件\sunfunxman\表单测试\web嵌套里改变字段值.xsn"></xsf2:share>
+				</xsf2:solutionPropertiesExtension>
+				<xsf2:offline openIfQueryFails="no" cacheQueries="no"></xsf2:offline>
+				<xsf2:viewsExtension></xsf2:viewsExtension>
+				<xsf2:preview userRole="客户主管" domain="http://www.sunfunsoft.com/yjxmgl"></xsf2:preview>
+				<xsf2:managedCode projectPath="F:\陈仕城\sunfunxman\永嘉电力局工程项目管理系统\项目基本信息\项目基本信息.csproj" language="CSharp" version="1.0" enabled="yes"></xsf2:managedCode>
+			</xsf2:solutionDefinition>
+		</xsf:extension>
+	</xsf:extensions>
+	<xsf:onLoad>
+		<xsf:ruleSetAction ruleSet="ruleSet_126"></xsf:ruleSetAction>
+	</xsf:onLoad>
+	<xsf:roles default="客户主管">
+		<xsf:role name="客户主管"></xsf:role>
+	</xsf:roles>
+</xsf:xDocumentClass>

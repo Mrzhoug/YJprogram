@@ -1,0 +1,119 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="AdvancedShowListSetting.aspx.vb" Inherits="manager_AdvancedShowList_AdvancedShowListSetting" Theme="SkinFile" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>高级显示列设置</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+</head>
+<body>
+<center>
+    <form id="form1" runat="server" style="width:500px">
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>高级显示列设置</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            模块名称：
+                        </th>
+                        <td width="75%" style="text-align:left">
+                            <asp:DropDownList ID="DDLMKMC" runat="server">
+                                <asp:ListItem Value="0">请选择</asp:ListItem>
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            显示名称设置：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:TextBox ID="TBShowName" runat="server"></asp:TextBox>                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            是否显示统计：
+                        </th>
+                        <td  style="text-align:left">                            
+                            <asp:RadioButtonList ID="RadioButtonList1" runat="server" RepeatDirection="Horizontal">
+                                <asp:ListItem Value="true">是</asp:ListItem>
+                                <asp:ListItem Value="false">否</asp:ListItem>
+                            </asp:RadioButtonList>
+                        </td>
+                    </tr>
+                     <tr>
+                        <th>
+                            是否显示buttonbar：
+                        </th>
+                        <td  style="text-align:left">                            
+                            <asp:RadioButtonList ID="RadioButtonList2" runat="server" RepeatDirection="Horizontal">
+                                <asp:ListItem Value="1">是</asp:ListItem>
+                                <asp:ListItem Value="0">否</asp:ListItem>
+                            </asp:RadioButtonList>
+                        </td>
+                    </tr>
+                    <tr>
+
+                        <td  style="text-align:center" colspan="2">
+                            <asp:Button ID="BtnConfirm" runat="server" Text="提 交" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                </table>
+                     <table width="100%" cellspacing="0" cellpadding="0" border="0">                   
+                    <tr> <td  style="text-align:center" colspan="2" > <ul id="Ul6">
+                <li class="topmenu"><a class="top_link" id="A6" href="javascript:void(0);">
+                <span>附件显示列连接</span></a></li>
+            </ul></td></tr>
+                      <tr>
+                        <th>
+                            表单名称：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:DropDownList ID="DropDownList5" runat="server" Width="176px">
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            显示列名称：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:TextBox ID="txtshowcol" runat="server" Width="176px"></asp:TextBox>                       
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            连接显示名称：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:TextBox ID="txtfjname" runat="server" Width="176px"></asp:TextBox>&nbsp;
+                            <asp:Button ID="btnfjadd" runat="server" Text=" 添 加 " CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td  style="text-align:center" colspan="2">
+                            <asp:Button ID="btnup" runat="server" Text="所选向上" CssClass="btnsubmit" />&nbsp;
+                            <asp:Button ID="btndown" runat="server" Text="所选向下" CssClass="btnsubmit" />&nbsp;
+                            <asp:Button ID="btndel" runat="server" Text="删除所选" CssClass="btnsubmit" />&nbsp;
+                            <asp:Button ID="btnsave" runat="server" Text="保存结果" CssClass="btnsubmit" />&nbsp;
+                            <br />
+                            <asp:ListBox ID="ListBox2" runat="server" Height="136px" SelectionMode="Multiple" Width="304px"></asp:ListBox>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    </form>
+</center>
+</body>
+</html>

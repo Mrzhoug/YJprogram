@@ -1,0 +1,76 @@
+﻿
+Partial Class manager_FileManager_CopyFileHandler
+    Inherits System.Web.UI.Page
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim fileID As Integer
+        Dim toFolderID As Integer
+
+        Try
+            fileID = Convert.ToInt32(Request("fileID"))
+        Catch ex As Exception
+            fileID = 0
+        End Try
+
+
+        Try
+            toFolderID = Convert.ToInt32(Request("toFolderID"))
+        Catch ex As Exception
+            toFolderID = -1
+        End Try
+
+
+        If fileID = 0 Or toFolderID = -1 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+        Dim UserInfo As New UserInfo
+        Dim userName As String
+        userName = UserInfo.GetWebUserName
+        Dim userID As Integer
+        userID = UserInfo.GetUserID(userName)
+
+        Dim FileManager As New FileManager
+
+        Dim filePath As String
+        '文件路径
+        filePath = FileManager.GetFilePath(fileID)
+        Dim fileName As String
+        '文件名
+        fileName = FileManager.GetFileName(fileID)
+
+        Dim toFolderPath As String
+        '移至文件夹路径
+
+        If toFolderID = 0 Then
+            toFolderPath = FileManager.GetFolderPath(0, userName)
+        Else
+            toFolderPath = FileManager.GetFolderPathByFolderID(toFolderID)
+        End If
+
+
+        '如果目标文件夹为公共文件夹，则判断权限
+        If FileManager.IsPublicFolder(toFolderID) Then
+            Dim UserPermissions As New MPublicFolderPermissions
+            UserPermissions = FileManager.GetUserPermission(userID, toFolderID)
+            If Not UserPermissions.CanUpload Then
+                Response.Write("您没有向该公共文件夹复制文件的权利！")
+                Response.End()
+            End If
+        End If
+
+
+        If IO.File.Exists(toFolderPath + fileName) Then
+            Response.Write("目标文件夹下存在同名文件，复制失败！")
+            Response.End()
+        Else
+            If FileManager.CopyFile(fileID, toFolderID, userID, userName) Then
+                Response.Write("复制成功")
+            Else
+                Response.Write("复制失败")
+            End If
+
+        End If
+    End Sub
+End Class

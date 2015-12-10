@@ -1,0 +1,250 @@
+﻿
+Partial Class manager_AdvancedShowList_AdvancedShowListSetting
+    Inherits System.Web.UI.Page
+
+    Dim Base As New Base
+    Dim dt As New DataTable
+
+    Dim mkdm As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+
+        Try
+            mkdm = Convert.ToInt32(Request.QueryString("mkdm"))
+        Catch ex As Exception
+            mkdm = 0
+        End Try
+
+        Dim sqlstr As String
+        If Not IsPostBack Then
+            loadmkmc()
+            loadlist2()
+            sqlstr = "SELECT [MKDM], [MKMC], [XDLJ],NoLCDM,IsWan,IsStop FROM [GY_MKXX] Where (NoLCDM is not null and NoLCDM <> 0)"
+            dt = Base.DB.Table(sqlstr, "dd")
+            For i As Integer = 0 To dt.Rows.Count - 1
+                Dim item As New ListItem
+                item.Value = dt.Rows(i).Item("mkdm")
+                item.Text = dt.Rows(i).Item("MKMC")
+                DDLMKMC.Items.Add(item)
+            Next
+            
+            If mkdm <> 0 Then
+
+                Dim upMKMC As String
+                Dim showMKMC As String
+                Dim canCount As String
+                Dim buttonbar As String
+                sqlstr = "select * from gy_mkxx where mkdm=" & mkdm
+                dt = Base.DB.Table(sqlstr, "dd")
+                upMKMC = dt.Rows(0).Item("xsndir").ToString()
+                showMKMC = dt.Rows(0).Item("mkmc").ToString()
+                canCount = (dt.Rows(0).Item("view"))
+                buttonbar = dt.Rows(0).Item("buttonbar").ToString()
+                If buttonbar = "" Then
+                    buttonbar = 1
+                End If
+                DDLMKMC.Items.FindByText(upMKMC).Selected = True
+                TBShowName.Text = showMKMC
+                RadioButtonList1.Items.FindByValue(canCount).Selected = True
+                RadioButtonList2.Items.FindByValue(buttonbar).Selected = True
+            End If
+
+
+
+
+        End If
+
+    End Sub
+
+    Protected Sub BtnConfirm_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles BtnConfirm.Click
+        Dim upMKDM As String
+        Dim sqlstr As String
+        upMKDM = DDLMKMC.SelectedItem.Value
+
+        If upMKDM = 0 Then
+            Base.Js.alert(Me, "请选择需要设置的模块")
+            Return
+        End If
+
+
+        Dim showName As String
+        showName = Base.SqlFilter(TBShowName.Text)
+
+        If showName.Length = 0 Then
+            Base.Js.alert(Me, "请输入显示名称")
+            Return
+        Else
+            If mkdm = 0 Then
+                sqlstr = "select * from gy_mkxx where mkmc = '" & showName & "'"
+                dt = Base.DB.Table(sqlstr, "dd")
+                If dt.Rows.Count > 0 Then
+                    Base.Js.alert(Me, "你输入的名称有重复")
+                    Return
+                End If
+            End If
+        End If
+
+        '是否进行数量统计
+        Dim RBL As String
+        RBL = RadioButtonList1.SelectedItem.Value
+        '是否显示buttonbar
+        Dim buttonbar As String
+        buttonbar = RadioButtonList2.SelectedValue
+        If buttonbar = "" Then
+            buttonbar = 1
+        End If
+        'showlist的路径
+        Dim xdlj As String = "../manager/xjxm/showlistadvanced.aspx?mkdm=" & upMKDM
+
+
+
+        sqlstr = "select * from gy_mkxx where mkdm = " & upMKDM
+
+        dt = Base.DB.Table(sqlstr, "dd")
+
+        Dim xsnDir As String
+        xsnDir = dt.Rows(0).Item("xsndir").ToString()
+
+
+
+        If mkdm = 0 Then
+            sqlstr = "insert into gy_mkxx (mkmc,xdlj,[view],xsndir,buttonbar) values ('" & showName & "','" & xdlj & "','" & RBL & "','" & xsnDir & "'," & buttonbar & ") select @@identity"
+
+            
+
+            Dim temp As String = Base.DB.Table(sqlstr, "aa").Rows(0).Item(0)
+
+
+
+
+            xdlj = xdlj & "&thisMKDM=" & temp
+            sqlstr = "update gy_mkxx set xdlj = '" & xdlj & "' where mkdm=" & temp
+            Base.DB.Query(sqlstr)
+
+
+
+            Response.Write("<script>window.opener.location.href=window.opener.location.href</script>")
+
+
+            Base.Js.closestr(Me, "添加成功")
+        Else
+            xdlj = xdlj & "&thisMKDM=" & mkdm
+            sqlstr = "update gy_mkxx set mkmc='" & showName & "',xdlj='" & xdlj & "',[view]='" & RBL & "',xsndir='" & xsnDir & "',buttonbar=" & buttonbar & " where mkdm=" & mkdm
+            Base.DB.Query(sqlstr)
+
+            Response.Write("<script>window.opener.location.href=window.opener.location.href</script>")
+            Base.Js.closestr(Me, "更新成功")
+        End If
+
+
+    End Sub
+
+
+    Private Sub loadmkmc()
+        Dim dt As New Data.DataTable
+        dt = Base.DB.Table("select nolcdm,mkmc from GY_MKXX where nolcdm>0", "dd")
+        DropDownList5.DataTextField = "mkmc"
+        DropDownList5.DataValueField = "nolcdm"
+        DropDownList5.DataSource = dt
+        DropDownList5.DataBind()
+
+    End Sub
+
+    Protected Sub btnfjadd_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnfjadd.Click
+        Try
+            If txtfjname.Text.Trim.Length < 0 Then
+                Base.Js.alert(Me, "名称不能为空")
+                Exit Sub
+            End If
+            Dim lcdm_link As String = ""
+            Dim showname As String = ""
+            Dim columnname As String = ""
+            lcdm_link = DropDownList5.SelectedValue
+            showname = txtfjname.Text
+            columnname = txtshowcol.Text
+            Base.DB.Query("insert into MapConfig_link(mkdm,lcdm_link,showname,columnname) values(" & Base.SqlFilter(MKDM) & ",'" & Base.SqlFilter(lcdm_link) & "','" & Base.SqlFilter(showname) & "','" & Base.SqlFilter(columnname) & "')")
+            ListBox2.Items.Add(showname & "|" & lcdm_link & "|" & columnname & "")
+        Catch ex As Exception
+            Base.Js.alert(Me, "保存失败")
+        End Try
+        Base.Js.alert(Me, "保存成功")
+    End Sub
+
+    Private Sub loadlist2()
+        Dim dt As New DataTable
+        dt = Base.DB.Table("select showname,lcdm_link,columnname from MapConfig_link where mkdm=" & MKDM & " order by IsTotal", "22")
+        If dt.Rows.Count > 0 Then
+            Dim i As Integer
+            For i = 0 To dt.Rows.Count - 1
+                ListBox2.Items.Add(dt.Rows(i)("showname").ToString & "|" & dt.Rows(i)("lcdm_link").ToString & "|" & dt.Rows(i)("columnname").ToString & "")
+            Next
+
+        End If
+    End Sub
+
+    Protected Sub btndown_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btndown.Click
+        Dim TempIndex As Integer = ListBox2.SelectedIndex
+        If TempIndex = -1 Then
+            Base.Js.alert(Me, "你没有选中任何行")
+            Exit Sub
+        End If
+
+        If TempIndex = ListBox2.Items.Count - 1 Then
+            Base.Js.alert(Me, "你所选中的内容已经是最后一条记录了,不能再向下移了")
+            Exit Sub
+        End If
+        '开始交换数据
+        Dim TempString As String
+        TempString = ListBox2.Items(TempIndex + 1).Text
+        ListBox2.Items(TempIndex + 1).Text = ListBox2.Items(TempIndex).Text
+        ListBox2.Items(TempIndex).Text = TempString
+        '复位到原来选中的那条记录
+        ListBox2.SelectedIndex = TempIndex + 1
+    End Sub
+
+    Protected Sub btnup_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnup.Click
+        Dim TempIndex As Integer = ListBox2.SelectedIndex
+        If TempIndex = -1 Then
+            Base.Js.alert(Me, "你没有选中任何行")
+            Exit Sub
+        End If
+
+        If TempIndex = 0 Then
+            Base.Js.alert(Me, "你所选中的内容已经是第一条记录了,不能再向上移了")
+            Exit Sub
+        End If
+        '开始交换数据
+        Dim TempString As String
+        TempString = ListBox2.Items(TempIndex - 1).Text
+        ListBox2.Items(TempIndex - 1).Text = ListBox2.Items(TempIndex).Text
+        ListBox2.Items(TempIndex).Text = TempString
+        '复位到原来选中的那条记录
+        ListBox2.SelectedIndex = TempIndex - 1
+    End Sub
+
+    Protected Sub btndel_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btndel.Click
+        Dim TempIndex As Integer = ListBox2.SelectedIndex
+        If TempIndex = -1 Then
+            Base.Js.alert(Me, "你没有选中任何行")
+            Exit Sub
+        End If
+        ListBox2.Items.RemoveAt(TempIndex)      '移除
+    End Sub
+
+    Protected Sub btnsave_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnsave.Click
+        Dim lcdm_link As String = ""
+        Dim showname As String = ""
+        Dim columnname As String = ""
+        Dim i As Integer
+        Dim TempString As String()
+        Base.DB.Query("delete MapConfig_link where MKDM = " & MKDM)
+        For i = 0 To ListBox2.Items.Count - 1
+            TempString = ListBox2.Items(i).Text.Split("|")
+            lcdm_link = TempString(1)
+            showname = TempString(0)
+            columnname = TempString(2)
+            Base.DB.Query("insert into MapConfig_link(mkdm,lcdm_link,showname,IsTotal,columnname) values(" & Base.SqlFilter(MKDM) & ",'" & Base.SqlFilter(lcdm_link) & "','" & Base.SqlFilter(showname) & "'," & i & ",'" & Base.SqlFilter(columnname) & "')")
+        Next
+    End Sub
+End Class

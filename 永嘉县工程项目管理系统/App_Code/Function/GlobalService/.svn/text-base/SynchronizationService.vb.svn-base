@@ -1,0 +1,1306 @@
+﻿Imports Microsoft.VisualBasic
+Imports System.Xml
+Imports System.Data.SqlClient
+
+Public Class SynchronizationService
+
+#Region "同步服务主函数"
+    ''' <summary>
+    ''' 同步服务主函数
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Shared Sub Main()
+
+        Dim dt As New DataTable
+        Dim sqlstr As String = String.Empty
+
+        While True
+            Try
+                '查询第一条需要同步的数据
+                sqlstr = "select top 1 AID, FID, Ftype,SynNum from SynSubmit where (IsSyn = 0)"
+                dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---Main 查询第一条需要同步的数据 失败", ex.ToString())
+            End Try
+
+            If dt.Rows.Count > 0 Then
+                Dim fid As Integer
+                Dim aid As Integer
+                Dim synType As String
+
+                Try
+                    fid = Convert.ToInt32(dt.Rows(0).Item("fid"))
+                Catch ex As Exception
+                    fid = 0
+                End Try
+
+                Try
+                    aid = Convert.ToInt32(dt.Rows(0).Item("aid"))
+                Catch ex As Exception
+                    aid = 0
+                End Try
+
+                Try
+                    synType = dt.Rows(0).Item("Ftype").ToString().Trim()
+                Catch ex As Exception
+                    synType = ""
+                End Try
+
+                If synType = "提交" Then
+                    If Submit(fid) Then
+                        UpdateStatus(aid, True)
+                    Else
+                        UpdateStatus(aid, False)
+                    End If
+                ElseIf synType.IndexOf("删除") <> -1 Then
+                    If Delete(fid) Then
+                        UpdateStatus(aid, True)
+                    Else
+                        UpdateStatus(aid, False)
+                    End If
+                ElseIf synType.IndexOf("同步XML库") <> -1 Then
+                    Dim mkmc As String
+                    mkmc = synType.Replace("同步XML库|", "")
+
+                    If XMLLibrarySyn(mkmc) Then
+                        UpdateStatus(aid, True)
+                    Else
+                        UpdateStatus(aid, False)
+                    End If
+                ElseIf synType.IndexOf("同步SQL库") <> -1 Then
+                    Dim mkmc As String
+                    mkmc = synType.Replace("同步SQL库|", "")
+
+                    If SQLLibrarySyn(mkmc) Then
+                        UpdateStatus(aid, True)
+                    Else
+                        UpdateStatus(aid, False)
+                    End If
+                ElseIf synType.IndexOf("同步显示列") <> -1 Then
+                    Dim mkmc As String
+                    mkmc = synType.Replace("同步显示列|", "")
+
+                    If SynchronousDisplay(mkmc) Then
+                        UpdateStatus(aid, True)
+                    Else
+                        UpdateStatus(aid, False)
+                    End If
+                ElseIf synType.IndexOf("同步查询数据") <> -1 Then
+                    Dim mkmc As String
+                    mkmc = synType.Replace("同步查询数据|", "")
+                    If SynALLXMLDataToDB(mkmc) Then
+                        UpdateStatus(aid, True)
+                    Else
+                        UpdateStatus(aid, False)
+                    End If
+                End If
+
+            End If
+            System.Threading.Thread.Sleep(1000)
+        End While
+    End Sub
+#End Region
+
+#Region "提交同步"
+    ''' <summary>
+    ''' 提交同步
+    ''' </summary>
+    ''' <param name="fid"></param>
+    ''' <remarks></remarks>
+    Shared Function Submit(ByVal fid As Integer) As Boolean
+
+        Dim sqlstr As String
+        Dim dt As New DataTable
+
+        Try
+            '通过FID查询表单信息
+            sqlstr = "select XX_XMJC.MKDM,MKMC from XX_XMJC,GY_MKXX where XX_XMJC.MKDM=GY_MKXX.MKDM and FID=" + fid.ToString()
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---Submit 通过FID查询表单信息 失败", ex.ToString())
+            Return False
+        End Try
+
+
+        '模块代码
+        Dim mkdm As Integer
+        '模块名称
+        Dim mkmc As String
+
+        If dt.Rows.Count > 0 Then
+            Try
+                mkmc = dt.Rows(0).Item("MKMC").ToString().Trim()
+                mkdm = Convert.ToInt32(dt.Rows(0).Item("MKDM"))
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---Submit mkdm不合法", ex.ToString())
+                Return False
+            End Try
+        Else
+            DoLog.LogGlobalServiceToFile("SynchronizationService---Submit 通过FID查询表单信息 失败", "FID不合法，查询表单信息为空")
+            Return False
+        End If
+
+
+        Dim currentPath As String = System.AppDomain.CurrentDomain.BaseDirectory
+
+        '库文件夹路径
+        Dim libraryPath As String
+        '库文件路径
+        Dim libraryFile As String
+        '表单路径
+        Dim formFile As String
+        If IO.Directory.Exists(currentPath & "\FormFolder\") = True Then
+            libraryPath = currentPath & "\FormFolder\"
+        Else
+            libraryPath = currentPath & "\流程文件夹\"
+        End If
+
+        libraryFile = libraryPath + mkmc + ".库.xml"
+
+        formFile = libraryPath + mkmc + "\" + fid.ToString() + ".xml"
+
+        '如果表单文件与库文件都存在的话，那么开始做同步
+        If IO.File.Exists(libraryFile) And IO.File.Exists(formFile) Then
+
+            Dim xmlClass As New XmlClass
+            Try
+                xmlClass.GetXmlFile(formFile)
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---Submit 获取XML文件失败 失败", ex.ToString())
+                Return False
+            End Try
+
+            '是否为草稿标志
+            Dim isDraft As Boolean
+            Try
+                isDraft = Convert.ToBoolean(xmlClass.FindNode("//my:备用3").InnerXml)
+            Catch ex As Exception
+                isDraft = False
+            End Try
+
+
+            Dim fidNodeName As String
+            Try
+                fidNodeName = xmlClass.GetFormID()
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---Submit 获取fidNodeName失败 失败", ex.ToString())
+                fidNodeName = "my:"
+            End Try
+
+            Dim tempNode As XmlNode
+            Try
+                tempNode = xmlClass.GetRootNode.Item(0)
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---tempNode 根节点获取 失败", "")
+                Return False
+            End Try
+
+            Dim resultString As String = String.Empty
+            '扩展节点入库
+            If Not UpdateMapExt(mkdm, mkmc, fid, libraryPath) Then
+                resultString += "扩展节点入库失败;"
+                DoLog.LogGlobalServiceToFile("SynchronizationService---Submit 扩展节点入库失败 失败", "")
+            End If
+
+
+
+
+            ''映射节点入库
+            'If Not UpdateMapping(mkdm, mkmc, fid, libraryPath) Then
+            '    resultString += "映射节点入库失败;"
+            '    DoLog.LogGlobalServiceToFile("SynchronizationService---Submit 映射节点入库失败 失败", "")
+            'End If
+
+
+            '如果不为草稿，那么对其进行入库操作
+            If Not isDraft Then
+                '表单库入库操作
+
+                If System.Configuration.ConfigurationManager.AppSettings("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+                    If Not SQLLibrarySyn(fid) Then
+                        DoLog.LogGlobalServiceToFile("SynchronizationService---Submit XMLLirary入库 失败", "")
+                    End If
+
+                Else
+                    '映射节点入库
+                    If Not UpdateMapping(mkdm, mkmc, fid, libraryPath) Then
+                        resultString += "映射节点入库失败;"
+                        DoLog.LogGlobalServiceToFile("SynchronizationService---Submit 映射节点入库失败 失败", "")
+                    End If
+                    If Not UpdateLibrary(fid, libraryFile, fidNodeName, tempNode) Then
+                        resultString += "表单库入库失败;"
+                        DoLog.LogGlobalServiceToFile("SynchronizationService---Submit 表单库入库失败 失败", "")
+                    End If
+                End If
+
+
+
+            End If
+
+            '查询数据插入数据库
+            If Not XmlDataToDB(fid, formFile) Then
+                resultString += "查询数据入库失败;"
+                DoLog.LogGlobalServiceToFile("SynchronizationService---Submit 查询数据入库失败 失败", "")
+            End If
+
+            If resultString = String.Empty Then
+                Return True
+            Else
+                DoLog.LogGlobalServiceToFile("SynchronizationService---Submit 表单同步 失败", resultString)
+                Return False
+            End If
+
+        Else
+            DoLog.LogGlobalServiceToFile("SynchronizationService---Submit 失败", "表单文件或库文件不存在")
+            Return False
+        End If
+    End Function
+
+#End Region
+
+#Region "删除同步"
+
+    ''' <summary>
+    ''' 删除同步
+    ''' </summary>
+    ''' <param name="fid"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Shared Function Delete(ByVal fid As Integer) As Boolean
+        Dim sqlstr As String
+        Dim dt As New DataTable
+
+        Try
+            '通过FID查询表单信息
+            sqlstr = "select XX_XMJC.MKDM,MKMC from XX_XMJC,GY_MKXX where XX_XMJC.MKDM=GY_MKXX.MKDM and FID=" + fid.ToString()
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---Delete 通过FID查询表单信息 失败", ex.ToString())
+            Return False
+        End Try
+
+
+        '模块代码
+        Dim mkdm As Integer
+        '模块名称
+        Dim mkmc As String
+
+        If dt.Rows.Count > 0 Then
+            Try
+                mkmc = dt.Rows(0).Item("MKMC").ToString().Trim()
+                mkdm = Convert.ToInt32(dt.Rows(0).Item("MKDM"))
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---Delete mkdm不合法", ex.ToString())
+                Return False
+            End Try
+        Else
+            DoLog.LogGlobalServiceToFile("SynchronizationService---Delete 通过FID查询表单信息 失败", "FID不合法，查询表单信息为空")
+            Return False
+
+        End If
+
+        Dim currentPath As String = System.AppDomain.CurrentDomain.BaseDirectory
+
+        '库文件夹路径
+        Dim libraryPath As String
+        '库文件路径
+        Dim libraryFile As String
+        '表单路径
+        Dim formFile As String
+        If IO.Directory.Exists(currentPath & "FormFolder\") = True Then
+            libraryPath = currentPath & "FormFolder\"
+        Else
+            libraryPath = currentPath & "流程文件夹\"
+        End If
+
+        libraryFile = libraryPath + mkmc + ".库.xml"
+
+        formFile = libraryPath + mkmc + "\" + fid.ToString() + ".xml"
+
+
+        '如果表单库文件存在的话，那么开始删除
+        If IO.File.Exists(libraryFile) Then
+
+            Dim xmlClass As New XmlClass
+            Try
+                xmlClass.GetXmlFile(formFile)
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---Delete 获取XML文件失败 失败", ex.ToString())
+                Return False
+            End Try
+
+            '是否为草稿标志
+            Dim isDraft As Boolean
+            Try
+                isDraft = Convert.ToBoolean(xmlClass.FindNode("//my:备用3").InnerXml)
+            Catch ex As Exception
+                isDraft = False
+            End Try
+
+
+            Dim resultString As String = String.Empty
+
+          
+
+            '删除扩展映射（显示列）
+            If Not DelMapExt(fid, mkmc) Then
+                resultString += "删除扩展映射失败;"
+            End If
+
+            '删除二维映射
+            If Not DelMapping(fid, mkmc) Then
+                resultString += "删除二维映射失败;"
+            End If
+
+            '删除检索数据
+            If Not DelMapSearchData(fid, mkmc) Then
+                resultString += "删除检索数据失败;"
+            End If
+
+            If System.Configuration.ConfigurationManager.AppSettings("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+                If Not SQLLiraryDelSyn(fid) Then
+                    resultString += "XMLLiraryDelSyn失败;"
+                End If
+            Else
+                '删除表单库
+                If Not DeleteLibrary(fid, libraryFile) Then
+                    resultString += "删除库失败;"
+                End If
+            End If
+
+            If resultString = String.Empty Then
+                Return True
+            Else
+                DoLog.LogGlobalServiceToFile("SynchronizationService---Delete 删除表单 失败", resultString)
+                Return False
+            End If
+
+        Else
+            DoLog.LogGlobalServiceToFile("SynchronizationService---Delete XML库文件不存在 失败", "")
+            Return False
+        End If
+
+
+    End Function
+#End Region
+
+#Region "SQL库同步"
+
+    ''' <summary>
+    ''' 同步库中某一条记录
+    ''' </summary>
+    ''' <param name="fid"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Shared Function SQLLibrarySyn(ByVal fid As Integer) As Boolean
+        Dim sqlLibrary As New SQLLibrary
+        Return sqlLibrary.AddLibraryData(fid)
+    End Function
+
+    ''' <summary>
+    ''' 同步Sql整个库
+    ''' </summary>
+    ''' <param name="mkmc"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Shared Function SQLLibrarySyn(ByVal mkmc As String) As Boolean
+        Dim sqlLibrary As New SQLLibrary
+        Return sqlLibrary.AddLibraryData(mkmc)
+    End Function
+
+    ''' <summary>
+    ''' 删除库中记录
+    ''' </summary>
+    ''' <param name="fid"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Shared Function SQLLiraryDelSyn(ByVal fid As Integer) As Boolean
+        Dim sqlLibrary As New SQLLibrary()
+        Return sqlLibrary.DelLibraryData(fid)
+    End Function
+#End Region
+
+#Region "XML库操作"
+
+
+    ''' <summary>
+    ''' 同步XML整个库
+    ''' </summary>
+    ''' <param name="mkmc"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Shared Function XMLLibrarySyn(ByVal mkmc As String) As Boolean
+        Dim sqlLibrary As New SQLLibrary
+        Dim xmlClass As New XmlClass
+        Dim currentPath As String = System.AppDomain.CurrentDomain.BaseDirectory
+        '库文件夹路径
+        Dim libraryPath As String
+        '库文件路径
+        Dim libraryFile As String
+        If IO.Directory.Exists(currentPath & "\FormFolder\") = True Then
+            libraryPath = currentPath & "\FormFolder\"
+        Else
+            libraryPath = currentPath & "\流程文件夹\"
+        End If
+
+        libraryFile = libraryPath + mkmc + ".库.xml"
+        Dim AllxmlClass As New XmlClass
+        'Dim NewAllxmlClass As New XmlClass
+        Try
+            AllxmlClass.GetXmlFile(libraryFile)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---XMLLibrarySyn 载入XML库失败 失败", ex.ToString())
+            AllxmlClass.xmlDoc = Nothing
+            Return False
+        End Try
+        '获取所有有效的表单
+        Dim sqlstr As String
+        sqlstr = "SELECT XX_XMJC.FID,XX_XMJC.MKDM FROM GY_MKXX,XX_XMJC,GY_XMXX where  XX_XMJC.XMDM = GY_XMXX.XMDM  and (GY_XMXX.XMJD is not null) and XX_XMJC.MKDM = GY_MKXX.MKDM And GY_MKXX.MKMC='" & mkmc.Replace("'", "''") & "' and GY_XMXX.XMJD != '已删除' order by Fid desc"
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Dim i As Integer
+        For i = 0 To dt.Rows.Count - 1
+            Dim fid As Integer = Convert.ToInt32(dt.Rows(i)("fid"))
+            Dim xmlFilePath As String
+            xmlFilePath = currentPath & "\\FormFolder\\" & mkmc & "\\" & fid & ".xml"
+            If System.IO.File.Exists(xmlFilePath) Then
+                Dim fidNodeName As String
+                Try
+                    Try
+                        xmlClass.GetXmlFile(xmlFilePath)
+                    Catch ex As Exception
+                        DoLog.LogGlobalServiceToFile("XMLLibrarySyn---Submit 载入库失败", "")
+                    End Try
+                    fidNodeName = xmlClass.GetFormID()
+                    Dim tempNode As XmlNode
+                    tempNode = xmlClass.GetRootNode.Item(0)
+                    If Not AllUpdateLibrary(fid, AllxmlClass, fidNodeName, tempNode, AllxmlClass) Then
+                        DoLog.LogGlobalServiceToFile("XMLLibrarySyn---Submit 表单库入库失败 失败 fid=" & fid, "")
+                    End If
+                Catch ex As Exception
+                    DoLog.LogGlobalServiceToFile("XMLLibrarySyn---Submit 获取fidNodeName失败 失败 fid=" & fid, ex.ToString())
+                End Try
+            End If
+        Next
+        '表单库入库操作
+        AllxmlClass.Save()
+        xmlClass.xmlDoc = Nothing
+        AllxmlClass.xmlDoc = Nothing
+        Return True
+
+    End Function
+
+
+    ''' <summary>
+    ''' XML数据库入库操作(批量单模板)
+    ''' </summary>
+    ''' <param name="Fid"></param>
+    ''' <param name="xmlClass"></param>
+    ''' <param name="FidNodeName"></param>
+    ''' <param name="TempNode"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Shared Function AllUpdateLibrary(ByVal Fid As Integer, ByVal xmlClass As XmlClass, ByVal FidNodeName As String, ByVal TempNode As XmlNode, ByRef newxmlClass As XmlClass) As Boolean
+
+        '得到源文件的要节点名称
+        Dim RootNodeName As String = TempNode.Name
+
+        Dim checkNode As XmlNode
+        '查询库中是否已有该节点
+        Try
+            checkNode = xmlClass.FindNode("//" & RootNodeName & "/" & FidNodeName.Replace("表单号", "标题") & "[" & FidNodeName & "='" & Fid & "']")
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---AllUpdateLibrary 查询库中节点 失败", ex.ToString())
+            newxmlClass = xmlClass
+            Return False
+        End Try
+        If checkNode Is Nothing Then
+            Dim NodeNull As XmlNode
+            '查询是否存在空节点
+            Try
+                NodeNull = xmlClass.FindNode("//" & RootNodeName & "/" & FidNodeName.Replace("表单号", "标题") & "[" & FidNodeName & "='']")
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---AllUpdateLibrary 查询空节点 失败", ex.ToString())
+                newxmlClass = xmlClass
+                Return False
+            End Try
+
+            If NodeNull Is Nothing Then
+                Try
+                    xmlClass.AddNodeAll(TempNode)
+                Catch ex As Exception
+                    DoLog.LogGlobalServiceToFile("SynchronizationService---AllUpdateLibrary 添加节点失败(空) 失败", ex.ToString())
+                    newxmlClass = xmlClass
+                    Return False
+                End Try
+            Else
+                Try
+                    xmlClass.UpdateNode("//" & RootNodeName & "/" & FidNodeName.Replace("表单号", "标题") & "[" & FidNodeName & "='']", TempNode)
+                Catch ex As Exception
+                    DoLog.LogGlobalServiceToFile("SynchronizationService---AllUpdateLibrary 更新节点失败(空) 失败", ex.ToString())
+                    newxmlClass = xmlClass
+                    Return False
+                End Try
+            End If
+        Else
+            Try
+                xmlClass.UpdateNode("//" & RootNodeName & "/" & FidNodeName.Replace("表单号", "标题") & "[" & FidNodeName & "='" & Fid.ToString() & "']", TempNode)
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---AllUpdateLibrary 更新节点失败 失败", ex.ToString())
+                newxmlClass = xmlClass
+                Return False
+            End Try
+        End If
+        newxmlClass = xmlClass
+        Return True
+    End Function
+
+    ''' <summary>
+    ''' XML数据库入库操作
+    ''' </summary>
+    ''' <param name="Fid"></param>
+    ''' <param name="LibraryFile"></param>
+    ''' <param name="FidNodeName"></param>
+    ''' <param name="TempNode"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Shared Function UpdateLibrary(ByVal Fid As Integer, ByVal LibraryFile As String, ByVal FidNodeName As String, ByVal TempNode As XmlNode) As Boolean
+
+        '得到源文件的要节点名称
+        Dim RootNodeName As String = TempNode.Name
+
+
+        Dim xmlClass As New XmlClass
+        Try
+            xmlClass.GetXmlFile(LibraryFile)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateLibrary 载入XML库失败 失败", ex.ToString())
+            xmlClass.xmlDoc = Nothing
+            Return False
+        End Try
+
+        Dim checkNode As XmlNode
+        '查询库中是否已有该节点
+        Try
+            checkNode = xmlClass.FindNode("//" & RootNodeName & "/" & FidNodeName.Replace("表单号", "标题") & "[" & FidNodeName & "='" & Fid & "']")
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateLibrary 查询库中节点 失败", ex.ToString())
+            xmlClass.xmlDoc = Nothing
+            Return False
+        End Try
+
+
+        If checkNode Is Nothing Then
+            Dim NodeNull As XmlNode
+            '查询是否存在空节点
+            Try
+                NodeNull = xmlClass.FindNode("//" & RootNodeName & "/" & FidNodeName.Replace("表单号", "标题") & "[" & FidNodeName & "='']")
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateLibrary 查询空节点 失败", ex.ToString())
+                xmlClass.xmlDoc = Nothing
+                Return False
+            End Try
+
+            If NodeNull Is Nothing Then
+                Try
+                    xmlClass.AddNode(TempNode)
+                Catch ex As Exception
+                    DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateLibrary 添加节点失败(空) 失败", ex.ToString())
+                    xmlClass.xmlDoc = Nothing
+                    Return False
+                End Try
+            Else
+                Try
+                    xmlClass.UpdateNode("//" & RootNodeName & "/" & FidNodeName.Replace("表单号", "标题") & "[" & FidNodeName & "='']", TempNode)
+                Catch ex As Exception
+                    DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateLibrary 更新节点失败(空) 失败", ex.ToString())
+                    xmlClass.xmlDoc = Nothing
+                    Return False
+                End Try
+            End If
+        Else
+            Try
+                xmlClass.UpdateNode("//" & RootNodeName & "/" & FidNodeName.Replace("表单号", "标题") & "[" & FidNodeName & "='" & Fid.ToString() & "']", TempNode)
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateLibrary 更新节点失败 失败", ex.ToString())
+                xmlClass.xmlDoc = Nothing
+                Return False
+            End Try
+        End If
+        xmlClass.xmlDoc = Nothing
+        Return True
+    End Function
+
+    ''' <summary>
+    ''' 删除库中节点
+    ''' </summary>
+    ''' <param name="fid"></param>
+    ''' <param name="LibraryFile"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Shared Function DeleteLibrary(ByVal fid As Integer, ByVal LibraryFile As String) As Integer
+        Dim xmlClass As New XmlClass
+        Dim FidNodeName, RootNodeName As String
+        Try
+            xmlClass.GetXmlFile(LibraryFile)
+            FidNodeName = xmlClass.GetFormID
+            RootNodeName = xmlClass.GetRootNode.Item(0).Name
+            xmlClass.DelNode("//" & RootNodeName & "/" & FidNodeName.Replace("表单号", "标题") & "[" & FidNodeName & "='" & fid & "']")
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---DeleteLibrary 删除库中节点 失败", ex.ToString())
+            Return False
+        End Try
+        Return True
+    End Function
+
+
+#End Region
+
+#Region "查询数据处理"
+
+    ''' <summary>
+    ''' 将所有数据同步到查询表中
+    ''' </summary>
+    ''' <param name="mkmc"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Shared Function SynALLXMLDataToDB(ByVal mkmc As String) As Boolean
+
+        Dim sqlstr As String
+        Dim haveTable As Boolean = False
+        Try
+            sqlstr = "select top 1 cid from " & mkmc & "_MapSearch"
+            SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+            haveTable = True
+        Catch ex As Exception
+            haveTable = False
+        End Try
+
+
+        If haveTable = False Then
+            If Not CreatMapSearchTable(mkmc) Then
+                DoLog.LogGlobalServiceToFile("SynchronizationService---SynALLXMLDataToDB 创建查询表失败", "")
+                Return False
+            End If
+        End If
+
+        '删除原表所有数据
+        sqlstr = "delete from " & mkmc & "_MapSearch"
+        Try
+            SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---XmlDataToDB 删除原表所有数据 失败", ex.ToString())
+            Return False
+        End Try
+
+        '获取所有有效的表单
+        sqlstr = "SELECT XX_XMJC.FID,XX_XMJC.MKDM,xx_xmjc.xmdm FROM GY_MKXX,XX_XMJC,GY_XMXX where  XX_XMJC.XMDM = GY_XMXX.XMDM  and (GY_XMXX.XMJD is not null) and XX_XMJC.MKDM = GY_MKXX.MKDM And GY_MKXX.MKMC='" & mkmc.Replace("'", "''") & "' and GY_XMXX.XMJD != '已删除' order by Fid desc"
+
+        Dim dt As New DataTable
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---XmlDataToDB 获取所有有效的表单 失败", ex.ToString())
+            Return False
+        End Try
+
+
+        Dim currentPath As String = System.AppDomain.CurrentDomain.BaseDirectory
+
+        Dim i As Integer
+        For i = 0 To dt.Rows.Count - 1
+            Dim fid As Integer = Convert.ToInt32(dt.Rows(i)("fid"))
+            Dim mkdm As Integer = Convert.ToInt32(dt.Rows(i)("mkdm"))
+            Dim xmdm As Integer = Convert.ToInt32(dt.Rows(i)("xmdm"))
+            Dim xmlFilePath As String
+            xmlFilePath = currentPath & "\\FormFolder\\" & mkmc & "\\" & fid & ".xml"
+
+
+            Dim xmlclass As New XmlClass
+            Try
+                xmlclass.GetXmlFile(xmlFilePath)
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---XmlDataToDB 载入XML文件 失败", ex.ToString())
+                Return False
+            End Try
+
+            Dim RootNode As System.Xml.XmlNodeList
+            Try
+                RootNode = xmlclass.GetRootNode()
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---XmlDataToDB 获取RootNode 失败", ex.ToString())
+                Return False
+            End Try
+
+            '递归方法对节点进行插入
+            Try
+                AddXmlToData(RootNode, fid, xmdm, mkdm, mkmc)
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---XmlDataToDB 递归法插入节点 失败", ex.ToString())
+                Return False
+            End Try
+
+        Next
+
+
+
+        Return True
+    End Function
+
+    ''' <summary>
+    ''' 将查询数据插入数据库
+    ''' </summary>
+    ''' <param name="fid"></param>
+    ''' <param name="formPath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Shared Function XmlDataToDB(ByVal fid As Integer, ByVal formPath As String) As Boolean
+
+        Dim dt As New DataTable
+
+        Dim sqlstr As String
+        sqlstr = "SELECT XX_XMJC.FID,Gy_MKXX.MKMC,XX_XMJC.XMDM,XX_XMJC.MKDM FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & fid & ")"
+
+        '通过FID获取项目基本信息
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---XmlDataToDB 通过FID获取项目基本信息 失败", ex.ToString())
+            Return False
+        End Try
+
+        Dim mkmc As String      '模块名称
+        Dim xmdm As String      '项目代码
+        Dim mkdm As String      '模块代码
+
+        If dt.Rows.Count > 0 Then
+            mkmc = dt.Rows(0).Item(1)
+            xmdm = dt.Rows(0).Item(2)
+            mkdm = dt.Rows(0).Item(3)
+        Else
+            DoLog.LogGlobalServiceToFile("SynchronizationService---XmlDataToDB 通过FID获取项目基本信息 失败", "FID非法")
+            Return False
+        End If
+
+        Dim haveTable As Boolean = False
+        Try
+            sqlstr = "select top 1 cid from " & mkmc & "_MapSearch"
+            SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+            haveTable = True
+        Catch ex As Exception
+            haveTable = False
+        End Try
+
+
+        If haveTable = False Then
+            If Not CreatMapSearchTable(mkmc) Then
+                Return False
+            End If
+        End If
+
+        sqlstr = "delete FormSearchData where FormID = " + fid.ToString()
+        SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+
+
+        Try
+            sqlstr = "delete " + mkmc + "_MapSearch where FormID =" + fid.ToString()
+            SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---XmlDataToDB 删除原查询数据 失败", ex.ToString())
+            Return False
+        End Try
+
+
+        Dim xmlclass As New XmlClass
+        Try
+            xmlclass.GetXmlFile(formPath)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---XmlDataToDB 载入XML文件 失败", ex.ToString())
+            Return False
+        End Try
+
+        Dim RootNode As System.Xml.XmlNodeList
+        Try
+            RootNode = xmlclass.GetRootNode()
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---XmlDataToDB 获取RootNode 失败", ex.ToString())
+            Return False
+        End Try
+
+        '递归方法对节点进行插入
+        Try
+            AddXmlToData(RootNode, fid, xmdm, mkdm, mkmc)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---XmlDataToDB 递归法插入节点 失败", ex.ToString())
+            Return False
+        End Try
+
+        xmlclass = Nothing
+        Return True
+    End Function
+
+    ''' <summary>
+    ''' 递归方法将节点插入数据库用以查询
+    ''' </summary>
+    ''' <param name="xmluser"></param>
+    ''' <param name="Fid"></param>
+    ''' <param name="xmdm"></param>
+    ''' <param name="mkdm"></param>
+    ''' <param name="mkmc"></param>
+    ''' <remarks></remarks>
+    Shared Sub AddXmlToData(ByVal xmluser As System.Xml.XmlNodeList, ByVal Fid As Integer, ByVal xmdm As Integer, ByVal mkdm As String, ByVal mkmc As String)
+        '用递归的方法查找所有节点.并显示出来
+        Dim i As Integer
+        Dim Temp As String = String.Empty
+        Dim DataValue As String = Nothing
+        Dim sqlstr As String
+        For i = 0 To xmluser.Count - 1
+            If xmluser.Item(i).Name <> "#text" Then  '过滤掉为空的值项
+                If xmluser.Item(i).ChildNodes.Count >= 1 Then
+                    DataValue = xmluser.Item(i).ChildNodes.Item(0).Value
+                    If Not DataValue Is Nothing Then
+                        If DataValue.Trim.Length > 0 Then
+                            If DataValue.Length > 500 Then DataValue = DataValue.Substring(0, 500)
+                            Try
+                                sqlstr = "insert into " & mkmc & "_MapSearch (FormID,FormData,xmdm,mkdm) values (@FormID,@FormData,@xmdm,@mkdm)"
+                                Dim params As SqlParameter() = New SqlParameter() { _
+                                    New SqlParameter("@FormID", Fid), _
+                                    New SqlParameter("@FormData", DataValue), _
+                                    New SqlParameter("@xmdm", xmdm), _
+                                    New SqlParameter("@mkdm", mkdm) _
+                                }
+                                SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, params)
+
+                                sqlstr = "insert into FormSearchData (FormID,FormData,xmdm,mkdm) values (@FormID,@FormData,@xmdm,@mkdm)"
+                                params = New SqlParameter() { _
+                                   New SqlParameter("@FormID", Fid), _
+                                   New SqlParameter("@FormData", DataValue), _
+                                   New SqlParameter("@xmdm", xmdm), _
+                                   New SqlParameter("@mkdm", mkdm) _
+                                }
+                                SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, params)
+
+
+                            Catch ex As Exception
+                                DoLog.LogErrorToFile("", ex.ToString())
+                            End Try
+                        End If
+                    End If
+                    AddXmlToData(xmluser.Item(i).ChildNodes, Fid, xmdm, mkdm, mkmc)
+                End If
+            End If
+        Next
+    End Sub
+
+
+    ''' <summary>
+    ''' 创建查询数据表
+    ''' </summary>
+    ''' <param name="mkmc"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Shared Function CreatMapSearchTable(ByVal mkmc As String) As Boolean
+
+        Dim tablename As String = mkmc & "_MapSearch"
+        Dim sqlstr As String = String.Empty
+
+        '创建表
+        sqlstr += "SET ANSI_NULLS ON" & vbCrLf
+        sqlstr += "SET QUOTED_IDENTIFIER ON" & vbCrLf
+        sqlstr += "SET ANSI_PADDING ON" & vbCrLf
+        sqlstr += "CREATE TABLE [dbo].[" & tablename & "](" & vbCrLf
+        sqlstr += "[CID] [bigint] IDENTITY(1,1) NOT NULL," & vbCrLf
+        sqlstr += "[FormID] [int] NULL," & vbCrLf
+        sqlstr += "[XMDM] [int] NULL," & vbCrLf
+        sqlstr += "[MKDM] [int] NULL," & vbCrLf
+        sqlstr += "[FormData] [varchar](500) NULL," & vbCrLf
+        sqlstr += "CONSTRAINT [PK_" & tablename & "] PRIMARY KEY CLUSTERED " & vbCrLf
+        sqlstr += "(" & vbCrLf
+        sqlstr += "[CID]Asc" & vbCrLf
+        sqlstr += ")WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]" & vbCrLf
+        sqlstr += ") ON [PRIMARY]" & vbCrLf
+        sqlstr += "SET ANSI_PADDING OFF" & vbCrLf
+
+        Try
+            SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---CreatMapSearchTable 创建数据查询表 失败", ex.ToString())
+            Return False
+        End Try
+
+
+        '创建索引
+        sqlstr = String.Empty
+        sqlstr += "CREATE NONCLUSTERED INDEX [IX_" & tablename & "_FormData] ON [dbo].[" & tablename & "] " & vbCrLf
+        sqlstr += "(" & vbCrLf
+        sqlstr += "[FormData]Asc" & vbCrLf
+        sqlstr += ")WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]" & vbCrLf
+
+        Try
+            SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---CreatMapSearchTable 创建数据查询表索引FormData 失败", ex.ToString())
+            Return False
+        End Try
+
+
+        sqlstr = String.Empty
+
+        sqlstr += "CREATE NONCLUSTERED INDEX [IX_" & tablename & "_FormID] ON [dbo].[" & tablename & "] " & vbCrLf
+        sqlstr += "(" & vbCrLf
+        sqlstr += "[FormID]Asc" & vbCrLf
+        sqlstr += ")WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]" & vbCrLf
+
+        Try
+            SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---CreatMapSearchTable 创建数据查询表索引FormID 失败", ex.ToString())
+            Return False
+        End Try
+
+
+        sqlstr = String.Empty
+
+        sqlstr += "CREATE NONCLUSTERED INDEX [IX_" & tablename & "_MKDM] ON [dbo].[" & tablename & "] " & vbCrLf
+        sqlstr += "(" & vbCrLf
+        sqlstr += "[MKDM]Asc" & vbCrLf
+        sqlstr += ")WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]" & vbCrLf
+
+        Try
+            SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---CreatMapSearchTable 创建数据查询表索引MKDM 失败", ex.ToString())
+            Return False
+        End Try
+
+        Return True
+    End Function
+
+#End Region
+
+#Region "数据库同步"
+
+    Shared Function UpdateMapping(ByVal MKDM As Integer, ByVal MKMC As String, ByVal FID As Integer, ByVal LibraryPath As String) As Boolean
+
+        Dim dt As New DataTable
+        Dim sqlstr As String
+
+        Try
+            '查询映射信息
+            sqlstr = "SELECT MapXpath FROM GY_MKXX where MKDM=" + MKDM.ToString() + " and MapXpath is not null"
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateMapping 查询映射信息 失败", ex.ToString())
+            Return False
+        End Try
+
+        '表单路径
+        Dim formFile As String
+        formFile = LibraryPath + MKMC + "\" + FID.ToString() + ".xml"
+
+        If Not IO.File.Exists(formFile) Then
+            DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateMapping 表单文件不存在 失败", "")
+            Return False
+        End If
+
+        '映射的节点
+        Dim formMappingNode As String
+        If dt.Rows.Count > 0 Then
+            '删除原有的映射数据
+            sqlstr = "Delete " + MKMC + "_Mapping where Fid=" + FID.ToString()
+            Try
+                SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateMapping 删除原有的映射数据 失败", ex.ToString())
+                Return False
+            End Try
+
+            Dim xmlClass As New XmlClass
+            Try
+                xmlClass.GetXmlFile(formFile)
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateMapping 载入表单文件 失败", ex.ToString())
+                Return False
+            End Try
+
+            formMappingNode = dt.Rows(0).Item(0).ToString()
+            Dim Exnodelist As XmlNodeList = xmlClass.FindNodes("//" & formMappingNode)
+            Dim i, j As Integer
+            Dim kid As Integer
+            For i = 0 To Exnodelist.Count - 1
+
+                sqlstr = "INSERT INTO [" + MKMC + "_Mapping](FID) VALUES(" + FID.ToString() + ");Select AId from " + MKMC + "_Mapping where aid = @@IDENTITY"
+                Try
+                    kid = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0).Rows(0).Item(0)
+                Catch ex As Exception
+                    DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateMapping 插入MAPPING 失败", ex.ToString())
+                    Return False
+                End Try
+
+                For j = 0 To Exnodelist.Item(i).ChildNodes.Count - 1
+                    Try
+                        If Not Exnodelist.Item(i).ChildNodes(j).ChildNodes(0) Is Nothing Then
+
+                            Try
+                                sqlstr = "update [" + MKMC + "_Mapping] set " + Exnodelist.Item(i).ChildNodes(j).Name.Replace(":", "") + " = '" & Exnodelist.Item(i).ChildNodes(j).ChildNodes(0).Value & "' where aid=" + kid.ToString()
+                                SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+                            Catch ex As Exception
+                                DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateMapping 插入MAPPING(1) 失败", ex.ToString())
+                                Return False
+                            End Try
+
+                        Else
+
+                            Try
+                                sqlstr = "update [" + MKMC + "_Mapping] set " + Exnodelist.Item(i).ChildNodes(j).Name.Replace(":", "") + " = '' where aid=" + kid.ToString()
+                                SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+                            Catch ex As Exception
+                                DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateMapping 插入MAPPING(2) 失败", ex.ToString())
+                                Return False
+                            End Try
+
+                        End If
+                    Catch ex As Exception
+                        '表示插表失败,一般都是读出的XML节点内容为空
+                        DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateMapping 失败", ex.ToString())
+                        Return False
+                    End Try
+                Next
+            Next
+        End If
+        Return True
+    End Function
+
+    ''' <summary>
+    ''' 删除二维映射
+    ''' </summary>
+    ''' <param name="fid"></param>
+    ''' <param name="mkmc"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Shared Function DelMapping(ByVal fid As Integer, ByVal mkmc As String) As Boolean
+        Dim sqlstr As String
+        Try
+            sqlstr = "delete from " & mkmc & "_Mapping where fid=" & fid
+            SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---DelMapping 删除MAPPING 失败", ex.ToString())
+            Return False
+        End Try
+        Return True
+    End Function
+
+
+    ''' <summary>
+    ''' 扩展属性映射（显示列）
+    ''' </summary>
+    ''' <param name="MKDM"></param>
+    ''' <param name="MKMC"></param>
+    ''' <param name="FID"></param>
+    ''' <param name="LibraryPath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Shared Function UpdateMapExt(ByVal MKDM As Integer, ByVal MKMC As String, ByVal FID As Integer, ByVal LibraryPath As String) As Boolean
+
+
+        '表单路径
+        Dim formFile As String
+        formFile = LibraryPath + MKMC + "\" + FID.ToString() + ".xml"
+
+        If Not IO.File.Exists(formFile) Then
+            DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateMapExt 表单文件不存在 失败", formFile)
+            Return False
+        End If
+
+        Dim dt As New DataTable
+        Dim sqlstr As String
+
+        Try
+            '查询映射信息
+            sqlstr = "SELECT AID,MapExtName FROM MapConfig where (IsTotal  is null or IsTotal = 0) and  MKDM=" + MKDM.ToString()
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateMapExt 查询扩展映射信息 失败", ex.ToString())
+            Return False
+        End Try
+
+        Dim kid As Integer
+
+        '对扩展属性进行映射
+        If dt.Rows.Count > 0 Then
+
+            '删除原有扩展属性
+            Try
+                sqlstr = "Delete " + MKMC + "_MapExt where Fid=" + FID.ToString()
+                SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateMapExt 删除原有扩展属性 失败", ex.ToString())
+            End Try
+
+            Try
+                sqlstr = "INSERT INTO [" + MKMC + "_MapExt](FID) VALUES(" + FID.ToString() + ");Select AId from " + MKMC + "_MapExt where aid = @@IDENTITY"
+                kid = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0).Rows(0).Item(0)
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateMapExt 插入扩展属性 失败", ex.ToString())
+                Return False
+            End Try
+
+
+            Dim xmlClass As New XmlClass
+            Try
+                xmlClass.GetXmlFile(formFile)
+            Catch ex As Exception
+                DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateMapExt 载入表单文件 失败", ex.ToString())
+                Return False
+            End Try
+
+            Dim i As Integer
+            '插入节点内容
+            For i = 0 To dt.Rows.Count - 1
+                Try
+
+                    Dim Exnode As XmlNode
+                    Try
+                        Dim nodeName As String = "//" + dt.Rows(i).Item("MapExtName").ToString()
+                        Exnode = xmlClass.FindNode(nodeName)
+                        Exnode = xmlClass.xmlDoc.SelectSingleNode(nodeName, xmlClass.GetNameSpaceManager())
+                    Catch ex As Exception
+                        Exnode = Nothing
+                    End Try
+
+                    If Not Exnode Is Nothing Then
+
+                        sqlstr = "update " + MKMC + "_MapExt set " + dt.Rows(i).Item("MapExtName").ToString().Replace(":", "") + " = @value where aid=@aid"
+
+                        Dim value As String = ""
+                        If Not Exnode.ChildNodes(0) Is Nothing Then
+                            value = Exnode.ChildNodes.Item(0).InnerText
+                        End If
+                        Dim params As SqlParameter() = New SqlParameter() { _
+                            New SqlParameter("@value", value), _
+                            New SqlParameter("@aid", kid) _
+                        }
+                        Try
+                            SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, params)
+                        Catch ex As Exception
+                            DoLog.LogGlobalServiceToFile("sql", sqlstr)
+                            DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateMapExt 插入节点内容 失败", ex.ToString())
+                            Return False
+                        End Try
+                    End If
+                Catch ex As Exception
+                    DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateMapExt 获取映射节点 失败", ex.ToString())
+                    '表示插表失败,一般都是读出的XML节点内容为空
+                End Try
+            Next
+        End If
+        Return True
+    End Function
+
+    ''' <summary>
+    ''' 删除扩展映射（显示列）
+    ''' </summary>
+    ''' <param name="fid"></param>
+    ''' <param name="MKMC"></param>
+    ''' <remarks></remarks>
+    Shared Function DelMapExt(ByVal fid As Integer, ByVal MKMC As String) As Boolean
+        Dim sqlstr As String
+        Try
+            sqlstr = "delete from " + MKMC + "_MapExt where fid=" + fid.ToString()
+            SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---DelMapping 删除MAPPING 失败", ex.ToString())
+            Return False
+        End Try
+        Return True
+    End Function
+
+    ''' <summary>
+    ''' 删除检索数据
+    ''' </summary>
+    ''' <param name="fid"></param>
+    ''' <param name="mkmc"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Shared Function DelMapSearchData(ByVal fid As Integer, ByVal mkmc As String) As Boolean
+        Dim sqlstr As String
+        Try
+            sqlstr = "delete from " + mkmc + "_MapSearch where formID=" + fid.ToString()
+            SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---DelMapSearchData 删除检索数据 失败", ex.ToString())
+            Return False
+        End Try
+        Return True
+    End Function
+
+
+
+    ''' <summary>
+    ''' 同步显示列
+    ''' </summary>
+    ''' <param name="mkmc"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Shared Function SynchronousDisplay(ByVal mkmc As String) As Boolean
+
+        Dim mkdm As Integer
+        Dim currentPath As String = System.AppDomain.CurrentDomain.BaseDirectory
+        '库文件夹路径
+        Dim libraryPath As String
+        If IO.Directory.Exists(currentPath & "FormFolder\") = True Then
+            libraryPath = currentPath & "FormFolder\"
+        Else
+            libraryPath = currentPath & "流程文件夹\"
+        End If
+
+        '获取所有有效的表单
+        Dim sqlstr As String
+        sqlstr = "SELECT XX_XMJC.FID,XX_XMJC.MKDM FROM GY_MKXX,XX_XMJC,GY_XMXX where  XX_XMJC.XMDM = GY_XMXX.XMDM  and (GY_XMXX.XMJD is not null) and XX_XMJC.MKDM = GY_MKXX.MKDM And GY_MKXX.MKMC='" & mkmc.Replace("'", "''") & "' and GY_XMXX.XMJD != '已删除' order by Fid desc"
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Dim i As Integer
+        For i = 0 To dt.Rows.Count - 1
+            Dim fid As Integer = Convert.ToInt32(dt.Rows(i)("fid"))
+            mkdm = Convert.ToInt32(dt.Rows(0).Item("MKDM"))
+            '扩展节点入库
+            If Not UpdateMapExt(mkdm, mkmc, fid, libraryPath) Then
+                DoLog.LogGlobalServiceToFile("SynchronizationService---Submit 扩展节点入库失败 失败", "")
+            End If
+            '映射节点入库
+            If Not UpdateMapping(mkdm, mkmc, fid, libraryPath) Then
+                DoLog.LogGlobalServiceToFile("SynchronizationService---Submit 映射节点入库失败 失败", "")
+            End If
+        Next
+
+        Return True
+
+    End Function
+
+#End Region
+
+#Region "公用函数"
+    ''' <summary>
+    ''' 更改同步表状态
+    ''' </summary>
+    ''' <param name="aid"></param>
+    ''' <param name="issyn"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Shared Function UpdateStatus(ByVal aid As Integer, ByVal issyn As Boolean) As String
+        Dim sqlstr As String
+        Try
+            If issyn = True Then
+                sqlstr = "Update [SynSubmit] set SynResult='同步成功',IsSyn=1,SynTime=getdate() where AId=" + aid.ToString()
+            Else
+                sqlstr = "Update [SynSubmit] set SynResult='同步失败',IsSyn=1,SynTime=getdate() where AId=" + aid.ToString()
+            End If
+            SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogGlobalServiceToFile("SynchronizationService---UpdateStatus 更改同步表状态 失败", ex.ToString())
+        End Try
+        Return True
+    End Function
+#End Region
+
+End Class

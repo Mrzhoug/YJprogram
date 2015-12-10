@@ -1,0 +1,49 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="LookPublicMessage.aspx.vb" Inherits="manager_Desktop_LookPublicMessage" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>查看公告</title>
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+</head>
+<body>
+    <form id="form1" runat="server">
+<table border="0" cellpadding="2" cellspacing="0" width="100%" style=" background-color:#EFF5FB;">
+<tr><td style="width:10px;"></td><td style="height:35px; font-weight:bold; font-size:15pt;"><span id="Titles" runat="server" ></span></td></tr>
+<tr><td style="width:10px;"></td><td style="color:#999999">发布者：<span id="User1" runat="server"></span></td></tr>
+<tr><td style="width:10px;"></td><td style="color:#999999">时&nbsp;&nbsp;&nbsp;&nbsp;间：<span id="PDate" runat="server"></span></td></tr>
+<tr><td style="width:10px; height:5px;"></td><td></td></tr>
+</table>
+
+<table cellpadding="8" style="background-color:#eeeeee;" width="100%">
+    <tr>
+    <td style=" background-color:White; margin-left:10px;">
+        <asp:Label ID="Content" runat="server" Height="100px" Text="Label" Width="556px"></asp:Label>
+    </td>
+    </tr>
+</table>
+<br />
+        
+<!--  文件附件 -->            
+<span id="filelist" runat="server"></span>
+  
+<!--  文件附件 -->  
+<br />
+
+<!--  查看记录 -->            
+<table border="0" cellpadding="2" cellspacing="0" width="100%" id="looklistTable1" runat="server">
+<tr><td style="background-color:#E0ECF9; height:30px;">&nbsp;&nbsp;查看记录&nbsp;</td></tr>
+<tr><td style="background-color:#E0ECF9;">
+    <table border="0" cellpadding="6" cellspacing="0" width="100%">
+    <tr><td style="background-color:White; height:60px;" valign="top">
+        <span id="looklist" runat="server"></span>
+    </td></tr>
+    </table>
+</td></tr>
+</table>  
+<!--  查看记录 -->  
+        
+    </form>
+</body>
+</html>
+

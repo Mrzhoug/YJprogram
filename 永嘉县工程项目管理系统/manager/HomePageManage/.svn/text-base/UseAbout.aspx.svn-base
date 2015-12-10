@@ -1,0 +1,45 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="UseAbout.aspx.vb" Inherits="manager_HomePageManage_UseAbout" ValidateRequest="false"  %>
+
+<%@ Register Assembly="FreeTextBox" Namespace="FreeTextBoxControls" TagPrefix="FTB" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>使用说明</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        <br />
+        <table border="0">
+            <tr>
+                <td style="width: 15px">
+                </td>
+                <td style="width: 700px" align="center">
+                    使用说明</td>
+                <td style="width: 22px">
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 15px">
+                </td>
+                <td style="width: 100px">
+        <FTB:FreeTextBox ID="Content" runat="server" Height="450px" Width="700px">
+        </FTB:FreeTextBox>
+                </td>
+                <td style="width: 22px">
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 15px">
+                </td>
+                <td align="center" style="width: 700px">
+                    <asp:Button ID="Button1" runat="server" Text="确定修改" /></td>
+                <td style="width: 22px">
+                </td>
+            </tr>
+        </table>
+        &nbsp;
+    </div>
+    </form>
+</body>
+</html>

@@ -1,0 +1,99 @@
+﻿Imports System.Data
+Imports System.IO
+Imports System.Xml
+Partial Class manager_lctmanage_xglczt
+    Inherits System.Web.UI.Page
+    Dim base As New Base
+    Dim xmbh As String = ""
+    Dim Login_User As String
+    Dim UserID As Integer
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim sql As String
+        sql = "update lc_lczt set cstype=" & ddllczt.SelectedValue & ",xgr='" & Login_User & "',xgtime=getdate(),note='" & base.SqlFilter(txtbz.Text.Trim) & "' where xmbh='" & xmbh & "' and xmzt='" & ddllcmc.SelectedItem.Text & "'"
+        ' Response.Write(sql)
+        Try
+            base.DB.Query(sql)
+            base.Js.alert(Me, "修改成功")
+        Catch ex As Exception
+            base.Js.alert(Me, "修改失败")
+        End Try
+
+
+    End Sub
+    Dim xmldoc As New XmlDocument
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        If Not base.CheckUserAuthentication() Then
+            Response.Write("非法访问！")
+            Response.End()
+        End If
+        Try
+            xmbh = base.SqlFilter(Request("xmbh"))
+        Catch ex As Exception
+            Response.Write("非法访问！")
+            Response.End()
+        End Try
+        '得到用户信息
+        Login_User = base.GetWebUserName
+        UserID = base.GetUserID(Login_User)
+        Dim sql As String = ""
+        sql = "select lc_lczt.xmzt,lc_lczt.id,lc_order.bm,(select my项目名称 from 项目基本信息_MapExt where my项目编号=lc_lczt.xmbh) as xmmc,(select KSMC from GY_KSDM where ksdm=lc_order.bm) as bmmc from lc_lczt,lc_order where lc_lczt.xmbh='" & xmbh & "' and lc_lczt.bz=0 and lc_order.lczt=lc_lczt.xmzt and lc_order.lcbs='" & xmbh.Substring(0, 2).ToLower & "' and isnull(lc_lczt.endtime,getdate()) -lc_lczt.starttime>lc_order.days and lc_order.days<>0 and lc_order.days is not null"
+        If Me.IsPostBack = False Then
+            Dim dt As New DataTable
+            dt = base.DB.Table(sql, "dt")
+            Dim i As Integer = 0
+            If dt.Rows.Count > 0 Then
+                For i = 0 To dt.Rows.Count - 1
+                    ddllcmc.Items.Add(New ListItem(dt.Rows(i)("xmzt").ToString(), dt.Rows(i)("id").ToString()))
+                Next
+            End If
+            ddllcmc.SelectedIndex = 0
+            getxx(ddllcmc.SelectedItem.Text)
+        End If
+
+
+
+    End Sub
+    Function getbm(ByVal bmbh As String) As String
+
+        Dim dt As New DataTable
+        dt = base.DB.Table("select KSMC from GY_KSDM where ksdm=" & bmbh & "", "dd")
+        If dt.Rows.Count > 0 Then
+            Return dt.Rows(0)(0).ToString
+        End If
+        Return ""
+    End Function
+
+    Function getcszt(ByVal lczt As String) As Integer
+        Dim sql As String
+        sql = "select lc_lczt.xmzt,lc_lczt.fid from lc_lczt,lc_order where lc_lczt.xmbh='" & xmbh & "' and lc_lczt.bz=0 and lc_order.lczt=lc_lczt.xmzt and lc_order.lcbs='" & xmbh.Substring(0, 2).ToLower & "' and isnull(lc_lczt.endtime,getdate()) -lc_lczt.starttime>lc_order.days and lc_order.days<>0 and lc_order.days is not null and lc_lczt.xmzt='" & lczt & "'"
+        Dim dt As New DataTable
+        dt = base.DB.Table(sql, "dd")
+        If dt.Rows.Count > 0 Then
+            Return 1
+        End If
+        Return 0
+    End Function
+
+    Private Sub getxx(ByVal lczt As String)
+        Dim sql As String
+        sql = "select (select KSMC from GY_KSDM where ksdm=lc_order.bm) as bmmc,lc_lczt.xmzt,(select my项目名称 from 项目基本信息_MapExt where my项目编号='" & xmbh & "') as xmmc from lc_lczt,lc_order where lc_lczt.xmbh='" & xmbh & "' and lc_lczt.bz=0 and lc_order.lczt=lc_lczt.xmzt and lc_order.lcbs='" & xmbh.Substring(0, 2).ToLower & "' and isnull(lc_lczt.endtime,getdate()) -lc_lczt.starttime>lc_order.days and lc_order.days<>0 and lc_order.days is not null and lc_lczt.xmzt='" & lczt & "'"
+        Dim dt As New DataTable
+        dt = base.DB.Table(sql, "dd")
+        If dt.Rows.Count > 0 Then
+            lblbm.Text = dt.Rows(0)("bmmc").ToString
+            ddllczt.SelectedIndex = 1
+            Label1.Text = dt.Rows(0)("xmmc").ToString
+        Else
+            lblbm.Text = ""
+            Label1.Text = ""
+            ddllczt.SelectedIndex = 0
+        End If
+    End Sub
+
+    Protected Sub ddllcmc_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles ddllcmc.SelectedIndexChanged
+
+        getxx(ddllcmc.SelectedItem.Text)
+        txtbz.Text = ""
+    End Sub
+End Class

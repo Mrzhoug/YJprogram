@@ -1,0 +1,20 @@
+﻿
+Partial Class manager_FileManager_CopyFile
+    Inherits System.Web.UI.Page
+
+    Public fileID As Integer
+    Dim FileManager As New FileManager
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Try
+            fileID = Request.QueryString("fileID")
+        Catch ex As Exception
+            fileID = 0
+        End Try
+
+        If fileID = 0 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+    End Sub
+End Class

@@ -1,0 +1,167 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Default.aspx.vb" Inherits="manager_KSDM_Default" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>部门管理</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+    <script language="javascript" type="text/javascript">
+    function test11()
+    {
+        var resultstr  = "";
+        resultstr = window.showModalDialog("../Dialog/UserDialog.aspx","用户选择","dialogWidth=300px;dialogHeight=450px");
+        var namelist = "";
+        var idlist = "";
+        if (resultstr !=null) 
+        {
+            var tmp = resultstr.split(",");
+            for (var i=0 ;i<tmp.length;i++)
+            {
+                if (tmp[i]!="")
+                {
+                    var tmp1 = tmp[i].split("|");
+                    namelist = namelist + tmp1[1] + ",";
+                    idlist = idlist + tmp1[0] + ",";
+                }
+            }
+        }
+        else
+        {
+            return false;
+        }
+        var obj1 = document.getElementById("userlist");
+        obj1.value = idlist;
+    }
+    
+    </script>
+    <style type="text/css">
+        .style1
+        {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <center>
+    <form id="form1" runat="server" style="width:600px;">
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>部门管理</span></a></li>
+            </ul>
+        </div>
+
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="left" style="text-align:center; width:45%;">
+                            部门
+                        </th>
+                        <td style="width:10%"></td>               
+
+                        <th align="left" style="text-align:center; width:45%;">
+                            用户
+                        </th>
+                    </tr>
+
+                    <tr>
+                        <td style="vertical-align:top;">
+                            名称：<asp:TextBox ID="TextBox1" runat="server" Width="190px"></asp:TextBox>                            
+                            <br />
+                            <asp:TreeView ID="TreeView1" runat="server" Width="98%" ImageSet="Contacts" 
+                                OnSelectedNodeChanged="TreeView1_SelectedNodeChanged" NodeIndent="10" >
+                                <ParentNodeStyle Font-Bold="True" ForeColor="#5555DD" />
+                                <HoverNodeStyle Font-Underline="False" />
+                                <SelectedNodeStyle Font-Underline="True" HorizontalPadding="0px" 
+                                    VerticalPadding="0px" Font-Bold="True" ForeColor="Black" />
+                                <NodeStyle Font-Names="Verdana" Font-Size="8pt" ForeColor="Black" HorizontalPadding="5px"
+                                    NodeSpacing="0px" VerticalPadding="0px" />
+                            </asp:TreeView>
+                            <br />
+
+                            
+                        </td>
+
+                        <td></td>
+                                      
+                        <td style="vertical-align:top;">
+                            <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False"  
+                                DataKeyNames="YGDM" CssClass="cooltable" DataSourceID="Conn"
+                                Font-Size="9pt" Width="98%" AllowPaging="True">
+                                <FooterStyle BackColor="#CCCC99" />
+                                <Columns>
+                                    <asp:TemplateField>
+                                        <HeaderTemplate>
+                                            <asp:CheckBox ID="CheckBox3" runat="server" onclick="chk(this,'GridView1')"/>
+                                        </HeaderTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox1" runat="server" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:BoundField DataField="YGXM" HeaderText="用户姓名" SortExpression="YGXM" />                                    
+                                    <asp:BoundField DataField="DLMC" HeaderText="用户名" SortExpression="DLMC" />
+                                </Columns>
+                                <RowStyle HorizontalAlign="Center" />
+                                <AlternatingRowStyle BackColor="White" />
+                            </asp:GridView>
+                    
+                            <%--<table align="center" style="width:98%; height:26px; text-align:center; vertical-align:middle; background-color:#EBECEE;">
+                                <tr>
+                                    <td id="PageBar" runat="server" align="center"></td>
+                                </tr>
+                            </table>--%>
+                            <input id="userlist" runat="server" style="width: 256px;" type="hidden" readonly="readOnly" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center">
+                            <asp:Button ID="Button7" runat="server" Text="下 移" CssClass="btnsubmit" />
+                            &nbsp;&nbsp;
+                            <asp:Button ID="Button8" runat="server" Text="上 移" CssClass="btnsubmit" />
+                            <br />
+                            <br />
+                            <asp:Button ID="Button1" runat="server" Text="添 加" CssClass="btnsubmit" />
+                            <asp:Button ID="Button3" runat="server" Text="删 除" CssClass="btnsubmit" />
+                            <asp:Button ID="Button2" runat="server" Text="修 改" CssClass="btnsubmit" />                    
+                        </td>
+                        <td></td>
+                        <td align="center">
+                        <asp:Button ID="Button6" runat="server" Text="添加用户" CssClass="btnsubmit" OnClientClick="test11();" />
+                        <asp:Button ID="Button5" runat="server" Text="移除用户" CssClass="btnsubmit" OnClick="Button5_Click" />
+                            <input id="Hidden1" runat="server" style="width: 256px;" type="hidden" readonly="readOnly" />
+                        </td>
+                    </tr>
+               
+                    
+                </table>
+            </div>
+        </div>
+
+        <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT [YGDM], [YGXM], [DLMC] FROM [GY_YGDM] WHERE ([QYBZ] = @QYBZ)">
+            <SelectParameters>
+                <asp:Parameter DefaultValue="1" Name="QYBZ" Type="Int32" />
+            </SelectParameters>
+        </asp:SqlDataSource>
+
+    </form>
+    </center>
+</body>
+</html>
+<script language="JavaScript">
+    <!--
+    function chk(chk,id){
+     var oEvent = document.all(id);
+     var chks = oEvent.getElementsByTagName("INPUT");
+     for(var i=0; i<chks.length; i++)
+        {
+          if(chks[i].type=="checkbox")
+      chks[i].checked=chk.checked;
+        }
+    }
+    -->
+</script>

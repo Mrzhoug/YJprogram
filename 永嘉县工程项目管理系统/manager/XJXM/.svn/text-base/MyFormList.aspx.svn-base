@@ -1,0 +1,70 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="MyFormList.aspx.vb" Inherits="manager_XJXM_MyFormList" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>我的表单</title>
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+      <!--
+      tr             {height: 20;}
+      tr.over        {font-size: 9pt; color: #ffffff; background-color: #000080; cursor: default;}
+      tr.out         {font-size: 9pt; color: #000000; background-color: #D4D0C8; cursor: default;}
+      div.rm_div     {position: absolute; filter: Alpha(Opacity='95'); display: none; background-color: #D4D0C8; border: 2px outset #FFFFFF;width: 0; height: 0;padding:1}
+      hr.sperator    {width:95%;border: 1px inset #FFFFFF;}
+      -->
+      </style>
+</head>
+<script language="javascript" src="../../Pub/function.js" type="text/javascript"></script>
+<script language="javascript" src="../../Pub/RightMenu.js" type="text/javascript"></script>
+<body>
+    <form id="form1" runat="server" >
+        <br />
+        <nobr>
+        &nbsp;&nbsp;查询关键字:<asp:TextBox ID="TextBox1" runat="server" Width="240px"></asp:TextBox>
+        <asp:Button ID="Button1" runat="server" OnClick="Button1_Click" Text=" 查 询 " />
+        <asp:Button ID="Button3" runat="server" OnClick="Button3_Click" Text="刷新列表" />
+<!--        <asp:CheckBox ID="AutoUpdate" runat="server" Text="更新架构" AutoPostBack="True" />
+        <asp:CheckBox ID="spbz" runat="server" AutoPostBack="True" Text="申请审批" />
+        <asp:CheckBox ID="LookSP" runat="server" AutoPostBack="True" Text="查看审批" />
+-->
+        <asp:DropDownList ID="DropDownList1" runat="server" AutoPostBack="True">
+            <asp:ListItem Selected="True" Value="0">表单相应操作</asp:ListItem>
+            <asp:ListItem Value="1">设置为[已完成]</asp:ListItem>
+            <asp:ListItem Value="2">设置为[进行中]</asp:ListItem>
+            <asp:ListItem Value="3">设置为[已取消]</asp:ListItem>
+            <asp:ListItem Value="4">删除所选表单</asp:ListItem>
+            <asp:ListItem Value="5">锁定所选表单</asp:ListItem>
+            <asp:ListItem Value="6">解锁所选表单</asp:ListItem>
+            <asp:ListItem Value="7">置顶所选表单</asp:ListItem>
+            <asp:ListItem Value="8">解除置顶所选表单</asp:ListItem>
+        </asp:DropDownList>
+        </nobr>
+<asp:GridView ID="GridView1" runat="server" Width="98%" AllowPaging="True" BackColor="White" BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" PageSize="15" AllowSorting="True" OnRowDeleting="GridView1_RowDeleting" Font-Size="11pt" ForeColor="Black" OnDataBound="GridView1_DataBound" HorizontalAlign="Center" OnRowDataBound="GridView1_RowDataBound" DataKeyNames="fid" AutoGenerateColumns="False" SkinID="GridViewSkin1">
+            <FooterStyle BackColor="#CCCC99" />
+            <Columns>
+                <asp:TemplateField ShowHeader="False">
+                    <ItemStyle HorizontalAlign="Center" Width="25px" />
+                    <ItemTemplate>
+                        <asp:CheckBox ID="CheckBox1" runat="server" />
+                    </ItemTemplate>
+                    <HeaderTemplate>
+                        <asp:CheckBox ID="CheckBox1" runat="server"  onclick="SelectCheckboxAll(this,'GridView1')" />
+                    </HeaderTemplate>
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="状态">
+                    <ItemStyle Width="30px" />
+                </asp:TemplateField>
+            </Columns>
+            <RowStyle BackColor="White" />
+            <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+            <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Center" />
+            <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" Wrap="False" />
+            <AlternatingRowStyle BackColor="White" />
+            <PagerSettings FirstPageText="首页" NextPageText="下页" PreviousPageText="上页" Visible="False" />
+        </asp:GridView>
+        <table align="center" width="98%" height="26" valign="middle" bgcolor="#EBECEE" ><tr><td id="PageBar" runat="server" align="center"></td></tr></table>
+    </form>
+    
+    
+</body>
+</html>

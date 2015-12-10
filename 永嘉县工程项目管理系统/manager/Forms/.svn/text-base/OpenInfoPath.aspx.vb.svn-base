@@ -1,0 +1,713 @@
+﻿Imports System.Xml
+Partial Class manager_Forms_OpenInfoPath
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim base64 As New SunFun.Base64
+    Dim AutoUpdate As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Dim Fid As Integer
+
+        Try
+            Fid = Request("FID")
+
+        Catch ex As Exception
+            Base.Js.alert(Me, "非法参数或是非法访问!")
+            Exit Sub
+        End Try
+        
+        '接收自动更新的标志，当标志为1时，自动对数据文件进行更新
+        Try
+            AutoUpdate = Request("AutoUpdate")
+        Catch ex As Exception
+            AutoUpdate = 0
+        End Try
+        AutoUpdate = 1          '默认直接进行更新模板架构
+
+
+        '接收传递的表单ID值.如果为0则表示未传递
+        Dim ImportFID As String
+        Try
+            ImportFID = Request("ImportFID")
+            If ImportFID.Trim.Length = 0 Then ImportFID = ""
+        Catch ex As Exception
+            ImportFID = ""
+        End Try
+
+
+        Dim Tb As New Data.DataTable
+        Dim lc As String = Request("LC")
+
+
+        '根据ＦＩＤ得到相关的信息        
+        Tb = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir,GY_MKXX.MKDM,XX_XMJC.XMDM,[View] FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & Fid & ")", "XX_XMJC")
+        If Tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "非法访问1")
+            Exit Sub
+        End If
+        Dim MKMC As String = Tb.Rows(0).Item(1)
+        Dim XsnDir As String = Tb.Rows(0).Item(2).ToString.Trim
+        Dim XMMC As String = Tb.Rows(0).Item(1).ToString.Trim
+        Dim MKDM As Integer = Tb.Rows(0).Item(3)
+        Dim XMDM As Integer = Tb.Rows(0).Item(4)
+        Dim View As String = Tb.Rows(0)(5).ToString.Trim
+
+        '假设如果目标目录下存在此文件,表示先前已经提交过一次.不存在临时文件的问题.如果不存在,去读取临时文件的内容
+        Dim FileName As String = Server.MapPath("../../") & "\FormFolder\" & MKMC & "\" & Fid & ".xml"
+        Base.pub.CreateDir(Server.MapPath("../../") & "\Submit_Temp\" & Login_User & "\")
+        Dim TmpFileName As String = Server.MapPath("../../") & "\Submit_Temp\" & Login_User & "\" & Fid & ".xml"
+        If IO.File.Exists(FileName) = False Then
+            FileName = Server.MapPath("../../") & "\Submit_Temp\CreateTemp\" & Fid & ".xml"
+        End If
+
+        Dim XmlFileName = Server.MapPath("../../") & "\TemplateLibrary\" & XsnDir & "\template.xml"
+
+        If AutoUpdate = 1 Then      '如果是架构更新，先更新表单头部,因为模板已经是最新，内容则是在临时文件中更新，为了保护现有文件
+            Dim NewTitle As String = Base.IO.Text_File_Read(XmlFileName)
+            Dim index As Integer
+            index = NewTitle.LastIndexOf("?>")
+            NewTitle = NewTitle.Substring(0, index + 2)
+            Dim OldTitle As String = Base.IO.Text_File_Read(FileName)
+            index = OldTitle.LastIndexOf("?>")
+            Base.IO.Text_File_SaveAs(FileName, NewTitle & OldTitle.Substring(index + 2), Encoding.UTF8)
+        End If
+
+        Try
+            IO.File.Copy(FileName, TmpFileName, True)
+            FileName = TmpFileName
+        Catch ex As Exception
+            Response.Write(ex.ToString())
+            Response.Write("读写临时目录失败,请与管理员联系")
+            Response.End()
+        End Try
+
+        Dim Tb1 As New Data.DataTable
+        Tb1 = Base.DB.Table("Select LCDM,* from xx_xmjc,gy_xmxx where xx_xmjc.xmdm=gy_xmxx.xmdm and fid=" & Fid, "xx_xmjc123")
+        Dim LCDM As Integer
+
+        If Tb1.Rows.Count = 0 Then
+            LCDM = 0
+        Else
+            LCDM = Tb1.Rows(0)(0)
+        End If
+        Base.Js.WriteScript(Me, "var lcdm=" & LCDM & ";")
+
+
+        '对订阅做已读标志
+        Dim msgid As Integer
+        Try
+            msgid = Request("msgid")
+        Catch ex As Exception
+            msgid = 0
+        End Try
+        'Base.DB.Query("update SendMessage set LookFlag=1 where cid = " & msgid)
+        Base.DB.Query("Update Order_Form_Log set LookFlag=1 WHERE msgid=" & msgid)
+        '----------------------
+
+        '进行文件的处理,下面进行更新架构
+        If AutoUpdate = 1 Then
+            '开始同步节点.头文件上面已经更新
+            Base.XmlClass.GetXmlFile(XmlFileName)
+            Dim RootNode As XmlNodeList = Base.XmlClass.GetRootNode
+            ComparedForm(RootNode, FileName)
+        End If
+        '---------------------------
+
+        MergerFormAnnex(Fid, MKMC)          '对表单附件进行合并
+
+        If lc Is Nothing Then
+            '如果文件不存在，则生成
+            If IO.File.Exists(XmlFileName) = False Then
+                Response.Write("[" & XsnDir & "] 模板不存在,请与管理员联系！")
+                Response.End()
+            End If
+            If IO.File.Exists(FileName) = False Then
+                Try
+                    IO.File.Copy(XmlFileName, FileName)
+                Catch ex As Exception
+                    Response.Write(FileName)
+                    Response.Write("目录 [FormFolder] 不可写，请与管理员联系！")
+                    Response.End()
+                End Try
+            End If
+
+            Dim WriteFlag As Boolean    '表单可写标志
+            Dim Qx As Integer = Base.GetUserHaveQX(UserID, MKDM)
+            '这里对表单进行处理，判断表单是只读，或是可写的，或是没有权限的。
+            If Qx <= 0 Then
+                If Base.CheckDistributionQX(UserID, MKDM) = True Then       '分发权限．只限打开
+                    WriteFlag = False
+                Else
+                    Base.Js.alert(Me, "无权打开此表单，请联系管理员")
+                    Exit Sub
+                End If
+            End If
+            If Qx >= 2 Then
+                WriteFlag = True
+            Else
+                WriteFlag = False
+            End If
+
+            '这里去表里查询.如果是新建的话,没有完成标志,如果是别人的单的话,就会有完成标志必需进行权限检测
+            Tb = Base.DB.Table("select FID from XX_XMJC where wcbz=1 and FID=" & Fid, "XX_XMJC")
+            If Tb.Rows.Count > 0 Then
+                '这里判断是否拥用表单列表权限,如果没有.则判断是否与本人相关表单,否则提示无权限
+                If Base.CheckListFormQX_MKDM(UserID, MKDM) = False Then
+                    Tb = Base.DB.Table("select GY_XMXX.XMDM FROM GY_XMXX,XX_XMJC where XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null) and GY_XMXX.XMSM='" & Login_User & "' and fid=" & Fid, "GY_XMXX")
+                    If Tb.Rows.Count = 0 Then
+                        Base.Js.alert(Me, "你无权打开此表单，请联系管理员")
+                        Exit Sub
+                    End If
+                End If
+            End If
+
+            Dim Result1 As String = Base.AutoFillDate(FileName, Fid, XMDM, Login_User, WriteFlag, ImportFID)
+            If Not Result1 Is Nothing Then               '对自动生成的值进行相应的填写
+                Base.Js.alert(Me, Result1)
+                Exit Sub
+            End If
+        End If
+
+
+
+        '判断是否设置了只有一种打开方式,infopath ,infojet
+        Select Case Base.pub.GetWebConfig("SunfunSoft.Xman.OpenInfoPathOnly").ToLower
+            Case "infopath"
+                'SendContent3(Base.IO.Text_File_Read(FileName))
+                SendContent3_Ajax(FileName)
+                Exit Sub
+            Case "infojet"
+                Response.Redirect("WebInfoPath.aspx?Fid=" & Fid)
+                Exit Sub
+            Case Else       '其他
+        End Select
+
+        '调用打印输出程序
+        'If Not lc Is Nothing Then       '流程时.只用InfoPath打开 
+        '    SendContent3_Ajax(FileName)
+        '    Exit Sub
+        'End If
+
+        '接收打开方式参数
+        Dim OpenKind As Integer
+        Try
+            OpenKind = Request("OpenKind")
+        Catch ex As Exception
+            OpenKind = 0
+        End Try
+
+        Dim OpKind As Integer
+        If OpenKind = 0 Then
+            'OpKind = Base.GetOpenConfig("打开方式", UserID, LCDM)
+            OpKind = Base.GetOpenConfig("打开方式", 0, LCDM)
+        Else
+            OpKind = OpenKind
+        End If
+
+        Select Case OpKind
+            Case 1
+                '直接输出流
+                SendContent1(Base.IO.Text_File_Read(FileName))
+            Case 2
+                '直接ＨＴＴＰ文件
+                SendContent2(Base.IO.Text_File_Read(FileName))
+            Case 3
+                '通过JS调用.由ajax得到表单内容
+                SendContent3_Ajax(FileName)
+                '通过ＪＳ输出
+                'SendContent3(Base.IO.Text_File_Read(FileName))
+            Case 4  '通过Infojet显示
+                Response.Redirect("WebInfoPath.aspx?Fid=" & Fid)
+            Case 5  '自己做的XSL显示方式
+                SendContent4(FileName, XsnDir)
+            Case Else
+                '默认采用WEB的打开方式
+                Response.Redirect("WebInfoPath.aspx?Fid=" & Fid)
+        End Select
+    End Sub
+
+    ''' <summary>
+    ''' 对附件进行合并操作.
+    ''' </summary>
+    ''' <param name="Fid"></param>
+    ''' <param name="MKMC"></param>
+    ''' <remarks></remarks>
+    Sub MergerFormAnnex(ByVal Fid As Integer, ByVal MKMC As String)
+        '取得模板名称,和模板路径
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & Fid & ")", "XX_XMJC")
+        If tb.Rows.Count = 0 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+        Dim XsnDir As String = tb.Rows(0).Item(2).ToString.Trim
+
+        Dim Opfile As String = Server.MapPath("../../") & "\Submit_Temp\" & Login_User & "\" & Fid & ".xml"
+        If IO.File.Exists(Opfile) = False Then      '若文件不存在,读取临时目录下的文件
+            Opfile = Server.MapPath("../../") & "\Submit_Temp\CreateTemp\" & Fid & ".xml"
+        End If
+
+
+        Dim SchemaFile As String = Server.MapPath("../../") & "\TemplateLibrary\" & XsnDir & "\myschema.xsd"
+        Dim SaveBase As String = Server.MapPath("../../") & "\FormFolder\" & MKMC & "\Annex\"
+        Base.pub.CreateDir(SaveBase)
+        If IO.File.Exists(SchemaFile) = False Then
+            Response.Write("请更新模板")
+            Response.End()
+        End If
+        Base.XmlClass.GetXmlFile(SchemaFile)
+        Dim NodeList As XmlNodeList = Base.XmlClass.FindNodes("/xsd:schema/xsd:element[@type='xsd:base64Binary']")
+        Dim NodeList1 As XmlNodeList
+        Dim AnnNodeName As String
+        Dim SaveFile As String
+        Dim i, j As Integer
+        '查询找附件的节点.并进行还原
+        For i = 0 To NodeList.Count - 1
+            AnnNodeName = NodeList.Item(i).Attributes("name").Value
+            Base.XmlClass.GetXmlFile(Opfile)
+            NodeList1 = Base.XmlClass.FindNodes("//my:" & AnnNodeName)
+            For j = 0 To NodeList1.Count - 1
+                SaveFile = NodeList1.Item(j).InnerText
+                '判断是否经过附件处理过的节点,如果不是.则显示原内容
+                NodeList1.Item(j).Attributes.RemoveNamedItem("xsi:nil")         '先移除命名空间,如附件内容为空,则要将命名空间添加回去.
+                If SaveFile.IndexOf(".txt") > 0 And SaveFile.IndexOf(Fid) >= 0 Then
+                    If IO.File.Exists(SaveBase & SaveFile) = True Then
+                        Dim AnnContent As String = Base.pub.Text_File_Read(SaveBase & SaveFile)
+                        If AnnContent.Replace(Chr(13), "").Replace(Chr(10), "").Trim.Length = 0 Then
+                            NodeList1.Item(j).InnerText = ""
+                            Dim TempAttrib As XmlAttribute = Base.XmlClass.xmlDoc.CreateAttribute("xsi:nil", "http://www.w3.org/2001/XMLSchema-instance")
+                            TempAttrib.Value = "true"
+                            NodeList1.Item(j).Attributes.Append(TempAttrib)
+                        Else
+                            NodeList1.Item(j).InnerText = AnnContent
+                        End If
+
+                    Else
+                        NodeList1.Item(j).InnerText = ""
+                        Dim TempAttrib As XmlAttribute = Base.XmlClass.xmlDoc.CreateAttribute("xsi:nil", "http://www.w3.org/2001/XMLSchema-instance")
+                        TempAttrib.Value = "true"
+                        NodeList1.Item(j).Attributes.Append(TempAttrib)
+                    End If
+                Else
+                    NodeList1.Item(j).InnerText = ""
+                    Dim TempAttrib As XmlAttribute = Base.XmlClass.xmlDoc.CreateAttribute("xsi:nil", "http://www.w3.org/2001/XMLSchema-instance")
+                    TempAttrib.Value = "true"
+                    NodeList1.Item(j).Attributes.Append(TempAttrib)
+                End If
+            Next
+            Base.XmlClass.Save()
+        Next
+
+    End Sub
+
+
+    Public Sub SendContent1(ByVal content As String)
+        If content Is Nothing Or content = String.Empty Then
+            Exit Sub
+        End If
+        Response.Clear()
+        '由于Web.Config中的Response和Request都变成GB2312了.而输出的内容又是UTF-8的。所以把输入的格式转化为UTF-8格式
+        Dim UTF8 As Encoding = Encoding.GetEncoding("UTF-8")
+        Response.ContentEncoding = UTF8
+        Dim bytes As Byte() = Encoding.UTF8.GetBytes(content)
+        Response.AddHeader("Content-Disposition", "attachment; filename=SunFunSoft X-MAN.InfoPathXml")
+        Response.ContentType = "text/xml"
+        Response.AddHeader("Content-Length", bytes.Length.ToString())
+        Response.Write(content)
+        Response.End()
+    End Sub
+
+    Public Sub SendContent2(ByVal content As String)
+        If content Is Nothing Or content = String.Empty Then
+            Exit Sub
+        End If
+        '复制一份到临时文件,进行操作
+        Dim TempName As String = System.DateTime.Now.ToString("yyyyMMddHHmmssfff") & UserID & ".xml"
+        Base.Js.alert(Me, Server.MapPath("../../") & "\Submit_Temp\" & TempName)
+        Base.Js.alert(Me, "../../" & "\Submit_Temp\" & TempName)
+        Try
+            Base.IO.Text_File_Save(Server.MapPath("../../") & "\Submit_Temp\" & TempName, content, Encoding.UTF8)
+            Response.Redirect("../../" & "\Submit_Temp\" & TempName)
+        Catch ex As Exception
+            Base.Js.alert(Me, "已经有人打开了此表单")
+        End Try
+    End Sub
+
+    Sub SendContent3(ByVal Content As String)
+
+        '原来的第三种方式,直接将内容由网页输出,但是由于文件过大.而导致客户端打开时超慢的情况.
+        Dim Temp As String = String.Empty
+        Temp += "<script language=javascript>" & vbCrLf
+        Temp += " var content;" & vbCrLf
+        Temp += " content = """ & Content.Replace("""", "\""").Replace(Chr(13) & Chr(10), "\n") & """;" & vbCrLf
+        Temp += "</scr" & "ipt>" & vbCrLf
+        Response.ContentEncoding = Encoding.UTF8
+        Response.Write(Temp)
+        Exit Sub
+
+        '可以写。但是不是UTF-8的格式的。
+        'Temp += "<script language=javascript>" & vbCrLf
+        'Temp += "var fso = new ActiveXObject(""Scripting.FileSystemObject"");" & vbCrLf
+        'Temp += "var a = fso.CreateTextFile(""d:\\testfile.xml"", true);" & vbCrLf
+        'Temp += "a.WriteLine(""" & Content.Replace("""", "\""").Replace(Chr(13) & Chr(10), "\n") & """);" & vbCrLf
+        'Temp += "a.Close();" & vbCrLf
+        'Temp += "</scr" & "ipt>"
+        'Response.Write(Temp)
+        'Response.End()
+
+    End Sub
+
+    Sub SendContent3_Ajax(ByVal FileName As String)
+
+        '复制一份到临时文件,进行操作
+        '通过客户端的Ajax方式.向服务器端拉表单的内容.
+        Dim TempName As String = System.DateTime.Now.ToString("yyyyMMddHHmmssfff") & UserID & ".xml"
+        Base.Js.alert(Me, Server.MapPath("../../") & "\Submit_Temp\" & Login_User & "\")
+        Base.Js.alert(Me, Server.MapPath("../../") & "\Submit_Temp\" & Login_User & "\" & TempName)
+
+        Try
+            Base.IO.CreateDir(Server.MapPath("../../") & "\Submit_Temp\" & Login_User & "\")
+            IO.File.Copy(FileName, Server.MapPath("../../") & "\Submit_Temp\" & Login_User & "\" & TempName, True)
+        Catch ex As Exception
+            Base.Js.alert(Me, "已经有人打开了此表单")
+        End Try
+        Dim Temp As String = String.Empty
+        Temp += "<script language=javascript>" & vbCrLf
+        Temp += " var content;" & vbCrLf
+        Temp += " var tempfilename ='../../Submit_temp/" & Login_User & "/" & TempName & "';" & vbCrLf
+        Temp += "</scr" & "ipt>" & vbCrLf
+        Response.ContentEncoding = Encoding.UTF8
+        Response.Write(Temp)
+
+    End Sub
+
+    Sub SendContent4(ByVal FileName As String, ByVal XsnDir As String)
+
+        Dim Views As String = String.Empty
+        Dim ViewTemp As String = String.Empty
+        Dim Root As String = Server.MapPath("../../") & "TemplateLibrary\" & XsnDir
+        Dim i As Integer
+        Base.XmlClass.GetXmlFile(FileName)
+        Dim node As System.Xml.XmlNode = Base.XmlClass.FindNode("//my:视图")
+
+        If System.IO.File.Exists(Root & "/manifest.xsf") = False Then
+            Base.Js.alert(Me, "功能存在问题")
+            Exit Sub
+        End If
+        Base.XmlClass.GetXmlFile(Root & "/manifest.xsf")
+        Dim NodeLt, NodeLt2 As System.Xml.XmlNodeList
+        NodeLt = Base.XmlClass.FindNodes("//xsf:view")
+        NodeLt2 = Base.XmlClass.FindNodes("//xsf:mainpane")
+
+        If node.ChildNodes.Item(0) Is Nothing Then
+            Views = "view1.xsl"
+        Else
+            ViewTemp = node.ChildNodes.Item(0).Value
+            If ViewTemp Is Nothing Then
+                Views = NodeLt2.Item(0).Attributes("transform").Value
+            Else
+                If Not NodeLt Is Nothing Then
+                    For i = 0 To NodeLt.Count - 1
+                        If NodeLt.Item(i).Attributes("name").Value = ViewTemp Then
+                            Views = NodeLt2.Item(i).Attributes("transform").Value
+                            Exit For
+                        End If
+                    Next
+                End If
+            End If
+        End If
+        If Views.Trim.Length = 0 Then Views = "view1.xsl"
+        '对视图文件进行查找.得到图片的字段.并修改视图文件.
+        Dim XslFile As String = "../../" & "TemplateLibrary/" & XsnDir & "/" & Views
+        If IO.File.Exists(Server.MapPath(XslFile)) = False Then
+            '当有各别模板的默认视图不是View1.xsl的时候,进行处理
+            If Views = "view1.xsl" Then
+                XslFile = "../../" & "TemplateLibrary/" & XsnDir & "/view2.xsl"
+                If IO.File.Exists(Server.MapPath(XslFile)) = False Then
+                    Base.Js.alert(Me, "模板存在问题,请更新模板,或是查看模板中的视图.")
+                    Exit Sub
+                End If
+            Else
+                Base.Js.alert(Me, "模板存在问题,请更新模板,或是查看模板中的视图.")
+                Exit Sub
+            End If
+
+        End If
+
+        Dim TempName As String = Server.MapPath("../../") & "\Submit_Temp\" & System.DateTime.Now.ToString("yyyyMMddHHmmssfff") & UserID & "old.xml"
+        Try
+            Base.IO.Text_File_Save(TempName, Base.IO.Text_File_Read(FileName), Encoding.UTF8)
+        Catch ex As Exception
+            Base.Js.alert(Me, "打开出错,请换种方式打开")
+        End Try
+
+
+        Dim ViewStr As String = Base.pub.Text_File_Read(Server.MapPath(XslFile))
+        Dim ImgValue As String = "<img class=""xdLinkedPicture"" hideFocus=""1"" alt=""单击此处可插入图片"" tabIndex=""0"" xd:xctname=""LinkedImage"" xd:CtrlId=""CTRL218"" tabStop=""true"" xd:boundProp=""src"" xd:binding=""Node"" $style$ >" & vbCrLf
+        ImgValue += "<xsl:attribute name=""src"">" & vbCrLf
+        ImgValue += "<xsl:value-of select=""Node""/>" & vbCrLf
+        ImgValue += "</xsl:attribute>" & vbCrLf
+        ImgValue += "</img>" & vbCrLf
+
+
+        Dim index As Integer
+        Dim Str1, Str2 As String
+        Dim i1, i2 As Integer
+        index = ViewStr.ToLower.IndexOf("('xdimage:getimageurl")
+        While index > 0
+            '先得到开始位置
+            Str1 = ViewStr.Substring(0, index)
+            i1 = Str1.ToLower.LastIndexOf("<xsl:")
+            If i1 > 0 Then
+                'Response.Write(Str1.Substring(0, i1))
+            End If
+            '再得到结束位置
+            Str1 = ViewStr.ToLower.Substring(index + 10)
+            i2 = Str1.IndexOf("</xsl:if>")
+            If i2 > 0 Then
+                Str2 = ViewStr.Substring(i1, index + 10 + i2 - i1 + 9)
+            End If
+            If Str2.IndexOf("<xsl:value-of") < 0 Then
+
+            End If
+            '得到图片节点名
+            i1 = Str2.ToLower.IndexOf("xdimage:getimageurl(")
+            If i1 > 0 Then
+                Str1 = Str2.Substring(i1 + 20)
+            End If
+            i2 = Str1.IndexOf(")")
+            If i2 > 0 Then
+                Str1 = Str1.Substring(0, i2)
+            Else
+                Str1 = Nothing
+            End If
+
+
+
+            If Str2.Trim.Length > 0 Then
+                Dim xmlDoc As XmlDocument = New XmlDocument()
+                xmlDoc.LoadXml(Str2.Replace(":", ""))
+                Try
+                    Dim tempstr As String
+                    Dim StyleStr As String = String.Empty
+                    tempstr = xmlDoc.DocumentElement.ChildNodes(0).Attributes("style").Value
+                    If tempstr.Length > 0 Then
+                        StyleStr = "style=""" & tempstr & """"
+                    End If
+                    tempstr = xmlDoc.DocumentElement.ChildNodes(0).Attributes("height").Value
+                    If tempstr.Length > 0 Then
+                        StyleStr += " height=""" & tempstr & """"
+                    End If
+                    tempstr = xmlDoc.DocumentElement.ChildNodes(0).Attributes("width").Value
+                    If tempstr.Length > 0 Then
+                        StyleStr += " width=""" & tempstr & """"
+                    End If
+                    ImgValue = ImgValue.Replace("$style$", StyleStr)
+                Catch ex As Exception
+                    ImgValue = ImgValue.Replace("$style$", "")
+                End Try
+            End If
+
+            If Str2.IndexOf("<xsl:value-of") <= 0 Then
+                SaveBase64ImageFile(TempName, Str1)
+                ViewStr = ViewStr.Replace(Str2, ImgValue.Replace("Node", Str1))
+            Else
+                'SaveBase64ToFile(TempName, Str1)
+                ViewStr = ViewStr.Replace(Str2, SaveBase64ToFile(TempName, Str1))
+            End If
+
+
+
+            index = ViewStr.ToLower.IndexOf("('xdimage:getimageurl")
+
+        End While
+
+        '将更新后的样式文件保存
+        Views = System.DateTime.Now.ToString("yyyyMMddHHmmssfff") & UserID & ".xsl"
+        Dim saveview As String = Server.MapPath("../../") & "\Submit_Temp\" & Views
+        Base.pub.Text_File_SaveAs(saveview, ViewStr, Encoding.UTF8)
+
+
+        '把得到的图片字段进行处理.
+
+        Dim TempName1 As String = System.DateTime.Now.ToString("yyyyMMddHHmmssfff") & UserID & ".Xml"
+        SaveForViewing(Server.MapPath("../../") & "\Submit_Temp\", TempName1, Views, Base.XmlClass.GetXmlFile(TempName).OuterXml)
+        Response.Redirect("../../" & "\Submit_Temp\" & TempName1)
+    End Sub
+
+    Sub SaveBase64ImageFile(ByVal FileName As String, ByVal NodeName As String)
+        If NodeName Is Nothing Then Exit Sub
+        Dim Node As XmlNode = Base.XmlClass.GetXmlFile(FileName)
+
+        '判断表单号的合法性
+        Dim Xpath As String = "//" & NodeName
+        Dim Node1 As XmlNodeList = Base.XmlClass.FindNodes(Xpath)
+        If Node1 Is Nothing Then
+        Else
+            Dim i As Integer
+            For i = 0 To Node1.Count - 1
+                If Node1.Item(i).ChildNodes.Item(0) Is Nothing Then '判断第一条记录中是不有存在FormId,如果不存在,则表示不合法
+                Else
+                    Try
+                        Dim ImgSrc As String = NodeName.Replace(":", "") & System.DateTime.Now.ToString & i & ".jpg"
+                        base64.SaveDecodingToFile(Node1.Item(i).ChildNodes.Item(0).Value, Server.MapPath("../../") & "\Submit_Temp\" & ImgSrc)
+                        Node1.Item(i).ChildNodes.Item(0).Value = ImgSrc
+                        Base.XmlClass.Save()
+                    Catch ex As Exception
+                        '表示节点中的内容不是BASE64的.
+                    End Try
+                End If
+            Next
+        End If
+
+    End Sub
+
+    Function SaveBase64ToFile(ByVal FileName As String, ByVal NodeName As String) As String
+        If NodeName Is Nothing Then Return ""
+        Dim Node As XmlNode = Base.XmlClass.GetXmlFile(FileName)
+        Dim Str As String = String.Empty
+        Dim FileTempName() As Byte    '临时的文件名字节位
+        Dim BodyData() As Byte      '用来存储转换后的内容
+        '判断表单号的合法性
+        Dim Xpath As String = "//" & NodeName
+        Dim Node1 As XmlNodeList = Base.XmlClass.FindNodes(Xpath)
+        If Node1 Is Nothing Then
+            Return ""
+        Else
+            Dim i As Integer
+            For i = 0 To Node1.Count - 1
+                If Node1.Item(i).ChildNodes.Item(0) Is Nothing Then '判断第一条记录中是不有存在FormId,如果不存在,则表示不合法
+                Else
+                    Try
+                        Dim FileSrc As String
+                        Dim Base64Str As String = Node1.Item(i).ChildNodes.Item(0).Value
+
+                        If Base64Str Is Nothing Then
+                        Else
+                            BodyData = System.Convert.FromBase64String(Base64Str)
+
+                            '头24个位置为INFOPATH添加上去的内容.
+                            '查找文件名的位置
+                            Dim Zcount As Int16 = 0
+                            Dim BodyIndex As Integer = 0
+                            Dim j As Integer
+                            For j = 0 To BodyData.Length - 1
+                                If j >= 24 Then
+                                    If BodyData.GetValue(j) = 0 Then
+                                        Zcount += 1
+                                    Else
+                                        Zcount = 0
+                                    End If
+                                    If Zcount = 3 Then
+                                        BodyIndex = j
+                                        Exit For
+                                    End If
+                                End If
+                            Next
+
+                            '得到文件名.
+                            Dim FileTempName1 As New IO.MemoryStream()
+                            FileTempName1.Write(BodyData, 24, BodyIndex - 24)
+                            FileTempName = FileTempName1.ToArray
+
+                            '得到文件的内容
+                            Dim stream As New IO.MemoryStream()
+                            stream.Write(BodyData, BodyIndex + 1, BodyData.Length - BodyIndex - 1)
+                            BodyData = stream.ToArray()
+                            stream.Close()
+
+                            FileSrc = System.DateTime.Now.ToString("yyyyMMddHHmmssfff") & i & Encoding.Unicode.GetString(FileTempName)
+                            Dim fs As System.IO.FileStream = New System.IO.FileStream(Server.MapPath("../../") & "\Submit_Temp\" & FileSrc, System.IO.FileMode.Create)
+                            Dim bw As System.IO.BinaryWriter = New System.IO.BinaryWriter(fs)
+
+                            bw.Write(BodyData)
+                            bw.Close()
+                            fs.Close()
+                            Str = Str & "<a href='" & FileSrc & "' target='_blank'>下载:" & Encoding.Unicode.GetString(FileTempName) & "</a><br />"
+                        End If
+                        Node1.Item(i).ChildNodes.Item(0).Value = ""
+                        Base.XmlClass.Save()
+                    Catch ex As Exception
+                        '表示节点中的内容不是BASE64的.
+                    End Try
+                End If
+            Next
+            Return Str
+        End If
+
+    End Function
+
+
+    Function SaveForViewing(ByVal path As String, ByVal FileName As String, ByVal xslFile As String, ByVal Content As String) As String
+        '对ＸＭＬ文件以ＷＥＢ的形式显示出来。
+        Dim doc As System.Xml.XmlDocument = New System.Xml.XmlDocument()
+        doc.LoadXml(Content)
+        Dim PI As System.Xml.XmlProcessingInstruction = doc.CreateProcessingInstruction("xml-stylesheet", "type='text/xsl' href='" + xslFile + "'")
+        doc.PrependChild(PI)
+        Dim FullPath As String = path & FileName
+        doc.Save(FullPath)
+        Return FullPath
+    End Function
+
+    Function ComparedForm(ByVal xmluser As XmlNodeList, ByVal DfileName As String) As String
+        '用递归的方法查找所有节点.并显示出来
+        'On Error Resume Next
+        Dim i, j As Integer
+        For i = 0 To xmluser.Count - 1
+            If xmluser.Item(i).Name <> "#text" Then  '过滤掉为空的值项
+                Dim xml1 As New SunFun.Xmlclass
+                xml1.GetXmlFile(DfileName)
+                Dim Node2 As XmlNode
+                Try
+                    Node2 = xml1.FindNode("//" & xmluser.Item(i).Name)
+                Catch ex As Exception
+                    Response.Write("read error")
+                    Return Nothing
+                End Try
+
+                If Node2 Is Nothing Then
+                    '如果找不到此节点.那移值进去.他的子节点也就不用判断了
+                    Dim NodeFather As XmlNode = xmluser.Item(i).ParentNode
+                    Dim TempNode As XmlNode
+                    If xmluser.Item(i).PreviousSibling Is Nothing Then
+                        '表示是下级节点
+                        Dim TmpNd1 As XmlNodeList = xml1.FindNodes("//" & NodeFather.Name)
+                        For j = 0 To TmpNd1.Count - 1
+                            TempNode = TmpNd1.Item(j)
+                            Dim NewNodeName As String = xmluser.Item(i).Name
+                            NewNodeName = NewNodeName.Substring(NewNodeName.IndexOf(":") + 1)
+                            Dim InsertNode As XmlNode = xml1.xmlDoc.CreateNode(XmlNodeType.Element, xmluser.Item(i).Prefix, NewNodeName, xmluser.Item(i).NamespaceURI)
+                            InsertNode.InnerXml = xmluser.Item(i).InnerXml
+                            TempNode.InsertBefore(InsertNode, TempNode.FirstChild)
+                            xml1.Save()
+                        Next
+                    Else
+                        '表示是同级节点.得到前一节点进行插入操作
+                        Dim TmpNd1 As XmlNodeList = xml1.FindNodes("//" & xmluser.Item(i).PreviousSibling.Name)
+                        For j = 0 To TmpNd1.Count - 1
+                            TempNode = TmpNd1.Item(j)
+                            Dim NewNodeName As String = xmluser.Item(i).Name
+                            NewNodeName = NewNodeName.Substring(NewNodeName.IndexOf(":") + 1)
+                            Dim InsertNode As XmlNode = xml1.xmlDoc.CreateNode(XmlNodeType.Element, xmluser.Item(i).Prefix, NewNodeName, xmluser.Item(i).NamespaceURI)
+                            InsertNode.InnerXml = xmluser.Item(i).InnerXml
+                            TempNode.ParentNode.InsertAfter(InsertNode, TempNode)
+                            xml1.Save()
+                        Next
+                    End If
+                Else
+                    '如果找到,则检测子节点.
+                    If xmluser.Item(i).ChildNodes.Count >= 1 Then
+                        ComparedForm(xmluser.Item(i).ChildNodes, DfileName)
+                    End If
+                End If
+                xml1 = Nothing
+            End If
+        Next
+        Return Nothing
+    End Function
+End Class

@@ -1,0 +1,251 @@
+﻿Imports System.Xml
+Partial Class HomePage_Forms_OpenInfoPath
+    Inherits System.Web.UI.Page
+
+
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim KSDM As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim Base As New Base
+        Dim Fid As Integer
+        Try
+            Fid = Request("FID")
+        Catch ex As Exception
+            Base.Js.alert(Me, "非法参数或是非法访问!")
+            Exit Sub
+        End Try
+        '接收自动更新的标志，当标志为1时，自动对数据文件进行更新
+
+        If Base.HomePageUserCheck = False Then
+            Base.Js.alert(Me, "请先登陆,再填写表单")
+        Else
+            Login_User = Session("LoginName")
+        End If
+
+        Dim Tb As New Data.DataTable
+
+
+
+
+        Dim lc As String = Request("LC")
+
+
+
+
+        '根据ＦＩＤ得到相关的信息        
+        Tb = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir,GY_MKXX.MKDM,XX_XMJC.XMDM,[View] FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & Fid & ")", "XX_XMJC")
+        If Tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "非法访问")
+            Exit Sub
+        End If
+        Dim MKMC As String = Tb.Rows(0).Item(1)
+        Dim XsnDir As String = Tb.Rows(0).Item(2).ToString.Trim
+        Dim XMMC As String = Tb.Rows(0).Item(1).ToString.Trim
+        Dim MKDM As Integer = Tb.Rows(0).Item(3)
+        Dim XMDM As Integer = Tb.Rows(0).Item(4)
+        Dim View As String = Tb.Rows(0)(5).ToString.Trim
+        Dim FileName As String = Server.MapPath("../../") & "\FormFolder\" & MKMC & "\" & Fid & ".xml"
+        Dim Tb1 As New Data.DataTable
+        Tb1 = Base.DB.Table("Select LCDM,* from xx_xmjc,gy_xmxx where xx_xmjc.xmdm=gy_xmxx.xmdm and fid=" & Fid, "xx_xmjc123")
+        Dim LCDM As Integer
+        If Tb1.Rows.Count = 0 Then
+            LCDM = 0
+        Else
+            LCDM = Tb1.Rows(0)(0)
+        End If
+
+
+        '进行文件的处理,下面进行更新架构
+        Dim XmlFileName = Server.MapPath("../../") & "\TemplateLibrary\" & XsnDir & "\template.xml"
+        Dim DFileName = Server.MapPath("../../") & "\FormFolder\" & XMMC & "\" & Fid & ".xml"
+
+        Dim AutoUpdate As Integer = Request("AutoUpdate")
+        If AutoUpdate = 1 Then
+            '先对文件头进行更新.因为有可能版问题不一样.也会导致产生的节点不一样.
+            Dim NewTitle As String = Base.IO.Text_File_Read(XmlFileName)
+            Dim index As Integer
+            index = NewTitle.LastIndexOf("?>")
+            NewTitle = NewTitle.Substring(0, index + 2)
+            Dim OldTitle As String = Base.IO.Text_File_Read(DFileName)
+            index = OldTitle.LastIndexOf("?>")
+            Base.IO.Text_File_SaveAs(DFileName, NewTitle & OldTitle.Substring(index + 2), Encoding.UTF8)
+            '开始同步节点.
+            Base.XmlClass.GetXmlFile(XmlFileName)
+            Dim RootNode As XmlNodeList = Base.XmlClass.GetRootNode
+            ComparedForm(RootNode, DFileName)
+        Else
+        End If
+
+        If lc Is Nothing Then
+            '如果文件不存在，则生成
+            If IO.File.Exists(DFileName) = False Then
+                IO.File.Copy(XmlFileName, DFileName)
+            End If
+
+            Dim WriteFlag As Boolean    '表单可写标志
+            WriteFlag = True
+
+            '这里去表里查询.如果是新建的话,没有完成标志,如果是别人的单的话,就会有完成标志必需进行权限检测
+            Tb = Base.DB.Table("select FID from XX_XMJC where wcbz=1 and FID=" & Fid, "XX_XMJC")
+            If Tb.Rows.Count > 0 Then
+                '这里判断是否拥用表单列表权限,如果没有.则判断是否与本人相关表单,否则提示无权限
+                'If Base.CheckListFormQX_MKDM(UserID, MKDM) = False Then
+                '    Tb = Base.DB.Table("select GY_XMXX.XMDM FROM GY_XMXX,XX_XMJC where XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null) and GY_XMXX.XMSM='" & Login_User & "' and fid=" & Fid, "GY_XMXX")
+                '    If Tb.Rows.Count = 0 Then
+                '        Base.Js.alert(Me, "你无权打开此表单，请联系管理员")
+                '        Exit Sub
+                '    End If
+                'End If
+            End If
+
+            Dim Result1 As String = Base.AutoFillDate(DFileName, Fid, XMDM, Login_User, WriteFlag, "")
+            If Not Result1 Is Nothing Then               '对自动生成的值进行相应的填写
+                Base.Js.alert(Me, Result1)
+                Exit Sub
+            End If
+        End If
+
+        '直接调用ＷＥＢ打开方式　
+        Response.Redirect("WebInfoPath.aspx?Fid=" & Fid)
+
+    End Sub
+
+
+
+    Function ComparedForm(ByVal xmluser As XmlNodeList, ByVal DfileName As String) As String
+        '用递归的方法查找所有节点.并显示出来
+        'On Error Resume Next
+        Dim i As Integer
+        For i = 0 To xmluser.Count - 1
+            If xmluser.Item(i).Name <> "#text" Then  '过滤掉为空的值项
+                Dim xml1 As New SunFun.Xmlclass
+                xml1.GetXmlFile(DfileName)
+                Dim Node2 As XmlNode
+                Try
+                    Node2 = xml1.FindNode("//" & xmluser.Item(i).Name)
+                Catch ex As Exception
+                    Response.Write("read error")
+                    Response.Write(xmluser.Item(i).Name)
+                    Return Nothing
+                End Try
+
+                If Node2 Is Nothing Then
+                    '如果找不到此节点.那移值进去.他的子节点也就不用判断了
+                    Dim NodeFather As XmlNode = xmluser.Item(i).ParentNode
+                    Dim NodeName As String
+                    Dim TempStr As String = Base.IO.Text_File_Read(DfileName)
+                    Dim DStr As String = String.Empty
+                    Dim Str As String = String.Empty
+                    Dim index As Integer
+                    Dim NodeLen, PY As Integer
+
+
+                    If xmluser.Item(i).PreviousSibling Is Nothing Then
+                        '表示是下级节点
+                        NodeName = NodeFather.Name
+                        index = TempStr.IndexOf(NodeName)
+                        Str = TempStr.Substring(index)
+                        PY = Str.IndexOf(">")
+                        If PY > Str.IndexOf("/>") Then
+                            TempStr = TempStr.Replace(TempStr.Substring(index, PY + 1), NodeName & "></" & NodeName & ">")
+                            index = TempStr.IndexOf(NodeName)
+                            Str = TempStr.Substring(index)
+                            PY = Str.IndexOf(">")
+                        End If
+                        NodeLen = PY + 1
+                        DStr = TempStr.Substring(0, index + NodeLen) & xmluser.Item(i).OuterXml & TempStr.Substring(index + NodeLen)
+                    Else
+                        '表示是同级节点.得到前一节点进行插入操作
+
+                        NodeName = xmluser.Item(i).PreviousSibling.Name
+                        '下面对三种情况进行处理 <temp></temp>  或<temp/> 或<temp />
+
+                        index = TempStr.IndexOf(NodeName)
+                        Str = TempStr.Substring(index)
+                        PY = Str.IndexOf(">")
+                        Dim LsStr As String = TempStr
+                        Dim lspy As Integer = 0
+                        Dim dd As Integer = 0
+                        '如果为节点内容为空,形式为<temp/> 则转换为<temp></temp>
+                        If PY > Str.IndexOf("/>") And index > 0 And Str.IndexOf("/>") <> -1 Then
+                            TempStr = TempStr.Replace(TempStr.Substring(index, PY + 1), NodeName & "></" & NodeName & ">")
+                        End If
+
+                        Dim CirFlag As Boolean = False
+                        '这里判断当前节点的父节点类型,是那种情况
+                        '如果此处循环,则添加<temp></temp><temp></temp>,的情况下,在temp下添加节点.会添加多条.打开会出错.
+                        '如果此处不循环,则添加<temp><temp1></temp1></temp><temp><temp1></temp1></temp>,的情况下,在temp1后添加的节点,会只添加第一条
+                        Base.XmlClass.GetXmlFile(DfileName)
+                        Dim Node, Node1 As XmlNode
+                        Node = Base.XmlClass.FindNode("//" & NodeName).ParentNode
+                        If Not Node Is Nothing Then
+                            Node1 = Node.NextSibling
+                            If Not Node1 Is Nothing Then
+                                If Node1.Name = NodeName Then
+                                    CirFlag = True
+                                End If
+                            End If
+                        End If
+
+                        If CirFlag = False Then
+
+                            LsStr = TempStr.Substring(lspy)
+                            '不循环
+                            index = LsStr.LastIndexOf("</" & NodeName & ">")
+
+                            If index <= 0 Then Exit For
+                            Str = LsStr.Substring(index)
+                            PY = Str.IndexOf(">")
+                            NodeLen = PY + 1
+                            TempStr = TempStr.Substring(0, index + NodeLen + lspy) & xmluser.Item(i).OuterXml & TempStr.Substring(index + NodeLen + lspy)
+
+                            lspy = lspy + index + NodeLen + xmluser.Item(i).OuterXml.Length
+                            LsStr = TempStr.Substring(lspy)
+                            index = LsStr.IndexOf(NodeName)
+                            Str = LsStr.Substring(index + 1)
+                            PY = Str.IndexOf(">")
+                        Else
+                            While index > 0
+                                LsStr = TempStr.Substring(lspy)
+                                '循环
+                                index = LsStr.IndexOf("</" & NodeName & ">")
+
+                                If index <= 0 Then Exit For
+                                Str = LsStr.Substring(index)
+                                PY = Str.IndexOf(">")
+                                NodeLen = PY + 1
+                                TempStr = TempStr.Substring(0, index + NodeLen + lspy) & xmluser.Item(i).OuterXml & TempStr.Substring(index + NodeLen + lspy)
+
+                                lspy = lspy + index + NodeLen + xmluser.Item(i).OuterXml.Length
+                                LsStr = TempStr.Substring(lspy)
+                                'Response.Write(LsStr.Replace("<", "&lt;").Replace(">", "&gt;") & "-" & lspy & "<br><br><br>")
+                                index = LsStr.IndexOf(NodeName)
+                                If index <= 0 Then Exit While
+                                Str = LsStr.Substring(index + 1)
+                                If Str.IndexOf(NodeName) <= 0 Then Exit While
+
+                                PY = Str.IndexOf(">")
+                                'NodeName = xmluser.Item(i).Name
+                            End While
+                        End If
+
+                        DStr = TempStr
+                    End If
+
+                    Base.IO.Text_File_SaveAs(DfileName, DStr, Encoding.UTF8)
+                    'Response.End()
+                Else
+                    '如果找到,则检测子节点.
+                    If xmluser.Item(i).ChildNodes.Count >= 1 Then
+                        ComparedForm(xmluser.Item(i).ChildNodes, DfileName)
+                    End If
+                End If
+                xml1 = Nothing
+            End If
+        Next
+        Return Nothing
+    End Function
+
+End Class

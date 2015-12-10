@@ -1,0 +1,108 @@
+﻿
+Partial Class HomePage_Forms_Questionnaire1
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim LCDM As Integer
+    Dim MKDM, XMDM, Fid As Integer
+    Dim UserID As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Try
+            LCDM = Request("LCDM")
+        Catch ex As Exception
+            LCDM = 0
+        End Try
+        Dim Login_User As String = "匿名"
+        UserID = Base.GetUserID(Login_User)
+        If UserID <= 0 Then
+            Response.Write("用户不存在,请与管理员联系")
+            Response.End()
+        End If
+
+        '判断是否存在此流程，并得到项目名称
+        Dim tb As New Data.DataTable
+        Dim Row As Data.DataRow = Base.DB.Row("SELECT LCMC FROM GY_LCDM where LCDM = " & LCDM, "GY_LCDM")
+        If Row Is Nothing Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+        '新建表单
+        Dim DfileName As String = Base.AutoAddProject_HasNoLC_Web(LCDM, Login_User, "../../")
+        If DfileName = Nothing Then
+            Base.Js.alert(Me, "新建表单出错,请更新模板")
+            Exit Sub
+        End If
+
+        '采用直接输出的主式    
+        Dim StartID As Integer = DfileName.Trim.LastIndexOf("\") + 1
+        Dim EndID As Integer = DfileName.ToLower.Trim.LastIndexOf(".xml")
+        Dim Fid As String = DfileName.Trim.Substring(StartID, EndID - StartID)
+
+
+        '根据ＦＩＤ得到相关的信息        
+        tb = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir,GY_MKXX.MKDM,XX_XMJC.XMDM,[View] FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & Fid & ")", "XX_XMJC")
+        If tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "非法访问1")
+            Exit Sub
+        End If
+        Dim MKMC As String = tb.Rows(0).Item(1)
+        Dim XsnDir As String = tb.Rows(0).Item(2).ToString.Trim
+        Dim XMMC As String = tb.Rows(0).Item(1).ToString.Trim
+        Dim MKDM As Integer = tb.Rows(0).Item(3)
+        Dim XMDM As Integer = tb.Rows(0).Item(4)
+        Dim View As String = tb.Rows(0)(5).ToString.Trim
+
+        '假设如果目标目录下存在此文件,表示先前已经提交过一次.不存在临时文件的问题.如果不存在,去读取临时文件的内容
+        Dim FileName As String = Server.MapPath("../../") & "\FormFolder\" & MKMC & "\" & Fid & ".xml"
+        Base.pub.CreateDir(Server.MapPath("../../") & "\Submit_Temp\" & Login_User & "\")
+        Dim TmpFileName As String = Server.MapPath("../../") & "\Submit_Temp\" & Login_User & "\" & Fid & ".xml"
+        If IO.File.Exists(FileName) = False Then
+            FileName = Server.MapPath("../../") & "\Submit_Temp\CreateTemp\" & Fid & ".xml"
+        End If
+
+        Dim XmlFileName = Server.MapPath("../../") & "\TemplateLibrary\" & XsnDir & "\template.xml"
+
+        Try
+            IO.File.Copy(FileName, TmpFileName, True)
+            FileName = TmpFileName
+        Catch ex As Exception
+            Response.Write("读写临时目录失败,请与管理员联系")
+            Response.End()
+        End Try
+
+
+        '如果文件不存在，则生成
+        If IO.File.Exists(XmlFileName) = False Then
+            Response.Write("[" & XsnDir & "] 模板不存在,请与管理员联系！")
+            Response.End()
+        End If
+        If IO.File.Exists(FileName) = False Then
+            Try
+                IO.File.Copy(XmlFileName, FileName)
+            Catch ex As Exception
+                Response.Write(FileName)
+                Response.Write("目录 [FormFolder] 不可写，请与管理员联系！")
+                Response.End()
+            End Try
+        End If
+
+        Dim WriteFlag As Boolean    '表单可写标志
+        Dim Qx As Integer = Base.GetUserHaveQX(UserID, MKDM)
+        '这里对表单进行处理，判断表单是只读，或是可写的，或是没有权限的。
+        If Qx >= 2 Then
+            WriteFlag = True
+        Else
+            Response.Write("无权限或是此表单已经停止提交")
+            Response.End()
+        End If
+
+        Dim Result1 As String = Base.AutoFillDate(FileName, Fid, XMDM, Login_User, WriteFlag, "")
+        If Not Result1 Is Nothing Then               '对自动生成的值进行相应的填写
+            Base.Js.alert(Me, Result1)
+            Exit Sub
+        End If
+        Response.Redirect("Questionnaire2.aspx?pid=---------------------------------------------------------------------------------------------------------------------------------------&fid=" & Fid)
+
+    End Sub
+End Class

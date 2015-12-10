@@ -1,0 +1,281 @@
+
+[2015/3/12 8:19:06]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 8:20:00]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 8:20:01]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 8:28:19]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 8:28:44]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 8:28:52]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 8:28:56]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 8:30:20]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 8:30:24]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 8:33:41]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 8:33:50]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 8:33:56]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 8:34:03]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 8:44:10]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 8:44:48]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 8:55:32]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 8:55:44]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:04:01]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 9:04:04]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:05:32]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 9:05:34]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:09:35]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 9:09:41]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:09:47]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:09:52]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 9:20:11]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:20:16]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 9:20:32]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 9:20:34]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:25:57]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 9:26:01]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:26:09]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:26:11]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 9:29:56]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 9:29:57]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:45:00]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 9:45:04]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:45:13]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:45:17]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 9:46:22]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 9:46:24]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:49:27]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 9:49:35]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:49:39]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:49:45]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 9:50:38]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:50:42]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 9:50:42]=SynchronizationService---Main 查询第一条需要同步的数据 失败--
+System.Threading.ThreadAbortException: 正在中止线程。
+   在 SNINativeMethodWrapper.SNIPacketGetConnection(IntPtr packet)
+   在 System.Data.SqlClient.TdsParserStateObject.ProcessSniPacket(IntPtr packet, UInt32 error)
+   在 System.Data.SqlClient.TdsParserStateObject.ReadSni(DbAsyncResult asyncResult, TdsParserStateObject stateObj)
+   在 System.Data.SqlClient.TdsParserStateObject.ReadNetworkPacket()
+   在 System.Data.SqlClient.TdsParserStateObject.ReadBuffer()
+   在 System.Data.SqlClient.TdsParserStateObject.ReadByte()
+   在 System.Data.SqlClient.TdsParser.Run(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj)
+   在 System.Data.SqlClient.SqlDataReader.ConsumeMetaData()
+   在 System.Data.SqlClient.SqlDataReader.get_MetaData()
+   在 System.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString)
+   在 System.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean async)
+   在 System.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method, DbAsyncResult result)
+   在 System.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method)
+   在 System.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior, String method)
+   在 System.Data.SqlClient.SqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   在 System.Data.Common.DbCommand.System.Data.IDbCommand.ExecuteReader(CommandBehavior behavior)
+   在 System.Data.Common.DbDataAdapter.FillInternal(DataSet dataset, DataTable[] datatables, Int32 startRecord, Int32 maxRecords, String srcTable, IDbCommand command, CommandBehavior behavior)
+   在 System.Data.Common.DbDataAdapter.Fill(DataSet dataSet, Int32 startRecord, Int32 maxRecords, String srcTable, IDbCommand command, CommandBehavior behavior)
+   在 System.Data.Common.DbDataAdapter.Fill(DataSet dataSet)
+   在 SqlHelper.ExecuteDataSet(String connectionString, CommandType cmdType, String cmdText, SqlParameter[] commandParameters) 位置 F:\陈仕城\sunfungov\xman平台\永嘉县工程项目管理系统\App_Code\Function\Common\SqlHelper.vb:行号 80
+   在 SynchronizationService.Main() 位置 F:\陈仕城\sunfungov\xman平台\永嘉县工程项目管理系统\App_Code\Function\GlobalService\SynchronizationService.vb:行号 21
+
+
+[2015/3/12 9:55:40]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:55:46]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 9:56:38]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:56:40]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 9:59:38]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 9:59:39]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 10:00:03]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 10:00:05]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 11:03:30]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 13:08:06]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 13:08:31]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 13:08:32]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 13:25:38]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 13:25:41]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 14:32:05]=GolbalService服务结束--
+结束成功
+
+
+[2015/3/12 14:47:29]=GolbalService服务启动--
+启动成功
+
+
+[2015/3/12 15:08:29]=GolbalService服务结束--
+结束成功
+

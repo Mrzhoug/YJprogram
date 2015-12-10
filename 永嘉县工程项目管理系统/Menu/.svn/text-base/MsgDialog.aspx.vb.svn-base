@@ -1,0 +1,56 @@
+﻿
+Partial Class Menu_MsgDialog
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Dim type As String
+        Try
+            type = Request("type")
+        Catch ex As Exception
+            type = ""
+        End Try
+
+        Dim lastActiveTime As String
+
+        Dim dt As New DataTable
+
+        Dim Login_User As String
+        Dim UserID As Integer
+        Login_User = Base.GetWebUserNameWithoutUpdate
+        UserID = Base.GetUserID(Login_User)
+
+        If type = "undo" Then
+            Dim sqlstr As String
+            sqlstr = "SELECT cid FROM SendMessage where (ToID=" & UserID & ") and lookflag=0 and cid not in(select messageid from PublicMessageLookLog where userid=" & UserID & ") and isdel=0"
+
+            dt = Base.DB.Table(sqlstr, "dd")
+            Dim count As Integer
+            count = dt.Rows.Count
+            Response.Write(count)
+
+
+        Else
+
+            Dim sqlstr As String
+            sqlstr = "SELECT cid FROM SendMessage where (ToID=" & UserID & ") and lookflag=0 and cid not in(select messageid from PublicMessageLookLog where userid=" & UserID & ") and senddate between '" & lastActiveTime & "' and '" & System.DateTime.Now & "' and isnotice = 'false' and isdel=0"
+
+            dt = Base.DB.Table(sqlstr, "dd")
+            Dim count As Integer
+            count = dt.Rows.Count
+            Dim i As Integer
+            For i = 0 To dt.Rows.Count - 1
+                sqlstr = "update sendmessage set isnotice = 'true' where cid = " & dt.Rows(i).Item(0)
+                Base.DB.Query(sqlstr)
+            Next
+            Response.Write(count)
+        End If
+
+
+        
+        'MsgCount = Base.DB.ExeScalar(sqlstr)
+        'MsgCount = Base.DB.ExeScalar("SELECT Count(DID) FROM DesktopMessage where (YGDM=" & UserID & " OR YGDM=0) and Looked = 0")
+        'msgct.InnerText = MsgCount
+    End Sub
+End Class

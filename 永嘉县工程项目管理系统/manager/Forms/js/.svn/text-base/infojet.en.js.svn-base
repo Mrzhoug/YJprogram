@@ -1,0 +1,81 @@
+﻿/*
+* InfoJetSoft Copyright 2005-2010
+* Updated 2011.02.04
+*/
+
+//CID 0737 //2010.12.20 //Begin
+InfoJet_LocalResources["CorrectFirstMessage"] = "This form contains validation errors. Errors are marked with either a red asterisk(required fields) or a red, dashed border(invalid values). \nPlease correct them first.";
+InfoJet_LocalResources["ClickAgainMessage"] = "The button click is interrupted by a postback, please try again.";
+InfoJet_LocalResources["TryAgainMessage"] = "Please try again while the postback progress is finished.";
+InfoJet_LocalResources["CloseAnywayMessage"] = "The document has been changed, do you want to close anyway?";
+InfoJet_LocalResources["DeleteAllMessage"] = "This action will delete all information in the current form.\n\nDo you want to continue?";
+//CID 0737 //2010.12.20 //End
+
+//CID 0737 //2010.12.20 //Begin
+var UploadFileDialogResources = {};
+UploadFileDialogResources["Title"] = "Attach File";
+UploadFileDialogResources["OK"] = "OK";
+UploadFileDialogResources["Cancel"] = "Cancel";
+UploadFileDialogResources["SelectFileText"] = "Please select a file to upload";
+UploadFileDialogResources["LimitedFileTypesText"] = "Please upload only {0} files.";
+InfoJet_LocalResources["UploadFileDialogResources"] = UploadFileDialogResources;
+//CID 0737 //2010.12.20 //End
+
+//CID 0737 //2010.12.20 //Begin
+var UploadPictureDialogResources = {};
+UploadPictureDialogResources["Title"] = "Insert Picture";
+UploadPictureDialogResources["OK"] = "OK";
+UploadPictureDialogResources["Cancel"] = "Cancel";
+UploadPictureDialogResources["SelectPictureText"] = "Please select a picture to upload:";
+UploadPictureDialogResources["ReplacePictureText"] = "Please select a picture to upload and replace the current picture:";
+UploadPictureDialogResources["DeletePictureText"] = "Delete the Current Picture.";
+InfoJet_LocalResources["UploadPictureDialogResources"] = UploadPictureDialogResources;
+//CID 0737 //2010.12.20 //End
+
+//CID 0737 //2010.12.20 //Begin
+var EditLinkDialogResources = {};
+EditLinkDialogResources["Title"] = "Insert Hyperlink";
+EditLinkDialogResources["OK"] = "OK";
+EditLinkDialogResources["Cancel"] = "Cancel";
+EditLinkDialogResources["Remove"] = "Remove";
+EditLinkDialogResources["AddressNotValidText"] = "The address is not valid. Enter an address that begins with http://, https://, ftp://, mailto:.";
+EditLinkDialogResources["InsertHyperlinkText"] = "Click here to insert a hyperlink";
+//CID 0779 //2011.02.04 //Begin
+EditLinkDialogResources["AddressText"] = "Address:";
+//CID 0779 //2011.02.04 //End
+EditLinkDialogResources["ExampleText"] = "Example: http://www.contoso.com/";
+EditLinkDialogResources["DisplayText"] = "Display this text:";
+InfoJet_LocalResources["EditLinkDialogResources"] = EditLinkDialogResources;
+//CID 0737 //2010.12.20 //End
+
+//CID 0737 //2010.12.20 //Begin
+var EditInkDialogResources = {};
+EditInkDialogResources["Title"] = "Ink Picture";
+EditInkDialogResources["Save"] = "OK";
+EditInkDialogResources["Cancel"] = "Cancel";
+InfoJet_LocalResources["EditInkDialogResources"] = EditInkDialogResources;
+//CID 0737 //2010.12.20 //End
+
+//CID 0737 //2010.12.20 //Begin
+var PNGPickerDialogResources = {};
+PNGPickerDialogResources["Title"] = "Select People and Groups";
+PNGPickerDialogResources["OK"] = "OK";
+PNGPickerDialogResources["Cancel"] = "Cancel";
+PNGPickerDialogResources["Find"] = "Find";
+PNGPickerDialogResources["NoResultText"] = "No results were found to match your search item. Please enter a new term or less specific term.";
+PNGPickerDialogResources["FindingText"] = "Finding...";
+PNGPickerDialogResources["DisplayNameText"] = "Display Name";
+PNGPickerDialogResources["AccountNameText"] = "Account Name";
+InfoJet_LocalResources["PNGPickerDialogResources"] = PNGPickerDialogResources;
+//CID 0737 //2010.12.20 //End
+
+//CID 0737 //2010.12.20 //Begin
+var EXIPickerDialogResources = {};
+EXIPickerDialogResources["Title"] = "Select Item";
+EXIPickerDialogResources["OK"] = "OK";
+EXIPickerDialogResources["Cancel"] = "Cancel";
+EXIPickerDialogResources["Find"] = "Find";
+EXIPickerDialogResources["NoResultText"] = "No results were found to match your search item. Please enter a new term or less specific term.";
+EXIPickerDialogResources["FindingText"] = "Finding...";
+InfoJet_LocalResources["EXIPickerDialogResources"] = EXIPickerDialogResources;
+//CID 0737 //2010.12.20 //End

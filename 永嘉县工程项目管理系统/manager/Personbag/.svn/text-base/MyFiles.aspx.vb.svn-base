@@ -1,0 +1,454 @@
+﻿Imports System.io
+Partial Class manager_Personbag_MyFiles
+    Inherits System.Web.UI.Page
+    Dim RootPath As String
+    Dim Base As New Base
+    Dim OpFolder As String = ""
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim TmpFolder As String
+    Dim TempSource As New DataSet
+    Dim dv1 As New DataView
+    Dim dv2 As New DataView
+    Dim MaxPage As String
+    Public flpath As String
+    Sub PrintContent(ByVal FileName As String)
+        Dim stream As FileStream = New FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.Read)
+        Dim Type1 As String
+        Type1 = FileName.Substring(FileName.LastIndexOf("."))
+
+        Dim DownFileName As String
+        Dim idx As Integer = FileName.LastIndexOf("\")
+        If idx > 0 Then
+            DownFileName = FileName.Substring(idx + 1)
+        Else
+            DownFileName = FileName
+        End If
+
+        Try
+            Dim bufSize As Integer = stream.Length
+            Dim buf(bufSize) As Byte
+            Dim bytesRead As Integer = stream.Read(buf, 0, bufSize)
+            Dim UTF8 As Encoding = Encoding.GetEncoding("GB2312")
+            Response.ContentEncoding = UTF8
+            Response.AddHeader("Content-Disposition", "attachment; filename=" & HttpUtility.UrlEncode(DownFileName, Encoding.UTF8))
+            Response.AddHeader("Content-Length", bufSize.ToString())
+            Response.OutputStream.Write(buf, 0, bytesRead)
+            Response.End()
+        Catch ex As Exception
+            Base.Js.alert(Me, "打开出错.")
+        End Try
+    End Sub
+
+    Function CheckFileType(ByVal FileType As String) As String
+        Dim Result As String
+        FileType = FileType.ToLower
+        Select Case FileType
+            Case ".doc"
+                Result = "DOC.GIF"
+            Case ".txt"
+                Result = "TXT.GIF"
+            Case ".zip"
+                Result = "ZIP.GIF"
+            Case ".xls"
+                Result = "XLS.GIF"
+            Case ".pic"
+                Result = "PIC.GIF"
+            Case ".gif"
+                Result = "PIC.GIF"
+            Case ".bmp"
+                Result = "PIC.GIF"
+            Case ".jpg"
+                Result = "PIC.GIF"
+            Case ".ppt"
+                Result = "PPT.GIF"
+            Case ".pdf"
+                Result = "pdf.gif"
+            Case ".wav"
+                Result = "WAV.GIF"
+            Case ".mdb"
+                Result = "MDB.GIF"
+            Case ".mpg"
+                Result = "MPG.GIF"
+            Case Else
+                Result = "other.gif"
+        End Select
+        Return Result
+    End Function
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Response.Expires = 0
+        Response.Buffer = False
+
+
+        Dim username As String
+        Dim userpassword As String
+
+        Try
+            username = Request("username").ToString()
+            userpassword = Request("userpassword").ToString()
+
+        Catch ex As Exception
+            username = ""
+            userpassword = ""
+        End Try
+
+        If username <> "" And userpassword <> "" Then
+            Base.CheckUserAuthentication(username, userpassword)
+        End If
+
+
+
+
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+        TmpFolder = Server.MapPath("../../Submit_Temp") & "\" & Login_User & "\"
+        Base.IO.CreateDir(TmpFolder)
+        Dim context As HelpSoft.UploadContext = HelpSoft.UploadContextFactory.InitUploadContext(Me, TmpFolder)
+
+        Dim i As Integer
+        Dim OutStr As String = ""
+
+        '得到当前的HTTP URL路径
+        Dim Url As String = Request.ServerVariables("Url").ToLower
+        Dim CurrentUrl As String = Url.Replace("manager/personbag/myfiles.aspx", "PersonalFolders/" & Login_User & "/")
+
+        Dim RootPath As String = Request.MapPath("../../") & "PersonalFolders\" & Login_User & "\"
+        Base.IO.CreateDir(RootPath) '如果目录不存在,则建立
+        '每个用户进去前。添加一个共享文件
+        Base.IO.CreateDir(RootPath & "\共享文件夹")
+        Dim FileName As String = Server.UrlDecode(Request("FileName"))
+
+        If Not FileName Is Nothing Then
+            If File.Exists(RootPath & FileName) = True Then     '关判断文件是否存在
+                PrintContent(RootPath & FileName)
+                'Response.Redirect(CurrentUrl & FileName)
+                'Response.End()
+            Else
+                Base.Js.alert(Me, "非法参数!")
+            End If
+        End If
+
+        '得到操作目录        
+        Dim Folder As String = Server.UrlDecode(Request("Folder"))
+        flpath = Server.UrlEncode(Folder)
+        OutStr += "<hr width='98%' /><b>&nbsp;&nbsp;&nbsp;当前路径:</b>[<a href='MyFiles.aspx'>根</a>\"
+        If Not Folder Is Nothing Then
+            If Directory.Exists(RootPath & Folder) = True And Folder.Trim.Length > 0 Then
+                OpFolder = Folder       '得到操作目录
+                '这里进行制作目录导航条
+                Dim Temp As String() = Folder.Split("\")
+                Dim TempStr As String = ""
+                For i = 0 To Temp.GetUpperBound(0)
+                    If TempStr = "" Then
+                        TempStr = Temp(i)
+                    Else
+                        TempStr += "\" & Temp(i)
+                    End If
+                    OutStr += "<a href='MyFiles.aspx?Folder=" & Server.UrlEncode(TempStr) & "'>" & Temp(i) & "</a>\"
+                Next
+            End If
+        End If
+        OutStr += "]"
+        OutStr = "<input id='newbutton' type='button' value='新建文件夹' class='btnsubmit' onclick=""javascript:retheurl('" & Server.UrlEncode(OpFolder) & "');""/>" & OutStr
+        OutStr = "<input id='updatebtn' type='button' value='上传文件' class='btnsubmit' onclick=""javascript:window.open('updatefile.aspx?flpath=" & Server.UrlEncode(OpFolder) & "','newwindow','height=200,width=400');""/>&nbsp;" & OutStr
+        Dim TempIndex As Integer = OpFolder.LastIndexOf("\")
+        If TempIndex > 0 Then
+            OutStr += "&nbsp;&nbsp;<a href='MyFiles.aspx?Folder=" & Server.UrlEncode(OpFolder.Substring(0, TempIndex)) & "'>返回上一级目录</a><br/>"
+        Else
+            OutStr += "&nbsp;&nbsp;<a href='MyFiles.aspx'>返回上一级目录</a><br/>"
+        End If
+        message.InnerHtml = OutStr
+
+        '创建新文件夹        
+        Dim NewFolder As String = Request("NewFolder")
+        If Not NewFolder Is Nothing Then
+            If Base.IO.CreateDir(RootPath & OpFolder & "\" & NewFolder) = False Then
+                Base.Js.alert(Me, NewFolder & "文件已经存在")
+                'Response.Write("<script lanauage=javascript>alert('" & NewFolder & "文件已经存在');</" & "script>")
+            End If
+        End If
+
+
+        '删除文件功能
+        Dim DelFileName As String = Request("DelFileName")
+        If Not DelFileName Is Nothing Then
+            If File.Exists(RootPath & OpFolder & "\" & DelFileName) = True Then
+                Try
+                    File.Delete(RootPath & OpFolder & "\" & DelFileName)
+                    ' Response.Write("<script>refym(" & OpFolder & ");</script>")
+                Catch ex As Exception
+                    Base.Js.alert(Me, "删除文件:" & DelFileName & "失败!可能文件正在使用中!")
+                End Try
+            End If
+        End If
+
+        '删除目录
+        Dim DelFolder As String = Request("DelFolder")
+        If Not DelFolder Is Nothing Then
+            If Directory.Exists(RootPath & OpFolder & "\" & DelFolder) = True Then
+                Try
+                    Base.IO.DelDir(RootPath & OpFolder & "\" & DelFolder)
+                    Base.DB.Query("delete sharefile where filepath='" & OpFolder & "\" & DelFolder & "' and giveuserid='" & Base.GetWebUserName & "'")
+                Catch ex As Exception
+                    Base.Js.alert(Me, "删除文件夹:" & DelFolder & "失败!可能有文件正在使用中!")
+                End Try
+            End If
+        End If
+
+        '文件改名
+        Dim OldFileName As String = Request("OldFileName")
+        Dim NewFileName As String = Request("NewFileName")
+        If (Not OldFileName Is Nothing) And (Not NewFileName Is Nothing) Then
+            If File.Exists(RootPath & OpFolder & "\" & OldFileName) = True Then     '判断源文件是否存在
+                If File.Exists(RootPath & OpFolder & "\" & NewFileName) = True Then '判断要改的文件名是否已经存在
+                    Base.Js.alert(Me, "重命名失败,该目录下已有名为:" & NewFileName & "的文件了!")
+                Else
+                    Try
+                        File.Move(RootPath & OpFolder & "\" & OldFileName, RootPath & OpFolder & "\" & NewFileName)
+
+                    Catch ex As Exception
+                        Base.Js.alert(Me, "重命名失败,系统错误,可能是没有权限!")
+                    End Try
+                End If
+            End If
+        End If
+
+        '目录改名
+        Dim OldFolderName As String = Request("OldFolderName")
+        Dim NewFolderName As String = Request("NewFolderName")
+        If (Not OldFolderName Is Nothing) And (Not NewFolderName Is Nothing) Then
+            If Directory.Exists(RootPath & OpFolder & "\" & OldFolderName) = True Then     '判断源文件夹是否存在
+                If Directory.Exists(RootPath & OpFolder & "\" & NewFolderName) = True Then '判断要改的文件夹是否已经存在
+                    Base.Js.alert(Me, "重命名失败,该目录下已有名为:" & NewFolderName & "的文件夹了!")
+                    'Response.Write("<script lanauage=javascript>alert('重命名失败,该目录下已有名为:" & NewFolderName & "的文件夹了!');</" & "script>")
+
+                Else
+                    Try
+                        Directory.Move(RootPath & OpFolder & "\" & OldFolderName, RootPath & OpFolder & "\" & NewFolderName)
+                        Base.DB.Query("update sharefile set filepath='" & OpFolder & "\" & NewFolderName & "'where filepath='" & OpFolder & "\" & OldFolderName & "' and giveuserid='" & Base.GetWebUserName & "'")
+                    Catch ex As Exception
+                        Base.Js.alert(Me, "重命名失败,系统错误,可能是没有权限!")
+                        'Response.Write("<script lanauage=javascript>alert('重命名失败,系统错误,可能是没有权限!');</" & "script>")
+                    End Try
+                End If
+            End If
+        End If
+
+        '列出目录和文件
+        If Not IsPostBack Then
+            Dim Dt1 As DataSet = Base.GetFileListToDataSet(RootPath, OpFolder, 1)
+
+            ' Response.Write(Folder)
+
+            'If Folder = "" Then
+
+
+            '    Dim datarow As DataRow = Dt1.Tables(0).NewRow()
+
+            '    datarow.Item(1) = "公用文件夹"
+            '    datarow.Item(3) = "文件夹"
+            '    datarow.Item(4) = DateTime.Now.ToString()
+
+
+            '    Dt1.Tables(0).Rows.InsertAt(datarow, 0)
+            'End If
+
+
+            dv1.Table = Dt1.Tables(0)
+            dv1.Sort = "最后修改时间 desc"
+            Dim Dt2 As DataSet = Base.GetFileListToDataSet(RootPath, OpFolder, 2)
+
+            dv2.Table = Dt2.Tables(0)
+            dv2.Sort = "最后修改时间 desc"
+            GridView1.DataSource = dv1
+            GridView1.DataBind()
+
+            MaxPage = dv2.ToTable.Rows.Count
+            GridView2.DataSource = dv2
+            GridView2.DataBind()
+        End If
+
+
+    End Sub
+
+    'Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+
+    '    If FileUpload1.PostedFile.ContentLength = 0 Then Exit Sub
+
+    '    Dim Ret As String = Base.CheckUploadFileType(FileUpload1)
+    '    If Not Ret Is Nothing Then
+    '        Base.Js.alert(Me, Ret)
+    '        Exit Sub
+    '    End If
+
+    '    Dim Dpath As String = Request.MapPath("../../") & "PersonalFolders\" & Login_User & "\" & OpFolder & "\"
+    '    Base.IO.CreateDir(Dpath)
+
+    '    If File.Exists(Dpath & FileUpload1.PostedFile.FileName) = True Then
+    '        Base.Js.alert(Me, "文件已存在，你重命名或是删除已经存在的文件再上传")
+    '        Exit Sub
+    '    End If
+
+    '    Dim context As HelpSoft.UploadContext = HelpSoft.UploadContextFactory.GetUploadContext()
+    '    If ((Not context Is Nothing) And (context.Status = HelpSoft.uploadStatus.Complete)) Then
+    '        Try
+    '            context.SaveFile(FileUpload1.ClientID, Dpath)
+    '        Catch ex As Exception
+    '            Try
+    '                Base.IO.DelDir(TmpFolder)
+    '            Catch ex1 As Exception
+    '            End Try
+    '            Base.Js.alert(Me, "上传失败，请重新上传")
+    '            Exit Sub
+    '        End Try
+    '        Base.Js.alert(Me, "上传成功", "MyFiles.aspx?Folder=" & Server.UrlEncode(OpFolder) & "&t=" & Now.Ticks)
+    '    End If
+
+    '    ''文件上传功能,大小为1M
+
+    '    'Base.Upload.Sizes = 1000 * 1024
+    '    'Base.Upload.Path = "../../" & "PersonalFolders/" & Login_User & "/" & OpFolder
+    '    'Dim FileType As String = Base.GetSystemParameters("UpLoad_Filter")
+    '    'If FileType Is Nothing Then FileType = "空"
+    '    'Base.Upload.FileType = FileType
+    '    'If Base.Upload.FileSaveAs(FileUpload1) = True Then
+    '    '    Base.Js.alert(Me, "上传成功", "MyFiles.aspx?Folder=" & Server.UrlEncode(OpFolder))
+    '    'Else
+    '    '    Base.Js.alert(Me, Base.Upload.ReturnMessage, "MyFiles.aspx?Folder=" & Server.UrlEncode(OpFolder))
+    '    'End If
+    'End Sub
+
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        Dim Row As DataRow
+        Dim TmpName As String
+        Dim TmpType As String
+        For i = 0 To GridView1.Rows.Count - 1
+            TmpName = GridView1.DataKeys(i).Item(0).ToString.Trim
+            TmpType = GridView1.DataKeys(i).Item(1).ToString.Trim
+
+            If TmpName = "公用文件夹" Then
+                GridView1.Rows(i).Cells(1).Text = i + 1
+                Row = Base.DB.Row("select top 1 * from sharefile where filepath ='" & Server.UrlEncode(OpFolder) & "\" & TmpName & "' and giveuserid='" & Base.GetWebUserName & "'and getuserid<>''", "sharefile")
+
+                GridView1.Rows(i).Cells(2).Text = "<a href='MyFiles.aspx?Folder=" & Server.UrlEncode(OpFolder) & "\" & Server.UrlEncode(TmpName) & "'>" & GridView1.Rows(i).Cells(2).Text & "</a>"
+                If Row Is Nothing Then
+                    GridView1.Rows(i).Cells(2).Text = "<img src='../../images/FileManage/FOLDER.GIF'>&nbsp;" & GridView1.Rows(i).Cells(2).Text
+                Else
+                    GridView1.Rows(i).Cells(2).Text = "<img height='15'width='20' src='../../images/FileManage/share.jpg'>&nbsp;" & GridView1.Rows(i).Cells(2).Text
+                End If
+
+                If Login_User <> "admin" Then
+
+
+                    GridView1.Rows(i).Cells(6).Text = "<span style='color:GrayText'>更名</span>"
+                    GridView1.Rows(i).Cells(7).Text = "<span style='color:GrayText'>删除</span>"
+                    GridView1.Rows(i).Cells(8).Text = "<span style='color:GrayText'>移动</span>"
+                    GridView1.Rows(i).Cells(9).Text = "<span style='color:GrayText'>复制</span>"
+                    GridView1.Rows(i).Cells(10).Text = "<span style='color:GrayText'>权限设置</span>"
+                End If
+
+                GridView1.Rows(i).Cells(6).Text = "<span style='color:GrayText'>更名</span>"
+                GridView1.Rows(i).Cells(7).Text = "<span style='color:GrayText'>删除</span>"
+                GridView1.Rows(i).Cells(8).Text = "<span style='color:GrayText'>移动</span>"
+                GridView1.Rows(i).Cells(9).Text = "<a href='#' onclick=""javascript:copyfolder('" & Server.UrlEncode(OpFolder) & "','" & TmpName & "');"">复制</a>"
+                GridView1.Rows(i).Cells(10).Text = "<span style='color:GrayText'>权限设置</span>"
+
+            Else
+                GridView1.Rows(i).Cells(1).Text = i + 1
+                Row = Base.DB.Row("select top 1 * from sharefile where filepath ='" & Server.UrlEncode(OpFolder) & "\" & TmpName & "' and giveuserid='" & Base.GetWebUserName & "'and getuserid<>''", "sharefile")
+
+                GridView1.Rows(i).Cells(2).Text = "<a href='MyFiles.aspx?Folder=" & Server.UrlEncode(OpFolder) & "\" & Server.UrlEncode(TmpName) & "'>" & GridView1.Rows(i).Cells(2).Text & "</a>"
+                If Row Is Nothing Then
+                    GridView1.Rows(i).Cells(2).Text = "<img src='../../images/FileManage/FOLDER.GIF'>&nbsp;" & GridView1.Rows(i).Cells(2).Text
+                Else
+                    GridView1.Rows(i).Cells(2).Text = "<img height='15'width='20' src='../../images/FileManage/share.jpg'>&nbsp;" & GridView1.Rows(i).Cells(2).Text
+                End If
+                GridView1.Rows(i).Cells(6).Text = "<a href='#' onclick=""javascript:refoldername('" & Server.UrlEncode(OpFolder) & "','" & TmpName & "');"">更名</a>"
+                GridView1.Rows(i).Cells(7).Text = "<a href='#' onclick=""javascript:delfolder('" & Server.UrlEncode(OpFolder) & "','" & TmpName & "');"">删除</a>"
+                GridView1.Rows(i).Cells(8).Text = "<a href='#' onclick=""javascript:movefolder('" & Server.UrlEncode(OpFolder) & "','" & TmpName & "');"">移动</a>"
+                GridView1.Rows(i).Cells(9).Text = "<a href='#' onclick=""javascript:copyfolder('" & Server.UrlEncode(OpFolder) & "','" & TmpName & "');"">复制</a>"
+                Row = Base.DB.Row("select top 1 * from sharefile where filepath ='" & Server.UrlEncode(OpFolder) & "\" & TmpName & "' and giveuserid='" & Base.GetWebUserName & "'and getuserid<>''", "sharefile")
+                If Not Row Is Nothing Then
+                    GridView1.Rows(i).Cells(10).Text = "<a href='#' onclick=""javascript:sharefile1('" & Server.UrlEncode(OpFolder) & "','" & TmpName & "');"">权限设置</a>"
+                Else
+                    GridView1.Rows(i).Cells(10).Text = "<a href='#' onclick=""javascript:sharefile('" & Server.UrlEncode(OpFolder) & "','" & TmpName & "');"">权限设置</a>"
+                End If
+            End If
+        Next
+        GridView1.Columns(0).Visible = False
+    End Sub
+
+    Protected Sub GridView2_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView2.DataBound
+        Dim i As Integer
+        Dim TmpName As String
+        Dim TmpType As String
+        For i = 0 To GridView2.Rows.Count - 1
+            TmpName = GridView2.DataKeys(i).Item(0).ToString.Trim
+            TmpType = GridView2.DataKeys(i).Item(1).ToString.Trim
+            GridView2.Rows(i).Cells(1).Text = GridView1.Rows.Count + i + 1
+            GridView2.Rows(i).Cells(2).Text = "<img src='../../images/FileManage/" & CheckFileType(TmpType) & "'>&nbsp;<a href='MyFiles.aspx?FileName=" & Server.UrlEncode(OpFolder & "\" & TmpName) & "'>" & TmpName & "</a></td>"
+            GridView2.Rows(i).Cells(6).Text = "<a href='#' onclick=""javascript:refilename('" & Server.UrlEncode(OpFolder) & "','" & TmpName & "');"">更名</a>"
+            GridView2.Rows(i).Cells(7).Text = "<a href='#' onclick=""javascript:delfile('" & Server.UrlEncode(OpFolder) & "','" & TmpName & "');"">删除</a>"
+            GridView2.Rows(i).Cells(8).Text = "<a href='#' onclick=""javascript:movefile('" & Server.UrlEncode(OpFolder) & "','" & TmpName & "');"">移动</a>"
+            GridView2.Rows(i).Cells(9).Text = "<a href='#' onclick=""javascript:copyfile('" & Server.UrlEncode(OpFolder) & "','" & TmpName & "');"">复制</a>"
+        Next
+        PageBar.InnerHtml = Base.pub.WritePage2(GridView2, MaxPage)
+        GridView2.Columns(0).Visible = False
+    End Sub
+
+    Protected Sub GridView2_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView2.PageIndexChanging
+        GridView2.PageIndex = e.NewPageIndex
+        GridView2.DataSource = dv2
+        GridView2.DataBind()
+    End Sub
+
+    'Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+
+    '    Dim RootPath As String = Request.MapPath("../../") & "PersonalFolders\" & Login_User & "\"
+    '    Dim Folder As String = Server.UrlDecode(Request("Folder"))
+
+
+
+    '    Dim ck As CheckBox
+    '    Dim paths As New ArrayList
+    '    Dim filenames As New ArrayList
+    '    For i As Integer = 0 To GridView2.Rows.Count - 1
+    '        ck = GridView2.Rows(i).Cells(0).Controls(1)
+    '        If ck.Checked = True Then
+    '            Dim filename As String
+    '            filename = GridView2.DataKeys(i).Value()
+    '            filenames.Add(filename)
+    '            paths.Add(RootPath & Folder & "\" & filename)
+    '        End If
+    '    Next
+
+    '    If paths.Count = 0 Then
+    '        Base.Js.alert(Me, "请选择需要发送的文件")
+    '        Return
+    '    End If
+
+    '    Dim destinationPath As String
+    '    destinationPath = RootPath
+
+    '    For i As Integer = 0 To paths.Count - 1
+    '        ' Response.Write(paths(i))
+
+    '        'If File.Exists(destinationPath & "\" & filenames(i)) Then
+    '        '    File.Delete(destinationPath & "\" & filenames(i))
+    '        'End If
+
+    '        ' File.Copy(paths(i), destinationPath & "\" & filenames(i))
+    '    Next
+
+    '    Response.Write("<script>window.open('../Desktop/WriteSendMessage.aspx', '编写信息', 'height=520, width=820, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes');</script>")
+
+
+
+
+
+    'End Sub
+End Class

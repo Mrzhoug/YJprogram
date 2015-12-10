@@ -1,0 +1,31 @@
+﻿
+Partial Class manager_HomePageManage_HomePageNewsList
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            CType(GridView1.Rows(i).Cells(5).Controls(0), LinkButton).Attributes.Add("onclick", "return confirm('你确定要删除此公告吗？');")
+        Next
+        Dim MaxCount As Integer = GridView1.Rows.Count
+        GridView1.AllowPaging = True
+        PageBar.InnerHtml = Base.pub.WritePage(GridView1, MaxCount)
+
+    End Sub
+
+    Protected Sub GridView1_RowDeleting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs) Handles GridView1.RowDeleting
+        SqlDataSource1.DeleteCommand = "delete HomePageNews where cid=" & GridView1.DataKeys(e.RowIndex).Item(0)
+    End Sub
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking()
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        Response.Redirect("HomePageNews.aspx?cid=" & GridView1.Rows(e.NewSelectedIndex).Cells(0).Text.ToString.Trim)
+    End Sub
+End Class

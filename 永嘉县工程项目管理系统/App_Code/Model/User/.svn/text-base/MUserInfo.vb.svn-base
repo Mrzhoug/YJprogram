@@ -1,0 +1,51 @@
+﻿Imports Microsoft.VisualBasic
+
+Public Class MUserInfo
+
+
+    Private _UserID As Integer
+    Public Property UserID() As Integer
+        Get
+            Return _UserID
+        End Get
+        Set(ByVal value As Integer)
+            _UserID = value
+        End Set
+    End Property
+
+
+    Private _DepartmentID As Integer
+    Public Property DepartmentID() As Integer
+        Get
+            Return _DepartmentID
+        End Get
+        Set(ByVal value As Integer)
+            _DepartmentID = value
+        End Set
+    End Property
+
+
+    Private _LoginName As String
+    Public Property LoginName() As String
+        Get
+            Return _LoginName
+        End Get
+        Set(ByVal value As String)
+            _LoginName = value
+        End Set
+    End Property
+
+
+    Private _RealName As String
+    Public Property RealName() As String
+        Get
+            Return _RealName
+        End Get
+        Set(ByVal value As String)
+            _RealName = value
+        End Set
+    End Property
+
+
+
+End Class

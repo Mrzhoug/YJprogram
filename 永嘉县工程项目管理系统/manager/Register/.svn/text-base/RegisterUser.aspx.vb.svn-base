@@ -1,0 +1,190 @@
+﻿
+Partial Class manager_Register_RegisterUser
+    Inherits System.Web.UI.Page
+
+
+    Dim RegisterCompanyUser As New RegisterCompanyUser
+    Dim UserInfo As New UserInfo
+
+    Protected Sub Page_Load(sender As Object, e As System.EventArgs) Handles Me.Load
+
+    End Sub
+
+    Protected Sub Button3_Click(sender As Object, e As System.EventArgs) Handles Button3.Click
+
+
+        If tb_username.Text.Trim.Length = 0 Then
+            DoJS.alert(Me, "用户名不能为空！")
+            tb_username.Focus()
+            Exit Sub
+        Else
+            If UserInfo.GetUserID(DoFilter.SQLFilter(tb_username.Text.ToLower)) > 0 Or RegisterCompanyUser.CheckCompanyUserNameExist(DoFilter.SQLFilter(tb_username.Text.ToLower)) Then
+                DoJS.alert(Me, "用户名已存在！")
+                tb_username.Focus()
+                Exit Sub
+            End If
+        End If
+
+        If tb_password1.Text.Trim.Length = 0 Then
+            DoJS.alert(Me, "密码不能为空！")
+            tb_password1.Focus()
+            Exit Sub
+        End If
+
+        If tb_password1.Text <> tb_password2.Text Then
+            DoJS.alert(Me, "两次密码不一致，请重填！")
+            tb_password1.Focus()
+            Exit Sub
+        End If
+
+
+        If tb_companyName.Text.Trim.Length = 0 Then
+            DoJS.alert(Me, "单位名称不能为空！")
+            tb_companyName.Focus()
+            Exit Sub
+        End If
+
+        If tb_companyNo.Text.Trim.Length = 0 Then
+            DoJS.alert(Me, "单位注册号不能为空！")
+            tb_companyNo.Focus()
+            Exit Sub
+        Else
+            If RegisterCompanyUser.GetCompanyNameByCompanyNo(DoFilter.SQLFilter(tb_companyNo.Text)) <> String.Empty Then
+                DoJS.alert(Me, "该单位已存在！")
+                tb_companyNo.Focus()
+                Exit Sub
+            End If
+        End If
+
+
+        If tb_companyOwner.Text.Trim.Length = 0 Then
+            DoJS.alert(Me, "法人代表不能为空！")
+            tb_companyOwner.Focus()
+            Exit Sub
+        End If
+
+
+        If tb_companyOwnerTel.Text.Trim.Length = 0 Then
+            DoJS.alert(Me, "法人代表联系电话不能为空！")
+            tb_companyOwnerTel.Focus()
+            Exit Sub
+        End If
+
+        If tb_companyContacts.Text.Trim.Length = 0 Then
+            DoJS.alert(Me, "联系人不能为空！")
+            tb_companyContacts.Focus()
+            Exit Sub
+        End If
+
+        If tb_companyContactsTel.Text.Trim.Length = 0 Then
+            DoJS.alert(Me, "联系人联系电话不能为空！")
+            tb_companyContactsTel.Focus()
+            Exit Sub
+        End If
+
+        If tb_companyAddress.Text.Trim.Length = 0 Then
+            DoJS.alert(Me, "单位地址不能为空！")
+            tb_companyAddress.Focus()
+            Exit Sub
+        End If
+
+        Dim peopleNum, peopleNum1, peopleNum2, peopleNum3 As Integer
+        Try
+            peopleNum = Convert.ToInt32(tb_peopleNum.Text.Trim)
+        Catch ex As Exception
+            DoJS.alert(Me, "从业人数不正确！")
+            Exit Sub
+        End Try
+
+        Try
+            peopleNum1 = Convert.ToInt32(tb_peopleNum1.Text.Trim)
+        Catch ex As Exception
+            DoJS.alert(Me, "一级建造师人数不正确！")
+            Exit Sub
+        End Try
+        Try
+            peopleNum2 = Convert.ToInt32(tb_peopleNum2.Text.Trim)
+        Catch ex As Exception
+            DoJS.alert(Me, "二级建造师人数不正确！")
+            Exit Sub
+        End Try
+        Try
+            peopleNum3 = Convert.ToInt32(tb_peopleNum3.Text.Trim)
+        Catch ex As Exception
+            DoJS.alert(Me, "技术人员人数人数不正确！")
+            Exit Sub
+        End Try
+
+
+
+        Dim companyInfo As New MRegisterUser
+        companyInfo.UserName = DoFilter.SQLFilter(tb_username.Text.ToLower)
+        companyInfo.Password = DoFilter.SQLFilter(tb_password1.Text)
+        companyInfo.CompanyName = DoFilter.SQLFilter(tb_companyName.Text)
+        companyInfo.CompanyNo = DoFilter.SQLFilter(tb_companyNo.Text)
+        companyInfo.CompanyName = DoFilter.SQLFilter(tb_companyName.Text)
+        companyInfo.CompanyCreateTime = DoFilter.SQLFilter(tb_companyCreateTime.Text)
+        companyInfo.CompanyOwner = DoFilter.SQLFilter(tb_companyOwner.Text)
+        companyInfo.CompanyOwnerTel = DoFilter.SQLFilter(tb_companyOwnerTel.Text)
+        companyInfo.CompanyContacts = DoFilter.SQLFilter(tb_companyContacts.Text)
+        companyInfo.CompanyContactsTel = DoFilter.SQLFilter(tb_companyContactsTel.Text)
+        companyInfo.CompanyAddress = DoFilter.SQLFilter(tb_companyAddress.Text)
+        companyInfo.CompanyType = DoFilter.SQLFilter(tb_companyType.Text)
+        companyInfo.CompanyMoney = DoFilter.SQLFilter(tb_companyMoney.Text)
+        companyInfo.PeopleNum = peopleNum
+        companyInfo.PeopleNum1 = peopleNum1
+        companyInfo.PeopleNum2 = peopleNum2
+        companyInfo.PeopleNum3 = peopleNum3
+        companyInfo.ImgUrl = Image1.ImageUrl
+
+
+        If RegisterCompanyUser.AddCompanyInfo(companyInfo) Then
+            DoJS.alert(Me, "登记成功，请等待审核")
+        Else
+            DoJS.alert(Me, "登记失败")
+        End If
+
+
+    End Sub
+
+    Protected Sub Button1_Click(sender As Object, e As System.EventArgs) Handles Button1.Click
+
+        Dim fileOk As Boolean = False
+        Dim path As String = Server.MapPath("~/upload/")
+
+        If Not System.IO.Directory.Exists(path) Then
+            System.IO.Directory.CreateDirectory(path)
+        End If
+
+
+        If FileUpload1.HasFile Then
+            Dim fileExtension As String = System.IO.Path.GetExtension(FileUpload1.FileName).ToLower()
+            Dim allowExtension As String() = {".jpg", ".jepg", ".png"}
+
+            Dim i As Integer
+            Dim isFileOK As Boolean = True
+            For i = 0 To allowExtension.Length - 1
+                If fileExtension <> allowExtension(i) Then
+                Else
+                    isFileOK = True
+                End If
+            Next
+
+            If isFileOK = False Then
+                DoJS.alert(Me, "不允许上传" & fileExtension & "类型的文件,系统仅支持.jpg,.jepg,png类型!")
+                Exit Sub
+            End If
+
+            Dim fileName As String
+            fileName = DateTime.Now.ToString("yyyyMMddHHmmss") + fileExtension
+
+
+            FileUpload1.PostedFile.SaveAs(path + fileName)
+
+            Image1.ImageUrl = "../../upload/" + fileName
+
+
+        End If
+
+    End Sub
+End Class

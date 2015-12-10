@@ -1,0 +1,222 @@
+﻿
+Partial Class manager_Personbag_AttendanceExport
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim TmpTb As New Data.DataTable
+
+    Dim date1, date2 As Date
+    Dim TmpDate As Date                 '临时日期 
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Try         '如果当前日期为空或是非法，则取当天时间
+            TmpDate = CDate(Date3.Value)
+        Catch ex As Exception
+            Date3.Value = Now.ToShortDateString
+            TmpDate = Now.ToShortDateString
+        End Try
+
+    End Sub
+
+    Sub ShowAllUser()
+        'select YGDM,YGXM,DLMC from GY_YGDM where QYBZ=1
+    End Sub
+
+
+
+
+
+    ''' <summary>
+    ''' 导出EXCEL功能。
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    ''' <remarks></remarks>
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+        Dim Row As DataRow
+
+        Try
+            date1 = CDate(d1.Value)
+            date2 = CDate(d2.Value)
+        Catch ex As Exception
+            Response.Write("日期非法")
+            Exit Sub
+        End Try
+
+        Dim c As DataColumn = New DataColumn("员工姓名")
+        TmpTb.Columns.Add(c)
+        c = New DataColumn("考勤日期")
+        TmpTb.Columns.Add(c)
+        c = New DataColumn("星期")
+        TmpTb.Columns.Add(c)
+        c = New DataColumn("考勤时间")
+        TmpTb.Columns.Add(c)
+        c = New DataColumn("考勤IP")
+        TmpTb.Columns.Add(c)
+        c = New DataColumn("ATT_BZ")
+        TmpTb.Columns.Add(c)
+
+        Dim TempYGDM As Integer
+        Dim TempYGXM As String
+        Dim tb As New DataTable
+        tb = Base.DB.Table("select YGDM,YGXM,DLMC from GY_YGDM where QYBZ=1", "dd")
+        Dim i, j As Integer
+        For j = 0 To tb.Rows.Count - 1
+            TempYGDM = tb.Rows(j).Item(0).ToString
+            TempYGXM = tb.Rows(j).Item("YGXM").ToString
+            Dim NewRow As DataRow
+            NewRow = TmpTb.NewRow()
+            Dim TempDate As Date
+            For i = 0 To DateDiff(DateInterval.Day, date1, date2)
+                TempDate = date1.AddDays(i)
+                If Weekday(TempDate, Microsoft.VisualBasic.FirstDayOfWeek.Monday) < 6 Then
+                    NewRow = TmpTb.NewRow()
+                    NewRow.Item(0) = TempYGXM
+                    NewRow.Item(1) = TempDate.ToShortDateString
+                    NewRow.Item(2) = "星期" & Base.WeekDay2zh(TempDate)
+                    Row = Base.DB.Row("Select * from User_Attendance Where UserID=" & TempYGDM & " and datediff(d,Att_Time,'" & TempDate.ToShortDateString & "')=0 ", "d")
+                    If Row Is Nothing Then
+                        NewRow.Item(3) = "0:00"
+                        NewRow.Item(4) = ""
+                        NewRow.Item(5) = "未考勤"
+                    Else
+                        Try
+                            TempDate = CDate(Row.Item("Att_Time"))
+                            NewRow.Item(3) = TempDate.ToShortTimeString
+                        Catch ex As Exception
+                        End Try
+                        NewRow.Item(4) = Row.Item("Att_IP").ToString
+                        If Row.Item("Att_Bz").ToString <> "" Then
+                            NewRow.Item(5) = Row.Item("Att_bz")
+                        End If
+                    End If
+                    TmpTb.Rows.Add(NewRow)
+                End If
+            Next
+        Next
+        
+
+
+        If TmpTb.Rows.Count > 0 Then
+            Dim ExpDB As String = Server.MapPath("../../")
+            Dim TempOpDir As String = ExpDB & "/Submit_Temp/"
+            Dim OutFileName As String = "KQExcel." & System.DateTime.Now.ToString.Replace(".", "") & ".xls"
+            If IO.File.Exists(ExpDB & "/ExampleDB.xls") = False Then
+                Response.Write("环境错误，请与管理员联系")
+                Exit Sub
+            End If
+            Try
+                IO.File.Copy(ExpDB & "/ExampleDB.xls", TempOpDir & OutFileName, True)
+            Catch ex As Exception
+                Response.Write("对目录没有写的权限。复制文件出错")
+                Exit Sub
+            End Try
+
+            Dim e1 As New SunfunExcel(TempOpDir & OutFileName)
+            e1.SaveExcel(TmpTb)
+            Response.Redirect("../../Submit_Temp/" & OutFileName)
+        Else
+            Response.Write("所选择日期中无考勤记录,请重新选择")
+        End If
+
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Label1.Text = "星期" & Base.WeekDay2zh(TmpDate)
+
+        Dim i As Integer
+        Dim TmpYGDM As Integer
+        Dim Row As DataRow
+        For i = 0 To GridView1.Rows.Count - 1
+            TmpYGDM = GridView1.DataKeys(i).Item(0)
+            Row = Base.DB.Row("SELECT * FROM User_Attendance where UserID=" & TmpYGDM & " and  (DATEDIFF(d, Att_Time,'" & TmpDate & "') = 0)", "dd")
+            If Row Is Nothing Then
+                GridView1.Rows(i).Cells(2).Text = "未考勤"
+                GridView1.Rows(i).Cells(3).Text = "未考勤"
+            Else
+                Dim Att_Time As String = Row.Item("Att_Time").ToString.Trim
+                Dim Att_Bz As String = Row.Item("Att_BZ").ToString
+                GridView1.Rows(i).Cells(2).Text = Att_Time
+                GridView1.Rows(i).Cells(3).Text = Row.Item("Att_Ip").ToString.Trim
+                If Att_Bz.Length > 0 Then
+                    CType(GridView1.Rows(i).Cells(4).Controls(1), TextBox).Text = Att_Bz
+                Else
+                    Dim tmpdate As Date
+                    Try
+                        tmpdate = CDate(Att_Time)
+                        If tmpdate.Hour > 8 Then
+                            Att_Bz = "迟到2"
+                        Else
+                            If tmpdate.Hour = 8 And tmpdate.Minute >= 15 And tmpdate.Minute <= 30 And Att_Bz.Trim.Length = 0 Then
+                                Att_Bz = "迟到1"
+                            End If
+                            If tmpdate.Hour = 8 And tmpdate.Minute > 30 And Att_Bz.Trim.Length = 0 Then
+                                Att_Bz = "迟到2"
+                            End If
+                        End If
+                    Catch ex As Exception
+                    End Try
+                End If
+            End If
+            GridView1.Rows(i).Cells(0).Text = i + 1
+        Next
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+
+    End Sub
+
+
+    Protected Sub Button4_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button4.Click
+        TmpDate = DateAdd(DateInterval.Day, 1, TmpDate)
+        Date3.Value = TmpDate.ToShortDateString
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+        TmpDate = DateAdd(DateInterval.Day, -1, TmpDate)
+        Date3.Value = TmpDate.ToShortDateString
+        GridView1.DataBind()
+    End Sub
+
+
+    ''' <summary>
+    ''' 保存备注
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    ''' <remarks></remarks>
+    Protected Sub Button5_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button5.Click
+
+        Dim i As Integer
+        Dim BZ As String
+        Dim TmpYGDM As Integer
+        Dim row As DataRow
+        For i = 0 To GridView1.Rows.Count - 1
+            TmpYGDM = GridView1.DataKeys(i).Item(0).ToString
+            Try
+                BZ = Base.SqlFilter(CType(GridView1.Rows(i).Cells(4).Controls(1), TextBox).Text.ToString)
+                If BZ.Length > 0 Then
+                    row = Base.DB.Row("Select AID From  User_Attendance where Userid=" & TmpYGDM & " and datediff(d,Att_Time,'" & TmpDate & "')=0 ", "dd")
+                    If row Is Nothing Then
+                        Base.DB.Query("insert into User_Attendance(UserID,Att_Time,Att_IP,Att_BZ) values( " & TmpYGDM & ",'" & TmpDate & "','','" & BZ & "')")
+                    Else
+                        Base.DB.Query("update User_Attendance  set Att_Bz='" & BZ & "' where UserID=" & TmpYGDM & " and datediff(d,Att_Time,'" & TmpDate & "')=0 ")
+                    End If
+                End If
+            Catch ex As Exception
+                Response.Write(GridView1.Rows(i).Cells(0).Text & "的备注没有保存成功，请检查!<br>")
+            End Try
+        Next
+        Response.Write("保存备注成功！")
+        GridView1.DataBind()
+
+    End Sub
+End Class
+

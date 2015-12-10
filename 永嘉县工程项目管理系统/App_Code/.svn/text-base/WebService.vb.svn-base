@@ -1,0 +1,1386 @@
+﻿Imports System.Web
+Imports System.Web.Services
+Imports System.Web.Services.Protocols
+Imports System.Xml
+
+<WebService(Namespace:="http://tempuri.org/")> _
+<WebServiceBinding(ConformsTo:=WsiProfiles.BasicProfile1_1)> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+Public Class WebService
+    Inherits System.Web.Services.WebService
+
+    Dim RootPath As String = Server.MapPath("./FormFolder")
+    Dim FileName As String = String.Empty
+    Dim xmlDoc As New XmlDocument
+    Dim Base As New Base
+    Dim xmlDoc1 As New XmlDocument
+    Dim MKDM As Integer
+    Dim FullTextName As String
+
+
+    ''' <summary>
+    ''' 得到GetData的记录条数(两种)
+    ''' </summary>
+    ''' <param name="Name"></param>
+    ''' <param name="Xpath"></param>
+    ''' <param name="PageSize">默为20</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function GetMaxPage(ByVal Name As String, ByVal Xpath As String, ByVal PageSize As Integer) As XmlDocument
+        If PageSize <= 0 Then PageSize = 20 '默认为20条
+        Dim MaxPage As Integer
+
+        Dim TmpResult As String
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+            TmpResult = Base.GetXML_MKDM(Name, xmlDoc)
+            If Not TmpResult Is Nothing Then
+                Return Base.RetError("<Error/>", TmpResult)
+            End If
+        Else
+            Dim Result As String = CheckFileName(Name)
+            If Not Result Is Nothing Then
+                Return Base.RetError("<Error/>", Result)
+            End If
+            Try
+                xmlDoc.Load(FileName)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "XML结构错误")
+            End Try
+        End If
+        If Xpath.Trim.Length = 0 Then
+            Return Base.RetError("<PageCount/>", 0)
+        Else
+            Dim TempNodeList As XmlNodeList
+            Dim namespaces As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc)
+            Try
+                TempNodeList = xmlDoc.DocumentElement.SelectNodes(Xpath, namespaces)
+                If TempNodeList.Count = 1 Then
+                    MaxPage = 1
+                Else
+                    MaxPage = (TempNodeList.Count + (PageSize / 2 - 1)) / PageSize
+                End If
+                xmlDoc.LoadXml("<PageCount/>")
+                xmlDoc.DocumentElement.InnerText = MaxPage
+                Return xmlDoc
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "Xpath语法错：" & ex.Message)
+            End Try
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 更新批次号
+    ''' </summary>
+    ''' <param name="cph">产品号</param>
+    ''' <param name="pch">批次号</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function UpdatePHZT(ByVal cph As String, ByVal pch As String) As XmlDocument
+        If cph.Trim <> "" And pch.Trim <> "" Then
+            Dim TempNodeList As XmlNodeList
+            Dim pchxml As New XmlDocument
+            Dim sql As String
+            Dim tempnode As String
+            Try
+                pchxml.LoadXml(pch)
+                TempNodeList = pchxml.DocumentElement.SelectNodes("//pchid")
+                Dim i As Integer
+                For i = 0 To TempNodeList.Count - 1
+                    tempnode = TempNodeList.Item(i).InnerText
+                    sql = "update kt_入库单_" & System.DateTime.Now.ToString("yyyy") & "_Mapping set my是否用完='1' where my产品号='" & cph & "' and my批号='" & tempnode & "'"
+                    Try
+                        Base.DB.Query(sql)
+                    Catch ex As Exception
+                        Return Base.RetError("<re/>", "出错：" & ex.Message)
+                    End Try
+                Next
+            Catch ex As Exception
+                Return Base.RetError("<re/>", "出错：" & ex.Message)
+            End Try
+        End If
+        Return Base.RetError("<re/>", "成功")
+    End Function
+    ''' <summary>
+    ''' 常用的得到库数据的方法(带分页)(两种)
+    ''' </summary>
+    ''' <param name="Name">表单库名</param>
+    ''' <param name="Xpath">查询的XPATH语句</param>
+    ''' <returns></returns>
+    ''' <remarks>测试Xpath语句: /my:myFields/my:group1[my:标题/my:group2/my:group3/my:专家姓名='222']
+    ''' 这里要注意几点的问题是,前面的节点是表示返回节点的位置.</remarks>
+    <WebMethod()> _
+    Public Function GetData_Page(ByVal Name As String, ByVal Xpath As String, ByVal PageSize As Integer, ByVal CurrentPage As Integer) As XmlDocument
+
+        Dim TempNodeList As XmlNodeList
+        Dim namespaces As XmlNamespaceManager
+
+        If CurrentPage <= 0 Then CurrentPage = 1
+        If PageSize <= 0 Then PageSize = 20
+        Dim MaxPage As Integer      '最大页
+        Dim TempStr As New StringBuilder
+        Dim Tb As New DataTable
+        Dim i As Integer
+
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+            Dim sqlLibrary As New SQLLibrary
+            Return sqlLibrary.QueryNodesByPage(Name, Xpath, PageSize, CurrentPage)
+        Else
+            Dim Result As String = CheckFileName(Name)
+            If Not Result Is Nothing Then Return Base.RetError("<Error/>", Result)
+            Try
+                xmlDoc.Load(FileName)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "XML结构错误")
+            End Try
+        End If
+
+        namespaces = Base.GetXmlNamespaceManager(xmlDoc)
+
+        If Xpath.Trim.Length = 0 Then
+            TempNodeList = xmlDoc.DocumentElement.ChildNodes
+            If TempNodeList.Count = 1 Then
+                MaxPage = 1
+            Else
+                MaxPage = (TempNodeList.Count + (PageSize / 2 - 1)) / PageSize
+            End If
+            If CurrentPage > MaxPage Then
+                Return Base.RetError("<Error/>", "超出最大页数")
+            End If
+            For i = TempNodeList.Count - 1 To 0 Step -1 '倒序排列，最新的放在最前
+                If i > TempNodeList.Count - 1 - CurrentPage * PageSize And i <= TempNodeList.Count - 1 - (CurrentPage - 1) * PageSize Then
+                    TempStr.Append(TempNodeList.Item(i).OuterXml)
+                End If
+            Next
+
+            xmlDoc.DocumentElement.InnerXml = TempStr.ToString
+            TempStr = Nothing
+            Return xmlDoc
+        Else
+
+            Try
+                TempNodeList = xmlDoc.DocumentElement.SelectNodes(Xpath, namespaces)
+                If TempNodeList.Count = 1 Then
+                    MaxPage = 1
+                Else
+                    MaxPage = (TempNodeList.Count + (PageSize / 2 - 1)) / PageSize
+                End If
+                If CurrentPage > MaxPage Then
+                    Return Base.RetError("<Error/>", "超出最大页数")
+                End If
+                'For i = 0 To TempNodeList.Count - 1‘正序排列，最新的放在最后
+                '    If i >= (CurrentPage - 1) * PageSize And i < CurrentPage * PageSize Then
+                '        TempStr.Append(TempNodeList.Item(i).OuterXml)
+                '    End If
+                'Next
+                For i = TempNodeList.Count - 1 To 0 Step -1 '倒序排列，最新的放在最前
+                    If i > TempNodeList.Count - 1 - CurrentPage * PageSize And i <= TempNodeList.Count - 1 - (CurrentPage - 1) * PageSize Then
+                        TempStr.Append(TempNodeList.Item(i).OuterXml)
+                    End If
+                Next
+
+                xmlDoc.DocumentElement.InnerXml = TempStr.ToString
+                TempStr = Nothing
+                Return xmlDoc
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "Xpath语法错：" & ex.Message)
+            End Try
+        End If
+    End Function
+
+
+    ''' <summary>
+    ''' 多库进行汇总(带分页)
+    ''' </summary>
+    ''' <param name="SourceKu">源库名</param>
+    ''' <param name="Xpath">源库名Xpath</param>
+    ''' <param name="JoinKu1">汇总库名1</param>
+    ''' <param name="Xpath1">汇总库Xpath1</param>
+    ''' <param name="SourceNode1">源库名的查询节点</param>
+    ''' <param name="JoinKu2"></param>
+    ''' <param name="Xpath2"></param>
+    ''' <param name="SourceNode2"></param>
+    ''' <param name="JoinKu3"></param>
+    ''' <param name="Xpath3"></param>
+    ''' <param name="SourceNode3"></param>
+    ''' <param name="JoinKu4"></param>
+    ''' <param name="Xpath4"></param>
+    ''' <param name="SourceNode4"></param>
+    ''' <param name="JoinKu5"></param>
+    ''' <param name="Xpath5"></param>
+    ''' <param name="SourceNode5"></param>
+    ''' <param name="JoinKu6"></param>
+    ''' <param name="Xpath6"></param>
+    ''' <param name="SourceNode6"></param>
+    ''' <param name="JoinKu7"></param>
+    ''' <param name="Xpath7"></param>
+    ''' <param name="SourceNode7"></param>
+    ''' <param name="JoinKu8"></param>
+    ''' <param name="Xpath8"></param>
+    ''' <param name="SourceNode8"></param>
+    ''' <returns></returns>
+    ''' <remarks>Xpath1 中的 $$$ 将会替换成 源库名的查询节点内容
+    ''' 例:count(//my:考勤[my:姓名='$$$'])
+    ''' </remarks>
+    <WebMethod()> _
+       Public Function UionQuery_Page(ByVal SourceKu As String, ByVal Xpath As String, ByVal PageSize As Integer, ByVal CurrentPage As Integer, ByVal JoinKu1 As String, ByVal Xpath1 As String, ByVal SourceNode1 As String, ByVal JoinKu2 As String, ByVal Xpath2 As String, ByVal SourceNode2 As String, ByVal JoinKu3 As String, ByVal Xpath3 As String, ByVal SourceNode3 As String, ByVal JoinKu4 As String, ByVal Xpath4 As String, ByVal SourceNode4 As String, ByVal JoinKu5 As String, ByVal Xpath5 As String, ByVal SourceNode5 As String, ByVal JoinKu6 As String, ByVal Xpath6 As String, ByVal SourceNode6 As String, ByVal JoinKu7 As String, ByVal Xpath7 As String, ByVal SourceNode7 As String, ByVal JoinKu8 As String, ByVal Xpath8 As String, ByVal SourceNode8 As String, ByVal JoinKu9 As String, ByVal Xpath9 As String, ByVal SourceNode9 As String) As XmlDocument
+        '检测是否超出最大页数
+        Dim MaxPage As Integer
+        If PageSize <= 0 Then PageSize = 20 '默认为20条
+        If CurrentPage <= 0 Then CurrentPage = 1
+        Dim NameSpaces As XmlNamespaceManager
+        '先检得到源库的列表
+        Dim Result As String
+        Dim TempStr As New StringBuilder
+        Dim Tb As New DataTable
+        Dim i As Integer
+
+        If CurrentPage <= 0 Then CurrentPage = 1
+        Dim TmpResult As String
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+            TmpResult = Base.GetXML_MKDM(SourceKu, xmlDoc)
+            If Not TmpResult Is Nothing Then
+                Return Base.RetError("<Error/>", TmpResult)
+            End If
+        Else
+            '检测源库是否存在
+            Result = CheckFileName(SourceKu)
+            If Not Result Is Nothing Then
+                Return Base.RetError("<Error/>", Result)
+            End If
+            Try
+                xmlDoc.Load(FileName)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "XML结构错误")
+            End Try
+        End If
+        Dim TempNodeList As XmlNodeList
+        NameSpaces = Base.GetXmlNamespaceManager(xmlDoc)
+        '根据XPATH得到源库的列表数据
+        If Xpath.Trim.Length > 0 Then
+            Try
+                TempNodeList = xmlDoc.DocumentElement.SelectNodes(Xpath, NameSpaces)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "Xpath语法错：" & ex.Message)
+            End Try
+        Else        '如果Xpath 为空的话,取全部
+            TempNodeList = xmlDoc.ChildNodes
+        End If
+
+        If TempNodeList.Count = 1 Then
+            MaxPage = 1
+        Else
+            MaxPage = (TempNodeList.Count + (PageSize / 2 - 1)) / PageSize
+        End If
+        If CurrentPage > MaxPage Then
+            Return Base.RetError("<Error/>", "超出最大页数")
+        End If
+
+        '对第一个计算进行处理
+        If Xpath1.Trim.Length > 0 And Xpath1.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu1, Xpath1, PageSize, CurrentPage, SourceNode1, "查询结果1", TempNodeList, NameSpaces)
+        Else        '如果一个计算表达式都没有的话,直接返回
+            Dim Temp As New StringBuilder
+            For i = 0 To TempNodeList.Count - 1
+                If i >= (CurrentPage - 1) * PageSize And i < CurrentPage * PageSize Then
+                    Temp.Append(TempNodeList.Item(i).OuterXml)
+                End If
+            Next
+            xmlDoc.DocumentElement.InnerXml = Temp.ToString
+            Temp = Nothing
+            Return xmlDoc
+        End If
+
+        '对第二个计算进行处理
+        If Xpath2.Trim.Length > 0 And Xpath2.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu2, Xpath2, PageSize, CurrentPage, SourceNode2, "查询结果2", TempNodeList, NameSpaces)
+        End If
+
+        '对第三个计算进行处理
+        If Xpath3.Trim.Length > 0 And Xpath3.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu3, Xpath3, PageSize, CurrentPage, SourceNode3, "查询结果3", TempNodeList, NameSpaces)
+        End If
+
+        '对第四个计算进行处理
+        If Xpath4.Trim.Length > 0 And Xpath4.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu4, Xpath4, PageSize, CurrentPage, SourceNode4, "查询结果4", TempNodeList, NameSpaces)
+        End If
+
+        '对第五个计算进行处理
+        If Xpath5.Trim.Length > 0 And Xpath5.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu5, Xpath5, PageSize, CurrentPage, SourceNode5, "查询结果5", TempNodeList, NameSpaces)
+        End If
+
+        '对第六个计算进行处理
+        If Xpath6.Trim.Length > 0 And Xpath6.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu6, Xpath6, PageSize, CurrentPage, SourceNode6, "查询结果6", TempNodeList, NameSpaces)
+        End If
+
+        '对第七个计算进行处理
+        If Xpath7.Trim.Length > 0 And Xpath7.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu7, Xpath7, PageSize, CurrentPage, SourceNode7, "查询结果7", TempNodeList, NameSpaces)
+        End If
+
+        '对第八个计算进行处理
+        If Xpath8.Trim.Length > 0 And Xpath8.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu8, Xpath8, PageSize, CurrentPage, SourceNode8, "查询结果8", TempNodeList, NameSpaces)
+        End If
+
+        '对第九个计算进行处理
+        If Xpath9.Trim.Length > 0 And Xpath9.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu9, Xpath9, PageSize, CurrentPage, SourceNode9, "查询结果9", TempNodeList, NameSpaces)
+        End If
+
+        '再根据条件去查询子节点的内容。进行聚合
+        Return xmlDoc1
+
+    End Function
+
+
+    Public Function UionQuery_Page_Sql2005(ByVal SourceKu As String, ByVal Xpath As String, ByVal PageSize As Integer, ByVal CurrentPage As Integer, ByVal JoinKu1 As String, ByVal Xpath1 As String, ByVal SourceNode1 As String, ByVal JoinKu2 As String, ByVal Xpath2 As String, ByVal SourceNode2 As String, ByVal JoinKu3 As String, ByVal Xpath3 As String, ByVal SourceNode3 As String, ByVal JoinKu4 As String, ByVal Xpath4 As String, ByVal SourceNode4 As String, ByVal JoinKu5 As String, ByVal Xpath5 As String, ByVal SourceNode5 As String, ByVal JoinKu6 As String, ByVal Xpath6 As String, ByVal SourceNode6 As String, ByVal JoinKu7 As String, ByVal Xpath7 As String, ByVal SourceNode7 As String, ByVal JoinKu8 As String, ByVal Xpath8 As String, ByVal SourceNode8 As String, ByVal JoinKu9 As String, ByVal Xpath9 As String, ByVal SourceNode9 As String) As XmlDocument
+        Dim SqlXpath As String = String.Empty
+        If PageSize <= 0 Then PageSize = 20 '默认为20条
+        If CurrentPage <= 0 Then CurrentPage = 1
+        Dim NameSpaces As XmlNamespaceManager
+        Dim Tb As New Data.DataTable
+        MKDM = Base.GetMKDM(SourceKu)
+        If MKDM = -1 Then Return Base.RetError("<Error/>", SourceKu & "库名不存在")
+
+        '为了兼容XML文件库中的模板
+        '------------------------------------------------------------------
+        Dim RootName As String = String.Empty
+        Dim RootSpaceName As String = String.Empty
+        Dim SqlNameSpace As String = String.Empty
+        Dim Last As String = String.Empty
+        Tb = Base.DB.Table("Select top 1 RootName,RootNameSpace,[NameSpaces] From FormLibrary_" & MKDM & " where RootName is not null and RootNameSpace is not null", "dd")
+        If Tb.Rows.Count > 0 Then
+            If IsDBNull(Tb.Rows(0).Item(0)) = True Then
+                '如果返回的根节点为空
+                RootName = "结果"
+            Else
+                RootName = Tb.Rows(0).Item(0).ToString
+                If Xpath.IndexOf("[last()]") > 0 Then           '查询语句是否存在[last()],一般XPATH存在这个,表示取一条记录当做设计时导入结构之用
+                    Xpath = Xpath.Replace("[last()]", "")
+                    Last = "Top 1"
+                Else
+                    Last = ""
+                End If
+                SqlXpath = Xpath.Replace("/" & RootName, ".")        '兼容XPATH
+                RootSpaceName = Tb.Rows(0).Item(1).ToString
+                RootName = RootName.Trim & " " & RootSpaceName.Trim
+                SqlNameSpace = Tb.Rows(0).Item(2).ToString      '得到命名空间,在SQL里进行查询
+            End If
+        Else
+            RootName = "结果"
+        End If
+        '-----------------------------------------------------------------
+        If Xpath.Trim.Length = 0 Then
+            Return Base.RetError("<错误/>", "Xpath不能为空")
+        Else
+            Dim FullTextSql As String = Base.GetFullTextSql(Xpath)
+            SqlXpath = Base.ReplaceXpath_Contains(SqlXpath)
+            Try
+                Tb = Base.DB.Table("Set arithabort ON  with xmlnamespaces(" & SqlNameSpace & ") Select Forms.query('" & Base.ReplaceNameSpaces(SqlXpath) & "') From (select ROW_NUMBER() OVER(ORDER BY LID) as RowNumber,Forms From FormLibrary_" & MKDM & " where Forms.exist('" & Base.ReplaceNameSpaces(SqlXpath) & "')=1 ) as d where RowNumber between " & (CurrentPage - 1) * PageSize + 1 & " and " & CurrentPage * PageSize, "dd")
+            Catch ex As Exception
+                Return Base.RetError("<错误/>", "XPath语句有问题" & Base.ReplaceNameSpaces(SqlXpath))
+            End Try
+        End If
+
+        If Tb.Rows.Count = 0 Then       '因为在查询的时候．已经进行了分页．如果找不到结果，表示超出最大页
+            Return Base.RetError("<Error/>", "超出最大页数或查询结果为空")
+        End If
+        '为了兼容XML文件库中的模板
+        '------------------------------------------------------------------
+        Dim i As Integer
+        Dim TempXml As New StringBuilder
+        For i = 0 To Tb.Rows.Count - 1
+            TempXml.Append(Tb.Rows(i).Item(0).ToString)
+        Next
+        Try
+            xmlDoc.LoadXml("<" & RootName & " />")
+        Catch ex As Exception
+            xmlDoc.LoadXml("<结果/>")
+        End Try
+        xmlDoc.DocumentElement.InnerXml = TempXml.ToString
+        NameSpaces = Base.GetXmlNamespaceManager(xmlDoc)
+        TempXml = Nothing
+
+        Dim TempNodeList1 As XmlNodeList
+        TempNodeList1 = xmlDoc.DocumentElement.ChildNodes
+
+        '对第二个计算进行处理
+        If Xpath1.Trim.Length > 0 And Xpath1.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue1(JoinKu1, Xpath1, SourceNode1, "查询结果1", TempNodeList1, NameSpaces)
+        Else
+            Return xmlDoc
+        End If
+        If Xpath2.Trim.Length > 0 And Xpath2.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue1(JoinKu2, Xpath2, SourceNode2, "查询结果2", TempNodeList1, NameSpaces)
+        End If
+        If Xpath3.Trim.Length > 0 And Xpath3.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue1(JoinKu3, Xpath3, SourceNode3, "查询结果3", TempNodeList1, NameSpaces)
+        End If
+        If Xpath4.Trim.Length > 0 And Xpath4.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue1(JoinKu4, Xpath4, SourceNode4, "查询结果4", TempNodeList1, NameSpaces)
+        End If
+        If Xpath5.Trim.Length > 0 And Xpath5.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue1(JoinKu5, Xpath5, SourceNode5, "查询结果5", TempNodeList1, NameSpaces)
+        End If
+        If Xpath6.Trim.Length > 0 And Xpath6.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue1(JoinKu6, Xpath6, SourceNode6, "查询结果6", TempNodeList1, NameSpaces)
+        End If
+        If Xpath7.Trim.Length > 0 And Xpath7.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue1(JoinKu7, Xpath7, SourceNode7, "查询结果7", TempNodeList1, NameSpaces)
+        End If
+        If Xpath8.Trim.Length > 0 And Xpath8.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue1(JoinKu8, Xpath8, SourceNode8, "查询结果8", TempNodeList1, NameSpaces)
+        End If
+        If Xpath9.Trim.Length > 0 And Xpath9.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue1(JoinKu9, Xpath9, SourceNode9, "查询结果9", TempNodeList1, NameSpaces)
+        End If
+        Return xmlDoc1
+
+    End Function
+
+    Function MoreKuGetValue1(ByVal TempKu As String, ByVal TXpath As String, ByVal TempSourceNode As String, ByVal NodeText As String, ByRef TempNodeList As XmlNodeList, ByVal namespaces As XmlNamespaceManager) As XmlDocument
+        Dim TempXpath As String
+        Dim TempNode As XmlNode
+        If TXpath.Trim.Length > 0 Then
+            Dim TempStr As New StringBuilder
+            Dim RootName As String
+            Dim Tb, TempTb As New DataTable
+            Dim i As Integer
+            Dim TempMKDM As Integer
+
+            TempMKDM = Base.GetMKDM(TempKu)
+            If TempMKDM = -1 Then
+                Return Base.RetError("<Error/>", TempKu & "库名不存在")
+            End If
+            '为了兼容XML文件库中的模板
+            '------------------------------------------------------------------
+            Dim RootSpaceName As String = String.Empty
+            Dim SqlNameSpace As String = String.Empty
+            Dim Last As String = String.Empty
+            Tb = Base.DB.Table("Select top 1 RootName,RootNameSpace,[NameSpaces] From FormLibrary_" & TempMKDM & " where RootName is not null and RootNameSpace is not null", "dd")
+            If Tb.Rows.Count > 0 Then
+                If IsDBNull(Tb.Rows(0).Item(0)) = True Then
+                    '如果返回的根节点为空
+                    RootName = "结果"
+                Else
+                    RootName = Tb.Rows(0).Item(0).ToString
+                    RootSpaceName = Tb.Rows(0).Item(1).ToString
+                    RootName = RootName.Trim & " " & RootSpaceName
+                    SqlNameSpace = Tb.Rows(0).Item(2).ToString      '得到命名空间,在SQL里进行查询
+                End If
+            Else
+                RootName = "结果"
+            End If
+            '-----------------------------------------------------------------
+            '-----------------------------------------------------------------
+            Dim FullTextSql As String = Base.GetFullTextSql(TXpath)
+            Try
+
+                Tb = Base.DB.Table("Set arithabort ON  Select Forms From FormLibrary_" & TempMKDM, "dd")
+            Catch ex As Exception
+                Return Base.RetError("<错误/>", "SQL语句出错")
+            End Try
+            Dim TempXml As New StringBuilder()
+            For i = 0 To Tb.Rows.Count - 1
+                TempXml.Append(Tb.Rows(i).Item(0).ToString)
+            Next
+
+            Dim TempDoc As New XmlDocument
+            Try
+                TempDoc.LoadXml("<" & RootName & " />")
+            Catch ex As Exception
+                TempDoc.LoadXml("<结果/>")
+            End Try
+            TempDoc.DocumentElement.InnerXml = TempXml.ToString
+            Dim names As XmlNamespaceManager = Base.GetXmlNamespaceManager(TempDoc)
+
+            For i = 0 To TempNodeList.Count - 1
+                TempNode = TempNodeList.Item(i).Clone.SelectSingleNode(TempSourceNode, namespaces)
+                If Not TempNode Is Nothing Then
+                    If Not TempNode.ChildNodes.Item(0) Is Nothing Then
+                        TempXpath = TXpath
+                        TempXpath = TempXpath.Replace("$$$", TempNode.ChildNodes.Item(0).Value())
+                        Dim nav As XPath.XPathNavigator = TempDoc.CreateNavigator()
+                        Dim Temp As String = nav.Evaluate(TempXpath, names)
+                        Dim Node1 As XmlNode = xmlDoc.CreateNode(XmlNodeType.Element, "", NodeText, "")
+                        'If Temp = "非数字" Then
+                        '    Dim TNodeList As XmlNodeList = xmlDoc.DocumentElement.SelectNodes(TempXpath.ToLower.Replace("sum", ""), names)
+                        '    Dim j As Integer
+                        '    Dim TempInt As Int64 = 0
+                        '    For j = 0 To TempNodeList.Count - 1
+                        '        If Not TempNodeList.Item(j).Value Is Nothing Then
+                        '            Try '万一出现字符的情况,进行容错
+                        '                TempInt = TempInt + TempNodeList.Item(j).Value
+                        '            Catch ex As Exception
+                        '            End Try
+                        '        End If
+                        '    Next
+                        '    Node1.InnerText = TempInt
+                        'Else
+                        '    Node1.InnerText = Temp
+                        'End If
+                        Node1.InnerText = temp
+                        TempNodeList.Item(i).AppendChild(Node1.CloneNode(True))
+                    Else
+                        Dim Node1 As XmlNode = xmlDoc.CreateNode(XmlNodeType.Element, "", NodeText, "")
+                        Node1.InnerText = ""
+                        TempNodeList.Item(i).AppendChild(Node1.CloneNode(True))
+                    End If
+                Else
+                    Dim Node1 As XmlNode = xmlDoc.CreateNode(XmlNodeType.Element, "", NodeText, "")
+                    Node1.InnerText = ""
+                    TempNodeList.Item(i).AppendChild(Node1.CloneNode(True))
+                End If
+                TempStr.Append(TempNodeList.Item(i).OuterXml)
+            Next
+            xmlDoc.DocumentElement.InnerXml = TempStr.ToString
+            TempStr = Nothing
+            TempXml = Nothing
+            TempDoc = Nothing
+        End If
+        Return xmlDoc
+    End Function
+
+
+    ''' <summary>
+    ''' 对异库进行查询,并返回值
+    ''' </summary>
+    ''' <param name="TempKu">临时库</param>
+    ''' <param name="TXpath">临时Xpath</param>
+    ''' <param name="TempSourceNode">条件库名</param>
+    ''' <param name="NodeText">添加的节点名称</param>
+    ''' <param name="TempNodeList">目的节点集</param>
+    ''' <param name="namespaces">用到的命名空间</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function MoreKuGetValue(ByVal TempKu As String, ByVal TXpath As String, ByVal PageSize As Integer, ByVal CurrentPage As Integer, ByVal TempSourceNode As String, ByVal NodeText As String, ByRef TempNodeList As XmlNodeList, ByVal namespaces As XmlNamespaceManager) As XmlDocument
+        Dim TempStr As New StringBuilder
+        Dim Result, TempXpath As String
+        Dim TempNode As XmlNode
+        If TXpath.Trim.Length > 0 Then
+            Dim TmpResult As String
+            If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+                TmpResult = Base.GetXML_MKDM(TempKu, xmlDoc)
+                If Not TmpResult Is Nothing Then
+                    Return Base.RetError("<Error/>", TmpResult)
+                End If
+            Else
+                Result = CheckFileName(TempKu)
+                If Not Result Is Nothing Then
+                    Return Base.RetError("<Error/>", Result)
+                End If
+                Try
+                    xmlDoc1.Load(FileName)
+                Catch ex As Exception
+                    Return Base.RetError("<Error/>", "XML结构错误")
+                End Try
+            End If
+            Dim i As Integer
+            For i = 0 To TempNodeList.Count - 1
+                If i >= (CurrentPage - 1) * PageSize And i < CurrentPage * PageSize Then
+                    TempNode = TempNodeList.Item(i).Clone.SelectSingleNode(TempSourceNode, namespaces)
+                    If Not TempNode Is Nothing Then
+                        If Not TempNode.ChildNodes.Item(0) Is Nothing Then
+                            TempXpath = TXpath
+                            TempXpath = TempXpath.Replace("$$$", TempNode.ChildNodes.Item(0).Value())
+                            Dim Node1 As XmlNode = xmlDoc.CreateNode(XmlNodeType.Element, "", NodeText, "")
+                            If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLMapping").ToLower = "true" Then
+                                '调用二维映射程序
+                                Node1.InnerText = Base.GetDataPublicFun_Mapping(TempKu, TempXpath)
+                            Else
+                                Dim nav As XPath.XPathNavigator = xmlDoc1.CreateNavigator()
+                                Dim names As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc1)
+                                Dim Temp As String = nav.Evaluate(TempXpath, names)
+                                'If Temp = "非数字" Then
+                                '    Dim TNodeList As XmlNodeList = xmlDoc.DocumentElement.SelectNodes(TempXpath.ToLower.Replace("sum", ""), names)
+                                '    Dim j As Integer
+                                '    Dim TempInt As Int64 = 0
+                                '    For j = 0 To TempNodeList.Count - 1
+                                '        If Not TempNodeList.Item(j).Value Is Nothing Then
+                                '            Try '万一出现字符的情况,进行容错
+                                '                TempInt = TempInt + TempNodeList.Item(j).Value
+                                '            Catch ex As Exception
+                                '            End Try
+                                '        End If
+                                '    Next
+                                '    Node1.InnerText = TempInt
+                                'Else
+                                '    Node1.InnerText = Temp
+                                'End If
+                                Node1.InnerText = Temp
+                            End If
+                            TempNodeList.Item(i).AppendChild(Node1.CloneNode(True))
+                        Else
+                            Dim Node1 As XmlNode = xmlDoc.CreateNode(XmlNodeType.Element, "", NodeText, "")
+                            Node1.InnerText = ""
+                            TempNodeList.Item(i).AppendChild(Node1.CloneNode(True))
+                        End If
+                    Else
+                        Dim Node1 As XmlNode = xmlDoc.CreateNode(XmlNodeType.Element, "", NodeText, "")
+                        Node1.InnerText = ""
+                        TempNodeList.Item(i).AppendChild(Node1.CloneNode(True))
+                    End If
+                    TempStr.Append(TempNodeList.Item(i).OuterXml)
+                End If
+            Next
+            xmlDoc1.DocumentElement.InnerXml = TempStr.ToString
+            TempStr = Nothing
+        End If
+        TempStr = Nothing
+        Return xmlDoc1
+    End Function
+    ''' <summary>
+    ''' 获取有效批次号
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function GetPch(ByVal cph As String) As XmlDocument
+
+        Dim sqlstr As String
+        Dim tb As New DataTable
+        Dim i As Integer
+        Dim TempStr As New StringBuilder
+        sqlstr = "select my批号 FROM kt_入库单_2014_Mapping where my产品号='" & cph & "' and my是否用完<>'1'"
+        tb = Base.DB.Table(sqlstr, "11")
+        xmlDoc.LoadXml("<IDList/>")
+        TempStr.Append("<MaxPage>1</MaxPage>")
+        For i = 0 To tb.Rows.Count - 1
+            TempStr.Append("<ID>" & tb.Rows(i)(0).ToString.Trim() & "</ID>")
+        Next
+        xmlDoc.DocumentElement.InnerXml = TempStr.ToString
+        TempStr = Nothing
+        Return xmlDoc
+
+    End Function
+
+    ''' <summary>
+    ''' 多库进行重复性过滤并合并生成ID
+    ''' </summary>
+    ''' <param name="JoinKu1"></param>
+    ''' <param name="Xpath1"></param>
+    ''' <param name="JoinKu2"></param>
+    ''' <param name="Xpath2"></param>
+    ''' <param name="JoinKu3"></param>
+    ''' <param name="Xpath3"></param>
+    ''' <param name="JoinKu4"></param>
+    ''' <param name="Xpath4"></param>
+    ''' <param name="JoinKu5"></param>
+    ''' <param name="Xpath5"></param>
+    ''' <param name="JoinKu6"></param>
+    ''' <param name="Xpath6"></param>
+    ''' <param name="JoinKu7"></param>
+    ''' <param name="Xpath7"></param>
+    ''' <param name="JoinKu8"></param>
+    ''' <param name="Xpath8"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+       Public Function UionQuery_ID_List(ByVal PageSize As Integer, ByVal JoinKu1 As String, ByVal Xpath1 As String, ByVal JoinKu2 As String, ByVal Xpath2 As String, ByVal JoinKu3 As String, ByVal Xpath3 As String, ByVal JoinKu4 As String, ByVal Xpath4 As String, ByVal JoinKu5 As String, ByVal Xpath5 As String, ByVal JoinKu6 As String, ByVal Xpath6 As String, ByVal JoinKu7 As String, ByVal Xpath7 As String, ByVal JoinKu8 As String, ByVal Xpath8 As String) As XmlDocument
+        '先检得到源库的列表
+        Dim Result As String
+        Dim Temp As New StringCollection
+        If PageSize <= 0 Then PageSize = 20
+
+        '对第一个库进行处理
+        Result = UionQuery_ID_List_Process(Temp, Xpath1, JoinKu1)
+        If Not Result Is Nothing Then
+            Return Base.RetError("<Error/>", Result)
+        End If
+        '对第二个库进行处理
+        Result = UionQuery_ID_List_Process(Temp, Xpath2, JoinKu2)
+        If Not Result Is Nothing And Result <> "xpath为空" Then
+            Return Base.RetError("<Error/>", Result)
+        End If
+        '对第三个库进行处理
+        Result = UionQuery_ID_List_Process(Temp, Xpath3, JoinKu3)
+        If Not Result Is Nothing And Result <> "xpath为空" Then
+            Return Base.RetError("<Error/>", Result)
+        End If
+        '对第四个库进行处理
+        Result = UionQuery_ID_List_Process(Temp, Xpath4, JoinKu4)
+        If Not Result Is Nothing And Result <> "xpath为空" Then
+            Return Base.RetError("<Error/>", Result)
+        End If
+        '对第五个库进行处理
+        Result = UionQuery_ID_List_Process(Temp, Xpath5, JoinKu5)
+        If Not Result Is Nothing And Result <> "xpath为空" Then
+            Return Base.RetError("<Error/>", Result)
+        End If
+        '对第六个库进行处理
+        Result = UionQuery_ID_List_Process(Temp, Xpath6, JoinKu6)
+        If Not Result Is Nothing And Result <> "xpath为空" Then
+            Return Base.RetError("<Error/>", Result)
+        End If
+        '对第七个库进行处理
+        Result = UionQuery_ID_List_Process(Temp, Xpath7, JoinKu7)
+        If Not Result Is Nothing And Result <> "xpath为空" Then
+            Return Base.RetError("<Error/>", Result)
+        End If
+        '对第八个库进行处理
+        Result = UionQuery_ID_List_Process(Temp, Xpath8, JoinKu8)
+        If Not Result Is Nothing And Result <> "xpath为空" Then
+            Return Base.RetError("<Error/>", Result)
+        End If
+
+        '将结果输出
+        Dim i As Integer
+        Dim TempStr As New StringBuilder
+        xmlDoc.LoadXml("<IDList/>")
+        Dim MaxPage As Integer = (Temp.Count + (PageSize / 2 - 1)) / PageSize
+        TempStr.Append("<MaxPage>" & MaxPage & "</MaxPage>")
+        For i = 0 To Temp.Count - 1
+            TempStr.Append("<ID>" & Temp(i).ToString.Trim() & "</ID>")
+        Next
+        xmlDoc.DocumentElement.InnerXml = TempStr.ToString
+        TempStr = Nothing
+        Return xmlDoc
+
+    End Function
+
+
+    ''' <summary>
+    ''' UionQuery_ID_List 的处理函数
+    ''' </summary>
+    ''' <param name="Temp"></param>
+    ''' <param name="TmpXpath"></param>
+    ''' <param name="TmpKu"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function UionQuery_ID_List_Process(ByRef Temp As StringCollection, ByVal TmpXpath As String, ByVal TmpKu As String) As String
+        Dim Result As String
+        Dim Math As String = String.Empty
+
+        Dim TempNodeList As XmlNodeList
+        Dim namespaces As XmlNamespaceManager
+        If TmpXpath.Trim.Length > 0 Then
+            Dim TmpResult As String
+            If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+                TmpResult = Base.GetXML_MKDM(TmpKu, xmlDoc)
+                If Not TmpResult Is Nothing Then
+                    Return TmpResult
+                End If
+            Else
+                Result = CheckFileName(TmpKu)
+                If Not Result Is Nothing Then
+                    Return Result
+                End If
+                Try
+                    xmlDoc.Load(FileName)
+                Catch ex As Exception
+                    Return "XML结构错误"
+                End Try
+            End If
+            namespaces = Base.GetXmlNamespaceManager(xmlDoc)
+            Try
+                If TmpXpath.Substring(0, 1) = "-" Then
+                    Math = "-"
+                    TmpXpath = TmpXpath.Substring(1)
+                Else
+                    Math = "+"
+                End If
+                TempNodeList = xmlDoc.DocumentElement.SelectNodes(TmpXpath, namespaces)
+                Temp = UionQuery_ID_List_doing(TempNodeList, Temp, Math)
+                Return Nothing
+            Catch ex As Exception
+                Return "Xpath语法错：" & ex.Message
+            End Try
+        Else
+            Return "xpath为空"
+        End If
+    End Function
+
+
+    Public Function UionQuery_ID_List_Sql2005(ByVal PageSize As Integer, ByVal JoinKu1 As String, ByVal Xpath1 As String, ByVal JoinKu2 As String, ByVal Xpath2 As String, ByVal JoinKu3 As String, ByVal Xpath3 As String, ByVal JoinKu4 As String, ByVal Xpath4 As String, ByVal JoinKu5 As String, ByVal Xpath5 As String, ByVal JoinKu6 As String, ByVal Xpath6 As String, ByVal JoinKu7 As String, ByVal Xpath7 As String, ByVal JoinKu8 As String, ByVal Xpath8 As String) As XmlDocument
+        '先检得到源库的列表
+        Dim Temp As New StringCollection
+        If PageSize <= 0 Then PageSize = 20
+        If JoinKu1.Trim.Length > 0 And Xpath1.Trim.Length > 0 Then
+            Temp = Get_UionQuery_ID_List(JoinKu1, Xpath1, Temp)
+        End If
+        If JoinKu2.Trim.Length > 0 And Xpath2.Trim.Length > 0 Then
+            Temp = Get_UionQuery_ID_List(JoinKu2, Xpath2, Temp)
+        End If
+        If JoinKu3.Trim.Length > 0 And Xpath3.Trim.Length > 0 Then
+            Temp = Get_UionQuery_ID_List(JoinKu3, Xpath3, Temp)
+        End If
+        If JoinKu4.Trim.Length > 0 And Xpath4.Trim.Length > 0 Then
+            Temp = Get_UionQuery_ID_List(JoinKu4, Xpath4, Temp)
+        End If
+        If JoinKu5.Trim.Length > 0 And Xpath5.Trim.Length > 0 Then
+            Temp = Get_UionQuery_ID_List(JoinKu5, Xpath5, Temp)
+        End If
+        If JoinKu6.Trim.Length > 0 And Xpath6.Trim.Length > 0 Then
+            Temp = Get_UionQuery_ID_List(JoinKu6, Xpath6, Temp)
+        End If
+        If JoinKu7.Trim.Length > 0 And Xpath7.Trim.Length > 0 Then
+            Temp = Get_UionQuery_ID_List(JoinKu7, Xpath7, Temp)
+        End If
+        If JoinKu8.Trim.Length > 0 And Xpath8.Trim.Length > 0 Then
+            Temp = Get_UionQuery_ID_List(JoinKu8, Xpath8, Temp)
+        End If
+
+        '再根据条件去查询子节点的内容。进行聚合
+        Dim i As Integer
+        Dim TempStr As New StringBuilder
+        xmlDoc.LoadXml("<IDList/>")
+        Dim MaxPage As Integer = (Temp.Count - 1 + 10) / PageSize - 1
+        TempStr.Append("<MaxPage>" & MaxPage & "</MaxPage>")
+        For i = 0 To Temp.Count - 1
+            TempStr.Append("<ID>" & Temp(i).ToString.Trim() & "</ID>")
+        Next
+        xmlDoc.DocumentElement.InnerXml = TempStr.ToString
+        TempStr = Nothing
+        Return xmlDoc
+    End Function
+
+    Public Function Get_UionQuery_ID_List(ByVal JoinKu1 As String, ByVal Xpath1 As String, ByVal Temp As StringCollection) As StringCollection
+        Dim Tb As New Data.DataTable
+        '检测第一个源库是否存在
+        MKDM = Base.GetMKDM(JoinKu1)
+        If MKDM = -1 Then
+            xmlDoc = Base.RetError("<Error/>", JoinKu1 & "库名不存在")
+        End If
+
+        '为了兼容XML文件库中的模板
+        '------------------------------------------------------------------
+        Dim RootName As String = String.Empty
+        Dim RootSpaceName As String = String.Empty
+        Dim SqlNameSpace As String = String.Empty
+        Dim Last As String = String.Empty
+        Dim SqlXpath As String = String.Empty
+        Tb = Base.DB.Table("Select top 1 RootName,RootNameSpace,[NameSpaces] From FormLibrary_" & MKDM & " where RootName is not null and RootNameSpace is not null", "dd")
+        If Tb.Rows.Count > 0 Then
+            If IsDBNull(Tb.Rows(0).Item(0)) = True Then
+                '如果返回的根节点为空
+                RootName = "结果"
+            Else
+                RootName = Tb.Rows(0).Item(0).ToString
+                If Xpath1.IndexOf("[last()]") > 0 Then           '查询语句是否存在[last()],一般XPATH存在这个,表示取一条记录当做设计时导入结构之用
+                    Xpath1 = Xpath1.Replace("[last()]", "")
+                    Last = "Top 1"
+                Else
+                    Last = ""
+                End If
+                SqlXpath = Xpath1.Replace("/" & RootName, ".")        '兼容XPATH
+                RootSpaceName = Tb.Rows(0).Item(1).ToString
+                RootName = RootName.Trim & " " & RootSpaceName.Trim
+                SqlNameSpace = Tb.Rows(0).Item(2).ToString      '得到命名空间,在SQL里进行查询
+            End If
+        Else
+            RootName = "结果"
+        End If
+        '-----------------------------------------------------------------
+        If Xpath1.Trim.Length = 0 Then
+            xmlDoc = Base.RetError("<Error/>", "Xpath不能为空")
+        Else
+            'Dim FullTextSql As String = Base.GetFullTextSql(Xpath1)
+            SqlXpath = Base.ReplaceXpath_Contains(SqlXpath)
+            Try
+                Tb = Base.DB.Table("Set arithabort ON  with xmlnamespaces(" & SqlNameSpace & ") Select Forms.query('" & Base.ReplaceNameSpaces(SqlXpath) & "') From FormLibrary_" & MKDM & " where Forms.exist('" & Base.ReplaceNameSpaces(SqlXpath) & "')=1 ", "dd")
+                Dim i As Integer
+                Dim TempXml As New StringBuilder
+                For i = 0 To Tb.Rows.Count - 1
+                    TempXml.Append(Tb.Rows(i).Item(0).ToString)
+                Next
+                Try
+                    xmlDoc1.LoadXml("<" & RootName & " />")
+                Catch ex As Exception
+                    xmlDoc1.LoadXml("<结果/>")
+                End Try
+                xmlDoc1.DocumentElement.InnerXml = TempXml.ToString
+                TempXml = Nothing
+                '转换成DOM进行处理
+                Dim TempNodeList1 As XmlNodeList
+
+                If Tb.Rows.Count > 0 Then
+                    Dim NameSpaces As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc1)
+                    TempNodeList1 = xmlDoc1.DocumentElement.SelectNodes("//" & xmlDoc1.DocumentElement.ChildNodes.Item(0).Name, NameSpaces)
+                    Temp = UionQuery_ID_List_doing(TempNodeList1, Temp, "+")
+                End If
+            Catch ex As Exception
+                xmlDoc = Base.RetError("<错误/>", "sql语句出错")
+            End Try
+        End If
+        Return Temp
+    End Function
+
+    Function UionQuery_ID_List_doing_Sql2005(ByVal Tb As Data.DataTable, ByVal Temp As StringCollection) As StringCollection
+        Dim i As Integer
+        Dim k As Integer
+        Dim UpNum As Integer
+        Dim TempValue As String
+        For i = 0 To Tb.Rows.Count - 1
+            TempValue = Tb.Rows(i).Item(0).ToString().Trim
+            UpNum = Temp.Count - 1
+            For k = 0 To UpNum
+                If Temp(k).ToString.Trim() = TempValue.Trim Then
+                    Exit For
+                End If
+            Next
+            If k > UpNum Then
+                Temp.Add(TempValue)
+            End If
+        Next
+        Return Temp
+    End Function
+
+
+
+    ''' <summary>
+    ''' 对传进来的字符数据进行重复性过滤
+    ''' </summary>
+    ''' <param name="TempNodeList"></param>
+    ''' <param name="Temp"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function UionQuery_ID_List_doing(ByRef TempNodeList As XmlNodeList, ByRef Temp As StringCollection, ByVal Math As String) As StringCollection
+        Dim i As Integer
+        Dim k As Integer
+        Dim UpNum As Integer
+        Dim TempValue As String
+        Select Case Math
+            Case "+"
+                For i = 0 To TempNodeList.Count - 1
+                    If Not TempNodeList.Item(i).InnerText Is Nothing Then
+                        TempValue = TempNodeList.Item(i).InnerText
+                        UpNum = Temp.Count - 1
+                        For k = 0 To UpNum
+                            If Temp(k).ToString.Trim() = TempValue.Trim Then
+                                Exit For
+                            End If
+                        Next
+                        If k > UpNum Then
+                            Temp.Add(TempValue)
+                        End If
+                    End If
+                Next
+            Case "-"
+                For k = Temp.Count - 1 To 0 Step -1
+                    TempValue = Temp(k).ToString.Trim()
+                    For i = 0 To TempNodeList.Count - 1
+                        If TempNodeList.Item(i).InnerText = TempValue.Trim Then
+                            Temp.RemoveAt(k)
+                            Exit For
+                        End If
+                    Next
+                Next
+        End Select
+
+        Return Temp
+    End Function
+
+    <WebMethod()> _
+    Function GetPHKC(ByVal cph As String) As XmlDocument
+        Dim sqlstr As String
+        Dim tb As New DataTable
+        Dim i As Integer
+        Dim TempStr As New StringBuilder
+        '  Dim tempnode As XmlNode
+        Dim count As Integer = 0
+        Dim sql As String
+        sqlstr = "select distinct my批号,my有效期 FROM kt_入库单_" & System.DateTime.Now.ToString("yyyy") & "_Mapping where my产品号='" & cph & "' and (my是否用完 is null or my是否用完='')"
+        tb = Base.DB.Table(sqlstr, "11")
+        For i = 0 To tb.Rows.Count - 1
+            count = Base.GetPCount(cph, tb.Rows(i)(0).ToString.Trim, "kt_入库单_" & System.DateTime.Now.ToString("yyyy") & "_Mapping", " and my单据类型='入库单'") - Base.GetPCount(cph, tb.Rows(i)(0).ToString.Trim, "kt_入库单_" & System.DateTime.Now.ToString("yyyy") & "_Mapping", " and my单据类型='退库单'") - Base.GetPCount(cph, tb.Rows(i)(0).ToString.Trim, "kt_发货单_" & System.DateTime.Now.ToString("yyyy") & "_Mapping", " and my单据类型='发货清单'") - Base.GetPCount(cph, tb.Rows(i)(0).ToString.Trim, "kt_调整单_" & System.DateTime.Now.ToString("yyyy") & "_Mapping", "")
+            If count > 0 Then
+                TempStr.Append("<列表><产品号>" & cph & "</产品号><批号>" & tb.Rows(i)(0).ToString.Trim & "</批号><批号库存数量>" & count & "</批号库存数量><有效期>" & tb.Rows(i)(1).ToString.Trim & "</有效期></列表>")
+            Else
+                sql = "update kt_入库单_" & System.DateTime.Now.ToString("yyyy") & "_Mapping set my是否用完='1' where my产品号='" & cph & "' and my批号='" & tb.Rows(i)(0).ToString.Trim & "'"
+                Try
+                    Base.DB.Query(sql)
+                Catch ex As Exception
+
+                End Try
+            End If
+        Next
+        xmlDoc.LoadXml("<结果/>")
+        xmlDoc.DocumentElement.InnerXml = TempStr.ToString
+        TempStr = Nothing
+        Return xmlDoc
+    End Function
+
+
+
+    ''' <summary>
+    ''' 多库进行汇总(带分页)
+    ''' </summary>
+    ''' <param name="SourceKu">源库名</param>
+    ''' <param name="Xpath">源库名Xpath</param>
+    ''' <param name="JoinKu1">汇总库名1</param>
+    ''' <param name="Xpath1">汇总库Xpath1</param>
+    ''' <param name="SourceNode1">源库名的查询节点</param>
+    ''' <param name="JoinKu2"></param>
+    ''' <param name="Xpath2"></param>
+    ''' <param name="SourceNode2"></param>
+    ''' <param name="JoinKu3"></param>
+    ''' <param name="Xpath3"></param>
+    ''' <param name="SourceNode3"></param>
+    ''' <param name="JoinKu4"></param>
+    ''' <param name="Xpath4"></param>
+    ''' <param name="SourceNode4"></param>
+    ''' <param name="JoinKu5"></param>
+    ''' <param name="Xpath5"></param>
+    ''' <param name="SourceNode5"></param>
+    ''' <param name="JoinKu6"></param>
+    ''' <param name="Xpath6"></param>
+    ''' <param name="SourceNode6"></param>
+    ''' <param name="JoinKu7"></param>
+    ''' <param name="Xpath7"></param>
+    ''' <param name="SourceNode7"></param>
+    ''' <param name="JoinKu8"></param>
+    ''' <param name="Xpath8"></param>
+    ''' <param name="SourceNode8"></param>
+    ''' <returns></returns>
+    ''' <remarks>Xpath1 中的 $$$ 将会替换成 源库名的查询节点内容
+    ''' 例:count(//my:考勤[my:姓名='$$$'])
+    ''' </remarks>
+    <WebMethod()> _
+       Public Function UionQuery_ID_Page(ByVal SourceKu As String, ByVal Xpath As String, ByVal IDList As String, ByVal PageSize As Integer, ByVal CurrentPage As Integer, ByVal JoinKu1 As String, ByVal Xpath1 As String, ByVal SourceNode1 As String, ByVal JoinKu2 As String, ByVal Xpath2 As String, ByVal SourceNode2 As String, ByVal JoinKu3 As String, ByVal Xpath3 As String, ByVal SourceNode3 As String, ByVal JoinKu4 As String, ByVal Xpath4 As String, ByVal SourceNode4 As String, ByVal JoinKu5 As String, ByVal Xpath5 As String, ByVal SourceNode5 As String, ByVal JoinKu6 As String, ByVal Xpath6 As String, ByVal SourceNode6 As String, ByVal JoinKu7 As String, ByVal Xpath7 As String, ByVal SourceNode7 As String, ByVal JoinKu8 As String, ByVal Xpath8 As String, ByVal SourceNode8 As String, ByVal JoinKu9 As String, ByVal Xpath9 As String, ByVal SourceNode9 As String, ByVal JoinKu10 As String, ByVal Xpath10 As String, ByVal SourceNode10 As String, ByVal JoinKu11 As String, ByVal Xpath11 As String, ByVal SourceNode11 As String, ByVal JoinKu12 As String, ByVal Xpath12 As String, ByVal SourceNode12 As String) As XmlDocument
+        Dim TempStr As New StringBuilder
+        '先检得到源库的列表
+        Dim Result As String
+        Dim MaxPage As Integer
+        Dim i As Integer
+
+        '检测源库是否存在
+        If PageSize <= 0 Then PageSize = 20
+        Dim TmpResult As String
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+            TmpResult = Base.GetXML_MKDM(SourceKu, xmlDoc)
+            If Not TmpResult Is Nothing Then
+                Return Base.RetError("<Error/>", TmpResult)
+            End If
+        Else
+            Result = CheckFileName(SourceKu)
+            If Not Result Is Nothing Then
+                Return Base.RetError("<Error/>", Result)
+            End If
+            If CurrentPage <= 0 Then CurrentPage = 1
+            Try
+                xmlDoc.Load(FileName)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "XML结构错误")
+            End Try
+        End If
+        Dim TempNodeList As XmlNodeList
+        Dim namespaces As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc)
+        Dim TempNode As XmlNode
+        '根据IDList 得到所需要的结构，然后传值给处理过程
+        If Xpath.Trim.Length > 0 Then
+            Try
+                xmlDoc1.LoadXml("<?xml version=""1.0"" encoding=""UTF-8""?>" & IDList)
+                TempNodeList = xmlDoc1.DocumentElement.SelectNodes("//ID")
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "IDList传值错误")
+            End Try
+
+            If TempNodeList.Count = 1 Then
+                MaxPage = 1
+            Else
+                MaxPage = (TempNodeList.Count + (PageSize / 2 - 1)) / PageSize
+            End If
+            If CurrentPage > MaxPage Then
+                Return Base.RetError("<Error/>", "超出最大页数")
+            End If
+            Try
+                For i = 0 To TempNodeList.Count - 1
+                    If i >= (CurrentPage - 1) * PageSize And i < CurrentPage * PageSize Then
+                        TempNode = xmlDoc.DocumentElement.SelectSingleNode(Xpath.Replace("$$$", TempNodeList.Item(i).InnerText), namespaces)
+                        If Not TempNode Is Nothing Then
+                            TempStr.Append("<记录>" & TempNode.InnerXml & "</记录>")
+                        End If
+                    End If
+                Next
+                xmlDoc.LoadXml("<结果/>")
+                xmlDoc.DocumentElement.InnerXml = TempStr.ToString
+                TempStr = Nothing
+                'Return xmlDoc
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "查询错误，或是XPATH语句错误")
+            End Try
+            TempNodeList = xmlDoc.DocumentElement.ChildNodes
+        Else        '如果Xpath 为空的话,取全部
+            Return Base.RetError("<Error/>", "Xpath不能为空")
+        End If
+
+        '对第一个计算进行处理
+        If Xpath1.Trim.Length > 0 And Xpath1.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu1, Xpath1, PageSize, 1, SourceNode1, "查询结果1", TempNodeList, namespaces)
+        End If
+
+        '对第二个计算进行处理
+        If Xpath2.Trim.Length > 0 And Xpath2.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu2, Xpath2, PageSize, 1, SourceNode2, "查询结果2", TempNodeList, namespaces)
+        End If
+
+        '对第三个计算进行处理
+        If Xpath3.Trim.Length > 0 And Xpath3.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu3, Xpath3, PageSize, 1, SourceNode3, "查询结果3", TempNodeList, namespaces)
+        End If
+
+        '对第四个计算进行处理
+        If Xpath4.Trim.Length > 0 And Xpath4.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu4, Xpath4, PageSize, 1, SourceNode4, "查询结果4", TempNodeList, namespaces)
+        End If
+
+        '对第五个计算进行处理
+        If Xpath5.Trim.Length > 0 And Xpath5.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu5, Xpath5, PageSize, 1, SourceNode5, "查询结果5", TempNodeList, namespaces)
+        End If
+
+        '对第六个计算进行处理
+        If Xpath6.Trim.Length > 0 And Xpath6.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu6, Xpath6, PageSize, 1, SourceNode6, "查询结果6", TempNodeList, namespaces)
+        End If
+
+        '对第七个计算进行处理
+        If Xpath7.Trim.Length > 0 And Xpath7.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu7, Xpath7, PageSize, 1, SourceNode7, "查询结果7", TempNodeList, namespaces)
+        End If
+
+        '对第八个计算进行处理
+        If Xpath8.Trim.Length > 0 And Xpath8.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu8, Xpath8, PageSize, 1, SourceNode8, "查询结果8", TempNodeList, namespaces)
+        End If
+
+        '对第九个计算进行处理
+        If Xpath9.Trim.Length > 0 And Xpath9.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu9, Xpath9, PageSize, 1, SourceNode9, "查询结果9", TempNodeList, namespaces)
+        End If
+
+        '对第十个计算进行处理
+        If Xpath10.Trim.Length > 0 And Xpath10.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu10, Xpath10, PageSize, 1, SourceNode10, "查询结果10", TempNodeList, namespaces)
+        End If
+
+        '对第十一个计算进行处理
+        If Xpath11.Trim.Length > 0 And Xpath11.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu11, Xpath11, PageSize, 1, SourceNode11, "查询结果11", TempNodeList, namespaces)
+        End If
+
+        '对第十二个计算进行处理
+        If Xpath12.Trim.Length > 0 And Xpath12.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu12, Xpath12, PageSize, 1, SourceNode12, "查询结果12", TempNodeList, namespaces)
+        End If
+        '再根据条件去查询子节点的内容。进行聚合
+        Return xmlDoc1
+
+    End Function
+
+    Public Function UionQuery_ID_Page_Sql2005(ByVal SourceKu As String, ByVal Xpath As String, ByVal IDList As String, ByVal PageSize As Integer, ByVal CurrentPage As Integer, ByVal JoinKu1 As String, ByVal Xpath1 As String, ByVal SourceNode1 As String, ByVal JoinKu2 As String, ByVal Xpath2 As String, ByVal SourceNode2 As String, ByVal JoinKu3 As String, ByVal Xpath3 As String, ByVal SourceNode3 As String, ByVal JoinKu4 As String, ByVal Xpath4 As String, ByVal SourceNode4 As String, ByVal JoinKu5 As String, ByVal Xpath5 As String, ByVal SourceNode5 As String, ByVal JoinKu6 As String, ByVal Xpath6 As String, ByVal SourceNode6 As String, ByVal JoinKu7 As String, ByVal Xpath7 As String, ByVal SourceNode7 As String, ByVal JoinKu8 As String, ByVal Xpath8 As String, ByVal SourceNode8 As String, ByVal JoinKu9 As String, ByVal Xpath9 As String, ByVal SourceNode9 As String, ByVal JoinKu10 As String, ByVal Xpath10 As String, ByVal SourceNode10 As String, ByVal JoinKu11 As String, ByVal Xpath11 As String, ByVal SourceNode11 As String, ByVal JoinKu12 As String, ByVal Xpath12 As String, ByVal SourceNode12 As String) As XmlDocument
+        Dim TempStr As New StringBuilder
+        '先检得到源库的列表
+        Dim MaxPage As Integer
+        Dim i, j As Integer
+        '检测源库是否存在
+        If PageSize <= 0 Then PageSize = 20
+        If CurrentPage <= 0 Then CurrentPage = 1
+
+        Dim TempNodeList As XmlNodeList
+
+        Dim SqlXpath As String = String.Empty
+
+        Dim Tb As New Data.DataTable
+        MKDM = Base.GetMKDM(SourceKu)
+        If MKDM = -1 Then Return Base.RetError("<Error/>", SourceKu & "库名不存在")
+
+        '为了兼容XML文件库中的模板
+        '------------------------------------------------------------------
+        Dim RootName As String = String.Empty
+        Dim RootSpaceName As String = String.Empty
+        Dim SqlNameSpace As String = String.Empty
+        Dim Last As String = String.Empty
+        Tb = Base.DB.Table("Select top 1 RootName,RootNameSpace,[NameSpaces] From FormLibrary_" & MKDM & " where RootName is not null and RootNameSpace is not null", "dd")
+        If Tb.Rows.Count > 0 Then
+            If IsDBNull(Tb.Rows(0).Item(0)) = True Then
+                '如果返回的根节点为空
+                RootName = "结果"
+            Else
+                RootName = Tb.Rows(0).Item(0).ToString
+                If Xpath.IndexOf("[last()]") > 0 Then           '查询语句是否存在[last()],一般XPATH存在这个,表示取一条记录当做设计时导入结构之用
+                    Xpath = Xpath.Replace("[last()]", "")
+                    Last = "Top 1"
+                Else
+                    Last = ""
+                End If
+                SqlXpath = Xpath.Replace("/" & RootName, ".")        '兼容XPATH
+                RootSpaceName = Tb.Rows(0).Item(1).ToString
+                RootName = RootName.Trim & " " & RootSpaceName.Trim
+                SqlNameSpace = Tb.Rows(0).Item(2).ToString      '得到命名空间,在SQL里进行查询
+            End If
+        Else
+            RootName = "结果"
+        End If
+
+        If Xpath.Trim.Length > 0 Then
+            Try
+                xmlDoc1.LoadXml("<?xml version=""1.0"" encoding=""UTF-8""?>" & IDList)
+                TempNodeList = xmlDoc1.DocumentElement.SelectNodes("//ID")
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "IDList传值错误")
+            End Try
+
+            If TempNodeList.Count = 1 Then
+                MaxPage = 1
+            Else
+                MaxPage = (TempNodeList.Count + (PageSize / 2 - 1)) / PageSize
+            End If
+            If CurrentPage > MaxPage Then
+                Return Base.RetError("<Error/>", "超出最大页数")
+            End If
+            Try
+                For i = 0 To TempNodeList.Count - 1
+                    If i >= (CurrentPage - 1) * PageSize And i < CurrentPage * PageSize Then
+                        Dim FullTextSql As String = Base.GetFullTextSql(SqlXpath.Replace("$$$", TempNodeList.Item(i).InnerText))
+                        SqlXpath = Base.ReplaceXpath_Contains(SqlXpath)
+                        Try
+                            Tb = Base.DB.Table("Set arithabort ON  with xmlnamespaces(" & SqlNameSpace & ") Select  Forms.query('" & Base.ReplaceNameSpaces(SqlXpath.Replace("$$$", TempNodeList.Item(i).InnerText)) & "') From FormLibrary_" & MKDM & " where " & FullTextSql & " Forms.exist('" & Base.ReplaceNameSpaces(SqlXpath.Replace("$$$", TempNodeList.Item(i).InnerText)) & "')=1 ", "dd")
+                        Catch ex As Exception
+                            Return Base.RetError("<错误/>", "Set arithabort ON  with xmlnamespaces(" & SqlNameSpace & ") Select  Forms.query('" & Base.ReplaceNameSpaces(SqlXpath.Replace("$$$", TempNodeList.Item(i).InnerText)) & "') From FormLibrary_" & MKDM & " where " & FullTextSql & " Forms.exist('" & Base.ReplaceNameSpaces(SqlXpath.Replace("$$$", TempNodeList.Item(i).InnerText)) & "')=1 ")
+                        End Try
+                        For j = 0 To Tb.Rows.Count - 1
+                            TempStr.Append(Tb.Rows(j)(0).ToString)
+                        Next
+                    End If
+                Next
+                xmlDoc.LoadXml("<结果/>")
+                xmlDoc.DocumentElement.InnerXml = TempStr.ToString
+                TempStr = Nothing
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "查询错误，或是XPATH语句错误")
+            End Try
+            TempNodeList = xmlDoc.DocumentElement.ChildNodes
+        Else        '如果Xpath 为空的话,取全部
+            Return Base.RetError("<Error/>", "Xpath不能为空")
+        End If
+
+        '只为得到命名空间
+        '------------------------------------------------------------------
+        Try
+            xmlDoc.LoadXml("<" & RootName & " />")
+        Catch ex As Exception
+            xmlDoc.LoadXml("<结果/>")
+        End Try
+        Dim namespaces As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc)
+        '------------------------------------------------------------------
+
+
+        '对第二个计算进行处理
+        If Xpath1.Trim.Length > 0 And Xpath1.Trim.ToLower <> "null" Then
+            xmlDoc = MoreKuGetValue1(JoinKu1, Xpath1, SourceNode1, "查询结果1", TempNodeList, namespaces)
+        Else
+            Return xmlDoc
+        End If
+        If Xpath2.Trim.Length > 0 And Xpath2.Trim.ToLower <> "null" Then
+            xmlDoc = MoreKuGetValue1(JoinKu2, Xpath2, SourceNode2, "查询结果2", TempNodeList, namespaces)
+        End If
+        If Xpath3.Trim.Length > 0 And Xpath3.Trim.ToLower <> "null" Then
+            xmlDoc = MoreKuGetValue1(JoinKu3, Xpath3, SourceNode3, "查询结果3", TempNodeList, namespaces)
+        End If
+        If Xpath4.Trim.Length > 0 And Xpath4.Trim.ToLower <> "null" Then
+            xmlDoc = MoreKuGetValue1(JoinKu4, Xpath4, SourceNode4, "查询结果4", TempNodeList, namespaces)
+        End If
+        If Xpath5.Trim.Length > 0 And Xpath5.Trim.ToLower <> "null" Then
+            xmlDoc = MoreKuGetValue1(JoinKu5, Xpath5, SourceNode5, "查询结果5", TempNodeList, namespaces)
+        End If
+        If Xpath6.Trim.Length > 0 And Xpath6.Trim.ToLower <> "null" Then
+            xmlDoc = MoreKuGetValue1(JoinKu6, Xpath6, SourceNode6, "查询结果6", TempNodeList, namespaces)
+        End If
+        If Xpath7.Trim.Length > 0 And Xpath7.Trim.ToLower <> "null" Then
+            xmlDoc = MoreKuGetValue1(JoinKu7, Xpath7, SourceNode7, "查询结果7", TempNodeList, namespaces)
+        End If
+        If Xpath8.Trim.Length > 0 And Xpath8.Trim.ToLower <> "null" Then
+            xmlDoc = MoreKuGetValue1(JoinKu8, Xpath8, SourceNode8, "查询结果8", TempNodeList, namespaces)
+        End If
+        If Xpath9.Trim.Length > 0 And Xpath9.Trim.ToLower <> "null" Then
+            xmlDoc = MoreKuGetValue1(JoinKu9, Xpath9, SourceNode9, "查询结果9", TempNodeList, namespaces)
+        End If
+        If Xpath10.Trim.Length > 0 And Xpath10.Trim.ToLower <> "null" Then
+            xmlDoc = MoreKuGetValue1(JoinKu10, Xpath10, SourceNode10, "查询结果10", TempNodeList, namespaces)
+        End If
+        If Xpath11.Trim.Length > 0 And Xpath11.Trim.ToLower <> "null" Then
+            xmlDoc = MoreKuGetValue1(JoinKu11, Xpath11, SourceNode11, "查询结果11", TempNodeList, namespaces)
+        End If
+        If Xpath12.Trim.Length > 0 And Xpath12.Trim.ToLower <> "null" Then
+            xmlDoc = MoreKuGetValue1(JoinKu12, Xpath12, SourceNode12, "查询结果12", TempNodeList, namespaces)
+        End If
+
+        Return xmlDoc
+    End Function
+
+    ''' <summary>
+    ''' 对库名进行检测,XML库专用
+    ''' </summary>
+    ''' <param name="Name"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function CheckFileName(ByVal Name As String) As String
+        '检测输入的合法性
+        If Name.Trim.Length = 0 Then
+            Return "库名不能为空!"
+        End If
+
+        '将库名自动加上扩展名
+        If Name.IndexOf(".库.xml") < 0 Then
+            FileName = RootPath & "\" & Name.Trim & ".库.xml"
+        Else
+            FileName = RootPath & "\" & Name.Trim
+        End If
+
+        '检测库名所指向的文件是否存在
+        If IO.File.Exists(FileName) = False Then
+            Return "所输入库名不存在,请确认!"
+        End If
+
+        '检测认证
+        Dim Result As String = Base.Check_RZM()
+        If Not Result Is Nothing Then
+            'Return Result
+        End If
+
+        Return Nothing
+
+    End Function
+
+    ''' <summary>
+    ''' 控制表单的删除权限
+    ''' </summary>
+    ''' <param name="FID">表单号</param>
+    ''' <param name="Del">删除标志：1表示不能删，0表示可以删</param>
+    ''' <param name="User">表单创建者（可不填）</param>
+    ''' <param name="YZM">验证码</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function ModiIsDel(ByVal FID As Int64, ByVal Del As String, ByVal User As String, ByVal YZM As String) As Integer
+        If YZM <> "sunfunwzdj**" Then
+            Return 0
+        Else
+            Dim Row As Integer
+            If User = "" Then
+                Row = Base.DB.Query("update GY_XMXX set isDel=" & Del & " where XMDM=" & FID)
+            Else
+                Row = Base.DB.Query("update GY_XMXX set isDel=" & Del & ",XMSM='" & User & "' where XMDM=" & FID)
+            End If
+            If Row = 0 Then
+                Return 0
+            Else
+                Return 1
+            End If
+        End If
+    End Function
+
+    Protected Overrides Sub Finalize()
+        Base.Dispose()
+        xmlDoc1 = Nothing
+        xmlDoc = Nothing
+        MyBase.Finalize()
+    End Sub
+End Class
+

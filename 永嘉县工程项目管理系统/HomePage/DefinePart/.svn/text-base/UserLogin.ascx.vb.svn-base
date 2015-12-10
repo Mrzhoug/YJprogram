@@ -1,0 +1,79 @@
+﻿
+Partial Class HomePage_DefinePart_UserLogin
+    Inherits System.Web.UI.UserControl
+
+    Dim base As New Base
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs)
+        If TextBox3.Text.Trim = CStr(Session("ImageCode")) Then
+            If TextBox1.Text.Trim.Length > 0 Then
+                Session("LoginName") = TextBox1.Text.Trim.Replace("'", "")
+                Session("PassWord") = password1.Value.Trim.Replace("'", "")
+                If base.HomePageUserCheck = False Then
+                    base.Js.alert(Me.Page, "用户名或密码错误")
+                Else
+                    base.System_User_Login_Log(Session("LoginName"))
+                    Response.Redirect("EnterprisesLogin.aspx")
+                End If
+            Else
+                base.Js.alert(Me.Page, "用户名不能为空!")
+            End If
+        Else
+            base.Js.alert(Me.Page, "验证码错误!")
+        End If
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs)
+        If base.HomePageUserCheck = True Then
+            Response.Redirect("EnterprisesLogin.aspx")
+        End If
+
+
+    End Sub
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs)
+        Response.Redirect("EnterprisesReg.aspx")
+    End Sub
+
+    Protected Sub Page_Disposed(ByVal sender As Object, ByVal e As System.EventArgs)
+        base.Dispose()
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+
+    End Sub
+
+    Protected Sub Button5_Click(ByVal sender As Object, ByVal e As System.EventArgs)
+        Dim UserName, PassWord, Str
+        UserName = TextBox1.Text.Trim.Replace("'", "")
+        PassWord = password1.Value.Trim.Replace("'", "")
+        If UserName <> "" And PassWord <> "" Then
+            If TextBox3.Text.Trim = CStr(Session("ImageCode")) Then
+                If base.pub.GetWebConfig("SunfunSoft.Xman.ADUserAuthentication").ToLower = "true" Then     '采用AD验证
+                    Str = "&lt;script language=javascript&gt;"
+                    Str = Str & "var  xh = new  ActiveXObject(""Msxml2.XMLHTTP.3.0"");"
+                    Str = Str & "xh.open(""post"",""../../Menu/Logo.aspx"",false,""" & UserName & """,""" & PassWord & """);"
+                    Str = Str & "xh.send();"
+                    Str = Str & "if (xh.status==200)"
+                    Str = Str & "{location.href=""../../index.aspx"";}"
+                    Str = Str & "else"
+                    Str = Str & "{location.href=""../../default.aspx"";}"
+                    Str = Str & "&lt;/script&gt;"
+                    Response.Write(Server.HtmlDecode(Str))
+                Else                '数据验证
+                    If base.CheckUserAuthentication(UserName, base.EnCrypt.MD5(PassWord)) = True Then
+                        Response.Redirect("../Index.aspx")
+                    Else
+                        base.Js.alert(Me.Page, "用户名或密码错误,请检查!")
+                    End If
+                End If
+            Else
+                base.Js.alert(Me.Page, "验证码错误!")
+            End If
+        ElseIf UserName = "" Then
+            base.Js.alert(Me.Page, "用户名不能为空!")
+        ElseIf PassWord = "" Then
+            base.Js.alert(Me.Page, "密码不能为空!")
+        End If
+    End Sub
+End Class

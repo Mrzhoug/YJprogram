@@ -1,0 +1,35 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ExtMenu.aspx.vb" Inherits="Menu_ExtMenu" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>显示菜单</title>
+    <link rel="stylesheet" type="text/css" href="../images/Ext.UI/resources/css/ext-all.css" />
+    <script type="text/javascript" src="../../Pub/function.js"></script>
+    <style type="text/css">
+    BODY {
+	 FONT-SIZE: 9pt; TEXT-DECORATION: none
+    }
+    A {
+	    FONT-SIZE: 9pt; COLOR: #000000; FONT-STYLE: normal; TEXT-DECORATION: none
+    }
+    A:visited {
+	   FONT-SIZE: 9pt; FONT-STYLE: normal; TEXT-DECORATION: none
+    }
+    A:active {
+	    FONT-SIZE: 9pt; COLOR: red; FONT-STYLE: normal; TEXT-DECORATION: none
+    }
+    A:hover {
+	    COLOR: #ff3300; FONT-STYLE: normal; TEXT-DECORATION: underline
+    }
+    </style>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+    
+    </div>
+    </form>
+</body>
+</html>

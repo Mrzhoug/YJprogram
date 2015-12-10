@@ -1,0 +1,458 @@
+﻿//CID 1320 //2012.09.13 //Begin
+nicEditorPanel.prototype.construct = function (e, options, nicEditor) {
+    this.elm = e;
+    this.options = options;
+    this.ne = nicEditor;
+    this.panelButtons = new Array();
+    this.buttonList = bkExtend([], this.ne.options.buttonList);
+
+    this.panelElm = e;
+
+    //CID 1325 //2012.09.15 //Begin
+    e.innerHTML = "";
+    //CID 1325 //2012.09.15 //End
+
+    var opt = this.ne.options;
+    var buttons = opt.buttons;
+    for (button in buttons) {
+        this.addButton(button, opt, true);
+    }
+    this.reorder();
+    //CID 1327 //2012.09.15 //Begin
+    try {
+        e.noSelect();
+    } catch (exception) { };
+    //CID 1327 //2012.09.15 //End
+}
+//CID 1320 //2012.09.13 //End
+
+//CID 1320 //2012.09.13 //Begin
+bkLib.cancelEvent = function (e) {
+    e = e || window.event;
+    if (e) {
+        if (e.preventDefault && e.stopPropagation) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }
+    return false;
+}
+//CID 1320 //2012.09.13 //End
+
+//CID 1323 //2012.09.14 //Begin
+var NicEditXHTML = bkClass.extend({
+    stripAttributes: ['_moz_dirty', '_moz_resizing', '_extended'],
+    //CID 1384 //2012.10.09 //Begin
+    //noShort: ['style', 'title', 'script', 'textarea', 'a'],
+    noShort: ['script'],
+    //CID 1384 //2012.10.09 //End
+    cssReplace: { 'font-weight:bold;': 'strong', 'font-style:italic;': 'em' },
+    sizes: { 1: 'xx-small', 2: 'x-small', 3: 'small', 4: 'medium', 5: 'large', 6: 'x-large' },
+
+    construct: function () {
+    },
+
+    saveXhtml: function (node) {
+        var xhtml = this.toXHTML(node, false, true);
+        //CID 1382 //2012.10.09 //Begin
+        if (xhtml.indexOf("<div") != 0) {
+            xhtml = "<div xmlns=\"http://www.w3.org/1999/xhtml\">" + xhtml + "</div>";
+        }
+        //CID 1382 //2012.10.09 //End
+        //CID 1390 //2012.10.11 //Begin
+        var childElementCount = 0;
+        for (var i = 0; i < node.childNodes.length; i++) {
+            var childNode = node.childNodes[i];
+            if (childNode.nodeType == 1) {
+                if (childNode.nodeName.indexOf("/") < 0) {
+                    childElementCount++;
+                }
+            }
+        }
+        if (childElementCount > 1) {
+            xhtml = "<div xmlns=\"http://www.w3.org/1999/xhtml\">" + xhtml + "</div>";
+        }
+        //CID 1390 //2012.10.11 //End
+        return xhtml;
+    },
+
+    toXHTML: function (n, r, d) {
+        var txt = '';
+        var attrTxt = '';
+        var cssTxt = '';
+        var nType = n.nodeType;
+        var nName = n.nodeName.toLowerCase();
+        var nChild = n.hasChildNodes && n.hasChildNodes();
+        var extraNodes = new Array();
+
+        switch (nType) {
+            case 1:
+                var nAttributes = n.attributes;
+
+                //CID 1378 //2012.10.09 //Comment
+                /*
+                switch (nName) {
+                case 'b':
+                nName = 'strong';
+                break;
+                case 'i':
+                nName = 'em';
+                break;
+                case 'font':
+                nName = 'span';
+                break;
+                }
+                */
+                //CID 1378 //2012.10.09 //End
+
+                if (r) {
+                    for (var i = 0; i < nAttributes.length; i++) {
+                        var attr = nAttributes[i];
+
+                        var attributeName = attr.nodeName.toLowerCase();
+                        var attributeValue = attr.nodeValue;
+
+                        //CID 1398 //2012.10.17 //Begin
+                        if (attributeName == "istextcontrol") {
+                            continue;
+                        }
+                        //CID 1398 //2012.10.17 //End
+
+                        //CID 1384 //2012.10.09 //Begin
+                        if (attributeName == "style") {
+                            if (InfoJet_IsIE()) {
+                                attributeValue = n.style.cssText;
+                            }
+                        } else {
+                            if (!attr.specified || !attributeValue || bkLib.inArray(this.stripAttributes, attributeName) || typeof (attributeValue) == "function") {
+                                continue;
+                            }
+                        }
+                        //CID 1384 //2012.10.09 //End
+
+                        //CID 1378 //2012.10.09 //Comment
+                        /*
+                        switch (attributeName) {
+                        case 'style':
+                        var css = attributeValue.replace(/ /g, "");
+                        for (itm in this.cssReplace) {
+                        if (css.indexOf(itm) != -1) {
+                        extraNodes.push(this.cssReplace[itm]);
+                        css = css.replace(itm, '');
+                        }
+                        }
+                        cssTxt += css;
+                        attributeValue = "";
+                        break;
+                        case 'class':
+                        attributeValue = attributeValue.replace("Apple-style-span", "");
+                        break;
+                        case 'size':
+                        cssTxt += "font-size:" + this.sizes[attributeValue] + ';';
+                        attributeValue = "";
+                        break;
+                        }
+                        */
+                        //CID 1378 //2012.10.09 //End
+
+                        if (attributeValue) {
+                            attrTxt += ' ' + attributeName + '="' + attributeValue + '"';
+                        }
+                    }
+
+                    //CID 1384 //2012.10.09 //Comment
+                    /*
+                    if (cssTxt) {
+                    attrTxt += ' style="' + cssTxt + '"';
+                    }
+                    */
+                    //CID 1384 //2012.10.09 //End
+
+                    for (var i = 0; i < extraNodes.length; i++) {
+                        txt += '<' + extraNodes[i] + '>';
+                    }
+
+                    if (attrTxt == "" && nName == "span") {
+                        r = false;
+                    }
+                    if (r) {
+                        //CID 1385 //2012.10.09 //Begin
+                        if (nName.indexOf("/") >= 0 && (!nChild)) {
+                            //do nothing.
+                        }
+                        else {
+                            txt += '<' + nName;
+                            if (nName != 'br') {
+                                txt += attrTxt;
+                            }
+                        }
+                        //CID 1385 //2012.10.09 //End
+                    }
+                }
+
+                //CID 1385 //2012.10.09 //nName
+                if (!nChild && !bkLib.inArray(this.noShort, nName)) {
+                    if (r) {
+                        //CID 1385 //2012.10.09 //Begin
+                        if (nName.indexOf("/") >= 0) {
+                            //do nothing.
+                        } else {
+                            txt += ' />';
+                        }
+                        //CID 1385 //2012.10.09 //End
+                    }
+                } else {
+                    if (r) {
+                        txt += '>';
+                    }
+
+                    for (var i = 0; i < n.childNodes.length; i++) {
+                        var results = this.toXHTML(n.childNodes[i], true, true);
+                        if (results) {
+                            txt += results;
+                        }
+                    }
+                }
+
+                if (r && nChild) {
+                    txt += '</' + nName + '>';
+                }
+
+                for (var i = 0; i < extraNodes.length; i++) {
+                    txt += '</' + extraNodes[i] + '>';
+                }
+
+                break;
+            case 3:
+                //if(n.nodeValue != '\n') {
+                txt += n.nodeValue;
+                //}
+                break;
+        }
+
+        return txt;
+    }
+});
+//CID 1323 //2012.09.14 //End
+
+//CID 1376 //2012.10.06 //Begin
+//CID 1370 //2012.10.06 //Begin
+nicEditorConfig.prototype.buttonList = [
+'fontSize',
+'fontFamily',
+'bold',
+'italic',
+'underline',
+'forecolor',
+'bgcolor',
+'left',
+'center',
+'right',
+'justify',
+'ol',
+'ul',
+'indent',
+'outdent',
+'link', 
+'unlink',
+'image',
+//'upload',
+];
+//CID 1370 //2012.10.06 //End
+//CID 1376 //2012.10.06 //End
+
+//CID 1369 //2012.10.08 //Begin
+bkElement.prototype.removeClass = function (cls) {
+    if (this.hasClass(cls)) {
+        this.className = this.className.replace(new RegExp('(\\s|^)nicEdit-' + cls + '(\\s|$)'), ' ').replace(/(^\s*)|(\s*$)/g, "");
+    }
+    return this;
+}
+//CID 1369 //2012.10.08 //End
+
+//CID 1377 //2012.10.09 //Begin
+nicEditorBgColorButton.prototype.colorSelect = function (c) {
+    this.ne.nicCommand('BackColor', c);
+    this.removePane();
+};
+//CID 1377 //2012.10.09 //End
+
+//CID 1376 //2012.10.09 //Begin
+nicEditorAdvancedButton.prototype.addForm = function (f, elm) {
+    //CID 1376 //2012.10.09 //Begin
+    InfoJet_NicEditor_PaneExisting = true;
+    //CID 1376 //2012.10.09 //End
+    this.form = new bkElement('form').addEvent('submit', this.submit.closureListener(this));
+    this.pane.append(this.form);
+    this.inputs = {};
+
+    for (itm in f) {
+        var field = f[itm];
+        var val = '';
+        if (elm) {
+            val = elm.getAttribute(itm);
+        }
+        if (!val) {
+            val = field['value'] || '';
+        }
+        var type = f[itm].type;
+
+        if (type == 'title') {
+            new bkElement('div').setContent(field.txt).setStyle({ fontSize: '14px', fontWeight: 'bold', padding: '0px', margin: '2px 0' }).appendTo(this.form);
+        } else {
+            var contain = new bkElement('div').setStyle({ overflow: 'hidden', clear: 'both' }).appendTo(this.form);
+            if (field.txt) {
+                new bkElement('label').setAttributes({ 'for': itm }).setContent(field.txt).setStyle({ margin: '2px 4px', fontSize: '13px', width: '50px', lineHeight: '20px', textAlign: 'right', 'float': 'left' }).appendTo(contain);
+            }
+
+            switch (type) {
+                case 'text':
+                    this.inputs[itm] = new bkElement('input').setAttributes({ id: itm, 'value': val, 'type': 'text' }).setStyle({ margin: '2px 0', fontSize: '13px', 'float': 'left', height: '20px', border: '1px solid #ccc', overflow: 'hidden' }).setStyle(field.style).appendTo(contain);
+                    break;
+                case 'select':
+                    this.inputs[itm] = new bkElement('select').setAttributes({ id: itm }).setStyle({ border: '1px solid #ccc', 'float': 'left', margin: '2px 0' }).appendTo(contain);
+                    for (opt in field.options) {
+                        var o = new bkElement('option').setAttributes({ value: opt, selected: (opt == val) ? 'selected' : '' }).setContent(field.options[opt]).appendTo(this.inputs[itm]);
+                    }
+                    break;
+                case 'content':
+                    this.inputs[itm] = new bkElement('textarea').setAttributes({ id: itm }).setStyle({ border: '1px solid #ccc', 'float': 'left' }).setStyle(field.style).appendTo(contain);
+                    this.inputs[itm].value = val;
+            }
+        }
+    }
+    new bkElement('input').setAttributes({ 'type': 'submit' }).setStyle({ backgroundColor: '#efefef', border: '1px solid #ccc', margin: '3px 0', 'float': 'left', 'clear': 'both' }).appendTo(this.form);
+    this.form.onsubmit = bkLib.cancelEvent;
+};
+//CID 1376 //2012.10.09 //End
+
+//CID 1376 //2012.10.09 //Begin
+nicLinkButton.prototype.addPane = function () {
+    this.ln = this.ne.selectedInstance.selElm().parentTag('A');
+    this.addForm({
+        '': { type: 'title', txt: 'Add/Edit Link' },
+        'href': { type: 'text', txt: 'URL', value: 'http://', style: { width: '150px'} },
+        'title': { type: 'text', txt: 'Title' },
+        'target': { type: 'select', txt: 'Open In', value: '_blank', options: { '_blank': 'New Window', '': 'Current Window' }, style: { width: '100px'} }
+    }, this.ln);
+};
+//CID 1376 //2012.10.09 //End
+
+
+//CID 1376 //2012.10.09 //Begin
+nicImageButton.prototype.addPane = function () {
+    this.im = this.ne.selectedInstance.selElm().parentTag('IMG');
+    this.addForm({
+        '': { type: 'title', txt: 'Add/Edit Image' },
+        'src': { type: 'text', txt: 'URL', 'value': 'http://', style: { width: '150px'} },
+        'alt': { type: 'text', txt: 'Alt Text', style: { width: '100px'} },
+        'align': { type: 'select', txt: 'Align', options: { '': 'Default', 'left': 'Left', 'right': 'Right'} }
+    }, this.im);
+};
+//CID 1376 //2012.10.09 //End
+
+//CID 1393 //2012.10.17 //Begin
+nicEditorSelect.prototype.construct = function (e, buttonName, options, nicEditor) {
+    this.options = options.buttons[buttonName];
+    this.elm = e;
+    this.ne = nicEditor;
+    this.name = buttonName;
+    this.selOptions = new Array();
+
+    /*
+    this.margin = new bkElement('div').setStyle({ 'float': 'left', margin: '2px 1px 0 1px' }).appendTo(this.elm);
+    this.contain = new bkElement('div').setStyle({ width: '90px', height: '20px', cursor: 'pointer', overflow: 'hidden' }).addClass('selectContain').addEvent('click', this.toggle.closure(this)).appendTo(this.margin);
+    */
+    this.margin = new bkElement('DIV').setStyle({ 'float': 'left', marginTop: '2px' }).appendTo(e);
+    this.contain = new bkElement('DIV').setStyle({ width: '20px', height: '20px' }).addClass('buttonContain').appendTo(this.margin);
+    this.border = new bkElement('DIV').setStyle({ backgroundColor: '#efefef', border: '1px solid #efefef' }).appendTo(this.contain);
+    this.button = new bkElement('DIV').setStyle({ width: '18px', height: '18px', overflow: 'hidden', zoom: 1, cursor: 'pointer' }).addClass('button').setStyle(this.ne.getIcon(buttonName, options)).appendTo(this.border);
+    this.button.addEvent('mouseover', this.hoverOn.closure(this)).addEvent('mouseout', this.hoverOff.closure(this)).addEvent('mousedown', this.toggle.closure(this)).noSelect();
+
+    //this.items = new bkElement('div').setStyle({ overflow: 'hidden', zoom: 1, border: '1px solid #ccc', paddingLeft: '3px', backgroundColor: '#fff' }).appendTo(this.contain);
+    //this.control = new bkElement('div').setStyle({ overflow: 'hidden', 'float': 'right', height: '18px', width: '16px' }).addClass('selectControl').setStyle(this.ne.getIcon('arrow', options)).appendTo(this.items);
+    //this.txt = new bkElement('div').setStyle({ overflow: 'hidden', 'float': 'left', width: '66px', height: '14px', marginTop: '1px', fontFamily: 'sans-serif', textAlign: 'center', fontSize: '12px' }).addClass('selectTxt').appendTo(this.items);
+
+    if (!window.opera) {
+        //this.contain.onmousedown = this.control.onmousedown = this.txt.onmousedown = bkLib.cancelEvent;
+        this.button.onmousedown = this.button.onclick = bkLib.cancelEvent;
+    }
+
+    this.margin.noSelect();
+
+    this.ne.addEvent('selected', this.enable.closure(this)).addEvent('blur', this.disable.closure(this));
+
+    this.disable();
+    this.init();
+};
+//CID 1393 //2012.10.17 //End
+
+//CID 1393 //2012.10.17 //Begin
+nicEditorSelect.prototype.hoverOn = function () {
+    if (!this.isDisabled) {
+        this.isHover = true;
+        this.updateState();
+        this.ne.fireEvent("buttonOver", this);
+    }
+}
+//CID 1393 //2012.10.17 //End
+
+//CID 1393 //2012.10.17 //Begin
+nicEditorSelect.prototype.hoverOff = function () {
+    this.isHover = false;
+    this.updateState();
+    this.ne.fireEvent("buttonOut", this);
+}
+//CID 1393 //2012.10.17 //End
+
+//CID 1393 //2012.10.17 //Begin
+nicEditorSelect.prototype.updateState = function () {
+    if (this.isDisabled) { this.setBg(); }
+    else if (this.isHover) { this.setBg('hover'); }
+    else if (this.isActive) { this.setBg('active'); }
+    else { this.setBg(); }
+}
+//CID 1393 //2012.10.17 //End
+
+//CID 1393 //2012.10.17 //Begin
+nicEditorSelect.prototype.setBg = function (state) {
+    switch (state) {
+        case 'hover':
+            var stateStyle = { border: '1px solid #666', backgroundColor: '#ddd' };
+            break;
+        case 'active':
+            var stateStyle = { border: '1px solid #666', backgroundColor: '#ccc' };
+            break;
+        default:
+            var stateStyle = { border: '1px solid #efefef', backgroundColor: '#efefef' };
+    }
+    this.border.setStyle(stateStyle).addClass('button-' + state);
+}
+//CID 1393 //2012.10.17 //End
+
+//CID 1393 //2012.10.17 //Begin
+nicEditorSelect.prototype.setDisplay = function (txt) {
+    //this.txt.setContent(txt);
+};
+//CID 1393 //2012.10.17 //End
+
+//CID 1393 //2012.10.17 //Begin
+nicEditorSelect.prototype.open = function () {
+    this.pane = new nicEditorPane(this.border, this.ne, { width: '88px', padding: '0px', borderTop: 0, borderLeft: '1px solid #ccc', borderRight: '1px solid #ccc', borderBottom: '0px', backgroundColor: '#fff' });
+
+    for (var i = 0; i < this.selOptions.length; i++) {
+        var opt = this.selOptions[i];
+        var itmContain = new bkElement('div').setStyle({ overflow: 'hidden', borderBottom: '1px solid #ccc', width: '88px', textAlign: 'left', overflow: 'hidden', cursor: 'pointer' });
+        var itm = new bkElement('div').setStyle({ padding: '0px 4px' }).setContent(opt[1]).appendTo(itmContain).noSelect();
+        itm.addEvent('click', this.update.closure(this, opt[0])).addEvent('mouseover', this.over.closure(this, itm)).addEvent('mouseout', this.out.closure(this, itm)).setAttributes('id', opt[0]);
+        this.pane.append(itmContain);
+        if (!window.opera) {
+            itm.onmousedown = bkLib.cancelEvent;
+        }
+    }
+};
+//CID 1393 //2012.10.17 //End
+
+//CID 1393 //2012.10.17 //Begin
+nicEditorConfig.prototype.iconList = { "bgcolor": 2, "forecolor": 3, "bold": 4, "center": 5, "hr": 6, "indent": 7, "italic": 8, "justify": 9, "left": 10, "ol": 11, "outdent": 12, "removeformat": 13, "right": 14, "save": 15, "strikethrough": 16, "subscript": 17, "superscript": 18, "ul": 19, "underline": 20, "image": 21, "link": 22, "unlink": 23, "close": 24, "fontSize": 25, "fontFamily": 26 };
+//CID 1393 //2012.10.17 //End

@@ -1,0 +1,10 @@
+﻿
+Partial Class HomePage_Default
+    Inherits System.Web.UI.Page
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim Base As New Base
+        Me.Title = Base.pub.GetWebConfig("SunfunSoft.Xman.Title").ToString
+        titlestr.InnerHtml = Base.pub.GetWebConfig("SunfunSoft.Xman.Title").ToString
+    End Sub
+End Class

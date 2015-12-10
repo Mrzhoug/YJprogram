@@ -1,0 +1,137 @@
+﻿
+Partial Class manager_XJXM_ShowAbout_XMSP_NoLc
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim USerKSDM As Integer
+    Dim Fid As String
+    Dim XMDM, MKDM As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+        USerKSDM = Base.GetKSDM(UserID)
+
+        Try
+            Fid = Request("SID")
+        Catch ex As Exception
+            Fid = 0
+        End Try
+
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("select XMDM,MKDM from XX_XMJC where FID=" & Fid, "XX_XMJC")
+        If Tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "项目流程有问题！")
+            Exit Sub
+        Else
+            XMDM = Tb.Rows(0).Item(0)
+            MKDM = Tb.Rows(0).Item(1)
+        End If
+
+        'Tb = Base.DB.Table("select FQR,FQtime,YGXM From GY_XMSP,GY_YGDM Where GY_XMSP.FQR = GY_YGDM.DLMC and GY_XMSP.XMDM=" & XMDM & "  and GY_XMSP.MKDM = " & MKDM, "ddd")
+
+
+        Tb = Base.DB.Table("select GY_KSDM.KSMC,FQR,FQtime,gy_ygdm.ygxm From GY_XMSP,GY_KSDM,gy_ygdm Where gy_ygdm.dlmc = gy_xmsp.fqr and   GY_XMSP.FQKS = GY_KSDM.KSDM and GY_XMSP.XMDM= " & XMDM & "  and GY_XMSP.MKDM = " & MKDM, "dd")
+
+        If Tb.Rows.Count = 0 Then
+            'Base.Js.alert(Me, "非法访问！")
+            '暂时无审批信息
+            'Exit Sub
+        Else
+            Response.Write("<center><font size=2>该审阅于 " & Tb.Rows(0)(2) & " 由【" & Tb.Rows(0)(0) & "】的" & Tb.Rows(0)(3) & "(" & Tb.Rows(0)(1) & ") 发起</font></center>")
+        End If
+        Conn.SelectParameters("XMDM").DefaultValue = XMDM
+        Conn.SelectParameters("MKDM").DefaultValue = MKDM
+        '得到当前IE的用户名
+        If GridView1.Rows.Count = 0 Then
+            Response.Write("<br><br><center><b>此项目暂时无审阅信息</b></center>")
+        Else
+
+            Tb = Base.DB.Table("SELECT Overdate,YGXM,GY_YGDM.DLMC,About FROM GY_XMSP_Over,GY_YGDM where GY_YGDM.YGDM=GY_XMSP_OVER.YGDM and XMDM=" & XMDM & " and mkdm=" & MKDM, "gdsagas")
+            If Tb.Rows.Count > 0 Then
+                Response.Write("&nbsp;<font size=2 color=red>该审阅于 " & Tb.Rows(0).Item(0) & " 被用户 " & Tb.Rows(0)(1) & "(" & Tb.Rows(0)(2) & ") 强制终止!<br>&nbsp;理由：" & Tb.Rows(0)(3) & "</font>")
+            End If
+        End If
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        Dim Tb As New Data.DataTable
+        Dim tempDT As New Data.DataTable
+
+        Dim YGDM As String
+        Dim KSDM As String
+        Dim TempStr As String = String.Empty
+        For i = 0 To GridView1.Rows.Count - 1
+            'Tb = Base.DB.Table("select SPBZ,ZFBZ,GY_XMSP.YGDM,MKDM,DLMC from GY_XMSP,GY_YGDM where GY_YGDM.YGDM=GY_XMSP.YGDM and Cid = " & GridView1.DataKeys(i).Item(0), "GY_XMSP")
+            Tb = Base.DB.Table("select SPBZ,ZFBZ,GY_XMSP.KSDM,MKDM,KSMC from GY_XMSP,GY_KSDM where GY_KSDM.KSDM=GY_XMSP.KSDM and Cid = " & GridView1.DataKeys(i).Item(0), "GY_XMSP")
+            If Tb.Rows.Count > 0 Then
+
+                '显示科室代码
+                KSDM = GridView1.Rows(i).Cells(0).Text
+                tempDT = Base.DB.Table("select ksmc from gy_ksdm where ksdm =" & KSDM, "dd")
+                If tempDT.Rows.Count <> 0 Then
+                    GridView1.Rows(i).Cells(0).Text = tempDT.Rows(0).Item(0).ToString
+                Else
+                    GridView1.Rows(i).Cells(0).Text = "空"
+                End If
+
+                '显示用户名称
+                YGDM = GridView1.Rows(i).Cells(1).Text
+                tempDT = Base.DB.Table("select ygxm,dlmc from gy_ygdm where ygdm = " & YGDM, "dd")
+                If tempDT.Rows.Count <> 0 Then
+                    GridView1.Rows(i).Cells(1).Text = tempDT.Rows(0).Item(0).ToString & "(" & tempDT.Rows(0).Item(1).ToString & ")"
+                Else
+                    GridView1.Rows(i).Cells(1).Text = "空"
+                End If
+
+                If Tb.Rows(0).Item(1) = 1 Then
+                    TempStr = "转发："
+                    Tb = Base.DB.Table("select GY_YGDM.YGXM from GY_XMSP,GY_YGDM Where zfbz=0 and GY_YGDM.YGDM = GY_XMSP.YGDM and  FQR='" & Tb.Rows(0).Item(4) & "' and XMDM = " & XMDM & " and MKDM=" & Tb.Rows(0).Item(3), "GY_XMSP")
+                    If Tb.Rows.Count > 0 Then
+                        TempStr = TempStr & Tb.Rows(0).Item(0)
+                    Else
+                        TempStr = TempStr & "未知"
+                    End If
+                Else
+                    Select Case Tb.Rows(0).Item(0).ToString()
+                        Case 0
+                            TempStr = "未进行处理"
+                        Case 1
+                            TempStr = "审阅通过"
+                        Case -1
+                            TempStr = "审阅未通过"
+                    End Select
+                End If
+
+
+                GridView1.Rows(i).Cells(3).Text = TempStr
+
+
+                'GridView1.Rows(i).Cells(0).Text += "(" & Tb.Rows(0)(4).ToString.Trim & ")"
+                'Dim TempStr As String = ""
+                'If Tb.Rows(0).Item(1) = 1 Then
+                '    TempStr = "转发："
+                '    Tb = Base.DB.Table("select GY_YGDM.YGXM from GY_XMSP,GY_YGDM Where zfbz=0 and GY_YGDM.YGDM = GY_XMSP.YGDM and  FQR='" & Tb.Rows(0).Item(4) & "' and XMDM = " & XMDM & " and MKDM=" & Tb.Rows(0).Item(3), "GY_XMSP")
+                '    If Tb.Rows.Count > 0 Then
+                '        TempStr = TempStr & Tb.Rows(0).Item(0)
+                '    Else
+                '        TempStr = TempStr & "未知"
+                '    End If
+                'Else
+                '    Select Case Tb.Rows(0).Item(0).ToString()
+                '        Case 0
+                '            TempStr = "未进行处理"
+                '        Case 1
+                '            TempStr = "审阅通过"
+                '        Case -1
+                '            TempStr = "审阅未通过"
+                '    End Select
+                'End If
+                'GridView1.Rows(i).Cells(2).Text = TempStr
+
+            End If
+        Next
+    End Sub
+End Class

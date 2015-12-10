@@ -1,0 +1,104 @@
+﻿
+Partial Class manager_Forms_FormToTop
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim LCDM As Integer
+    Dim MKDM As Integer
+    Dim XMDM As Integer
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim Cid As Integer
+    Dim KindStr As String
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Dim OutTop As Integer
+        Try
+            LCDM = Request("LCDM")
+            Cid = Request("Fid")
+            OutTop = Request("OutTop")
+        Catch ex As Exception
+            Response.Write("参数错误或非法访问")
+            Response.End()
+        End Try
+
+
+        Dim tb As New Data.DataTable
+        If Cid = 0 Then
+            Try
+                XMDM = Request("XMDM")
+                MKDM = Request("MKDM")
+            Catch ex As Exception
+            End Try
+            tb = Base.DB.Table("Select FID from XX_XMJC where xmdm=" & XMDM & " and mkdm=" & MKDM, "dd")
+            If tb.Rows.Count > 0 Then
+                Cid = tb.Rows(0)("FID")
+            Else
+                Response.Write("参数错误或非法访问")
+                Response.End()
+            End If
+        Else
+            '先得到MKDM
+            tb = Base.DB.Table("select MKDM from XX_XMJC where FID=" & Cid, "XX_XMJC")
+            If tb.Rows.Count <= 0 Then
+                Base.Js.alert(Me, "非法访问!")
+                Exit Sub
+            End If
+            MKDM = tb.Rows(0)(0)
+            XMDM = 0
+        End If
+
+        If Base.GetUserHaveQX(UserID, MKDM) < 2 Then
+            Base.Js.alert(Me, "你无权使用置顶功能.你必须有写的权限才能使用!")
+            Exit Sub
+        End If
+
+        KindStr = Request("K")
+        Select Case KindStr
+            Case "state"
+                Dim state As Integer
+                Try
+                    state = Request("state")
+                Catch ex As Exception
+                    state = 0
+                End Try
+                If state <> 0 Then
+                    Base.DB.Query("Update XX_XMJC set State=" & state & " where FID=" & Cid)
+                    Dim row As DataRow
+                    row = Base.DB.Row("SELECT MKMC,XsnDir,MKDM FROM GY_MKXX where MKDM =" & MKDM, "D")
+                    If Not row Is Nothing Then
+                        Base.SynFormState(Cid, row.Item("MKMC").ToString, Login_User)            '同步状态
+                    End If
+                End If
+                If XMDM > 0 Then
+                    Base.Js.WriteScript(Me, "window.close();")
+                    'Base.Js.CloseGoTo(Me, "设置成功", "../XJXM/ProjectMap.aspx?XMDM=" & XMDM)
+                Else
+                    Base.Js.alert(Me, "设置成功")
+                End If
+            Case Else           '表示是置顶与取消置顶
+                Dim MaxTop As Integer
+                If OutTop = 1 Then      '取消置顶功能.
+                    MaxTop = -1
+                Else
+                    tb = Base.DB.Table("select max(topnum) from XX_XMJC where mkdm=" & MKDM, "Topnum")
+                    If tb.Rows.Count > 0 Then
+                        If IsDBNull(tb.Rows(0)(0)) = True Then
+                            MaxTop = 1
+                        Else
+                            MaxTop = tb.Rows(0)(0)
+                        End If
+                    Else
+                        MaxTop = 1
+                    End If
+                End If
+
+                Base.DB.Query("update XX_XMJC set TopNum=" & MaxTop + 1 & " where FID=" & Cid)
+                Response.Redirect("../XJXM/ShowList.aspx?LCDM=" & LCDM)
+        End Select
+
+        
+    End Sub
+End Class

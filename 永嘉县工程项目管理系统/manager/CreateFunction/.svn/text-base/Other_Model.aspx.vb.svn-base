@@ -1,0 +1,102 @@
+﻿Imports System.Xml
+Imports System.IO
+Partial Class manager_CreateFunction_Other_Model
+    Inherits System.Web.UI.Page
+    Dim RootPath As String
+    Dim Base As New Base
+    Dim CurrentUrl As String
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking()        '这里对文件进行权限限制
+
+        '得到当前路径的实际路径　
+        RootPath = Request.MapPath("../../") & "ApplicationTemplateLibrary\"
+        RootPath = RootPath.Substring(0, RootPath.Length - 1)
+        '得到当前的ＵＲＬ路径        
+        Dim Url As String = Request.ServerVariables("Url").ToLower
+        Dim Host As String = Request.ServerVariables("http_host")
+        CurrentUrl = Url.Replace("manager/createfunction/other_model.aspx", "ApplicationTemplateLibrary/")
+        Base.IO.CreateDir(RootPath)
+        GridView1.DataSource = Base.IO.CreateDataSetFromFileList(RootPath)
+        If Not Page.IsPostBack Then
+            GridView1.DataBind()
+        End If
+    End Sub
+
+    Protected Sub LinkButton1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles LinkButton1.Click
+        '这里所做操作包括上传,并修改模板里的发布路径,并保存     
+        If XsnFile.PostedFile.ContentLength = 0 Then Exit Sub
+
+        Dim TempFilename As String
+        If XsnFileName.Text.Length = 0 Then     '如果不输入模板名,默认为上传的文件名
+            TempFilename = XsnFile.FileName
+        Else
+            Dim index As Integer
+            index = XsnFile.FileName.LastIndexOf(".")
+            If index > 0 Then       '得到上传源文件的扩展名
+                TempFilename = XsnFile.FileName.Trim.Substring(index)
+            Else        '如果原来的文件名没有扩展名。则默认为XML
+                TempFilename = ".xml"
+            End If
+            TempFilename = XsnFileName.Text.Trim & TempFilename
+        End If
+        Dim BasePath As String = Server.MapPath("../../") & "ApplicationTemplateLibrary\"
+        If IO.File.Exists(BasePath & TempFilename) Then
+            Base.Js.alert(Me, "你要上传的文件已经存在,你重新输入模板名!")
+            Exit Sub
+        End If
+
+        '上传模板 
+        Base.Upload.Path = "../../" & "ApplicationTemplateLibrary"
+        If Base.GetSystemParameters("应用模板库_上传扩展名") Is Nothing Then
+            Base.Upload.FileType = "xml"
+        Else
+            Base.Upload.FileType = Base.GetSystemParameters("应用模板库_上传扩展名")
+        End If
+
+        Base.Upload.Sizes = 10480
+        If Base.Upload.FileSaveAs(XsnFile, TempFilename) = False Then
+            Base.Js.alert(Me, Base.Upload.ReturnMessage, "Other_Model.aspx")
+        Else
+            Base.Js.alert(Me, "上传成功", "Other_Model.aspx")
+        End If
+
+
+        '刷新显示的列表
+        'GridView1.DataSource = Base.IO.CreateDataSetFromFileList(RootPath)
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Cells(1).Text = "<a href='OpenFile.aspx?FileName=" & GridView1.Rows(i).Cells(1).Text & "'>" & GridView1.Rows(i).Cells(1).Text & "</a>"
+            GridView1.Rows(i).Attributes.Add("onmouseover", "this.style.backgroundColor='#e4e4e4'")
+            GridView1.Rows(i).Attributes.Add("onmouseout", "this.style.backgroundColor='white'")
+            CType(GridView1.Rows(i).Cells(3).Controls(0), LinkButton).Attributes.Add("onclick", "return confirm('你确认删除此文件吗?');")
+        Next
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+        GridView1.SelectedIndex = -1
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        '这里做删除操作
+        Dim TempFileName As String = GridView1.DataKeys(e.NewSelectedIndex).Item(0)
+        Try
+            File.Delete(RootPath & "\" & TempFileName)
+        Catch ex As Exception
+            Base.Js.alert(Me, "删除模板失败")
+        End Try
+
+        '刷新显示的列表
+        GridView1.DataSource = Base.IO.CreateDataSetFromFileList(RootPath)
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        GridView1.DataBind()
+    End Sub
+End Class

@@ -1,0 +1,198 @@
+﻿
+Partial Class manager_Desktop_SendMessageList
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim MaxPage As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+
+        Dim SqlStr As String = "FROM SendMessage WHERE (ToID=0 and FromId =" & UserID & ") and (IsDel is null or IsDel=0)"
+
+        If TextBox1.Text.Trim.Length > 0 Then
+            SqlStr += " and Title like '%" & Base.SqlFilter(TextBox1.Text) & "%'"
+        End If
+        If DropDownList1.SelectedItem.Value <> "全部" Then
+            SqlStr += " and Msgkind=" & Base.SqlFilter(DropDownList1.SelectedIndex)
+        End If
+
+        Conn.SelectCommand = "SELECT Cid, Title, [Content], ToID, UpID, SendDate, Msgkind, LookFlag " & SqlStr & " order by Cid desc"
+
+        Dim Tb As New DataTable
+        Tb = Base.DB.Table("SELECT Cid " & SqlStr & " order by Cid desc", "dd")
+        MaxPage = Tb.Rows.Count
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim DKind As String     '消息类型 
+        Dim DId As String       '目标消息ID
+        Dim Str As String = String.Empty        '临时字符串
+        Dim MessageTitle As String = String.Empty       '消息标题
+        Dim Tb As New Data.DataTable
+        Dim Tb1 As New Data.DataTable
+
+        Dim msgkind As String
+        Dim msgid As Integer
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Attributes.Add("onmouseover", "OnMouseOver(this)")
+            GridView1.Rows(i).Attributes.Add("onmouseout", "OnMouseOut(this)")
+
+            msgkind = GridView1.DataKeys(i).Item(1).ToString()
+            msgid = GridView1.DataKeys(i).Item(0)
+
+            DKind = GridView1.Rows(i).Cells(4).Text.Trim        '得到消息类型`
+            DId = GridView1.DataKeys(i).Item(1).ToString
+            MessageTitle = GridView1.Rows(i).Cells(2).Text
+
+
+            GridView1.Rows(i).Attributes.Add("OnDblClick", "DbClickEventLookSendMessage(" & msgid & ");ReloadDesktop();")        ''添加双击事件
+
+            Str = "<table border='1' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:100%;border-collapse:collapse;'>"
+            Str += "<tr><td width=20 align=center><img onclick=""javascript:show_desktop('showrow" & i & "',this);"" src='../../images/Ext.UI/resources/images/default/tree/elbow-plus-nl.gif' border=0></td><td>" & MessageTitle & "</td></tr></table>"
+
+            Dim Looked As Int16
+            Try
+                Looked = GridView1.DataKeys(i).Item(2)
+            Catch ex As Exception
+                Looked = 0
+            End Try
+
+            If Looked = 1 Then
+                GridView1.Rows(i).Cells(1).Text = "<img src='../../images/Read.gif' border=0>"
+            Else
+                GridView1.Rows(i).Cells(1).Text = "<img src='../../images/NoRead.gif' border=0>"
+            End If
+
+            Select Case DKind
+                Case 5 '项目分发
+                    Str += "<table border='1' id='showrow" & i & "' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:100%;border-collapse:collapse;display:none;'>"
+                    Str += "<tr><td width=20 align=center></td><td>" & Server.HtmlDecode(GridView1.DataKeys(i).Item(3)).Replace(Chr(13), "<br>") & "</td></tr>"
+                    Tb1 = Base.DB.Table("Select * from GY_XMXD where msgid=" & msgid, "dddd")
+                    If Tb1.Rows.Count > 0 Then
+                        GridView1.Rows(i).Attributes.Add("OnDblClick", "DbClickEventLCMAP('" & Tb1.Rows(0)("XMDM") & "&msgid=" & msgid & "');ReloadDesktop();")
+                    End If
+
+                    msgkind = "项目"
+                Case 4 ' "公告"
+                    Str += "<table border='1' id='showrow" & i & "' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:100%;border-collapse:collapse;display:none;'>"
+                    Str += "<tr><td width=20 align=center></td><td>" & Server.HtmlDecode(GridView1.DataKeys(i).Item(3)).Replace(Chr(13), "<br>") & "</td></tr>"
+                    msgkind = "公告"
+                    GridView1.Rows(i).Attributes.Add("OnDblClick", "DbClickEventLookPublicMessage(" & msgid & ");ReloadDesktop();")
+                    '对公告做是否已读判断
+                    Tb1 = Base.DB.Table("select userid from PublicMessageLookLog where userid=" & UserID & " and messageid=" & msgid, "jj")
+                    If Tb1.Rows.Count > 0 Then GridView1.Rows(i).Cells(1).Text = "<img src='../../images/Read.gif' border=0>"
+
+                Case 3 '"订阅"
+
+                    Tb1 = Base.DB.Table("SELECT  Order_Form_Log.XMDM, Order_Form_Log.MKDM FROM Order_Form_Log,GY_MKXX where  GY_MKXX.MKDM = Order_Form_Log.MKDM  and Order_Form_Log.msgid=" & msgid, "ddd")
+                    If Tb1.Rows.Count = 0 Then
+                        Str += "<table border='1' id='showrow" & i & "' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:100%;border-collapse:collapse;display:none;'>"
+                        Str += "<tr><td width=20 align=center></td><td>" & Server.HtmlDecode(GridView1.DataKeys(i).Item(3)).Replace(Chr(13), "<br>") & "</td></tr>"
+                    Else
+                        Dim MKDM As Integer = Tb1.Rows(0)("MKDM")
+                        Dim XMDM As Integer = Tb1.Rows(0)("XMDM")
+                        Tb = Base.GetShowFieldDate_NoLc(MKDM, XMDM, 5)
+                        If Tb Is Nothing Then
+                            Str += "<table border='1' id='showrow" & i & "' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:100%;border-collapse:collapse;display:none;'>"
+                            Str += "<tr><td width=20 align=center></td><td>" & Server.HtmlDecode(GridView1.DataKeys(i).Item(3)).Replace(Chr(13), "<br>") & "</td></tr>"
+                        Else
+                            Str += "<table border='1' id='showrow" & i & "' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:100%;border-collapse:collapse;display:none;'>"
+                            Str += "<tr><td width=20></td><td width=60 align=center>" & Tb.Columns(0).ColumnName.Trim & "</td><td>" & Tb.Rows(0).Item(0) & "</td></tr>"
+                            Str += "<tr><td width=20></td><td width=60 align=center>" & Tb.Columns(1).ColumnName.Trim & "</td><td>" & Tb.Rows(0).Item(1) & "</td></tr>"
+                            Str += "<tr><td width=20></td><td width=60 align=center>" & Tb.Columns(2).ColumnName.Trim & "</td><td>" & Tb.Rows(0).Item(2) & "</td></tr>"
+                            Str += "<tr><td width=20></td><td width=60 align=center>" & Tb.Columns(3).ColumnName.Trim & "</td><td>" & Tb.Rows(0).Item(3) & "</td></tr>"
+                            Str += "<tr><td width=20></td><td width=60 align=center>" & Tb.Columns(4).ColumnName.Trim & "</td><td>" & Tb.Rows(0).Item(4) & "</td></tr>"
+                        End If
+
+                        '最后得到进程表单ID
+                        Tb = Base.DB.Table("select Fid from XX_XMJC where MKDM =" & MKDM & "  and XMDM = " & XMDM, "XX_XMJC")
+                        If Tb.Rows.Count > 0 Then
+                            GridView1.Rows(i).Attributes.Add("OnDblClick", "DbClickEvent('" & Tb.Rows(0).Item(0) & "&msgid=" & msgid & "');ReloadDesktop();")
+                        End If
+                    End If
+                    msgkind = "订阅"
+                Case 2
+                    Tb1 = Base.DB.Table("SELECT [CID], [XMMC], [MKMC], [YGDM], [SPNR], [SPYJ], [FQR], [SPBZ], [ZFBZ],[FQtime],GY_XMSP.XMDM,GY_XMSP.MKDM FROM [GY_XMSP],Gy_XMXX,GY_MKXX WHERE  GY_XMSP.XMDM=GY_XMXX.XMDM and GY_XMSP.MKDM=GY_MKXX.MKDM and  ([YGDM] =" & UserID & ") and msgid=" & msgid & " order by Cid desc", "dd")
+                    If Tb1.Rows.Count = 0 Then
+                        Str += "<table border='1' id='showrow" & i & "' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:100%;border-collapse:collapse;display:none;'>"
+                        Str += "<tr><td width=20></td><td>记录出错...</td></tr>"
+                    Else
+                        Dim MKDM As Integer = Tb1.Rows(0)("MKDM")
+                        Dim XMDM As Integer = Tb1.Rows(0)("XMDM")
+                        Dim YGXM As String = Base.DB.ExeScalar("SELECT YGXM FROM GY_YGDM where DLMC='" & Tb1.Rows(0)("FQR") & "'")
+                        Tb = Base.GetShowFieldDate_NoLc(MKDM, XMDM, 5)
+                        If Tb Is Nothing Then
+                            Str += "<table border='1' id='showrow" & i & "' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:100%;border-collapse:collapse;display:none;'>"
+                            Str += "<tr><td width=20></td><td>记录出错...</td></tr>"
+                        Else
+                            Str += "<table border='1' id='showrow" & i & "' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:100%;border-collapse:collapse;display:none;'>"
+                            Str += "<tr><td width=20></td><td width=60 align=center>" & Tb.Columns(0).ColumnName.Trim & "</td><td>" & Tb.Rows(0).Item(0) & "</td></tr>"
+                            Str += "<tr><td width=20></td><td width=60 align=center>" & Tb.Columns(1).ColumnName.Trim & "</td><td>" & Tb.Rows(0).Item(1) & "</td></tr>"
+                            Str += "<tr><td width=20></td><td width=60 align=center>" & Tb.Columns(2).ColumnName.Trim & "</td><td>" & Tb.Rows(0).Item(2) & "</td></tr>"
+                            Str += "<tr><td width=20></td><td width=60 align=center>" & Tb.Columns(3).ColumnName.Trim & "</td><td>" & Tb.Rows(0).Item(3) & "</td></tr>"
+                            Str += "<tr><td width=20></td><td width=60 align=center>" & Tb.Columns(4).ColumnName.Trim & "</td><td>" & Tb.Rows(0).Item(4) & "</td></tr>"
+                        End If
+                        GridView1.Rows(i).Attributes.Add("OnDblClick", "DbClickEventXMSP('" & Tb1.Rows(0).Item(0) & "&msgid=" & msgid & "');ReloadDesktop();")
+                    End If
+                    msgkind = "审阅"
+                Case 1
+                    Str += "<table border='1' id='showrow" & i & "' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:100%;border-collapse:collapse;display:none;'>"
+                    Str += "<tr><td width=20 align=center></td><td>" & Server.HtmlDecode(GridView1.DataKeys(i).Item(3)).Replace(Chr(13), "<br>") & "</td></tr>"
+                    msgkind = "分发"
+                Case Else
+                    Str += "<table border='1' id='showrow" & i & "' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:100%;border-collapse:collapse;display:none;'>"
+                    Str += "<tr><td width=20 align=center></td><td>" & Server.HtmlDecode(GridView1.DataKeys(i).Item(3)).Replace(Chr(13), "<br>") & "</td></tr>"
+                    msgkind = "短消息"
+            End Select
+            Str += "</table>"
+
+            GridView1.Rows(i).Cells(2).Text = Str
+            GridView1.Rows(i).Cells(4).Text = msgkind
+        Next
+        PageBar.InnerHtml = Base.pub.WritePage(GridView1, MaxPage)
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+        Dim ck As CheckBox
+        Dim i As Integer
+        Dim MsgID As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                MsgID = GridView1.DataKeys(i).Item(0)
+                Base.DB.Query("Delete [Sendmessage] WHERE CID=" & MsgID & " and (msgkind <>1 and msgkind<>4 or msgkind is null)")            '如果是分发,公告，则不能删除
+                Base.DB.Query("Update SendMessage set IsDel = 1 where msgkind=1 and  CId=" & MsgID)             '如果是分发，则只做删除标志
+                Try
+                    Base.IO.DelDir(Server.MapPath("../../") & "\PersonalFolders\MessageAttachment\" & MsgID & "\")
+                Catch ex As Exception
+                End Try
+            End If
+        Next
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+
+    End Sub
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub DropDownList1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles DropDownList1.SelectedIndexChanged
+        GridView1.DataBind()
+    End Sub
+End Class

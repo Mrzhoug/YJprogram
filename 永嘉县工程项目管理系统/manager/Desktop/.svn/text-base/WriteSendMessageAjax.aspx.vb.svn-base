@@ -1,0 +1,227 @@
+﻿Imports System.IO
+
+Partial Class manager_Desktop_WriteSendMessageAjax
+    Inherits System.Web.UI.Page
+
+
+    Dim Base As New Base
+    Public Login_User As String
+    Dim UserID As Integer
+    Dim Sid As Integer
+
+    Dim BaseUrl As String
+
+
+    '指定发送的用户
+    Dim sendUserName As String
+    '发送标题
+    Dim msgTitle As String
+
+    '指定的流程状态
+    Dim msgState As String
+
+    'FID
+    Dim FID As String
+
+    '发送的消息类型
+    Dim Kind As Integer
+
+    Dim sendUserNames As String() '指定发送用户组
+
+    Dim msgID As Integer
+
+    Dim TempFolder As String
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+
+        TempFolder = Server.MapPath("../../" & "PersonalFolders/" & Login_User & "/临时附件文件夹")
+
+        Dim i As Integer
+        Dim tb As New Data.DataTable
+
+        '指定发送用户（如果不为空，则自动发送）
+        Try
+            sendUserName = Base.SqlFilter(Request("username").ToString)
+        Catch ex As Exception
+            sendUserName = ""
+        End Try
+
+        '发送标题
+        Try
+            msgTitle = Base.SqlFilter(Request("str").ToString())
+        Catch ex As Exception
+            msgTitle = ""
+        End Try
+
+        '指定的流程状态
+        Try
+            msgState = Base.SqlFilter(Request("state").ToString())
+        Catch ex As Exception
+            msgState = ""
+        End Try
+
+
+        Try
+            FID = Request("FID")
+        Catch ex As Exception
+            FID = ""
+        End Try
+
+
+        Try         '来源类型
+            Kind = Request("Kind")
+        Catch ex As Exception
+            Kind = 0
+        End Try
+
+
+        sendUserNames = sendUserName.Split(",")
+        For i = 0 To sendUserNames.Length - 1
+            Dim temp As String
+            tb = Base.DB.Table("SELECT [YGDM], [YGXM],[DLMC] FROM [GY_YGDM] WHERE  (IsOut = 0 or IsOut is null)  and ([QYBZ] = 1) and [DLMC]='" & sendUserNames(i) & "'", "aa")
+            If tb.Rows.Count > 0 Then
+                temp = tb.Rows(0).Item("YGXM").ToString.Trim & "<span style=color:#acacac>(" & tb.Rows(0).Item("DLMC").ToString.Trim & ");</span>"
+            End If
+        Next
+        msgAutoSend(FID, 0)
+
+        Response.Write("发送成功")
+
+
+
+    End Sub
+
+
+    Sub msgAutoSend(ByVal fid As Integer, ByVal where As Integer)
+        Dim AttFolder As String = Server.MapPath("../../") & "\PersonalFolders\MessageAttachment\"
+        Base.IO.CreateDir(AttFolder)
+
+        Dim j As Integer = 0
+        Dim i As Integer = 0
+        Dim num As Integer = 0
+
+
+        Dim Fids As String = fid.ToString.Trim
+
+        Dim UserStrings As String = ""
+        Dim YGDM As Integer
+        Dim userlist As String = ""
+        For num = 0 To sendUserNames.Length - 1
+            userlist += Base.GetUserNameByDLMC(sendUserNames(num)) & "(" & sendUserNames(num) & ");"
+            UserStrings = UserStrings & sendUserNames(num) & ";"
+        Next
+
+
+        For num = 0 To sendUserNames.Length - 1
+            YGDM = Base.GetUserID(sendUserNames(num))
+            Try
+                msgID = Base.DB.ExeScalar("insert into SendMessage(Title,FromID,Content,TOID,SendDate,LookFlag,msgkind,toidlist) values(''," & UserID & ",''," & YGDM & ",getdate(),0," & Kind & ",'" & userlist & "');Select CId from SendMessage where Cid = @@IDENTITY")
+                
+
+                '写入附件文件
+                Base.IO.CreateDir(AttFolder & "\" & msgID & "\")
+                Dim Values As New ArrayList
+                Dim MyFiles As String()
+                MyFiles = Directory.GetFiles(TempFolder)          '//得到该目录下所有文件
+                Values.AddRange(MyFiles)                            '//加入文件
+                Dim TmpFileName As String
+                For j = 0 To Values.Count - 1
+                    TmpFileName = Values.Item(j).ToString.Replace(TempFolder & "\", "")
+                    IO.File.Copy(TempFolder & "\" & TmpFileName, AttFolder & "\" & msgID & "\" & TmpFileName)
+                    Base.DB.Query("insert into MessageAttachment(msgid,filepath) values(" & msgID & ",'" & Base.SqlFilter(TmpFileName) & "')")
+                Next
+            Catch ex As Exception
+            End Try
+        Next
+
+
+        ''写发送信息
+        Try
+            msgID = Base.DB.ExeScalar("insert into SendMessage(Title,FromID,Content,TOID,SendDate,LookFlag,msgkind,ToIdList) values(''," & UserID & ",'',0,getdate(),0," & Kind & ",'" & userlist & "');Select CId from SendMessage where Cid = @@IDENTITY")
+            ''插分发/修订表
+            Dim tmpfids As String() = Fids.Split(",")
+            For j = 0 To tmpfids.Length - 1
+                If tmpfids(j).ToString <> "" Then
+                    fid = Convert.ToInt32(tmpfids(j).ToString)
+                    If fid <> -1 Then
+                        Base.DB.ExeScalar("INSERT INTO [Gy_XmXd]([Fid],[YGDM] ,[XdText] ,[FQR],[XdBZ],msgid) VALUES (" & fid & ",0,''," & UserID & ",0," & msgID & ")")
+                    End If
+                End If
+            Next
+
+            '写入附件文件
+            Base.IO.CreateDir(AttFolder & "\" & msgID & "\")
+            Dim Values As New ArrayList
+            Dim MyFiles As String()
+            MyFiles = Directory.GetFiles(TempFolder)          '//得到该目录下所有文件
+            Values.AddRange(MyFiles)                            '//加入文件
+            Dim TmpFileName As String
+            For i = 0 To Values.Count - 1
+                TmpFileName = Values.Item(i).ToString.Replace(TempFolder & "\", "")
+                IO.File.Move(TempFolder & "\" & TmpFileName, AttFolder & "\" & msgID & "\" & TmpFileName)
+                Base.DB.Query("insert into MessageAttachment(msgid,filepath) values(" & msgID & ",'" & Base.SqlFilter(TmpFileName) & "')")
+            Next
+
+        Catch ex As Exception
+
+        End Try
+
+        Try
+            If Kind <> 0 Then
+                Dim tb As New DataTable
+                tb = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir,GY_MKXX.MKDM,XX_XMJC.XMDM,[View] FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & fid & ")", "XX_XMJC")
+                If tb.Rows.Count = 0 Then
+                    Base.Js.alert(Me, "非法访问2")
+                    Exit Sub
+                End If
+                Dim MKMC As String = tb.Rows(0).Item(1)
+                Dim FileName As String = Server.MapPath("../../") & "\FormFolder\" & MKMC & "\" & fid & ".xml"
+                Dim TmpFileName As String = Server.MapPath("../../") & "\Submit_Temp\" & Login_User & "\" & fid & ".xml"
+                Dim xml As New System.Xml.XmlDocument
+                Try
+                    xml.Load(FileName)
+                    Dim namespaces As System.Xml.XmlNamespaceManager = Base.GetXmlNamespaceManager(xml)
+                    xml.SelectSingleNode("//my:流程状态", namespaces).InnerXml = msgState
+                    xml.SelectSingleNode("//my:备用7", namespaces).InnerText = UserStrings
+                    xml.Save(FileName)
+                Catch ex As Exception
+                    Response.Write("XML不存在！")
+                    Response.End()
+                End Try
+
+
+                Try
+                    xml.Load(TmpFileName)
+                    Dim namespaces As System.Xml.XmlNamespaceManager = Base.GetXmlNamespaceManager(xml)
+                    xml.SelectSingleNode("//my:流程状态", namespaces).InnerXml = msgState
+                    xml.SelectSingleNode("//my:备用7", namespaces).InnerText = UserStrings
+                    xml.Save(FileName)
+
+                Catch ex As Exception
+                    Response.Write("XML不存在！")
+                    Response.End()
+                End Try
+
+
+                'xml.Load(TmpFileName)
+                'namespaces = Base.GetXmlNamespaceManager(xml)
+                'xml.SelectSingleNode("//my:备用4", namespaces).InnerXml = msgState
+                'xml.Save(TmpFileName)
+                FormInfo.SubmitForm(fid)
+                'Base.SynSubmit(fid, "提交")   '同步表单状态到数据库状态
+            End If
+        Catch ex As Exception
+            Response.Write(ex.ToString)
+            Response.End()
+        End Try
+
+
+
+
+
+    End Sub
+
+End Class

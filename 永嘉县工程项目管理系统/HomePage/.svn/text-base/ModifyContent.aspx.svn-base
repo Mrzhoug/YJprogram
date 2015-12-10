@@ -1,0 +1,78 @@
+﻿<%@ Page Language="VB" MasterPageFile="~/HomePage/MasterPage.master" AutoEventWireup="false" CodeFile="ModifyContent.aspx.vb" Inherits="HomePage_ModifyContent" %>
+
+<%@ Register Src="DefinePart/UserLogined.ascx" TagName="UserLogined" TagPrefix="uc4" %>
+
+<%@ Register Src="DefinePart/ShortMessage.ascx" TagName="ShortMessage" TagPrefix="uc3" %>
+
+<%@ Register Src="DefinePart/HomePageNotice.ascx" TagName="HomePageNotice" TagPrefix="uc1" %>
+<%@ Register Src="DefinePart/UserLogin.ascx" TagName="UserLogin" TagPrefix="uc2" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+ <table border="0" style="width: 100%" cellpadding=0 cellspacing=0>
+        <tr>
+            <td style="width: 259px" valign="top">
+                <uc1:HomePageNotice ID="HomePageNotice1" runat="server" />
+                <uc4:UserLogined ID="UserLogined1" runat="server" />
+            </td>
+            <td valign="top">
+                <table id="Table_01" width="580" border="0" cellpadding="0" cellspacing="0" height=445>
+	<tr>
+		<td height=32><img src="images/ContentModify.gif" alt=""></td>
+	</tr>
+	<tr>
+	<td style="background:url(images/页面2_12.gif);">
+        <!--企业注册信息开始 -->
+         <table align="center" border="0" cellpadding="3" cellspacing="0" style="font-size:9pt; width: 524px;">
+            <tr><td colspan=4 width="10">&nbsp;</td></tr>
+            <tr>
+                <td rowspan="3" valign="top">
+                </td>
+                <td align="right"  valign="top" style="height: 25px; width: 134px;">
+                    用户名：</td>
+                <td valign="top" style="height: 25px; width: 244px;">
+                    <asp:TextBox ID="UserName" runat="server" Enabled="False"></asp:TextBox></td>
+                <td  valign="top" style="height: 25px; width: 107px;">
+                    </td>
+            </tr>
+            <tr>
+                <td align="right" valign="top" style="width: 134px">
+                        邮箱：
+                </td>
+                <td valign="top" style="width: 244px">
+                    <asp:TextBox ID="Email" runat="server" Width="280px"></asp:TextBox></td>
+                <td valign="top" style="width: 107px">
+                </td>
+            </tr>
+            <tr>
+                <td align="right" valign="top" style="width: 134px">
+                    手机：
+                </td>
+                <td valign="top" style="width: 244px">
+                    <asp:TextBox ID="Tel" runat="server" Width="280px"></asp:TextBox>*</td>
+                <td valign="top" style="width: 107px">
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="1" valign="top" style="height: 24px">
+                </td>
+                <td align="center" colspan="3" valign="top" style="height: 24px">
+                    &nbsp;<asp:Button ID="modi" runat="server" Text=" 确定修改 " />
+                    &nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp;
+                </td>
+            </tr>
+        </table>
+        <!--企业注册信息结束 -->
+    </td>
+	</tr>
+	<tr><td height=7><img src="images/页面2_16.gif" alt="" /></td></tr>
+</table>     
+        
+        
+            </td>
+            <td>
+            </td>
+        </tr>
+        
+    </table>
+
+</asp:Content>
+

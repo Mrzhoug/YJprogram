@@ -1,0 +1,59 @@
+﻿
+Partial Class RegisterUser
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.RegisterUser").ToLower <> "true" Then
+            Response.Write("系统不允许注册用户")
+            Response.End()
+        End If
+    End Sub
+
+
+    Protected Sub ImageButton1_Click(ByVal sender As Object, ByVal e As System.Web.UI.ImageClickEventArgs) Handles ImageButton1.Click
+        Dim CkName As String = DLMC.Text.Trim
+        Dim Tb As New Data.DataTable
+
+
+        If DLMC.Text.Trim.Length > 20 Or DLMC.Text.Trim.Length < 3 Then
+            Base.Js.alert(Me, "用户名必须是由3~20个字符组成！")
+            Exit Sub
+        End If
+
+
+        If YGXM.Text.Trim.Length > 20 Or YGXM.Text.Trim.Length < 3 Then
+            Base.Js.alert(Me, "用户昵称必须是由3~20个字符组成！")
+            Exit Sub
+        End If
+
+        If Notes.Text.Trim.Length > 200 Then
+            Base.Js.alert(Me, "相关说明必须小于200个字符！")
+            Exit Sub
+        End If
+
+        If answer.Text.Trim.Length > 100 Then
+            Base.Js.alert(Me, "提问回答不能超过100个字符")
+            Exit Sub
+        End If
+
+        If Email.Text.Trim.Length > 200 Then
+            Base.Js.alert(Me, "提问回答不能超过100个字符")
+            Exit Sub
+        End If
+
+
+        Dim DLPWD As String = Base.EnCrypt.MD5(PWD.Text.Trim)
+
+        Tb = Base.DB.Table("Select YGDM from GY_YGDM where DLMC='" & Base.SqlFilter(CkName) & "'", "dd")
+        If Tb.Rows.Count > 0 Then
+            Base.Js.alert(Me, "用户名已经存在，你选择其他用户名进行注册！")
+            Exit Sub
+        End If
+        Base.DB.Query("INSERT INTO GY_YGDM(YGXM,DLMC,DLPWD,QYBZ,Notes,Email,QuestionID,answer)VALUES('" & Base.SqlFilter(YGXM.Text) & "','" & Base.SqlFilter(DLMC.Text) & "','" & Base.SqlFilter(DLPWD) & "',0,'" & Base.SqlFilter(Notes.Text) & "','" & Base.SqlFilter(Email.Text) & "'," & questionid.Value & ",'" & Base.SqlFilter(answer.Text) & "')")
+        If Base.DB.ErrorMessage Is Nothing Then
+            Base.Js.alert(Me, "注册用户成功")
+        Else
+            Base.Js.alert(Me, "注册用户失败")
+        End If
+    End Sub
+End Class

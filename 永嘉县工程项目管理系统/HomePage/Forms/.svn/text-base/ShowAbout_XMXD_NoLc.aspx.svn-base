@@ -1,0 +1,37 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ShowAbout_XMXD_NoLc.aspx.vb" Inherits="HomePage_Forms_ShowAbout_XMXD_NoLc" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>查看审阅情况</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <asp:GridView ID="GridView1" runat="server" BackColor="White" BorderColor="#DEDFDE" HorizontalAlign=Center 
+            BorderStyle="None" BorderWidth="1px" CellPadding="4" ForeColor="Black" Width="500px" AutoGenerateColumns="False" DataSourceID="Conn" OnDataBound="GridView1_DataBound" Font-Size="9pt" DataKeyNames="Cid,DLMC">
+            <FooterStyle BackColor="#CCCC99" />
+            <RowStyle BackColor="White" />
+            <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+            <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Center" />
+            <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" />
+            <AlternatingRowStyle BackColor="White" />
+        <Columns>
+            <asp:BoundField DataField="FQR" HeaderText="发起人" SortExpression="FQR" >
+                <ItemStyle HorizontalAlign="Center" Width="150px" />
+            </asp:BoundField>
+            <asp:BoundField DataField="XDtext" HeaderText="修订意见" SortExpression="XDtext" />
+        </Columns>
+        </asp:GridView>
+        <br />
+        <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="select GY_XMXD.Cid,GY_XMXD.FQR,GY_XMXD.XDtext,GY_XMXD.YGDM,GY_YGDM.YGXM,GY_YGDM.DLMC From GY_XMXD,GY_YGDM Where GY_XMXD.YGDM = GY_YGDM.YGDM and GY_XMXD.Fid=@FID">
+            <SelectParameters>
+                <asp:Parameter Name="FID" Type="Decimal"  />
+            </SelectParameters>
+        </asp:SqlDataSource>
+    
+
+    </form>
+</body>
+</html>

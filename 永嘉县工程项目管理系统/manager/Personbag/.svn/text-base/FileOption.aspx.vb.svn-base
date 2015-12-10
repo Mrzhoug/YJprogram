@@ -1,0 +1,166 @@
+﻿Imports System.IO
+
+Partial Class manager_Personbag_FileOption
+    Inherits System.Web.UI.Page
+    Dim RootPath As String
+    Dim Base As New Base
+    Dim OpFolder As String = ""
+    Dim Login_User As String
+    Dim action As String
+    Dim FileName As String
+    Dim Folder As String
+    Dim UserID As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Dim OutStr As String = ""
+
+        FileName = Server.UrlDecode(Request("filename"))
+        Folder = Server.UrlDecode(Request("Folder"))
+
+        '得到当前的HTTP URL路径
+        Dim Url As String = Request.ServerVariables("Url").ToLower
+        Dim CurrentUrl As String = Url.Replace("manager/personbag/myfiles.aspx", "PersonalFolders/" & Login_User & "/")
+
+        RootPath = Request.MapPath("../../") & "PersonalFolders\" & Login_User
+        Base.IO.CreateDir(RootPath) '如果目录不存在,则建立
+
+        Label1.Text = Folder & "\" & FileName
+
+        action = Request("action")
+        Select Case action
+            Case "movefile"
+                spanTitle.InnerText = "移动文件"
+            Case "movefolder"
+                spanTitle.InnerText = "移动目录"
+            Case "copyfile"
+                spanTitle.InnerText = "复制文件"
+            Case "copyfolder"
+                spanTitle.InnerText = "复制目录"
+            Case "saveFile"
+                spanTitle.InnerText = "保存文件"
+                Label1.Text = "\信息附件"
+            Case Else
+                Base.Js.alert(Me, "错误的参数")
+                Exit Sub
+        End Select
+
+
+        If Page.IsPostBack = False Then
+            TextBox1.Text = Base.pub.LoadDir1(RootPath, ListBox1, RootPath)
+        End If
+    End Sub
+
+    Protected Sub ListBox1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles ListBox1.SelectedIndexChanged
+        TextBox1.Text = Base.pub.ChangeDir1(TextBox1.Text, ListBox1, RootPath)
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim DFileName As String
+        Select Case action
+            Case "movefile"     '移动文件
+                spanTitle.InnerText = "移动文件"
+                DFileName = RootPath & TextBox1.Text & "\" & FileName
+                If IO.File.Exists(DFileName) = True Then
+                    Base.Js.alert(Me, "目的路径已经存在文件名为：" & FileName & "的文件")
+                    Exit Sub
+                End If
+                Try
+                    IO.File.Move(RootPath & "\" & Label1.Text, DFileName)
+                Catch ex As Exception
+                    Base.Js.alert(Me, "移动文件失败！")
+                    Exit Sub
+                End Try
+                Base.Js.CloseGoTo(Me, "操作成功", "MyFiles.aspx?Folder=" & Folder)
+
+            Case "movefolder"       '移动目录
+                spanTitle.InnerText = "移动目录"
+                DFileName = RootPath & TextBox1.Text & "\" & FileName
+                If IO.Directory.Exists(DFileName) = True Then
+                    Base.Js.alert(Me, "目的路径已经存在目录名为：" & FileName & "的文件")
+                    Exit Sub
+                End If
+                Try
+                    IO.Directory.Move(RootPath & "\" & Label1.Text, DFileName)
+                Catch ex As Exception
+                    Base.Js.alert(Me, "移动目录失败！")
+                    Exit Sub
+                End Try
+                Base.Js.CloseGoTo(Me, "操作成功", "MyFiles.aspx?Folder=" & Folder)
+
+            Case "copyfile"     '复制文件
+                spanTitle.InnerText = "复制文件"
+                DFileName = RootPath & TextBox1.Text & "\" & FileName
+                If IO.File.Exists(DFileName) = True Then
+                    Base.Js.alert(Me, "目的路径已经存在文件名为：" & FileName & "的文件")
+                    Exit Sub
+                End If
+
+                Try
+                    IO.File.Copy(RootPath & "\" & Label1.Text, DFileName)
+                Catch ex As Exception
+                    Base.Js.alert(Me, "复制文件失败！")
+                    Exit Sub
+                End Try
+                Base.Js.CloseGoTo(Me, "操作成功", "MyFiles.aspx?Folder=" & Folder)
+
+            Case "copyfolder"       '复制目录
+                spanTitle.InnerText = "复制目录"
+                DFileName = RootPath & TextBox1.Text & "\" & FileName
+                If IO.Directory.Exists(DFileName) = True Then
+                    Base.Js.alert(Me, "目的路径已经存在目录名为：" & FileName & "的文件")
+                    Exit Sub
+                End If
+                Try
+                    Base.pub.CopyDir(RootPath & "\" & Label1.Text, DFileName)
+                Catch ex As Exception
+                    Base.Js.alert(Me, "复制目录失败！")
+                    Exit Sub
+                End Try
+                Base.Js.CloseGoTo(Me, "操作成功", "MyFiles.aspx?Folder=" & Folder)
+
+            Case "saveFile"
+                spanTitle.InnerText = "保存文件"
+                DFileName = RootPath & TextBox1.Text & "\"
+
+
+                Dim fileID As String = Request("fileID")
+                Dim msgID As String = Request("msgID")
+
+
+                Dim TempFolder As String = Server.MapPath("../../") & "\PersonalFolders\MessageAttachment\" & msgID '附件临时存放的文件夹
+
+                If Directory.GetFiles(TempFolder).Length = 0 Then '没有的话在临时文件夹里找。
+                    TempFolder = Server.MapPath("../../" & "PersonalFolders/" & Login_User & "/临时文件夹/MessageAttachment/" & msgID & "\")
+                End If
+
+                Dim MyFiles As String()
+                MyFiles = Directory.GetFiles(TempFolder)
+                If fileID >= 0 Then
+                    If File.Exists(MyFiles(FileName)) = True Then     '关判断文件是否存在
+                        Dim info As New FileInfo(MyFiles(fileID))
+
+                        Dim newName As String = DFileName & info.Name
+                        If File.Exists(newName) Then
+                            newName = DFileName & info.Name.Replace(info.Extension, "") & System.DateTime.Now.ToString("yyyyMMddhhmmss") & info.Extension
+                            Base.Js.alert(Me, "文件名已存在，重命名为" + newName)
+                        End If
+
+                        System.IO.File.Copy(MyFiles(fileID), newName)
+                        Base.Js.closestr(Me, "保存成功")
+
+                    Else
+                        Base.Js.alert(Me, "文件可能已经不存在，请确认。")
+                    End If
+                End If
+
+
+
+            Case Else
+                Base.Js.alert(Me, "错误的参数")
+                Exit Sub
+        End Select
+    End Sub
+End Class

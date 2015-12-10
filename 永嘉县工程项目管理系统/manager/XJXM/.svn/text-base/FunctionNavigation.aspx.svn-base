@@ -1,0 +1,14 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="FunctionNavigation.aspx.vb" Inherits="manager_XJXM_FunctionNavigation" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>功能导航</title>
+    <link href="../../images/Styles.css" type="text/css" />
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        功能导航正在制作当中...</div>
+    </form>
+</body>
+</html>

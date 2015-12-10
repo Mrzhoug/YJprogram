@@ -1,0 +1,248 @@
+﻿Imports System.io
+Partial Class manager_Forms_FormAnnex
+    Inherits System.Web.UI.Page
+    Dim RootPath As String
+    Dim Base As New Base
+    Dim OpFolder As String = ""
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim Fid As Integer      '表单号
+    Dim MKMC As String
+    Dim QX As Integer
+    Dim MKDM As Integer
+    Dim ManageSubmit As Boolean = False
+
+    Dim TmpFolder As String
+
+    Sub PrintContent(ByVal FileName As String)
+        Dim stream As FileStream = New FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.Read)
+        Dim Type1 As String
+        Type1 = FileName.Substring(FileName.LastIndexOf("."))
+
+        Dim DownFileName As String
+        Dim idx As Integer = FileName.LastIndexOf("\")
+        If idx > 0 Then
+            DownFileName = FileName.Substring(idx + 1)
+        Else
+            DownFileName = FileName
+        End If
+
+        Try
+            Dim bufSize As Integer = stream.Length
+            Dim buf(bufSize) As Byte
+            Dim bytesRead As Integer = stream.Read(buf, 0, bufSize)
+            Dim UTF8 As Encoding = Encoding.GetEncoding("GB2312")
+            Response.ContentEncoding = UTF8
+            Response.AddHeader("Content-Disposition", "attachment; filename=" & HttpUtility.UrlEncode(DownFileName, Encoding.UTF8))
+            Response.AddHeader("Content-Length", bufSize.ToString())
+            Response.OutputStream.Write(buf, 0, bytesRead)
+            Response.End()
+        Catch ex As Exception
+            Base.Js.alert(Me, "打开出错.")
+        End Try
+    End Sub
+
+    Function CheckFileType(ByVal FileType As String) As String
+        Dim Result As String
+        FileType = FileType.ToLower
+        Select Case FileType
+            Case ".doc"
+                Result = "DOC.GIF"
+            Case ".txt"
+                Result = "TXT.GIF"
+            Case ".zip"
+                Result = "ZIP.GIF"
+            Case ".xls"
+                Result = "XLS.GIF"
+            Case ".pic"
+                Result = "PIC.GIF"
+            Case ".gif"
+                Result = "PIC.GIF"
+            Case ".bmp"
+                Result = "PIC.GIF"
+            Case ".jpg"
+                Result = "PIC.GIF"
+            Case ".ppt"
+                Result = "PPT.GIF"
+            Case ".pdf"
+                Result = "pdf.gif"
+            Case ".wav"
+                Result = "WAV.GIF"
+            Case ".mdb"
+                Result = "MDB.GIF"
+            Case ".mpg"
+                Result = "MPG.GIF"
+            Case Else
+                Result = "other.gif"
+        End Select
+        Return Result
+    End Function
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Response.Expires = 0
+        Response.Buffer = False
+
+
+
+
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        TmpFolder = Server.MapPath("../../Submit_Temp") & "\" & Login_User & "\"
+        Dim context As HelpSoft.UploadContext = HelpSoft.UploadContextFactory.InitUploadContext(Me, TmpFolder)
+        Try
+            Fid = Request("FID")
+        Catch ex As Exception
+            Fid = 0
+        End Try
+        Dim Tb As New Data.DataTable
+        '根据ＦＩＤ得到相关的信息        
+        Tb = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir,GY_MKXX.MKDM,XX_XMJC.XMDM,[View] FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & Fid & ")", "XX_XMJC")
+        If Tb.Rows.Count = 0 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+        MKMC = Tb.Rows(0).Item(1).ToString.Trim
+        MKDM = Tb.Rows(0).Item(3).ToString.Trim
+
+        QX = Base.GetUserHaveQX(UserID, MKDM)
+
+        Dim i As Integer
+        Dim OutStr As String = ""
+
+        '得到当前的HTTP URL路径
+        Dim Url As String = Request.ServerVariables("Url").ToLower
+        'Dim CurrentUrl As String = Url.Replace("manager/personbag/myfiles.aspx", "PersonalFolders/" & Login_User & "/")
+
+        Dim RootPath As String = Request.MapPath("../../") & "FormFolder\" & MKMC & "\Annex\" & Fid
+        Base.IO.CreateDir(RootPath) '如果目录不存在,则建立
+
+        Dim FileName As String = Server.UrlDecode(Request("FileName"))
+
+        If Not FileName Is Nothing Then
+            If File.Exists(RootPath & FileName) = True Then     '关判断文件是否存在
+                PrintContent(RootPath & FileName)
+                'Response.Redirect(CurrentUrl & FileName)
+                'Response.End()
+            Else
+                Base.Js.alert(Me, "非法参数!")
+            End If
+        End If
+
+
+        '删除文件功能
+        Dim DelFileName As String = Request("DelFileName")
+        If Not DelFileName Is Nothing And QX >= 8 Then      '有删除的权力
+            If File.Exists(RootPath & OpFolder & "\" & DelFileName) = True Then
+                Try
+                    File.Delete(RootPath & OpFolder & "\" & DelFileName)
+                Catch ex As Exception
+                    Base.Js.alert(Me, "删除文件:" & DelFileName & "失败!可能文件正在使用中!")
+                End Try
+            End If
+        End If
+
+        '文件改名
+        Dim OldFileName As String = Request("OldFileName")
+        Dim NewFileName As String = Request("NewFileName")
+        If (Not OldFileName Is Nothing) And (Not NewFileName Is Nothing) And QX >= 4 Then           '改的权限
+            If File.Exists(RootPath & OpFolder & "\" & OldFileName) = True Then     '判断源文件是否存在
+                If File.Exists(RootPath & OpFolder & "\" & NewFileName) = True Then '判断要改的文件名是否已经存在
+                    Base.Js.alert(Me, "重命名失败,该目录下已有名为:" & NewFileName & "的文件了!")
+                Else
+                    Try
+                        File.Move(RootPath & OpFolder & "\" & OldFileName, RootPath & OpFolder & "\" & NewFileName)
+
+                    Catch ex As Exception
+                        Base.Js.alert(Me, "重命名失败,系统错误,可能是没有权限!")
+                    End Try
+                End If
+            End If
+        End If
+
+
+        Dim Values As New ArrayList
+        Dim MyFiles As String()
+        MyFiles = Directory.GetFiles(RootPath & OpFolder)          '//得到该目录下所有文件
+        Values.AddRange(MyFiles)                            '//加入文件
+        'Values.Sort(1, 2, Nothing)
+
+        OutStr += "<table width=100% ><tr bgcolor='#eeccee' align=center><td width=40>序号</td><td>名称</td><td>大小(K)</td><td>类型</td><td width=160>最后修改时间</td><td width=40>改名</td><td width=40>删除</td></tr>"
+
+        If Values.Count = 0 Then
+            OutStr += "<tr><td colspan=5 align=center>暂时没有文件</td></tr>"
+        Else
+            For i = 0 To Values.Count - 1
+                OutStr += "<tr align=center><td>" & i + 1 & "</td>"
+                Dim FileInfo As New System.IO.FileInfo(Values(i))
+
+
+                Dim FileType As String
+                FileType = FileInfo.Extension
+                Values(i) = Values(i).replace(RootPath, "")
+                OutStr += "<td align=left  valign=top><img src='../../images/FileManage/" & CheckFileType(FileType) & "'>&nbsp;"
+                OutStr += "<a href='?FID=" & Fid & "&FileName=" & Server.UrlEncode(OpFolder & "\" & FileInfo.Name) & "'>" & FileInfo.Name.Trim & "</a></td>"
+                Dim FileSize As Integer
+                FileSize = FileInfo.Length
+                If FileSize > 0 Then
+                    FileSize = FileSize \ 1024
+                    If FileSize = 0 Then FileSize = 1
+                End If
+                OutStr += "<td>" & FileSize & "K</td>"
+                OutStr += "<td>" & FileType & "文件</td>"
+                OutStr += "<td>" & FileInfo.LastWriteTime & "</td>"
+                If QX >= 4 Then
+                    OutStr += "<td><a href='#' onclick=""javascript:refilename('" & Server.UrlEncode(OpFolder) & "','" & FileInfo.Name & "','" & Fid & "');"">更名</a></td>"
+                Else
+                    OutStr += "<td align=center'>--</td>"
+                End If
+                If QX >= 8 Then
+                    OutStr += "<td><a href='#' onclick=""javascript:delfile('" & Server.UrlEncode(OpFolder) & "','" & FileInfo.Name & "','" & Fid & "');"">删除</a></td>"
+                Else
+                    OutStr += "<td align=center'>--</td>"
+                End If
+                OutStr += "</tr>"
+            Next
+        End If
+        OutStr += "</table>"
+
+        message.InnerHtml = OutStr
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        If FileUpload1.PostedFile.ContentLength = 0 Then Exit Sub
+        If QX < 2 Then
+            Base.Js.alert(Me, "你没有写的权限")
+            Exit Sub
+        End If
+        Dim CurrentRoot As String = Request.MapPath("../../") & "FormFolder\" & MKMC & "\Annex\" & Fid & "\"
+        If IO.File.Exists(CurrentRoot & FileUpload1.PostedFile.FileName) = True Then
+            Base.Js.alert(Me, "文件已经存在")
+            Exit Sub
+        End If
+
+        Dim Ret As String = Base.CheckUploadFileType(FileUpload1)
+        If Not Ret Is Nothing Then
+            Base.Js.alert(Me, Ret)
+            Exit Sub
+        End If
+
+
+        Dim context As HelpSoft.UploadContext = HelpSoft.UploadContextFactory.GetUploadContext()
+        If ((Not context Is Nothing) And (context.Status = HelpSoft.uploadStatus.Complete)) Then
+            Try
+                context.SaveFile(FileUpload1.ClientID, Request.MapPath("../../") & "FormFolder\" & MKMC & "\Annex\" & Fid & "\")
+            Catch ex As Exception
+                Try
+                    Base.IO.DelDir(TmpFolder)
+                Catch ex1 As Exception
+                End Try
+                Base.Js.alert(Me, "上传失败，请重新上传")
+                Exit Sub
+            End Try
+            Base.Js.alert(Me, "上传成功", "?FID=" & Fid & "&s=" & Now.Ticks)
+        End If
+    End Sub
+
+End Class

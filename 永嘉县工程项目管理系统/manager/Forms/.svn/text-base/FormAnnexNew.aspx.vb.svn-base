@@ -1,0 +1,143 @@
+﻿
+Partial Class manager_Forms_FormAnnexNew
+    Inherits System.Web.UI.Page
+
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As String
+    Public fid As Integer
+    Dim dt As New DataTable
+    Dim sqlstr As String
+    Public filetype As String
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Response.Expires = 0
+        Response.Buffer = False
+
+        Login_User = Base.GetWebUserName()
+        UserID = Base.GetUserID(Login_User)
+
+        Try
+            fid = Convert.ToInt32(Request("fid"))
+        Catch ex As Exception
+            fid = 0
+        End Try
+        Try
+            filetype = Request("type")
+        Catch ex As Exception
+            filetype = ""
+        End Try
+
+
+        If Not IsPostBack Then
+
+
+            Dim mkmc As String
+            Dim mkdm As String
+
+            '根据ＦＩＤ得到相关的信息        
+            dt = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir,GY_MKXX.MKDM,XX_XMJC.XMDM,[View] FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & fid & ")", "XX_XMJC")
+            If dt.Rows.Count = 0 Then
+                Response.Write("非法访问")
+                Response.End()
+            End If
+            mkmc = dt.Rows(0).Item(1).ToString.Trim
+            mkdm = dt.Rows(0).Item(3).ToString.Trim
+           
+
+        End If
+
+        If Not IsPostBack Then
+            bind()
+        End If
+
+    End Sub
+
+
+    Sub bind()
+
+        If filetype = "" Then
+            sqlstr = "select * from annexupload where fid=" & fid & " and (isdel is null or isdel = 'false')"
+        Else
+            sqlstr = "select * from annexupload where fid=" & fid & " and (isdel is null or isdel = 'false') and remarks='" & filetype & "'"
+        End If
+        GridView1.DataSource = Base.DB.Table(sqlstr, "ss")
+        GridView1.DataBind()
+    End Sub
+
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer = 0
+        For i = 0 To GridView1.Rows.Count - 1
+            Dim filetype As String
+            filetype = GridView1.Rows(i).Cells(1).Text
+
+            Dim filepath As String
+            filepath = GridView1.DataKeys(i).Item(2).ToString()
+            Dim filename As String
+            filename = "<a href='../../" & filepath & "'>" & GridView1.Rows(i).Cells(0).Text & "</a>"
+
+            GridView1.Rows(i).Cells(0).Text = "<img src='../../images/FileManage/" & CheckFileType(filetype) & "'>&nbsp;" & filename
+
+            GridView1.Rows(i).Cells(2).Text = Math.Round(Convert.ToInt64(GridView1.Rows(i).Cells(2).Text) / 1024, 2) & "K"
+
+            Dim userID As String
+            userID = GridView1.Rows(i).Cells(4).Text
+            GridView1.Rows(i).Cells(4).Text = Base.GetUserName(userID, 3)
+        Next
+    End Sub
+
+    Function CheckFileType(ByVal FileType As String) As String
+        Dim Result As String
+        FileType = FileType.ToLower
+        Select Case FileType
+            Case ".doc"
+                Result = "DOC.GIF"
+            Case ".txt"
+                Result = "TXT.GIF"
+            Case ".zip"
+                Result = "ZIP.GIF"
+            Case ".xls"
+                Result = "XLS.GIF"
+            Case ".pic"
+                Result = "PIC.GIF"
+            Case ".gif"
+                Result = "PIC.GIF"
+            Case ".bmp"
+                Result = "PIC.GIF"
+            Case ".jpg"
+                Result = "PIC.GIF"
+            Case ".ppt"
+                Result = "PPT.GIF"
+            Case ".pdf"
+                Result = "pdf.gif"
+            Case ".wav"
+                Result = "WAV.GIF"
+            Case ".mdb"
+                Result = "MDB.GIF"
+            Case ".mpg"
+                Result = "MPG.GIF"
+            Case Else
+                Result = "other.gif"
+        End Select
+        Return Result
+    End Function
+
+    Protected Sub GridView1_RowDeleting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs) Handles GridView1.RowDeleting
+        Dim sqlstr As String
+        sqlstr = "delete annexupload where cid=" & GridView1.DataKeys(e.RowIndex).Value
+
+        Try
+            IO.File.Delete(Server.MapPath("../../") & GridView1.DataKeys(e.RowIndex).Item(2))
+        Catch
+
+        End Try
+
+        'sqlstr = "update annexupload set isdel='true',deluserid='" & UserID & "',deltime='" & Date.Now.ToString() & "' where cid=" & GridView1.DataKeys(e.RowIndex).Value
+        Base.DB.Query(sqlstr)
+        bind()
+        Base.Js.showalert(Me, "删除成功")
+    End Sub
+
+End Class

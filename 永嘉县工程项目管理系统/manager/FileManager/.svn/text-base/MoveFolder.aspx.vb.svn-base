@@ -1,0 +1,22 @@
+﻿
+Partial Class manager_FileManager_MoveFolder
+    Inherits System.Web.UI.Page
+
+    Public folderID As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Try
+            folderID = Request.QueryString("folderID")
+        Catch ex As Exception
+            folderID = 0
+        End Try
+
+
+        If folderID = 0 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+    End Sub
+End Class

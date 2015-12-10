@@ -1,0 +1,338 @@
+﻿Imports System.IO
+Partial Class manager_Forms_FormSP_NoLc
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim XMDM, MKDM As Integer
+    Dim FID As Integer
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim UserKSDM As Integer
+    Dim SPkind As Integer
+
+    Function DoDropXMSP() As Boolean
+        Dim tb As New DataTable
+        Tb = Base.DB.Table("select GY_XMSP.YGDM,SPNR,FQR,YGXM from GY_XMSP,GY_YGDM where GY_YGDM.YGDM=GY_XMSP.YGDM and SPBZ =0 and ZFBZ=0 and xmdm = " & XMDM & " and mkdm=" & MKDM, "GY_XMSP")
+        If Tb.Rows.Count > 0 Then       '表示该项目已经在审批,而且还有没有审批完成
+            If Login_User.Trim <> Tb.Rows(0)(2).ToString.Trim Then
+                Base.Js.alert(Me, "此表单正在审阅当中，你无权进行中止审阅！")
+                Return True
+                Exit Function
+            Else
+            End If
+        Else
+            tb = Base.DB.Table("select GY_XMSP.YGDM,SPNR,FQR,YGXM from GY_XMSP,GY_YGDM where GY_YGDM.YGDM=GY_XMSP.YGDM and SPBZ=-1 and ZFBZ=0 and xmdm = " & XMDM & " and mkdm=" & MKDM, "GY_XMSP")
+            If tb.Rows.Count > 0 Then       '表示审批完成了.但是有不通过的.
+            Else                            '表示审批完成了，也通过了。
+                tb = Base.DB.Table("select GY_XMSP.YGDM,SPNR,FQR,YGXM from GY_XMSP,GY_YGDM where GY_YGDM.YGDM=GY_XMSP.YGDM and xmdm = " & XMDM & " and mkdm=" & MKDM, "GY_XMSP")
+                If tb.Rows.Count > 0 Then       '表示有审批记录
+                    '通过了。是发起人。可以再添加审批人。
+                    Base.Js.alert(Me, "此表单已经审阅通过，不能进行中止审阅！")
+                    Return True
+                    Exit Function
+                Else            '表示没有审批记录，第一次发起审批
+                End If
+            End If
+        End If
+        Base.DB.Query("Delete GY_XMSP where XMDM = " & XMDM & " and mkdm=" & MKDM)
+        Base.DB.Query("Delete GY_XMSP_Over where XMDM = " & XMDM & " and MKDM=" & MKDM)
+        ClearSP_Flag()      '清除审核标志
+        Base.Js.alert(Me, "中止审阅成功！")
+        Return True
+    End Function
+
+    Sub WriteSPing_Flag(ByVal Over As Boolean)
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("select SPBZ from GY_XMSP where XMDM = " & XMDM & " and MKDM=" & MKDM & " and spbz=0 and zfbz=0", "GY_XMSP")
+
+        '如果是无流程的话,对文件做写入操作,写入"审批中"
+        tb = Base.DB.Table("select FID from XX_XMJC where XMDM=" & XMDM & " and MKDM =" & MKDM, "XX_XMJC")
+        If tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "流程存在问题,请与管理员联系!")
+            Exit Sub
+        End If
+        Dim FID As Integer = tb.Rows(0).Item(0)
+        '得到模块名称与模板名称
+        tb = Base.DB.Table("SELECT XsnDir,MKMC FROM GY_MKXX where MKdm = " & MKDM & " and Nolcdm is not null", "GY_MKXX")
+        If tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "非法访问")
+            Exit Sub
+        End If
+        Dim XsnDir As String = tb.Rows(0).Item(0).ToString.Trim
+        Dim MKMC As String = tb.Rows(0).Item(1).ToString.Trim
+        Dim DFileName As String = Server.MapPath("../../") & "\FormFolder\" & MKMC & "\" & FID & ".xml"
+        Dim KFName As String = Server.MapPath("../../") & "\FormFolder\" & MKMC & ".库.xml"
+
+        If File.Exists(DFileName) = False Then
+            Base.Js.alert(Me, "因为审阅的文件不存在,或是申请人已经移除")
+            Exit Sub
+        End If
+        '如果不是SQL入库,则要判断表单库是否存在
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.IsSQL2005").ToLower <> "true" Then
+            If File.Exists(KFName) = False Then
+                Base.Js.alert(Me, "因为审阅的文件不存在,或是申请人已经移除")
+                Exit Sub
+            End If
+        End If
+
+
+        '对表单进行写表审批意见标志
+        Dim RootNodeName As String
+        Try
+            Base.XmlClass.GetXmlFile(DFileName)
+            RootNodeName = Base.XmlClass.GetRootNodeName
+        Catch ex As Exception
+            Base.Js.alert(Me, "审阅出错,文件格式不对!")
+            Exit Sub
+        End Try
+
+        Dim Fid_NodeName As String = Base.XmlClass.GetFormID
+        Dim SPNode As System.Xml.XmlNode = Base.XmlClass.FindNode("//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "/" & Fid_NodeName.Replace("表单号", "审批信息"))
+
+        Dim TempStr As String = String.Empty
+        If Not SPNode Is Nothing Then
+            TempStr = "<" & Fid_NodeName.Replace("表单号", "审批结果") & ">审批中</" & Fid_NodeName.Replace("表单号", "审批结果") & ">"
+            TempStr += "<" & Fid_NodeName.Replace("表单号", "重复组") & ">"
+            TempStr += "<" & Fid_NodeName.Replace("表单号", "审批人") & "></" & Fid_NodeName.Replace("表单号", "审批人") & ">"
+            TempStr += "<" & Fid_NodeName.Replace("表单号", "审批意见") & "></" & Fid_NodeName.Replace("表单号", "审批意见") & ">"
+            TempStr += "<" & Fid_NodeName.Replace("表单号", "审批时间") & "></" & Fid_NodeName.Replace("表单号", "审批时间") & ">"
+            TempStr += "</" & Fid_NodeName.Replace("表单号", "重复组") & ">"
+            SPNode.InnerXml = TempStr
+            Base.XmlClass.Save()
+        End If
+
+    End Sub
+
+    Sub ClearSP_Flag()
+        '清除表单或是表单库中的审批标志
+        Dim tb As Data.DataTable
+        tb = Base.DB.Table("select FID from XX_XMJC where XMDM=" & XMDM & " and MKDM =" & MKDM, "XX_XMJC")
+        If tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "流程存在问题,请与管理员联系!")
+            Exit Sub
+        End If
+        Dim FID As Integer = tb.Rows(0).Item(0)
+        '得到模块名称与模板名称
+        tb = Base.DB.Table("SELECT XsnDir,MKMC FROM GY_MKXX where MKdm = " & MKDM & " and Nolcdm is not null", "GY_MKXX")
+        If tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "非法访问")
+            Exit Sub
+        End If
+        Dim XsnDir As String = tb.Rows(0).Item(0).ToString.Trim
+        Dim MKMC As String = tb.Rows(0).Item(1)
+        Dim DFileName As String = Server.MapPath("../../") & "\FormFolder\" & MKMC & "\" & FID & ".xml"
+        Dim KFName As String = Server.MapPath("../../") & "\FormFolder\" & MKMC & ".库.xml"
+        If File.Exists(DFileName) = False Then
+            Base.Js.alert(Me, "因为审阅的文件不存在,或是申请人已经移除")
+            Exit Sub
+        End If
+        '如果不是SQL入库,则要判断表单库是否存在
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.IsSQL2005").ToLower <> "true" Then
+            If File.Exists(KFName) = False Then
+                Base.Js.alert(Me, "因为审阅的文件不存在,或是申请人已经移除")
+                Exit Sub
+            End If
+        End If
+
+        '对表单进行表审批意见标志清除
+        Dim RootNodeName As String
+        Try
+            Base.XmlClass.GetXmlFile(DFileName)
+            RootNodeName = Base.XmlClass.GetRootNodeName
+        Catch ex As Exception
+            Base.Js.alert(Me, "审阅出错,文件格式不对!")
+            Exit Sub
+        End Try
+
+        Dim Fid_NodeName As String = Base.XmlClass.GetFormID
+        Dim SPNode As System.Xml.XmlNode = Base.XmlClass.FindNode("//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "/" & Fid_NodeName.Replace("表单号", "审批信息"))
+        Dim TempStr As String = String.Empty
+        If Not SPNode Is Nothing Then
+            SPNode.InnerXml = ""
+            Base.XmlClass.Save()
+        End If
+
+        '对库进行清审批标志
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.IsSQL2005").ToLower <> "true" Then
+            Try
+                Base.XmlClass.GetXmlFile(KFName)
+                RootNodeName = Base.XmlClass.GetRootNodeName
+            Catch ex As Exception
+                Base.Js.alert(Me, "审阅出错,文件格式不对!")
+                Exit Sub
+            End Try
+            Fid_NodeName = Base.XmlClass.GetFormID
+            SPNode = Base.XmlClass.FindNode("//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "/" & Fid_NodeName.Replace("表单号", "审批信息") & "[../" & Fid_NodeName & "=" & FID & "]")
+            If Not SPNode Is Nothing Then
+                SPNode.InnerXml = ""
+                Base.XmlClass.Save()
+            End If
+        Else
+            Dim TempNode As System.Xml.XmlNode
+            Try
+                Base.XmlClass.GetXmlFile(DFileName)
+                TempNode = Base.XmlClass.GetRootNode.Item(0)
+            Catch ex As Exception
+                Base.Js.alert(Me, "审阅出错,文件格式不对!")
+                Exit Sub
+            End Try
+            Base.DB.Query("Set ARITHABORT ON")
+            Base.DB.Query("update FormLibrary_" & MKDM & " set Forms='" & TempNode.OuterXml.Replace("'", "''") & "' where FID=" & FID)
+            If Not Base.DB.ErrorMessage Is Nothing Then
+                Base.Js.alert(Me, "系统错误：清库失败,有可能库不存在！")
+                Exit Sub
+            End If
+        End If
+
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim i As Integer
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+        UserKSDM = Base.GetKSDM(UserID)
+
+        '此文件为无流程的审批功能，与有流程的是分离的。
+        Dim Action As String
+        Try
+            FID = Request("FID")
+            Action = Request("action")
+        Catch ex As Exception
+            Base.Js.alert(Me, "非法访问")
+            Exit Sub
+        End Try
+
+        Dim Tb As New Data.DataTable
+        Dim SQL As String
+        '得到进程中的记录,项目状态
+        Tb = Base.DB.Table("SELECT FID,MKDM,XMDM FROM XX_XMJC WHERE Fid = " & FID, "XX_XMJC")
+        If Tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "流程错误,请你重新建立项目")
+            Exit Sub
+        End If
+        XMDM = Tb.Rows(0)(2)
+        MKDM = Tb.Rows(0)(1)
+
+        If Action = "drop" Then             '当接收到是中止审阅时，进行处理
+            DoDropXMSP()
+            Exit Sub
+        End If
+
+        '判断是否是有流程的申请审批
+        Tb = Base.DB.Table("select NoLcDm from  GY_MKXX where MKDM = " & MKDM, "GY_MKXX")
+        If Tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "非法访问")
+            Exit Sub
+        Else
+            If IsDBNull(Tb.Rows(0)(0)) = True Then
+                '返回空值，表示是有流程的。 
+                Base.Js.alert(Me, "非法访问")
+                Exit Sub
+            End If
+        End If
+
+        '过滤掉当前用户名.防止提交给自己审阅
+        'Conn.SelectCommand = "SELECT * FROM [GY_YGDM] where YGDM<>" & UserID
+
+
+        Title.Text = "请选择发送人员"
+
+        Tb = Base.DB.Table("select GY_XMSP.KSDM,SPNR,FQR,KSMC from GY_XMSP,GY_KSDM where GY_KSDM.KSDM=GY_XMSP.KSDM and SPBZ =0 and ZFBZ=0 and xmdm = " & XMDM & " and mkdm=" & MKDM, "GY_XMSP")
+        If Tb.Rows.Count > 0 Then       '表示该项目已经在审批,而且还有没有审批完成
+            '            If Login_User.Trim <> Tb.Rows(0)(2).ToString.Trim Then
+            If UserKSDM <> Tb.Rows(0)(0) Then
+                Base.Js.alert(Me, "此表单已经通过审阅或在审阅当中，你无权再次提起审阅！")
+                Exit Sub
+            Else
+                Title.Text = "此表单正在审阅中，你可以发起审阅，系统会清除原来审阅标志！"
+                SPkind = 2
+            End If
+            If Page.IsPostBack = False Then
+                Tb = Base.DB.Table("select GY_XMSP.KSDM,SPNR,FQR,KSMC from GY_XMSP,GY_KSDM where GY_KSDM.KSDM=GY_XMSP.KSDM and xmdm = " & XMDM & " and mkdm=" & MKDM, "GY_XMSP")
+                For i = 0 To Tb.Rows.Count - 1
+                    Text1.Value = Text1.Value & Tb.Rows(i).Item(3) & ","
+                    userlist.Value = userlist.Value & Tb.Rows(i).Item(0) & ","
+                Next
+            End If
+        Else
+            Tb = Base.DB.Table("select GY_XMSP.KSDM,SPNR,FQR,KSMC from GY_XMSP,GY_KSDM where GY_KSDM.KSDM=GY_XMSP.KSDM and SPBZ=-1 and ZFBZ=0 and xmdm = " & XMDM & " and mkdm=" & MKDM, "GY_XMSP")
+            If Tb.Rows.Count > 0 Then       '表示审批完成了.但是有不通过的.
+                Title.Text = "此表单已经审阅完成，但是没有通过，你可以发起审阅，系统将清除原来审阅标志！"
+                SPkind = 1
+            Else                            '表示审批完成了，也通过了。
+                Tb = Base.DB.Table("select GY_XMSP.KSDM,SPNR,FQR,KSMC from GY_XMSP,GY_KSDM where GY_KSDM.KSDM=GY_XMSP.KSDM and xmdm = " & XMDM & " and mkdm=" & MKDM, "GY_XMSP")
+                If Tb.Rows.Count > 0 Then       '表示有审批记录
+                    'If Login_User.Trim <> Tb.Rows(0)(2).ToString.Trim Then
+                    If UserKSDM <> Tb.Rows(0)(0) Then
+                        Base.Js.alert(Me, "此表单已经通过审阅或在审阅当中，你无权再次提起审阅！")
+                        Exit Sub
+                    Else                '通过了。是发起人。可以再添加审批人。
+                        Title.Text = "此表单已经审阅通过，你可以发起审阅，系统会保留原来审阅标志，添加新的审批人员！"
+                        SPkind = 3
+                    End If
+                Else            '表示没有审批记录，第一次发起审批
+                End If
+            End If
+        End If
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim ModifyFlag As Integer
+        If userlist.Value.Trim.Length <= 0 Then
+            Base.Js.alert(Me, "请选择发送人员！")
+            Exit Sub
+        End If
+
+        Dim YGDM As Integer
+        Dim KSDM As Integer
+        Dim IdList As String = userlist.Value
+        Dim tmp As String()
+        tmp = IdList.Split(",")
+        Dim i As Integer
+        Dim MsgID As Integer
+
+        If SPkind = 3 Then
+            For i = 0 To tmp.Length - 1         '表示保留记录．但是重新发送的人．清除标志
+                Try
+                    KSDM = Convert.ToInt32(tmp(i).ToString)
+                    Base.DB.Query("delete GY_XMSP where XMDM=" & XMDM & " and MKDM=" & MKDM & " and YGDM=" & KSDM)
+                Catch ex As Exception
+                End Try
+            Next
+        Else
+            '清除以前所有的当前项目，当前模块的所有审阅记录,及强制终止的记录
+            Base.DB.Query("Delete GY_XMSP where XMDM = " & XMDM & " and mkdm=" & MKDM)
+        End If
+        Base.DB.Query("Delete GY_XMSP_Over where XMDM = " & XMDM & " and MKDM=" & MKDM)
+
+        ClearSP_Flag()      '清除表单或是表单库中的审批标志
+
+        For i = 0 To tmp.Length - 1
+            Try
+                KSDM = Convert.ToInt32(tmp(i).ToString)
+            Catch ex As Exception
+                KSDM = 0
+            End Try
+            If KSDM <> 0 Then
+                If Base.DB.Table("select XMDM from GY_XMSP where XMDM=" & XMDM & " and MKDM=" & MKDM & " and KSDM=" & KSDM, "GY_XMSP").Rows.Count = 0 And KSDM <> -1 And KSDM <> 0 Then
+                    If CheckBox1.Checked = False Then ModifyFlag = 0 Else ModifyFlag = 1
+                    MsgID = Base.DB.ExeScalar("insert into SendMessage(Title,FromID,FromKSDM,Content,ToKSDM,SendDate,LookFlag,msgkind) values('" & Base.SqlFilter(TextBox1.Text) & " '," & UserID & "," & Base.GetKSDM(UserID) & ",'" & Server.HtmlEncode(Base.SqlFilter(TextBox1.Text.Trim)) & "'," & KSDM & ",getdate(),0,2);Select CId from SendMessage where Cid = @@IDENTITY")
+                    Base.DB.ExeScalar(" insert into GY_XMSP(xmdm,mkdm,YGDM,KSDM,SPNR,FQR,FQKS,SPBZ,ZFBZ,ModifyFlag,msgid) values(" & XMDM & "," & MKDM & ",'" & YGDM & "'," & KSDM & ",'" & TextBox1.Text.Trim & "','" & Login_User & "'," & UserKSDM & ",'',''," & ModifyFlag & "," & MsgID & ");Select Cid From GY_XMSP where Cid = @@IDENTITY")
+                End If
+            End If
+        Next
+        WriteSPing_Flag(True)
+        Dim LCDM As Integer = Base.DB.ExeScalar("select NoLcDm from Gy_MKXX where MKDM = " & MKDM)
+        Base.Js.closestr(Me, "你的审阅请求已经发送给相关人员")
+    End Sub
+
+    Protected Sub CheckBox1_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles CheckBox1.CheckedChanged
+        If CheckBox1.Checked = False Then
+            Button1.Attributes.Clear()
+        Else
+            Button1.Attributes.Add("onclick", "return confirm('你已经选择了审阅人可以修改你的表单,确定吗?');")
+        End If
+    End Sub
+
+   
+End Class

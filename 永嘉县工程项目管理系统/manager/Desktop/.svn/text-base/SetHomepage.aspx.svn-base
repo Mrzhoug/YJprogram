@@ -1,0 +1,123 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="SetHomepage.aspx.vb" Inherits="manager_Desktop_SetHomepage" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>系统设置</title>
+     <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+</head>
+<body>
+    <form id="form1" runat="server" style="width :580px;">
+      <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>系统设置</span></a></li>
+            </ul>
+        </div>
+                <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            首页设置：
+                        </th>
+                          
+                        <td width="75%" style="text-align:left">
+                         <asp:DropDownList ID="DropDownList1" runat="server" AutoPostBack="True">
+                               <asp:ListItem Value="0">系统模块</asp:ListItem>
+                               <asp:ListItem Value="1">自定义模块</asp:ListItem>
+                        </asp:DropDownList> 
+                         <asp:DropDownList ID="ddlhomepage" runat="server" Width="150px" 
+                                AutoPostBack="True"></asp:DropDownList>
+                         <label runat ="server" id="lblname">名称：</label><asp:TextBox ID="txtname" runat="server"></asp:TextBox>
+                         <label runat ="server" id="lblurl">URL：</label><asp:TextBox ID="txturl" runat="server"></asp:TextBox>
+                          
+                            <asp:Button ID="Button1" runat="server" Text="确定设置" CssClass="btnsubmit" />
+                        </td>
+                    </tr>                                   
+                </table>
+            </div>
+        </div>
+         <br />
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">                    
+                    <tr> 
+                    <th>表单菜单配置:</th>                       
+                        <td width="75%" >
+                            <asp:CheckBox ID="CheckBox1" runat="server" Text="保存表单" />&nbsp;
+                            <asp:CheckBox ID="CheckBox16" runat="server" Text="保存草稿" />&nbsp;
+                            <asp:CheckBox ID="CheckBox2" runat="server" Text="申请审阅" />&nbsp;
+                            <asp:CheckBox ID="CheckBox3" runat="server" Text="审阅意见" />&nbsp;
+                            <asp:CheckBox ID="CheckBox4" runat="server" Text="分发表单" />
+                            <br />
+                            <asp:CheckBox ID="CheckBox5" runat="server" Text="查看回复" />&nbsp;
+                            <asp:CheckBox ID="CheckBox6" runat="server" Text="打印表单" />&nbsp;
+                            <asp:CheckBox ID="CheckBox7" runat="server" Text="设置状态" />&nbsp;
+                            <asp:CheckBox ID="CheckBox8" runat="server" Text="附件管理" />&nbsp;
+
+                            <br />
+                            <asp:Button ID="Button2" runat="server" Text="确定配置" CssClass="btnsubmit" />&nbsp;&nbsp;<font color="red">*设置适应全部表单</font>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <br />
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">                    
+                    <tr>                        
+                        <td width="100%" >
+                            <table>
+                                <tr>
+                                      <th>列表按钮配置 :</th>         
+                                    <td  width="75%"><asp:CheckBox ID="CheckBox10" runat="server" Text="置顶按钮" />
+                                    <asp:CheckBox ID="CheckBox11" runat="server" Text="分发按钮" />
+                                    <asp:CheckBox ID="CheckBox12" runat="server" Text="锁定按钮" />                               
+                               <asp:CheckBox ID="CheckBox13" runat="server" Text="表单操作下拉菜单" />
+                                 <br />   <asp:CheckBox ID="CheckBox14" runat="server" Text="列表过滤下拉菜单" />
+                                    <asp:CheckBox ID="CheckBox15" runat="server" Text="标签下拉框" />
+                                    <asp:CheckBox ID="CheckBox17" runat="server" Text="高级搜索" />
+                               <br />
+                               <asp:Button ID="Button4" runat="server" Text="确定配置" CssClass="btnsubmit" />&nbsp;&nbsp;<font color="red">*设置适应全部表单</font></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+            <br />   
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">                    
+                    <tr>                        
+                        <td width="100%" >
+                            <table>
+                                <tr>
+                                  <th>显示列功能按钮配置 :</th>         
+                                    <td width="75%"><asp:CheckBox ID="cb_showListMenu1" runat="server" Text="新建表单" />
+                                    <asp:CheckBox ID="cb_showListMenu2" runat="server" Text="表单列表" />
+                                    <asp:CheckBox ID="cb_showListMenu3" runat="server" Text="报表模式" />                                 
+                               <asp:CheckBox ID="cb_showListMenu4" runat="server" Text="管理标签" />
+                                    <asp:CheckBox ID="cb_showListMenu5" runat="server" Text="个人配置" />
+                                   <asp:CheckBox ID="cb_showListMenu6" runat="server" Text="全局配置" />
+                                    <asp:CheckBox ID="cb_showListMenu7" runat="server" Text="导入数据" />
+                               <br />
+                                    <asp:Button ID="Button10" runat="server" Text="确定配置" CssClass="btnsubmit" />&nbsp;&nbsp;<font color="red">*设置适应全部表单</font></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+</body>
+</html>

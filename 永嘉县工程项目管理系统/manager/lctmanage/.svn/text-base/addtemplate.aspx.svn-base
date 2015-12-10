@@ -1,0 +1,58 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="addtemplate.aspx.vb" Inherits="manager_lctmanage_addtemplate" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title></title>
+          <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>  
+     <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+     <script language="javascript" type="text/javascript">
+        
+     </script>
+</head>
+<body>
+    <form id="form1" runat="server">
+        
+
+        <div class="main" style="border:none;">
+         <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>流程图模板管理</span></a></li>
+            </ul>
+        </div>
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            下载：
+                        </th>
+                        <td width="75%">
+                           <%-- <asp:DropDownList ID="DropDownList2" runat="server" AutoPostBack="True">                             
+                                <asp:ListItem Value="sg">施工变施工流程</asp:ListItem>
+                                <asp:ListItem Value="yw">施工变业务流程</asp:ListItem>
+                                <asp:ListItem Value="ds">电室流程</asp:ListItem>
+                                <asp:ListItem Value="xg">线改流程</asp:ListItem>
+                                <asp:ListItem Value="qt">其他工程</asp:ListItem>
+                                <asp:ListItem Value="xt">系统内工程</asp:ListItem>
+                            </asp:DropDownList> &nbsp;      --%>                     
+                           <a href ="../../lct/lcmb/<%=mb %>">下载模板</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            上传：
+                        </th>
+                        <td>                       
+                            <asp:FileUpload ID="FileUpload1" runat="server" Width="300px"/> &nbsp; <asp:Button ID="Button1" runat="server" Text="上传" CssClass="btnsubmit" />&nbsp;<asp:Button ID="Button2" runat="server" Text="更新流程" CssClass="btnsubmit" />
+                             
+                        </td>
+                    </tr>                 
+                </table>
+                </div>
+    </div>
+    </form>
+</body>
+</html>

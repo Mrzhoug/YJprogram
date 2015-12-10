@@ -1,0 +1,61 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Function.aspx.vb" Inherits="manager_Forms_Function" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>审批功能</title>
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+    <script language="javascript" type="text/javascript">
+    function selectuser()
+    {
+        var resultstr  = "";
+        resultstr = window.showModalDialog("../Dialog/UserDialog.aspx","用户选择","dialogWidth=300px;dialogHeight=450px");
+        var namelist = "";
+        var idlist = "";
+        if (resultstr !=null) 
+        {
+            var tmp = resultstr.split(",");
+            for (var i=0 ;i<tmp.length;i++)
+            {
+                if (tmp[i]!="")
+                {
+                    var tmp1 = tmp[i].split("|");
+                    namelist = namelist + tmp1[1] + ",";
+                    idlist = idlist + tmp1[0] + ",";
+                }
+            }      
+        }
+        var obj = document.getElementById("Text1");
+        obj.value = namelist;
+        var obj1 = document.getElementById("userlist");
+        obj1.value = idlist;
+    }
+    
+    </script>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div align=center>
+        <br />
+        <asp:Label ID="Title" runat="server" Height="41px" Text="标题" Width="576px" Font-Bold="True" Font-Size="14pt" Font-Names="幼圆"></asp:Label><br />
+        <asp:Panel ID="Panel2" runat="server" GroupingText="审批说明" Height="110px" Width="576px">
+            <asp:TextBox ID="TextBox1" runat="server" Height="80px" TextMode="MultiLine" Width="550px"></asp:TextBox></asp:Panel>
+        <br />
+        <asp:Panel ID="Panel4" runat="server" GroupingText="发送人员清单" Height="50px" Width="576px">
+            <input id="Text1" runat="server" readonly="readonly" style="width: 512px; height: 56px;"
+                type="text" />
+            <input id="Button7" onclick="selectuser()" type="button" value="选择" />
+            <input id="userlist" runat="server" readonly="" style="width: 552px" type="hidden" /></asp:Panel>
+            <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT * FROM [GY_YGDM]"></asp:SqlDataSource>
+        <br />
+        <br />
+        <br />
+        <asp:Button ID="Button1" runat="server" Text=" 确 定 " OnClick="Button1_Click" />
+        &nbsp;<input id="Button2" type="button" value=" 关 闭 " onclick="window.close();" /></div>
+        
+    </form>
+</body>
+</html>

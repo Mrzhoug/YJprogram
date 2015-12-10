@@ -1,0 +1,388 @@
+﻿	document.oncontextmenu=function() 
+	{ 
+	return false; 
+	} 
+
+  function RightMenu()
+  {
+    this.AddExtendMenu=AddExtendMenu;
+    this.AddItem=AddItem;
+    this.GetMenu=GetMenu;
+    this.HideAll=HideAll;
+    this.I_onMouseOver=I_onMouseOver;
+    this.I_onMouseOut=I_onMouseOut;
+    this.I_onMouseUp=I_onMouseUp;
+    this.P_onMouseOver=P_onMouseOver;
+    this.P_onMouseOut=P_onMouseOut;
+    A_rbpm = new Array();
+    HTMLstr  = "";
+    HTMLstr += "<!-- RightButton PopMenu -->\n";
+    HTMLstr += "\n";
+    HTMLstr += "<!-- PopMenu Starts -->\n";
+    HTMLstr += "<div id='E_rbpm' class='rm_div'>\n";
+                        // rbpm = right button pop menu
+    HTMLstr += "<table width='100%' border='0' cellspacing='0'>\n";
+    HTMLstr += "<!-- Insert A Extend Menu or Item On Here For E_rbpm -->\n";
+    HTMLstr += "</table>\n";
+    HTMLstr += "</div>\n";
+    HTMLstr += "<!-- Insert A Extend_Menu Area on Here For E_rbpm -->";
+    HTMLstr += "\n";
+    HTMLstr += "<!-- PopMenu Ends -->\n";
+  }
+  function AddExtendMenu(id,name,parent)
+  {
+    var TempStr = "";
+
+    eval("A_"+parent+".length++");
+    eval("A_"+parent+"[A_"+parent+".length-1] = id");  // 将此项注册到父菜单项的ID数组中去
+    TempStr += "<div id='E_"+id+"' class='rm_div'>\n";
+    TempStr += "<table width='100%' border='0' cellspacing='0'>\n";
+    TempStr += "<!-- Insert A Extend Menu or Item On Here For E_"+id+" -->";
+    TempStr += "</table>\n";
+    TempStr += "</div>\n";
+    TempStr += "<!-- Insert A Extend_Menu Area on Here For E_"+id+" -->";
+    TempStr += "<!-- Insert A Extend_Menu Area on Here For E_"+parent+" -->";
+    HTMLstr = HTMLstr.replace("<!-- Insert A Extend_Menu Area on Here For E_"+parent+" -->",TempStr);
+    
+    eval("A_"+id+" = new Array()");
+    TempStr  = "";
+    TempStr += "<!-- Extend Item : P_"+id+" -->\n";
+    TempStr += "<tr id='P_"+id+"' class='out'";
+    TempStr += " onmouseover='P_onMouseOver(\""+id+"\",\""+parent+"\")'";
+    TempStr += " onmouseout='P_onMouseOut(\""+id+"\",\""+parent+"\")'";
+    TempStr += " onmouseup=window.event.cancelBubble=true;";
+    TempStr += " onclick=window.event.cancelBubble=true;";
+    TempStr += "><td nowrap width='150'>";
+    TempStr += "&nbsp;&nbsp;" + name + "</td><td style='font-family: webdings; text-align: ;'>4";
+    TempStr += "</td></tr>\n";
+    TempStr += "<!-- Insert A Extend Menu or Item On Here For E_"+parent+" -->";
+    HTMLstr = HTMLstr.replace("<!-- Insert A Extend Menu or Item On Here For E_"+parent+" -->",TempStr);
+  }
+  function AddItem(id,name,parent,location)
+  {
+    var TempStr = "";
+    var ItemStr = "<!-- ITEM : I_"+id+" -->";
+    if(id == "sperator")
+    {
+      TempStr += ItemStr+"\n";
+      TempStr += "<tr class='out' onclick='window.event.cancelBubble=true;' onmouseup='window.event.cancelBubble=true;'><td colspan='2' height='1'><hr class='sperator'></td></tr>";
+      TempStr += "<!-- Insert A Extend Menu or Item On Here For E_"+parent+" -->";
+      HTMLstr = HTMLstr.replace("<!-- Insert A Extend Menu or Item On Here For E_"+parent+" -->",TempStr);
+      return;
+    }
+    if(HTMLstr.indexOf(ItemStr) != -1)
+    {
+      alert("I_"+id+"already exist!");
+      return;
+    }
+    TempStr += ItemStr+"\n";
+    TempStr += "<tr id='I_"+id+"' class='out'";
+    TempStr += " onmouseover='I_onMouseOver(\""+id+"\",\""+parent+"\")'";
+    TempStr += " onmouseout='I_onMouseOut(\""+id+"\")'";
+    TempStr += " onclick='window.event.cancelBubble=true;'";
+    if(location == null)
+      TempStr += " onmouseup='I_onMouseUp(\""+id+"\",\""+parent+"\",null,null)'";
+    else
+      TempStr += " onmouseup='I_onMouseUp(\""+id+"\",\""+parent+"\",\""+location+"\",null)'";
+    TempStr += "><td nowrap width='150'>";
+    TempStr += "&nbsp;&nbsp;" + name + "";
+    TempStr += "</td><td></td></tr>\n";
+    TempStr += "<!-- Insert A Extend Menu or Item On Here For E_"+parent+" -->";
+    HTMLstr = HTMLstr.replace("<!-- Insert A Extend Menu or Item On Here For E_"+parent+" -->",TempStr);
+  }
+  function GetMenu()
+  {
+    return HTMLstr;
+  }
+  function I_onMouseOver(id,parent)
+  {
+    var Item;
+    if(parent != "rbpm")
+    {
+      var ParentItem;
+      ParentItem = eval("P_"+parent);
+      ParentItem.className="over";
+    }
+    Item = eval("I_"+id);
+    Item.className="over";
+    HideAll(parent,1);
+  }
+  function I_onMouseOut(id)
+  {
+    var Item;
+    Item = eval("I_"+id);
+    Item.className="out";
+  }
+  function I_onMouseUp(id,parent,location,parents)
+  {
+    var ParentMenu;
+    window.event.cancelBubble=true;
+    onClick();
+    ParentMenu = eval("E_"+parent);
+    ParentMenu.display="none";
+    if(location == null)
+      eval("Do_"+id+"()");
+    else
+    	{
+    		if (parents == null)
+    		{
+    			window.location.href=location;
+    		}
+    		else
+    		{
+    			window.open(location,'',parents);
+    		}
+    	}
+  }
+  function P_onMouseOver(id,parent)
+  {
+    var Item;
+    var Extend;
+    var Parent;
+    if(parent != "rbpm")
+    {
+      var ParentItem;
+      ParentItem = eval("P_"+parent);
+      ParentItem.className="over";
+    }
+    HideAll(parent,1);
+    Item = eval("P_"+id);
+    Extend = eval("E_"+id);
+    Parent = eval("E_"+parent);
+    Item.className="over";
+    Extend.style.display="block";
+    Extend.style.posLeft=document.body.scrollLeft+Parent.offsetLeft+Parent.offsetWidth-4;
+    if(Extend.style.posLeft+Extend.offsetWidth > document.body.scrollLeft+document.body.clientWidth)
+        Extend.style.posLeft=Extend.style.posLeft-Parent.offsetWidth-Extend.offsetWidth+8;
+    if(Extend.style.posLeft < 0) Extend.style.posLeft=document.body.scrollLeft+Parent.offsetLeft+Parent.offsetWidth;
+    Extend.style.posTop=Parent.offsetTop+Item.offsetTop;
+    if(Extend.style.posTop+Extend.offsetHeight > document.body.scrollTop+document.body.clientHeight)
+      Extend.style.posTop=document.body.scrollTop+document.body.clientHeight-Extend.offsetHeight;
+    if(Extend.style.posTop < 0) Extend.style.posTop=0;
+  }
+  function P_onMouseOut(id,parent)
+  {
+  }
+  function HideAll(id,flag)
+  {
+    var Area;
+    var Temp;
+    var i;
+    if(!flag)
+    {
+      Temp = eval("E_"+id);
+      Temp.style.display="none";
+    }
+    Area = eval("A_"+id);
+    if(Area.length)
+    {
+      for(i=0; i < Area.length; i++)
+      {
+        HideAll(Area[i],0);
+        Temp = eval("E_"+Area[i]);
+        Temp.style.display="none";
+        Temp = eval("P_"+Area[i]);
+        Temp.className="out";
+      }
+    }
+  }
+
+  //document.onmouseup=onMouseUp;
+  document.onclick=onClick;
+  function onMouseUp()
+  {
+    if(window.event.button == 2)
+    {
+      var PopMenu;
+      PopMenu = eval("E_rbpm");
+      HideAll("rbpm",0);
+      PopMenu.style.display="block";
+      PopMenu.style.posLeft=document.body.scrollLeft+window.event.clientX;
+      PopMenu.style.posTop=document.body.scrollTop+window.event.clientY;
+      if(PopMenu.style.posLeft+PopMenu.offsetWidth > document.body.scrollLeft+document.body.clientWidth)
+        PopMenu.style.posLeft=document.body.scrollLeft+document.body.clientWidth-PopMenu.offsetWidth;
+      if(PopMenu.style.posLeft < 0) PopMenu.style.posLeft=0;
+      if(PopMenu.style.posTop+PopMenu.offsetHeight > document.body.scrollTop+document.body.clientHeight)
+        PopMenu.style.posTop=document.body.scrollTop+document.body.clientHeight-PopMenu.offsetHeight;
+      if(PopMenu.style.posTop < 0) PopMenu.style.posTop=0;
+    }
+  }
+  function onClick()
+  {
+    HideAll("rbpm",0);
+  }
+  // Add Your Function on following
+  function Do_viewcode(){window.location="view-source:"+window.location.href;}
+  function Do_help(){window.showHelp(window.location);}
+  function Do_exit() {window.close();}
+  function Do_refresh() {window.location.reload();}
+  function Do_back() {history.back();}
+  function Do_forward() {history.forward();}
+  function Do_author(){alert("Gpcheng")}
+
+//var menu = new RightMenu();
+//menu.AddExtendMenu("d_setting","&nbsp;&nbsp;新建新表单","rbpm");
+//menu.AddItem("CreateNewForms","&nbsp;&nbsp;新建新表单&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;","rbpm","#");
+//menu.AddItem("CreateNewLikeForms","&nbsp;&nbsp;相似新建","rbpm","#");
+//menu.AddItem("sperator","","rbpm",null);
+//menu.AddItem("Refresh","&nbsp;&nbsp;刷新列表内容","rbpm","#");
+//menu.AddItem("UpdateForms","&nbsp;&nbsp;更新表单架构","rbpm","#");
+//menu.AddItem("sperator","","rbpm",null);
+//menu.AddItem("Fsp","&nbsp;&nbsp;申请审阅","rbpm","#");
+//menu.AddItem("LookSP","&nbsp;&nbsp;查看审阅","rbpm","#");
+//menu.AddItem("sperator","","rbpm",null);
+//document.writeln(menu.GetMenu());
+
+var menu = new RightMenu();
+//menu.AddExtendMenu("d_setting","&nbsp;&nbsp;新建新表单","rbpm");
+menu.AddItem("OpenForm","&nbsp;&nbsp;打开表单","rbpm","#");
+menu.AddItem("sperator","","rbpm",null);
+
+menu.AddItem("CreateNewForms","&nbsp;&nbsp;新建表单&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;","rbpm","#");
+menu.AddItem("CreateNewLikeForms","&nbsp;&nbsp;相似新建","rbpm","#");
+menu.AddItem("sperator","","rbpm",null);
+
+
+menu.AddItem("refresh","&nbsp;&nbsp;刷新列表内容","rbpm",null);
+menu.AddItem("UpdateForms","&nbsp;&nbsp;更新表单架构","rbpm","#");
+menu.AddItem("sperator","","rbpm",null);
+
+menu.AddExtendMenu("SPMenu","&nbsp;&nbsp;表单审阅 ...","rbpm");
+menu.AddItem("Fsp","&nbsp;&nbsp;申请审阅&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;","SPMenu","#");
+menu.AddItem("LookSP","&nbsp;&nbsp;查看审阅","SPMenu","#");
+menu.AddItem("DropSP","&nbsp;&nbsp;中止审阅","SPMenu","#");
+
+
+menu.AddExtendMenu("XDMenu","&nbsp;&nbsp;分发表单 ...","rbpm");
+menu.AddItem("Xd","&nbsp;&nbsp;分发表单&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;","XDMenu","#");
+menu.AddItem("LookXd","&nbsp;&nbsp;分发记录","XDMenu","#");
+
+menu.AddExtendMenu("formop","&nbsp;&nbsp;表单扩展操作","rbpm")
+menu.AddItem("intop","&nbsp;&nbsp;将此表单置顶","formop","#");
+menu.AddItem("outtop","&nbsp;&nbsp;取消表单置顶","formop","#");
+menu.AddItem("lock","&nbsp;&nbsp;锁定表单","formop","#");
+menu.AddItem("unlock","&nbsp;&nbsp;解锁表单","formop","#");
+
+menu.AddItem("sperator","","rbpm",null);
+menu.AddItem("formurl","&nbsp;&nbsp;复制打开表单 URL","rbpm","#");
+menu.AddItem("copynewform","&nbsp;&nbsp;复制新建表单 URL","rbpm","#");
+menu.AddItem("sperator","","rbpm",null);
+menu.AddItem("print1","&nbsp;&nbsp;打印此表单","rbpm","#");
+menu.AddItem("history1","&nbsp;&nbsp;历史版本","rbpm","#");
+
+
+document.writeln(menu.GetMenu());
+
+
+
+function gpc(cid,obj,idx)
+{
+//用来将选中的行进行换背景色.未选中的.清除原来选中的标记  
+var obj1 = document.getElementById("GridView1");
+for(i=1;i<obj1.rows.length;i++)
+{
+    if (obj1.rows[i].id==obj.id)
+    {
+        obj.style.backgroundColor='#CE5D5A';
+        obj.style.color='White';
+    }
+    else
+    {
+        obj1.rows[i].style.backgroundColor='white';
+        obj1.rows[i].style.color='#000000';
+    }
+}
+
+    //右键菜单的弹出   
+    if(window.event.button == 2)   {     onMouseUp();    }
+    //左键,可以让其切换是否选中
+    if(window.event.button == 1)
+    {
+    	var obj2 =document.getElementById("GridView1__ctl" + (idx + 2) + "_CheckBox1");
+    	if (obj2.checked==true)
+    	{
+				obj2.checked = false;
+    	}
+    	else
+    	{
+    		obj2.checked = true;
+    	}
+    }
+    
+    //下面开始设置根据选中的不同.产生不同的菜单
+    //打开选中的表单
+    var OpenForm = document.getElementById("I_OpenForm");
+	OpenForm.onmouseup=function () { I_onMouseUp("OpenForm","rbpm","../Forms/OpenInfoPath.aspx?FID=" + cid,"height=300, width=550, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes");}
+    
+	//创建新表单
+	var forms = document.getElementById("I_CreateNewForms");
+	forms.onmouseup=function () { I_onMouseUp("CreateNewForms","rbpm","../Forms/FunctionNoLC.aspx?LCDM=" + lcdm,"height=300, width=550, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes");}
+	
+
+	//相似新建
+	var LikeForms = document.getElementById("I_CreateNewLikeForms");
+	LikeForms.onmouseup=function () { I_onMouseUp("CreateNewLikeForms","rbpm","../Forms/FunctionNoLC.aspx?LCDM=" + lcdm +"&FID=" + cid + "&LikeNew=1","height=300, width=550, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes");}
+	
+	//更新架构
+	var UpdateForms = document.getElementById("I_UpdateForms");
+	UpdateForms.onmouseup=function () { I_onMouseUp("UpdateForms","rbpm","../Forms/OpenInfoPath.aspx?FID=" + cid + "&AutoUpdate=1","height=300, width=550, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes");}
+	
+	//查看审批
+	var LookSP = document.getElementById("I_LookSP");
+	LookSP.onmouseup=function(){I_onMouseUp("LookSP","SPMenu","ShowAbout_XMSP_NoLc.aspx?SID=" + cid ,"height=300, width=550, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no");}
+	
+	//申请审批
+	var sp = document.getElementById("I_Fsp");
+	sp.onmouseup=function () { I_onMouseUp("Fsp","SPMenu","../Forms/FormSP_NoLc.aspx?FID=" + cid,"height=450, width=800, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes");}
+	
+	//终止审批
+	var DropSP = document.getElementById("I_DropSP");
+	DropSP.onmouseup=function () { I_onMouseUp("DropSP","SPMenu","../Forms/FormSP_NoLc.aspx?Action=drop&FID=" + cid,null);}
+	
+	
+	//查看修订
+	var LookXd = document.getElementById("I_LookXd");
+	LookXd.onmouseup=function(){I_onMouseUp("LookXd","XDMenu","ShowAbout_XMXD_NoLc.aspx?SID=" + cid ,"height=300, width=750, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no");}
+	
+	//申请修订
+	var Xd = document.getElementById("I_Xd");
+	Xd.onmouseup=function () { I_onMouseUp("Xd","XDMenu","../desktop/WriteSendMessage.aspx?Kind=1&FID=" + cid,"height=450, width=800, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes");}
+	
+	
+	//得到打开表单URL
+	var formurl = document.getElementById("I_formurl");
+	var url=document.location.href;
+	var durl = document.location.search;
+	formurl.onmouseup=function () { window.clipboardData.setData('Text',url.replace("XJXM/ShowList.aspx" + durl,"") + "Forms/OpenInfoPath.aspx?FID=" + cid); alert("内容已经复制到剪切板中")}
+	
+    //得到新建表单URL
+    var copynewform	= document.getElementById("I_copynewform");
+	copynewform.onmouseup=function () { window.clipboardData.setData('Text',url.replace("XJXM/ShowList.aspx","Forms/FunctionNoLC.aspx")); alert("内容已经复制到剪切板中");}
+	
+	//置顶功能
+	var intop = document.getElementById("I_intop");
+	intop.onmouseup=function () { I_onMouseUp("intop","formop","../Forms/FormToTop.aspx?LCDM=" + lcdm +"&FID=" + cid,null);}
+	
+	//取消置顶功能
+	var outtop = document.getElementById("I_outtop");
+	outtop.onmouseup=function () { I_onMouseUp("outtop","formop","../Forms/FormToTop.aspx?LCDM=" + lcdm +"&FID=" + cid + "&outTop=1",null);}
+	
+	//锁定功能
+	var lock = document.getElementById("I_lock");
+	lock.onmouseup=function () { I_onMouseUp("lock","formop","../Forms/FormLock.aspx?lock=1&LCDM=" + lcdm +"&FID=" + cid,null);}
+	
+	//解锁功能
+	var unlock = document.getElementById("I_unlock");
+	unlock.onmouseup=function () { I_onMouseUp("unlock","formop","../Forms/FormLock.aspx?lock=0&LCDM=" + lcdm +"&FID=" + cid,null);}
+		
+	//打印表单	
+	var print1 = document.getElementById("I_print1");
+	print1.onmouseup=function () { I_onMouseUp("print1","rbpm","../Forms/FormPrint.aspx?Fid=" + cid,"height=300, width=550, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes");}
+	
+	
+	//历史修改记录
+	var history1 = document.getElementById("I_history1");
+	history1.onmouseup=function(){I_onMouseUp("history1","XDMenu","../Modify/ModifyList.aspx?FID=" + cid ,"height=400, width=600, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes");}
+	
+	
+}

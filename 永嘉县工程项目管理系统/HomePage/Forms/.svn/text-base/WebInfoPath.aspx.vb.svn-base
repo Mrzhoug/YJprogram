@@ -1,0 +1,146 @@
+﻿
+Partial Class HomePage_Forms_WebInfoPath
+    Inherits System.Web.UI.Page
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim Base As New Base
+
+        If Page.IsPostBack = False Then
+
+        End If
+        If Base.HomePageUserCheck = False Then
+            Base.Js.alert(Me, "请先登陆,再填写表单")
+            Exit Sub
+        End If
+
+        Dim Fid As Integer
+        Try
+            Fid = Request("FID")
+        Catch ex As Exception
+            Base.Js.alert(Me, "非法参数或是非法访问!")
+            Exit Sub
+        End Try
+
+        Response.Write("<script language=javascript>" & vbCrLf & "var cid=" & Fid & ";" & vbCrLf & "</script>")
+        Dim Tb As New Data.DataTable
+        '根据ＦＩＤ得到相关的信息        
+        Tb = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir,GY_MKXX.MKDM,XX_XMJC.XMDM,[View],XX_XMJC.lock FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & Fid & ") ", "XX_XMJC")
+        If Tb.Rows.Count > 0 Then
+            If Tb.Rows(0)("lock") = 1 Then
+                Response.Write("此表单已经锁定，打开文件前请解锁。有问题请联系管理员！")
+                Response.End()
+            End If
+        Else
+
+            Base.Js.alert(Me, "非法访问")
+
+            Exit Sub
+        End If
+        Dim Mkdm As Integer = Tb.Rows(0)(3).ToString
+        Dim XMDM As Integer = Tb.Rows(0)(4)
+        Dim MKMC As String = Tb.Rows(0).Item(1)
+        Dim XsnDir As String = Tb.Rows(0).Item(2).ToString.Trim
+
+        Dim uri As String = Server.MapPath("../../") & "TemplateLibrary\" & XsnDir & ".xsn"
+        Dim PublicUrl As String = Request("publicurl")
+        Dim Form As InfoJetSoft.Service.InfoJetForm = Nothing
+        Dim xml As String = Base.pub.Text_File_Read(Server.MapPath("../../") & "\FormFolder\" & MKMC & "\" & Fid & ".xml")
+
+
+        '对表单进行检测，是否已经通过审批
+        Dim RootNodeName As String
+        Try
+            RootNodeName = Base.XmlClass.GetXmlFile(Server.MapPath("../../") & "\FormFolder\" & MKMC & "\" & Fid & ".xml").ChildNodes.Item(0).Name
+        Catch ex As Exception
+            Response.Write("表单出错,无法打开!")
+            Exit Sub
+        End Try
+        Dim Fid_NodeName As String = Base.XmlClass.GetFormID
+        Dim SPNode As System.Xml.XmlNode = Base.XmlClass.FindNode("//" & RootNodeName & "/" & Fid_NodeName.Replace("表单号", "标题") & "/" & Fid_NodeName.Replace("表单号", "审批信息") & "/" & Fid_NodeName.Replace("表单号", "审批结果"))
+        Dim TempNodeValue As String
+        Dim ScriptStr As String = "<script language=javascript>" & vbCrLf
+        If Not SPNode Is Nothing Then
+            Try
+                TempNodeValue = SPNode.ChildNodes.Item(0).Value
+            Catch ex As Exception
+                TempNodeValue = ""
+            End Try
+            If TempNodeValue = "通过" Or TempNodeValue = "不通过" Then
+                ScriptStr += "var msg=true; " & vbCrLf
+            Else
+                ScriptStr += "var msg=false; " & vbCrLf
+            End If
+        Else
+            ScriptStr += "var msg=false; " & vbCrLf
+        End If
+        ScriptStr += "</script>"
+        Response.Write(ScriptStr)
+
+
+
+        '将表单状态标志填写在菜单上.
+        ScriptStr = ""
+        scriptstr = "<script language=javascript> var menu = new Ext.menu.Menu({items: [" & vbCrLf
+        scriptstr += "{text:   '设置为[已完成]',handler: function(){  dostate(-1);},iconCls:  'blist' }" & vbCrLf
+        scriptstr += ",{text:   '设置为[进行中]',handler: function(){  dostate(0);},iconCls:  'blist' }" & vbCrLf
+        scriptstr += ",{text:   '设置为[已取消]',handler: function(){  dostate(-2);},iconCls:  'blist' }" & vbCrLf
+        Tb = Base.DB.Table("Select cid,value from Xconfig,GY_XMXX where config='表单标签' and Xconfig.lcdm=GY_XMXX.LCDM and GY_XMXX.XMDM=" & XMDM, "dd")
+        Dim i As Integer
+        For i = 0 To Tb.Rows.Count - 1
+            scriptstr += ",{text:   '设置为[" & Tb.Rows(i).Item(1) & "]',handler: function(){  dostate(" & Tb.Rows(i).Item(0) & ");},iconCls:  'blist' }" & vbCrLf
+        Next
+        scriptstr += "]});" & vbCrLf
+
+        '根据是否有流程,显示不同的审批页面
+        Tb = Base.DB.Table("Select FID From XX_XMJC where XMZT is null and FID=" & Fid, "XMJC")
+        scriptstr += " function createsp()" & vbCrLf
+        scriptstr += "{" & vbCrLf
+        If Tb.Rows.Count > 0 Then       '表示是无流程
+            scriptstr += "window.open('../Forms/FormSP_NoLc.aspx?FID=" & Fid & "','发起审阅','height=450, width=800, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');" & vbCrLf
+        Else
+            scriptstr += "window.open('../Forms/Function.aspx?XMDM=" & XMDM & "&MKDM=" & Mkdm & "&Flag=1','发起审阅','height=450, width=800, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');" & vbCrLf
+        End If
+        scriptstr += "}" & vbCrLf
+
+        scriptstr += "</script>" & vbCrLf
+        clientscript.InnerHtml = scriptstr
+
+        Dim Fs As IO.FileStream = New IO.FileStream(uri, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read)  '当False为True是.向文件添加内容
+        Dim xsnContent(Fs.Length) As Byte
+        Dim strread As New IO.BinaryReader(Fs) '流处理要传输的文件
+        strread.Read(xsnContent, 0, xsnContent.Length)
+
+        '得到列表后,进行检测,模板是否已经注册过.
+        Dim uriList As String() = InfoJetSoft.Service.InfoJetService.List()
+        Dim RegFlag As Boolean = False
+        For i = 0 To uriList.GetUpperBound(0)
+            'Response.Write(uriList(i) & "<br>")
+            If uriList(i).IndexOf("/" & XsnDir & ".xsn") > 0 Then
+                PublicUrl = uriList(i)
+                RegFlag = True
+                Exit For
+            End If
+        Next
+        'If uriList.Length > 0 Then
+        '    InfoJetSoft.Service.InfoJetService.Remove(uriList(0))
+        'End If
+        If RegFlag = False Then
+            PublicUrl = InfoJetSoft.Service.InfoJetService.Register(Context, xsnContent)
+            'Response.Write("*")
+        End If
+
+
+        If Not PublicUrl Is Nothing Then
+            Try
+                Form = InfoJetSoft.Service.InfoJetService.BuildFormByXML(Context, PublicUrl, xml, "")
+            Catch ex As Exception
+                Base.Js.alert(Me, "以Web方式打开出错,请稍候再试!如果再试还是不行,请先用Infopath打方式.并联系管理员!")
+                xDocContent.Text = "以Web方式打开出错,请稍候再试!如果再试还是不行,请先用Infopath打方式.并联系管理员!"
+                Exit Sub
+            End Try
+            xDocContent.Text = Form.Xhtml
+            FileName.Value = xml
+        End If
+
+    End Sub
+End Class

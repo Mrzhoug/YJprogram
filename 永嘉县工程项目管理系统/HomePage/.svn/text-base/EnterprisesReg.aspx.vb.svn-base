@@ -1,0 +1,96 @@
+﻿Imports System.Web.Mail
+
+Partial Class HomePage_EnterprisesReg
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim TitleStr As String
+    Dim Host As String
+
+    ''' <summary>
+    ''' 检测用户名是否存在
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function CheckUserName() As Boolean
+        Dim User As String = Base.SqlFilter(Email.Text)
+
+        If User.Length = 0 Then
+            Base.Js.alert(Me, "请输入用户名！")
+            Return False
+            Exit Function
+        End If
+
+        If Base.DB.GetRowCount("SELECT YGDM FROM GY_YGDM  where DLMC='" & User & "'", "GY_YGDM") > 0 Then
+            Base.Js.alert(Me, "此Email已经注册过，请使用[密码找回]取回密码或是输入新的Email地址！")
+            Return False
+            Exit Function
+        End If
+
+        Return True
+    End Function
+
+    Protected Sub reg_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles reg.Click
+        If CheckUserName() = False Then Exit Sub
+
+        If Email.Text.Trim.Length > 0 And Email.Text.IndexOf("@") > 0 And Email.Text.IndexOf(".") > 0 Then
+        Else
+            Base.Js.alert(Me, "请正确输入ＥＭＡＩＬ邮箱！")
+            Exit Sub
+        End If
+
+        Dim d As New Random
+        Dim pwd As String = d.Next(50000000, 100000000)
+
+        Dim body As String = body & "<html>"
+        body = body & "<body>"
+        body = body & "<pre id=""content"" style=""width:100%;white-space:normal;word-wrap:break-word;word-break:keep-all;"">"
+        body = body & "亲爱的" & TitleStr & "用户" & Email.Text.Trim & "您好："
+        body = body & "<br>    您的密码为：" & pwd
+        body = body & "<br>    <a href='" & Host & "'>" & TitleStr & "</a>"
+        body = body & "<br>                                                                                                    " & TitleStr
+        body = body & "</pre>"
+        body = body & "</body>"
+        body = body & "</html>"
+        SendMail(Email.Text, body)
+        'Try
+        '    SendMail(Email.Text, body)
+        'Catch ex As Exception
+        '    Base.Js.alert(Me, "邮件发送失败，请与管理员联系")
+        '    Exit Sub
+        'End Try
+
+        Dim sql As String = "INSERT INTO GY_YGDM([YGXM],DLMC,[DLPWD],[Email], [mobile],IsOut,QYBZ)"
+        sql = sql & " values ('" & Base.SqlFilter(Email.Text) & "','" & Base.SqlFilter(Email.Text) & "','" & Base.SqlFilter(Base.EnCrypt.MD5(pwd)) & "','" & Base.SqlFilter(Email.Text) & "'"
+        sql = sql & ",'',1,1)"
+        Base.DB.Query(sql)
+
+        If Base.DB.ErrorMessage.ToString.Length <= 0 Then
+            Base.Js.alert(Me, "注册成功，请到您的邮箱查看密码！")
+        Else
+            Base.Js.alert(Me, "注册失败，请联系管理员！")
+        End If
+
+    End Sub
+
+    Sub SendMail(ByVal Mailto As String, ByVal mail As String)
+        Dim myMail As New MailMessage
+        Dim ta As Data.DataTable
+        myMail.From = "clicktone@tom.com"
+        myMail.BodyEncoding = System.Text.Encoding.UTF8
+        SmtpMail.SmtpServer = "smtp.tom.com"
+        myMail.Fields.Add("http://schemas.microsoft.com/cdo/configuration/smtpauthenticate", "1")
+        myMail.Fields.Add("http://schemas.microsoft.com/cdo/configuration/sendusername", "clicktone@tom.com")
+        myMail.Fields.Add("http://schemas.microsoft.com/cdo/configuration/sendpassword", "sunfun")
+        myMail.To = Mailto
+        myMail.Subject = TitleStr & "修改密码通知"
+        myMail.BodyFormat = MailFormat.Html
+        myMail.Body = mail
+        SmtpMail.Send(myMail)
+
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        TitleStr = Base.pub.GetWebConfig("SunfunSoft.Xman.Title").ToString
+        Host = Base.GetHost
+    End Sub
+End Class

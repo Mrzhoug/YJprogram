@@ -1,0 +1,391 @@
+﻿Imports System.xml
+Partial Class manager_CreateFunction_XSN_Model
+    Inherits System.Web.UI.Page
+    Dim RootPath As String
+    Dim Base As New Base
+    Dim CurrentUrl As String
+    Dim WorkingDirectory As String
+    Dim te As Integer = 0
+    Dim TempSource As New Data.DataSet
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking()        '这里对文件进行权限限制
+
+        '得到当前路径的实际路径　
+        WorkingDirectory = Request.MapPath("../../") & "Submit_Temp"
+        RootPath = Request.MapPath("../../") & "TemplateLibrary"
+
+        '得到当前的ＵＲＬ路径        
+        Dim Url As String = Request.ServerVariables("Url")
+        Dim Host As String = Request.ServerVariables("http_host")
+        CurrentUrl = Url.ToLower.Replace("manager/createfunction/xsn_model.aspx", "TemplateLibrary/")
+        Base.IO.CreateDir(RootPath)
+        TempSource = Base.IO.CreateDataSetFromFileList(RootPath)
+        If TextBox1.Text.Length > 0 Then
+            SearchGV()
+        End If
+        GridView1.DataSource = TempSource
+        If Not Page.IsPostBack Then
+            Dim P As Integer
+            Try
+                P = Request("P")
+                GridView1.PageIndex = P
+            Catch ex As Exception
+            End Try
+            GridView1.DataBind()
+        End If
+
+    End Sub
+
+    Sub SearchGV()
+        Dim i As Integer
+        Dim SearchStr As String = TextBox1.Text.Trim
+        For i = TempSource.Tables(0).Rows.Count - 1 To 0 Step -1
+            If TempSource.Tables(0).Rows(i)(1).ToString.IndexOf(SearchStr) = -1 Then
+                TempSource.Tables(0).Rows.RemoveAt(i)
+            End If
+        Next
+    End Sub
+
+    Function Modify_XSN(ByVal TempFilename As String) As String
+
+        '解压与压缩的过程
+        Dim Root As String = Server.MapPath("../../")
+        Dim Ph As String = "TemplateLibrary\" & TempFilename
+        Dim TempDir As String
+        Try
+            TempDir = Root & "TemplateLibrary\" & Left(TempFilename, Len(TempFilename) - 4)
+        Catch ex As Exception
+            Return "上传的文件有错误!"
+            Exit Function
+        End Try
+
+        '先删除此前模板生成的文件,有可能模板已经更新.得更新数据模板.
+        Try
+            Base.IO.DelDir(TempDir)
+            Base.IO.CreateDir(TempDir)
+        Catch ex As Exception
+            '表示临时目录被占用,无法删除一些文件.
+        End Try
+
+        Try
+            Base.IO.ExtractFilesFromXSN(Root & Ph, TempDir, WorkingDirectory)
+        Catch ex As Exception
+            Return "文件被占用!"
+            Exit Function
+        End Try
+
+
+        System.Threading.Thread.Sleep(1000)             '延时
+
+        '修改模板文件manifest.xsf 中的  publishUrl (发布路径),
+        Dim Url As String = Request.ServerVariables("Url").ToLower
+        Dim Host As String = Request.ServerVariables("http_host")
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.BaseUrl") <> "" Then
+            '如果域名进行了URL转发.变成内网IP.则取配置文件里的域名.
+            Host = Base.pub.GetWebConfig("SunfunSoft.Xman.BaseUrl")
+        End If
+        Dim SubmitUrl As String
+        SubmitUrl = Url.Replace("manager/createfunction/xsn_model.aspx", "Submit.aspx")
+        Url = Url.Replace("manager/createfunction/xsn_model.aspx", "TemplateLibrary/")
+
+        '先去除原来有些模板因为多次添加了扩展功能,导致的出错
+        If IO.File.Exists(TempDir & "/manifest.xsf") = False Then
+            Return "模板文件有错误,你确定此文件是InfoPath的模板文件"
+            Exit Function
+        End If
+
+        Dim TempText As String = Base.IO.Text_File_Read(TempDir & "/manifest.xsf")
+        TempText = TempText.Replace("xmlns:xdExtension=""http://schemas.microsoft.com/office/infopath/2003/xslt/extension""", "")
+        Try
+            Base.IO.Text_File_SaveAs(TempDir & "/manifest.xsf", TempText, Encoding.UTF8)
+        Catch ex As Exception
+            Return "文件保存错误,请检查权限!"
+            Exit Function
+        End Try
+
+        Dim Node As XmlNode
+        Try
+            Node = Base.XmlClass.GetXmlFile(TempDir & "/manifest.xsf")
+        Catch ex As Exception
+            Return "模板被InfoPath占用,请先关闭!"
+            Exit Function
+        End Try
+
+        Try
+            If IO.File.Exists(TempDir & "/template.xml") = False Then
+                Return "模板被占用,请先关闭正在设计的模板!"
+                Exit Function
+            End If
+        Catch ex As Exception
+            Return "模板被占用,请先关闭正在设计的模板!"
+            Exit Function
+        End Try
+
+
+        '得到原来的publishUrl发布目录
+
+        Dim Old_publishUrl As String
+        Try
+            Old_publishUrl = Node.Attributes("publishUrl").Value
+        Catch ex As Exception
+            Return "模板文件有错误,无发布目录,结构错误!"
+            Exit Function
+        End Try
+
+        TempText = Base.IO.Text_File_Read(TempDir & "/manifest.xsf")
+        '将里面的内空进行转换
+        TempText = TempText.Replace(Old_publishUrl, "http://" & Host & Url & TempFilename)
+
+        '修改模板文件中的ACTION的提交路径,如果没有,则添加上去一个.
+        Node = Base.XmlClass.FindNode("//xsf:useHttpHandler")
+        Dim ActionText As String = ""
+        If Node Is Nothing Then
+
+            '特别注意以下内容不能加任意的字符．特别是空格
+            ActionText += "<xsf:submit caption=""提交(&amp;B)"" disableMenuItem=""no"" onAfterSubmit=""keepOpen"" showStatusDialog=""yes"">"
+            ActionText += "<xsf:useHttpHandler method=""POST"" href=""http://" & Host & SubmitUrl & """>"
+            ActionText += "</xsf:useHttpHandler>"
+            ActionText += "</xsf:submit>"
+            If CheckBox1.Checked = True Then                '用来控制是否更新提交方式.
+                '先去除原来可能设置过的错误提交方式．现重新加上新的提交方式
+                Dim Index1 As Integer = TempText.IndexOf("<xsf:submit")
+                Dim Index2 As Integer = TempText.IndexOf("</xsf:submit>")
+                If Index1 > 0 And Index2 > 0 Then
+                    TempText = TempText.Replace(TempText.Substring(Index1, Index2 - Index1 + 13), ActionText)
+                Else
+                    ActionText += "</xsf:xDocumentClass>"
+                    TempText = TempText.Replace("</xsf:xDocumentClass>", ActionText)
+                End If
+            End If
+        Else
+            Try
+                ActionText = Node.Attributes("href").Value
+            Catch ex As Exception
+                Return "模板文件有错误,无提交路径,结构错误!"
+                Exit Function
+            End Try
+            TempText = TempText.Replace(ActionText, "http://" & Host & SubmitUrl)
+        End If
+        '对模板进行加强功能,可以在规则中引用函数.
+
+        TempText = TempText.Replace("<xsf:xDocumentClass", "<xsf:xDocumentClass xmlns:xdExtension=""http://schemas.microsoft.com/office/infopath/2003/xslt/extension""")
+        '全部修改后,进行保存
+        Try
+            Base.IO.Text_File_SaveAs(TempDir & "/manifest.xsf", TempText, Encoding.UTF8)
+        Catch ex As Exception
+            Return "文件保存错误,你检查权限!"
+            Exit Function
+        End Try
+
+        '对数据模板文件进行修改URL  (有问题的,还未完成)
+        Try
+            Node = Base.XmlClass.GetXmlFile(TempDir & "/template.xml")
+        Catch ex As Exception
+            Return "模板有错误,请检查!"
+            Exit Function
+        End Try
+
+        Dim Old_Href As String = ""
+        TempText = Base.IO.Text_File_Read(TempDir & "/template.xml")
+
+        Dim index As Integer
+        Dim MinIndex, MaxIndex As Integer
+        Try
+            '去除模板数据真实数据.只留下头文件,此步只为得到数据的有效性
+            index = TempText.IndexOf("InfoPath.Document")
+            Old_Href = TempText.Substring(0, index).ToLower
+            '去除href前面的内容
+            index = Old_Href.IndexOf("href=""")
+            MinIndex = index + 6        '得到href路径的头位置
+            Old_Href = Old_Href.Substring(index + 6)
+            '去除href后面的内容
+            index = Old_Href.IndexOf(".xsf")
+            If index <= 0 Then
+                index = Old_Href.IndexOf(".xsn")
+            End If
+            MaxIndex = index + 4        '得到href路径的尾位置
+            Old_Href = TempText.Substring(MinIndex, MaxIndex)
+        Catch ex As Exception
+            Return "你上传的模板结构有问题,请与管理员联系"
+            Exit Function
+        End Try
+
+        TempText = TempText.Replace(Old_Href, "http://" & Host & Url & TempFilename)
+
+        Try
+            If Base.IO.Text_File_SaveAs(TempDir & "\template.xml", TempText, Encoding.UTF8) = False Then
+                Return "文件保存错误,请检查权限!"
+                Exit Function
+            End If
+        Catch ex As Exception
+            Return "文件保存错误,请检查权限!"
+            Exit Function
+        End Try
+
+        '重新打包回去
+        Try
+            Dim ExeCuteResult As String = Base.IO.CreateXSNFromFiles(TempDir, TempFilename, Root & "TemplateLibrary", WorkingDirectory)
+            If ExeCuteResult Is Nothing Then
+                Base.Log(Base.GetWebUserName, "Xsn_Model.aspx", Replace(Base.IO.ExeCuteResult, "'", "''"), "打包出错,可能是权限问题")
+                Return "处理出错.或是超时!"
+                Exit Function
+            End If
+        Catch ex As Exception
+            'Return "处理错误,你检查权限!"
+            Throw ex
+            Exit Function
+        End Try
+        Return Nothing
+    End Function
+
+    Protected Sub LinkButton1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles LinkButton1.Click
+        '这里所做操作包括上传,并修改模板里的发布路径,并保存     
+        If XsnFile.PostedFile.ContentLength = 0 Then Exit Sub
+
+        Dim TempFilename As String
+        If XsnFileName.Text.Length = 0 Then     '如果不输入模板名,默认为上传的文件名
+            TempFilename = XsnFile.FileName
+        Else
+            TempFilename = XsnFileName.Text.Trim & ".xsn"
+        End If
+
+        If IO.File.Exists(Server.MapPath("../../") & "TemplateLibrary\" & TempFilename) Then
+            Base.Js.alert(Me, "你要上传的文件已经存在,你重新输入模板名!")
+            Exit Sub
+        End If
+
+        '上传模板 
+        Base.Upload.Path = "../../" & "TemplateLibrary"
+        Base.Upload.FileType = "xsn"
+        If Base.Upload.FileSaveAs(XsnFile, TempFilename) = False Then
+            Base.Js.alert(Me, Base.Upload.ReturnMessage, "xsn_model.aspx")
+        End If
+        '这里进行处理
+        Dim Result As String
+        Result = Modify_XSN(TempFilename)
+        If Result = Nothing Then
+            Base.Js.alert(Me, "新建成功", "xsn_model.aspx")
+        Else
+            Base.Js.alert(Me, Result, "xsn_model.aspx")
+        End If
+
+        '刷新显示的列表
+        GridView1.DataSource = Base.IO.CreateDataSetFromFileList(RootPath)
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        Dim TempFileName As String = GridView1.DataKeys(e.NewSelectedIndex).Item(0)
+        Dim Result As String
+        Result = Modify_XSN(TempFileName)
+
+        If Result = Nothing Then
+            Base.Js.alert(Me, "更新成功", "Xsn_Model.aspx?P=" & GridView1.PageIndex)
+        Else
+            Base.Js.alert(Me, Result, "Xsn_Model.aspx?P=" & GridView1.PageIndex) '进行处理
+        End If
+    End Sub
+
+    Protected Sub LinkButton2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles LinkButton2.Click
+        '这里所做操作包括上传,并修改模板里的发布路径,并保存     覆盖上传
+        If XsnFile.PostedFile.ContentLength = 0 Then Exit Sub
+
+        Dim TempFileName As String
+        If XsnFileName.Text.Length = 0 Then     '如果不输入模板名,默认为上传的文件名
+            TempFileName = XsnFile.FileName
+        Else
+            TempFileName = XsnFileName.Text.Trim & ".xsn"
+        End If
+        Dim DataStr As String = Now
+        If IO.File.Exists(RootPath & "\" & TempFileName) Then
+            '表示原来的模板已经存在，做备份处理
+            Base.IO.CreateDir(RootPath & "\" & "XsnBackup")           '如果目录不存在，则创建
+            Base.IO.CreateDir(RootPath & "\" & "XsnBackup\" & TempFileName)           '如果目录不存在，则创建
+            Try
+                IO.File.Copy(RootPath & "\" & TempFileName, RootPath & "\" & "XsnBackup\" & TempFileName & "\" & TempFileName.Replace(".xsn", DataStr.Replace("-", "").Replace(":", "").Replace(" ", "") & ".xsn"))
+            Catch ex As Exception
+
+            End Try
+        End If
+
+        '上传模板 
+        Base.Upload.Path = "../../" & "TemplateLibrary"
+        Base.Upload.FileType = "xsn"
+        Base.Upload.Sizes = 1024000
+        Base.Upload.ReWriteFlag = True        '上传时,如果文件存在,写重写.
+        If Base.Upload.FileSaveAs(XsnFile, TempFileName) = False Then
+            Base.Log(Base.GetWebUserName, "Msn_Model.aspx", "上传文件出错", "可能是没有写的权限")
+            Base.Js.alert(Me, Base.Upload.ReturnMessage)
+        End If
+
+        '这里进行处理
+        Dim Result As String
+        Result = Modify_XSN(TempFileName)
+        If Result = Nothing Then
+            Base.Js.alert(Me, "覆盖上传成功,原来模板备份为:" & TempFileName.Replace(".xsn", DataStr.Replace("-", "").Replace(":", "").Replace(" ", "") & ".xsn"), "xsn_model.aspx")
+        Else
+            Base.Js.alert(Me, Result)
+        End If
+
+        '刷新显示的列表
+        GridView1.DataSource = Base.IO.CreateDataSetFromFileList(RootPath)
+        GridView1.DataBind()
+    End Sub
+
+   
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_DataBound1(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            If GridView1.Rows(i).Cells(1).Text.ToLower = "xman-ygdm.xsn" Then
+                GridView1.Rows(i).Cells(5).Text = "系统模板"
+            Else
+                CType(GridView1.Rows(i).Cells(5).Controls(0), LinkButton).Attributes.Add("onclick", "return confirm('你确定要删除此模板吗?');")
+            End If
+            GridView1.Rows(i).Cells(4).Text = "<a href='Xsn_History.aspx?Xsn=" & Server.UrlEncode(GridView1.Rows(i).Cells(1).Text) & "'>查看修改历史</a>"
+            GridView1.Rows(i).Cells(1).Text = "<a href='" & CurrentUrl & GridView1.Rows(i).Cells(1).Text & "'>" & GridView1.Rows(i).Cells(1).Text & "</a>"
+            GridView1.Rows(i).Attributes.Add("onmouseover", "OnMouseOver(this)")
+            GridView1.Rows(i).Attributes.Add("onmouseout", "OnMouseOut(this)")
+        Next
+        '添加自定义分页    
+        PageBar.InnerHtml = Base.pub.WritePage(GridView1, TempSource.Tables(0).Rows.Count)
+    End Sub
+
+    Protected Sub GridView1_RowDeleting1(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs) Handles GridView1.RowDeleting
+        Dim XsnName As String = GridView1.DataKeys(e.RowIndex).Item(0)
+        Dim DirName As String = String.Empty
+        If XsnName.Trim.Length > 0 Then
+            If XsnName.LastIndexOf(".") > 0 Then
+                DirName = XsnName.Substring(0, XsnName.LastIndexOf("."))
+            End If
+            Try
+                IO.File.Delete(RootPath & "\" & XsnName)
+                Base.IO.DelDir(RootPath & "\" & DirName)
+            Catch ex As Exception
+                Base.Js.alert(Me, "删除出错")
+                Exit Sub
+            End Try
+
+            Base.IO.CreateDir(RootPath)
+            GridView1.DataSource = Base.IO.CreateDataSetFromFileList(RootPath)
+            GridView1.DataBind()
+            Base.Js.alert(Me, "删除成功", "Xsn_Model.aspx")
+
+        End If
+    End Sub
+
+End Class

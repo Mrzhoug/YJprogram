@@ -1,0 +1,715 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="WebInfoPath.aspx.vb" Inherits="manager_Forms_WebInfoPath" %>
+
+<html>
+<head runat="server">
+    <title>Web方式打开表单</title>
+    <link rel="stylesheet" type="text/css" href="../../images/Ext.UI/resources/css/ext-all.css" />
+    <script type="text/javascript" src="../../images/Ext.UI/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="../../images/Ext.UI/ext-all.js"></script>
+    <script type="text/javascript" src="../../images/Ext.UI/TabCloseMenu.js"></script>
+    <script type="text/javascript" src="../../pub/function.js"></script>
+    <script type="text/javascript" src="../../Pub/jquery-1.8.0.js"></script>    
+    <style type="text/css">
+        TD
+        {
+            font-size: 8.5pt;
+            font-family: "verdana" , "Helvetica" , "sans-serif";
+        }
+        A:link
+        {
+            font-size: 8.5pt;
+            color: #000000;
+            font-family: "verdana" , "Helvetica" , "sans-serif";
+            text-decoration: none;
+        }
+        A:hover
+        {
+            font-size: 8.5pt;
+            color: #b84e07;
+            font-family: "verdana" , "Helvetica" , "sans-serif";
+            text-decoration: underline;
+        }
+        A:visited
+        {
+            font-size: 8.5pt;
+            color: #000000;
+            font-family: "verdana" , "Helvetica" , "sans-serif";
+            text-decoration: none;
+        }
+        ul
+        {
+            background-color: White;
+            border: 1px solid #DEDFDE;
+            list-style: none;
+            width: 100%;
+            padding: 0px;
+        }
+        .select
+        {
+            background: #36C;
+            color: #FFF;
+        }
+        .select span
+        {
+            color: #FFF;
+        }
+        li
+        {
+            background-color: White;
+            line-height: 16px;
+            font-size: 12px;
+            padding: 2px;
+        }
+    </style>
+    <style media="print" type="text/css">
+        .Noprint
+        {
+            display: none;
+        }
+    </style>
+    <link href="css/calendar-blue.css" type="text/css" rel="stylesheet" />
+    <script type="text/javascript" src="js/calendar.js"></script>
+    <script type="text/javascript" src="js/calendar-zh.js"></script>
+    <script type="text/javascript" src="js/calendar-setup.js"></script>
+    <script type="text/javascript" src="js/infojet.js"></script>
+    <script type="text/javascript" src="js/infojet.zh-cn.js"></script>
+    <style type="text/css">
+        #info
+        {
+            height: 0px;
+            width: 0px;
+            top: 25%;
+            left: 50%;
+            position: absolute;
+            line-height: 1.7;
+        }
+
+        #center
+        {
+            background: #fff;
+            border: 1px solid #217AC1;
+            width: 360px;
+            height: 260px;
+            position: absolute;
+            margin: -50px -150px;
+        }
+
+            #center strong
+            {
+                display: block;
+                padding: 2px 5px;
+                background: #EBF4FC;
+                color: #519FEE;
+            }
+
+            #center p
+            {
+                padding: 10px;
+                text-align: center;
+                color: #1C6FB8;
+            }
+
+        .bg1
+        {
+            background-color: #666;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            filter: alpha(opacity=50);
+            opacity: 0.5;
+            z-index: 1;
+            position: fixed !important; /*FF IE7*/
+            position: absolute;
+            _top: expression(eval(document.compatMode && document.compatMode=='CSS1Compat') ? documentElement.scrollTop + (document.documentElement.clientHeight-this.offsetHeight)/2 : /*IE6*/
+            document.body.scrollTop + (document.body.clientHeight - this.clientHeight)/2); /*IE5 IE5.5*/
+        }
+
+        .mydiv
+        {
+            text-align: center;
+            font-size: 9pt;
+            z-index: 99;
+            width: 500px;
+            height: 300px;
+            left: 50%;
+            top: 50%;
+            margin-left: -250px !important;
+            margin-top: -150px !important;
+            margin-top: 0px;
+            position: fixed !important;
+            position: absolute;
+            _top: expression(eval(document.compatMode && document.compatMode=='CSS1Compat') ? documentElement.scrollTop + (document.documentElement.clientHeight-this.offsetHeight)/2 : /*IE6*/
+            document.body.scrollTop + (document.body.clientHeight - this.clientHeight)/2); /*IE5 IE5.5*/
+        }
+    </style>
+</head>
+<body onload="InfoJet_Init();" style="margin: 0; text-align: left" id="bbaa">
+    <iframe id="submitform" name="submitform" height="0" width="100%"></iframe>
+    <span id="boxs"></span>
+    <form name="xmlForm" action="../../submit.aspx" method="post" id="form1">
+        <div id="toolbar">
+        </div>
+        <br />
+        <br />
+        <input id="FileName" type="hidden" name="FileName" runat="server" />
+        <input id="MenuID" type="hidden" name="MenuID" runat="server" />
+        <asp:Label ID="xDocContent" runat="server">xDocContent</asp:Label>
+    </form>
+    <script language="javascript" type="text/javascript">
+        $(document).ready(function () {     //使用jquery的ready方法似的加载运行   
+            if (window.screen) {              //判断浏览器是否支持window.screen判断浏览器是否支持screen   
+                var myw = screen.availWidth;   //定义一个myw，接受到当前全屏的宽   
+                var myh = screen.availHeight;  //定义一个myw，接受到当前全屏的高   
+                window.moveTo(0, 0);           //把window放在左上脚   
+                window.resizeTo(myw, myh);     //把当前窗体的长宽跳转为myw和myh   
+            }
+        });
+        function onItemClick(item) {
+            switch (item.text) {
+                case '保存表单&nbsp;': doDownload(); break;
+                case '审阅意见&nbsp;': looksp(); break;
+                case '查看回复&nbsp;': lookxd(); break;
+                case '打印表单&nbsp;': formprint(); break;
+                case '分发表单&nbsp;': formcy(); break;
+                case '附件管理&nbsp;': manageannex(); break;
+                case '保存草稿&nbsp;': saveDraft(); break;
+            }
+        }
+
+        if (toolbar == false) {
+            show("toolbar");
+        }
+
+        //重置窗体大小。
+        function ResetWindows(width1, height1) {
+            var winWidth = 0;
+            var winHeight = 0;
+            if (width1 == 0 || height1 == 0) {
+                //必须刷新二次才能达到最大化
+                self.resizeTo(screen.availWidth, screen.availHeight);
+                self.moveTo(0, 0);
+                window.focus();
+                self.resizeTo(screen.availWidth, screen.availHeight);
+                self.moveTo(0, 0);
+                window.focus();
+            }
+            else {           //按规定大小显示
+                self.resizeTo(width1, height1);
+                self.moveTo(0, 0);
+                window.focus();
+            }
+        }
+
+    </script>
+
+
+    <div id="suggest">
+    </div>
+    <div id="bg1" class="bg1" style="display: none;">
+    </div>
+    <span id="clientscript" runat="server"></span>    
+</body>
+</html>
+<script type="text/javascript" language="javascript">
+
+    function saveDraft() {
+        form1.target = "submitform";
+        var msg = false;
+        if (msg == true) {
+            if (confirm('此表单已经被审批过，如果你现在提交，系统将清除所有审批记录，你确认提交吗？') == 1) {
+                document.getElementsByName("xmlForm").item(0).action = "../../submit.aspx?isDraft=true";
+                document.getElementsByName("xmlForm").item(0).submit();                
+            }
+        }
+        else {
+            document.getElementsByName("xmlForm").item(0).action = "../../submit.aspx?isDraft=true";
+            document.getElementsByName("xmlForm").item(0).submit();
+        }
+    }
+
+    function saveNoAlert() {
+        form1.target = "submitform";
+        var msg = false;
+        if (msg == true) {
+            if (confirm('此表单已经被审批过，如果你现在提交，系统将清除所有审批记录，你确认提交吗？') == 1) {
+                document.getElementsByName("xmlForm").item(0).action = "../../submit.aspx?NoAlert=True";
+                document.getElementsByName("xmlForm").item(0).submit();
+            }
+        }
+        else {
+            document.getElementsByName("xmlForm").item(0).action = "../../submit.aspx?NoAlert=True";
+            document.getElementsByName("xmlForm").item(0).submit();
+        }
+    }
+
+    function doDownload() {
+//        if (InfoJet_IsValid() == false) {
+//            alert("请将必填项填完(带红星的输入框)!");
+//            return false;
+//        }
+        form1.target = "submitform";
+        var msg = false;
+        if (msg == true) {
+            if (confirm('此表单已经被审批过，如果你现在提交，系统将清除所有审批记录，你确认提交吗？') == 1) {
+                document.getElementsByName("xmlForm").item(0).action = "../../submit.aspx";
+                document.getElementsByName("xmlForm").item(0).submit();                    
+            }
+        }
+        else {
+            document.getElementsByName("xmlForm").item(0).action = "../../submit.aspx";
+            document.getElementsByName("xmlForm").item(0).submit();            
+        }
+    }
+    function autoAddNewForms(LCDM, content) {
+        content = escape(content);
+
+        dataStr = "LCDM=" + LCDM + "&content=" + content
+        var message;
+        $.ajax(
+            {
+                type: "post",
+                url: "AutoAddNewForms.aspx",
+                data: dataStr,
+                async: false,
+                error: function (request) {
+                    alert("发送失败！");
+                },
+                success: function (msg) {
+                    alert(msg);
+                }
+            }
+            );
+    }
+    //打印条形码
+    function printBcode(bdode) {
+        url = "../PrintBarCode/PrintBarCode.aspx?barcode=" + bdode + "";
+        var newWindow = window.open(url, "_blank", 'height=39, width=240,toolbar=no,menubar=no,resizable=no,location=no,status=no,scrollbars=no,');
+    }
+
+
+    function autoAddNewFormsSendUser(LCDM, content, username, sendcontent) {
+        initXMLHttp(); //初始化ajax
+
+        content = escape(content);
+        username = escape(username);
+        sendcontent = escape(sendcontent);
+        url = "AutoAddNewFormsSendUser.aspx?LCDM=" + LCDM + "&content=" + content + "&sendusername=" + username + "&sendcontent=" + sendcontent;
+        http_request.open("POST", url, false); //打开连接
+        try {
+            http_request.send(); //发送数据
+        }
+        catch (ex) {
+            alert("提交失败！");
+            return false;
+        }
+        if (http_request.status == 200)//表示提交成功
+        {
+            if (http_request.responseText.indexOf("保存成功！") >= 0 || http_request.responseText == "") {
+                return true;
+            }
+            else {
+                alert(http_request.responseText);
+                return false;
+            }
+        }
+        else {
+            alert("由于网络原因，自动新建表单失败！");
+            location.reload();
+            return false;
+        }
+    }
+
+    function processClear() {
+        var str = "fid=" + cid + "&type=0";
+        var message;
+        $.ajax(
+        {
+            type: "post",
+            url: "../ProcessManager/processFunction.aspx",
+            data: str,
+            success: function (msg) {
+                alert(msg);
+                location.href = "OpenInfoPath.aspx?fid=" + cid;
+            }
+        }
+        );
+    }
+
+    function processBack(porcessName, toUserList) {
+        var str = "processname=" + porcessName + "&fid=" + cid + "&type=1&toUserList=" + toUserList;
+        var message;
+        $.ajax(
+        {
+            type: "post",
+            url: "../ProcessManager/processFunction.aspx",
+            data: str,
+            success: function (msg) {
+                alert(msg);
+                location.href = "OpenInfoPath.aspx?fid=" + cid;
+            }
+        }
+        );
+    }
+
+    function processBack(porcessName, toUserList, sendMessage, attentionNode) {
+        var str = "processname=" + porcessName + "&fid=" + cid + "&type=1&toUserList=" + toUserList + "&sendContent=" + sendContent + "&attentionNode=" + attentionNode;
+        var message;
+        $.ajax(
+        {
+            type: "post",
+            url: "../ProcessManager/processFunction.aspx",
+            data: str,
+            success: function (msg) {
+                alert(msg);
+                location.href = "OpenInfoPath.aspx?fid=" + cid;
+            }
+        }
+        );
+    }
+
+
+    function manageannex() {
+        window.open("../Forms/FormAnnexNew.aspx?FID=" + cid, "查看附件", "height=300, width=650, top=100, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no");
+    }
+    function manageannex(type) {
+        window.open("../Forms/FormAnnexNew.aspx?FID=" + cid + "&type=" + type , "查看附件", "height=300, width=650, top=100, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no");
+    }
+    function looksp() {
+        window.open("../XJXM/ShowAbout_XMSP_NoLc.aspx?SID=" + cid, "查看审阅", "height=300, width=550, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no");
+    }
+
+    function lookxd() {
+        window.open("../XJXM/ShowAbout_XMXD_NoLc.aspx?SID=" + cid, "查看审阅", "height=300, width=550, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no");
+    }
+
+    function formprint() {
+        //根据infojet打印
+        InfoJet_OpenPrintableVersion('');
+    }
+
+    function formcy() {
+        var url = "../desktop/WriteSendMessage.aspx?Kind=1&FID=" + cid
+        window.open(url, "表单分发", "height=500, width=800, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes");
+    }
+
+    function formcy(str) {
+        str = escape(str)
+        var url = "../desktop/WriteSendMessage.aspx?Kind=1&FID=" + cid + "&str='" + str + "'";
+        window.open(url, "表单分发", "height=500, width=800, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes");
+    }
+
+    function formcy(str, state) {
+        str = escape(str);
+        state = escape(state);
+        var url = "../desktop/WriteSendMessage.aspx?Kind=1&FID=" + cid + "&str=" + str + "&state=" + state;
+        window.open(url, "表单分发", "height=500, width=800, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes");
+
+    }
+
+    function formcybybm(str, state, bm) {
+        str = escape(str);
+        state = escape(state);
+        bm = escape(bm);
+
+        var url = "../desktop/WriteSendMessage.aspx?Kind=1&FID=" + cid + "&str=" + str + "&state=" + state + "&bm=" + bm;
+        window.open(url, "表单分发", "height=500, width=800, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes");
+
+    }
+
+    //    function formcybyuser(str,state,username)
+    //    {
+    //        str = escape(str);
+    //        state = escape(state);
+    //        username = escape(username);
+
+    //        var url = "../desktop/WriteSendMessage.aspx?Kind=1&FID=" + cid + "&str="+str+"&state="+state+"&username="+username;
+    //        window.open(url,"表单分发" ,"height=500, width=800, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes");
+    //    }
+
+    function formcybyuser(str, state, username) {
+        str = escape(str);
+        state = escape(state);
+        username = escape(username);
+
+        dataStr = "Kind=1&fid=" + cid + "&str=" + str + "&state=" + state + "&username=" + username;
+        var message;
+        $.ajax(
+            {
+                type: "post",
+                url: "../Desktop/WriteSendMessage.aspx",
+                data: dataStr,
+                async: false,
+                error: function (request) {
+                    alert("发送失败！");
+                },
+                success: function (msg) {
+                    alert("发送成功！");
+                }
+            }
+            );
+    }
+
+    function formcybyusergroup(str, state, username) {
+        str = escape(str);
+        state = escape(state);
+        username = escape(username);
+
+        dataStr = "Kind=1&fid=" + cid + "&str=" + str + "&state=" + state + "&username=" + username + "&isgroup=1";
+        var message;
+        $.ajax(
+            {
+                type: "post",
+                url: "../Desktop/WriteSendMessage.aspx",
+                data: dataStr,
+                async: false,
+                error: function (request) {
+                    alert("发送失败！");
+                },
+                success: function (msg) {
+                    alert("发送成功！");
+                }
+            }
+            );
+    }
+
+    function formcybysendbm(str, state, sendbm) {
+        str = escape(str);
+        state = escape(state);
+        sendbm = escape(sendbm);
+
+        var url = "../desktop/WriteSendMessage.aspx?Kind=1&FID=" + cid + "&str=" + str + "&state=" + state + "&sendbm=" + sendbm;
+        window.open(url, "表单分发", "height=500, width=800, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes");
+
+    }
+
+    //保存表单附件
+    function formsavefile(filename, txtname) {
+        filename = escape(filename)
+        txtname = escape(txtname)
+        var url = "SaveAnnex.aspx?filename=" + filename + "&txtname=" + txtname;
+        window.open(url, "保存附件", "height=500, width=800, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes");
+    }
+
+    function dostate(state) {
+        window.location.href = "FormToTop.aspx?K=state&state=" + state + "&Fid=" + cid;
+    }
+
+    function exportContract(strold, strnew, strdocname) {
+        window.open('../../Public/ExportContract.aspx?strold=' + encodeURI(strold) + '&strnew=' + encodeURI(strnew) + "&strdocname=" + encodeURI(strdocname), '新建流程', 'height=100, width=300, top=150, left=150, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=yes');
+    }
+    
+    function CreateForm(moduleName) {
+        CreateForm(moduleName,"");
+    }
+
+    function CreateForm(moduleName,transferValue) {
+        window.open("FunctionNoLc.aspx?moduleName=" + escape(moduleName) + "&Value=" + escape(transferValue) ,'_blank','height=500,width=700,top=100,left=100,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,status=yes');
+    }
+
+    //附件上传
+    function OpenAnnexForm(id, type) {
+      window.open("../Forms/FormAnnexNew.aspx?FID=" + id + "&type=" + escape(type), "_blank", "height=500,width=700,top=100,left=100,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,status=no");
+  }
+  //查看流程图 
+  function openlct(xmbh) {
+      url = "../lctmanage/default.aspx?xmbh=" + xmbh;
+      window.open(url, "表单分发", "height=700, width=1024, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes");
+  }
+
+  function addlczt(xmbh, xmzt, back, fid, type) {
+      initXMLHttp(); //初始化ajax
+      xmzt = escape(xmzt);
+      url = "../lctmanage/addlczt.aspx?xmbh=" + xmbh + "&xmzt=" + xmzt + "&fid=" + fid + "&back=" + back + "&type=" + type + "";
+      http_request.open("POST", url, false); //打开连接
+      try {
+          http_request.send(); //发送数据
+      }
+      catch (ex) {
+          alert("提交失败！");
+          return false;
+      }
+  }
+
+</script>
+<script language="JavaScript" type="text/javascript">
+<!--
+    //菜单随着页面的滚动一直保持在最顶部
+    var delta = 0.8;
+    var collection;
+    var closeB = false;
+    function floaters() {
+        this.items = [];
+        this.addItem = function (id, x, y, content) {
+            //document.write('<DIV id='+id+' style="Z-INDEX: 10; POSITION: absolute; background-color:#ffffff; padding-top:8px; padding-bottom:8px;  width:100%;left:'+(typeof(x)=='string'?eval(x):x)+';top:'+(typeof(y)=='string'?eval(y):y)+'">'+content+'</DIV>');
+            var newItem = {};
+            newItem.object = document.getElementById(id);
+            newItem.x = x;
+            newItem.y = y;
+            this.items[this.items.length] = newItem;
+        }
+        this.play = function () {
+            collection = this.items
+            setInterval('play()', 30);
+        }
+    }
+    function play() {
+        if (screen.width <= 800 || closeB) {
+            for (var i = 0; i < collection.length; i++) {
+                collection[i].object.style.display = 'none';
+            }
+            return;
+        }
+        for (var i = 0; i < collection.length; i++) {
+            var followObj = collection[i].object;
+            var followObj_x = (typeof (collection[i].x) == 'string' ? eval(collection[i].x) : collection[i].x);
+            var followObj_y = (typeof (collection[i].y) == 'string' ? eval(collection[i].y) : collection[i].y);
+            if (followObj.offsetLeft != (document.body.scrollLeft + followObj_x)) {
+                var dx = (document.body.scrollLeft + followObj_x - followObj.offsetLeft) * delta;
+                dx = (dx > 0 ? 1 : -1) * Math.ceil(Math.abs(dx));
+                followObj.style.left = followObj.offsetLeft + dx;
+            }
+            if (followObj.offsetTop != (document.body.scrollTop + followObj_y)) {
+                var dy = (document.body.scrollTop + followObj_y - followObj.offsetTop) * delta;
+                dy = (dy > 0 ? 1 : -1) * Math.ceil(Math.abs(dy));
+                followObj.style.top = followObj.offsetTop + dy;
+            }
+            followObj.style.display = '';
+        }
+    }
+    function closeBanner() {
+        closeB = true;
+        return;
+    }
+    var theFloaters = new floaters();
+    //
+    var obj = document.getElementById("toolbar");
+    theFloaters.addItem('toolbar', 0, 0, '');
+    theFloaters.play();
+    -->
+</script>
+<script language="javascript" type="text/javascript">
+    function ShowBox(str) {
+        //    document.getElementById('popDiv').style.display = 'block';
+        document.getElementById('bg1').style.display = 'block';
+        if (str == '提交成功') {
+            str = "<div id='popDiv' class='mydiv'><div id='info'><div id='center' style='font-size:12px;'><strong>友情提醒：</strong><br /><p>表单保存成功！您可以选择以下操作：</p><p><a href='javascript:CloseBox();'>（1）&nbsp;返&nbsp;回&nbsp;表&nbsp;单</a></p><p><a href='javascript:newform();'>（2）&nbsp;新&nbsp;建&nbsp;表&nbsp;单</a></p><p><a href='javascript:window.close();'>（3）&nbsp;关&nbsp;闭&nbsp;表&nbsp;单</a></p></div></div></div>";
+        }
+        else {
+            str = "<div id='popDiv' class='mydiv'><div id='info'><div id='center' style='font-size:12px;'><strong>友情提醒：</strong><br /><p>表单保存失败！可能是以下原因导致的错误：</p><p>" + str + "</p><p><a href='javascript:CloseBox();'>返&nbsp;回&nbsp;表&nbsp;单</a></p></div></div></div>";
+        }
+        window.scrollTo(0, 0);
+        var bo = document.getElementsByTagName('body')[0];
+        var ht = document.getElementsByTagName('html')[0];
+        var boht = document.getElementById('boxs');
+        bo.style.height = '100%';
+        bo.style.overflow = 'hidden';
+        ht.style.height = '100%';
+        boht.innerHTML = str;
+
+    }
+    function CloseBox() {
+        window.scrollTo(0, 0);
+        var bo = document.getElementsByTagName('body')[0];
+        var ht = document.getElementsByTagName('html')[0];
+        var boht = document.getElementById('boxs');
+        boht.innerHTML = '';
+        bo.style.height = 'auto';
+        bo.style.overflow = 'auto';
+        ht.style.height = 'auto';
+        document.getElementById('bg1').style.display = 'none';
+    }
+    function newform() {
+        window.location.href = 'FunctionNoLC.aspx?LCDM=' + lcdm;
+    }
+
+
+
+
+    var content = new Array();
+    var objID;
+    function onDropdownlistTextChange(obj) {
+
+
+        if (objID != obj.id) {
+            objID = obj.id;
+            content = new Array();
+        }
+        $("#suggest").css("position", "absolute");
+        $("#suggest").css("width", obj.offsetWidth);
+        $("#suggest li").css("height", obj.offsetHeight);
+        $("#suggest").css("left", obj.offsetLeft);
+        $("#suggest").css("top", obj.offsetTop + obj.offsetHeight);
+
+
+        if (content.length == 0) {
+            var optionID = obj.id + ",1";
+            var objOptions = document.getElementById(optionID)
+
+
+            for (var i = 0; i < objOptions.options.length; i++) {
+
+                content[i] = objOptions.options[i].text
+            }
+        }
+
+
+
+
+        obj.onkeyup = function tst1() {
+            var text = new String();
+            text = this.value;
+            var str = new String();
+            var j = 0;
+            for (var m = 0; m < content.length; m++) {
+                if (content[m].indexOf(text) >= 0) {
+
+
+                    str += "<ul>";
+                    str += "<li value= '" + j + "' onclick='selectItem(\"" + obj.id + "\")' onmouseover='mo(this.value)'>" + content[m] + "</li>";
+                    str += "</ul>";
+                    j++;
+                    document.getElementById("suggest").innerHTML = str;
+                }
+            }
+
+            if (j == 0) {
+                document.getElementById("suggest").innerHTML = "";
+            }
+            $("#suggest").css("display", "");
+        }
+    }
+
+    function selectItem(str) {
+        document.getElementById(str).focus();
+        if (j >= 0 && j < $("li").length) {
+            document.getElementById(str).value = $("li")[j].childNodes[0].nodeValue;
+            $("#suggest").css("display", "none");
+            InfoJet_OnControlChange(null, document.getElementById(str));
+        }
+    }
+
+
+
+
+    function set_style(num) {
+        for (var i = 0; i < $("li").length; i++) {
+            var li_node = $("li")[i];
+            li_node.className = "";
+        }
+        if (j >= 0 && j < $("li").length) {
+            var i_node = $("li")[j];
+            $("li")[j].className = "select";
+        }
+    }
+    function mo(nodevalue) {
+        j = nodevalue;
+        set_style(j);
+    }
+
+    //try {
+    //    onDropdownlistTextChange();
+    //} catch (e) {
+
+    //}
+</script>

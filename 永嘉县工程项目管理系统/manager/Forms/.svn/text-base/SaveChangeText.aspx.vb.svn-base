@@ -1,0 +1,91 @@
+﻿Imports System.IO
+Imports System.Xml
+
+
+Partial Class manager_Forms_SaveChangeText
+    Inherits System.Web.UI.Page
+    Dim base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+
+ 
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Login_User = base.GetWebUserName
+        UserID = base.GetUserID(Login_User)
+
+        Dim tb As New DataTable
+        Dim ShowTb As New DataTable
+
+        '通过读取流的方式将提交数据读入
+        Dim ar(Request.InputStream.Length) As Byte
+        Dim str As String
+        Request.InputStream.Read(ar, 0, ar.Length)
+        str = Request.ContentEncoding.GetString(ar)
+        base.XmlClass.xmlDoc.LoadXml(str) '将提交数据作为XML对象进行处理
+
+        Dim rowIndex, columnIndex As Integer
+        Dim i, j As Integer
+        Dim table, tr, td As System.Xml.XmlNode
+        Dim lcdm As Integer
+        Dim fid As Integer
+
+        lcdm = Request("LCDM") '获取流程代码
+
+        table = base.XmlClass.xmlDoc.ChildNodes(0)
+        rowIndex = table.ChildNodes.Count '得到传过来的节点行数     
+        columnIndex = table.ChildNodes(0).ChildNodes.Count
+
+        '获取显示列，通过对比显示列的行数对数据有效性进行判断。
+        ShowTb = base.DB.Table("Select ShowName,NodeName from ReportsList_LCDM where LCDM = " & lcdm & " order by ID", "dd") '报表模式中的自定义显示列
+        If ShowTb.Rows.Count = 0 Then '假如为报表方式为空时.则直接显示普通方式下的
+            ShowTb = base.DB.Table("Select ShowName,NodeName from ShowList_LCDM where LCDM = " & lcdm & " order by ID", "dd")
+        End If
+        If ShowTb.Rows.Count <> columnIndex - 1 Then
+            Response.Write("显示列不符合系统设定！")
+            Response.End()
+        End If
+
+        For i = 0 To rowIndex - 1 '循环 对每一行传过来的数据进行更新
+            tr = table.ChildNodes(i) '获取第i行
+            columnIndex = tr.ChildNodes.Count '第i行的列数
+            fid = tr.ChildNodes(columnIndex - 1).InnerXml '得到fid
+
+            '根据fid得到相关的信息
+            tb = base.DB.Table("SELECT Gy_MKXX.MKMC FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & fid & ")", "XX_XMJC")
+            If tb.Rows.Count = 0 Then
+                base.Js.alert(Me, "非法访问1")
+                Exit Sub
+            End If
+            Dim MKMC As String = tb.Rows(0).Item("MKMC") '模块名称
+            Dim FileName As String = Server.MapPath("../../") & "\FormFolder\" & MKMC & "\" & fid & ".xml" '存放路径
+
+            Dim xml As New System.Xml.XmlDocument
+            Try
+                xml.Load(FileName)
+            Catch ex As Exception
+                Response.Write("XML不存在！")
+                Response.End()
+            End Try
+
+            Try
+                Dim namespaces As System.Xml.XmlNamespaceManager = base.GetXmlNamespaceManager(xml)
+                For j = 0 To ShowTb.Rows.Count - 1
+                    td = tr.ChildNodes(j) '拿到提交数据的内容
+                    Dim nodeName As String = ShowTb.Rows(j)(1).ToString.Replace("<", "").Replace(">", "")
+                    xml.SelectSingleNode("//" + nodeName + "", namespaces).InnerXml = td.InnerXml '替换节点中的内容
+                    xml.Save(FileName)
+                Next
+            Catch ex As Exception
+                Response.Write("XML修改失败！")
+                Response.End()
+            End Try
+            FormInfo.SubmitForm(fid)
+            'base.SynSubmit(fid, "提交")   '同步表单状态到数据库状态
+        Next
+        Response.Write("保存成功！")
+    End Sub
+
+
+
+End Class

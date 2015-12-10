@@ -1,0 +1,1164 @@
+﻿Imports System.Xml
+Imports System.IO
+Partial Class manager_XJXM_ShowList
+    Inherits System.Web.UI.Page
+    Dim LCDM As Integer
+    Dim Base As New Base
+    Dim TempTable As New Data.DataTable
+    Dim MaxTitle As Integer = 1
+    Dim SelectSQL As String
+    Dim MaxPage As String
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim MKMC As String
+    Public MKDM As String
+    Dim BaseUrl As String       '在读取XML文件内容时的基目录
+    Dim NodePermStr As New StringBuilder     '用来存放字段集(隐藏)
+    Dim Kind As Integer = 0
+    Dim ShowList As Boolean = False             '是否有列表显示权限
+
+    Dim Selecteds As String = ""            '用来存储已经构选的ID号。
+
+    Dim hasTable As Boolean = False   '表示数据库中是否有映射表
+
+    ''' <summary>
+    ''' 重新绑定标签
+    ''' </summary>
+    ''' <remarks></remarks>
+    Sub LoadTagBind()
+        Dim Tb As New DataTable
+        Dim i As Integer
+        DropDownList2.Items.Clear()     '先清除原来的标签
+        Tb = Base.DB.Table("Select * From [Form_Tags_List] where Userid=" & UserID & " and Lcdm=" & LCDM, "dd")
+        DropDownList2.Items.Add(New ListItem("标签", "-1"))
+        DropDownList2.Items.Add(New ListItem("清除标签", "0"))
+        For i = 0 To Tb.Rows.Count - 1
+            DropDownList2.Items.Add(New ListItem(Tb.Rows(i).Item("TagName").ToString, Tb.Rows(i).Item("TID").ToString))
+        Next
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Try
+            LCDM = Request("lcdm")
+        Catch ex As Exception
+            Base.Js.alert(Me, "非法访问!")
+            Response.End()
+        End Try
+
+        Base.Js.WriteScript(Me, "var lcdm='" & LCDM & "';" & vbCrLf)
+
+
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("SELECT MKMC,XsnDir,MKDM FROM GY_MKXX where NoLcDM =" & LCDM, "GY_MKXX")
+        If Tb.Rows.Count <= 0 Then
+            Response.Write("功能模板有问题!")
+            Response.End()
+        End If
+        MKDM = Tb.Rows(0).Item(2).ToString.Trim
+        MKMC = Tb.Rows(0).Item(0).ToString.Trim
+
+        BaseUrl = Server.MapPath("../../") & "FormFolder/" & MKMC & "/"
+
+
+        Dim ConfigStr As String = Base.ReadConfig("表单列表页按钮配置", LCDM)
+        If ConfigStr.Length > 0 Then
+            Dim ConfigTmp() As String = ConfigStr.Split(",")
+            Try
+                If ConfigTmp(0) = "0" Then Button4.Visible = False
+                If ConfigTmp(1) = "0" Then Button5.Visible = False
+                If ConfigTmp(2) = "0" Then Button6.Visible = False
+                If ConfigTmp(3) = "0" Then DropDownList1.Visible = False
+                If ConfigTmp(4) = "0" Then filterlist.Visible = False
+                If ConfigTmp(5) = "0" Then DropDownList2.Visible = False
+                If ConfigTmp(6) = "0" Then BtnAdvancedSearch.Visible = False
+            Catch ex As Exception
+            End Try
+        End If
+
+
+        '做权限判断.是否有显示列表的权限
+        If Base.CheckListFormQX_LCDM(UserID, LCDM) = True Then
+            If Page.IsPostBack = False Then filterlist.Items.Add(New ListItem("全部列表", "-11"))
+            If Kind = 0 Then Kind = -11
+            ShowList = True
+        End If
+        If Base.GetUserHaveQX(UserID, MKDM) > 0 Then
+            If Page.IsPostBack = False Then filterlist.Items.Add(New ListItem("我的列表", "-12"))
+            If Kind = 0 Then Kind = -12
+        End If
+        If Page.IsPostBack = False Then filterlist.Items.Add(New ListItem("我的草稿", "-17"))
+        If Kind = 0 Then Kind = -17
+
+        If Page.IsPostBack = False Then filterlist.Items.Add(New ListItem("已收列表", "-13"))
+        If Kind = 0 Then Kind = -13
+
+        If Page.IsPostBack = False Then filterlist.Items.Add(New ListItem("已发列表", "-14"))
+        If Kind = 0 Then Kind = -14
+        If Page.IsPostBack = False Then filterlist.Items.Add(New ListItem("审阅发起列表", "-15"))
+        If Kind = 0 Then Kind = -15
+        If Page.IsPostBack = False Then filterlist.Items.Add(New ListItem("审阅处理列表", "-16"))
+        If Kind = 0 Then Kind = -16
+
+        Dim i As Integer
+        If Page.IsPostBack = False Then
+            filterlist.Items.Add(New ListItem("已完成", "-1"))
+            filterlist.Items.Add(New ListItem("进行中", "0"))
+            filterlist.Items.Add(New ListItem("已取消", "-2"))
+            Tb = Base.DB.Table("Select cid,value from Xconfig where config='表单标签' and lcdm=" & LCDM, "dd")
+
+            For i = 0 To Tb.Rows.Count - 1
+                filterlist.Items.Add(New ListItem(Tb.Rows(i).Item(1), Tb.Rows(i).Item(0)))
+                DropDownList1.Items.Add(New ListItem("设置为[" & Tb.Rows(i).Item(1) & "]", Tb.Rows(i).Item(0)))
+            Next
+            LoadTagBind()           ''绑定标签
+        Else
+            Kind = filterlist.SelectedValue
+        End If
+
+        '得到个性配置
+        If Page.IsPostBack = False Then
+            Dim TmpKind As Integer = 0
+            Dim Row As DataRow = Base.DB.Row("Select value From [Xconfig] where config='列表默认打开方式' and lcdm= " & LCDM & " and UserID=" & UserID, "xcofnfig")
+            If Not Row Is Nothing Then
+                '个人配置，个人配置优先级大于全局配置
+                TmpKind = Row.Item("Value")
+            Else
+                '产看是否有全局配置
+                Row = Base.DB.Row("Select value From [Xconfig] where config='列表默认打开方式全局' and lcdm= " & LCDM & " and UserID=" & UserID, "xcofnfig")
+                If Not Row Is Nothing Then
+                    TmpKind = Row.Item("Value")
+                End If
+            End If
+
+            '说明全局配置与跟人配置中至少有一个
+            If TmpKind <> 0 Then
+                Select Case TmpKind
+                    Case -11
+                        If ShowList <> True Then
+                            If Base.GetUserHaveQX(UserID, MKDM) > 0 Then
+                                Kind = -12
+                            Else
+                                Kind = -13
+                            End If
+                        Else
+                            Kind = -11
+                        End If
+                    Case -12
+                        If Base.GetUserHaveQX(UserID, MKDM) > 0 Then
+                            Kind = -12
+                        Else
+                            Kind = -13
+                        End If
+                    Case Else
+                        Kind = TmpKind
+                End Select
+                For i = 0 To filterlist.Items.Count - 1
+                    If Kind = filterlist.Items(i).Value Then
+                        filterlist.SelectedIndex = i
+                        Exit For
+                    End If
+                Next
+            End If
+            
+
+            '设置每页显示的行数
+            Row = Base.DB.Row("Select value From [Xconfig] where config='显示行数' and lcdm= " & LCDM & " and UserID=" & UserID, "xconfig")
+            If Not Row Is Nothing Then
+                GridView1.PageSize = Convert.ToInt32(Row.Item("value").ToString())
+            Else
+                '获取全局配置
+                Row = Base.DB.Row("Select value From [Xconfig] where config='显示行数全局' and lcdm= " & LCDM & " and UserID=" & UserID, "xconfig")
+                If Not Row Is Nothing Then
+                    GridView1.PageSize = Convert.ToInt32(Row.Item("value").ToString())
+                End If
+            End If
+
+        End If
+
+        Tb = Base.DB.Table("SELECT distinct NodePermList.NodeName FROM GY_YGDM, GY_YGQX,NodePermList where GY_YGDM.YGDM = GY_YGQX.YGDM and NodePermList.Group_ID=GY_YGQX.Group_ID and NodePermList.MKDM=" & MKDM & " and GY_YGDM.YGDM=" & UserID, "dd")
+        For i = 0 To Tb.Rows.Count - 1
+            NodePermStr.Append(Tb.Rows(i)(0) & ",")
+        Next
+
+
+
+        '查询表是否已经映射到数据库中
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLMapping").ToLower = "true" Then
+            Dim tablename As String
+            Dim tempdt As New Data.DataTable
+            tempdt = Base.DB.Table("select * from gy_lcdm where lcdm = " & LCDM, "tempdt")
+            If tempdt.Rows.Count > 0 Then
+                tablename = tempdt.Rows(0).Item("LCMC").ToString
+            End If
+            tablename = tablename & "_mapext"   '获取表单名称
+
+            Try
+                tempdt = Base.DB.Table("select top 1 * from " & tablename, "aa")
+                If tempdt.Rows.Count >= 0 Then
+                    hasTable = True
+                End If
+            Catch ex As Exception
+                hasTable = False
+            End Try
+        Else
+            hasTable = False
+        End If
+
+
+        If TBAdvancedSearch.Text.Length > 0 Then
+            BtnResetAdvancedSearchCondition.Visible = True
+        Else
+            BtnResetAdvancedSearchCondition.Visible = False
+        End If
+
+
+        SelectSQL = CheckKind(Kind)         '得到查询语句
+
+        If hasTable = True Then
+            '如果有映射到数据库中，则直接从数据库中读取
+            SelectSQL = SelectSQL.Replace(",GY_XMXX.XMDM,XX_XMJC.state", "") '转换sql语句，防止出错
+            If Page.IsPostBack = False Then
+                Try
+                    Base.CreateGridviewTitle_NEW(GridView1, LCDM, False, MKDM)
+                    TempTable = Base.FillDataToGridviewBySQL(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, False)
+                    MaxPage = TempTable.Rows.Count
+                Catch ex As Exception
+                    Response.Write("此功能的模板已经不存在,请刷新菜单!")
+                    Response.End()
+                End Try
+                GridView1.DataSource = TempTable
+                GridView1.DataBind()
+            Else
+                TempTable = Base.FillDataToGridviewBySQLWithAadvancedSearch(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, False, TBAdvancedSearch.Text)
+                MaxPage = TempTable.Rows.Count
+            End If
+        Else
+
+            '没有映射则通过原先方法进行读取
+            If Page.IsPostBack = False Then
+                Try
+                    Base.CreateGridviewTitle_NEW(GridView1, LCDM, False, MKDM)
+                    TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", False)
+                    MaxPage = TempTable.Rows.Count
+                Catch ex As Exception
+                    Response.Write("此功能的模板已经不存在,请刷新菜单!")
+                    Response.End()
+                End Try
+                GridView1.DataBind()
+            Else
+                TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", False)
+                MaxPage = TempTable.Rows.Count
+            End If
+        End If
+
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        If hasTable = True Then
+            GridView1.DataSource = TempTable
+        End If
+        GridView1.DataBind()
+
+    End Sub
+
+    Protected Sub BtnResetAdvancedSearchCondition_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles BtnResetAdvancedSearchCondition.Click
+        If hasTable = True Then
+            GridView1.DataSource = TempTable
+        End If
+        GridView1.DataBind()
+    End Sub
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i, j, ys, allys, FID As Integer
+        Dim FileName As String
+        Dim TopNum As Integer
+        Dim LockFlag As Integer         '锁定标志
+        Dim ShowTb As New Data.DataTable
+        Dim ysTb As New Data.DataTable
+        Dim allysTb As New Data.DataTable
+        Dim Tb As New Data.DataTable
+        If Selecteds.Length > 0 Then Selecteds = Selecteds.Substring(1) '把最前面的逗号去除
+        ShowTb = Base.DB.Table("Select ShowName,NodeName from ShowList_LCDM where LCDM = " & LCDM & " order by ID", "ShowList_LCDM")
+        '添加自定义列
+        Dim columndt As New DataTable
+        columndt = Base.DB.Table("select * from [MapConfig_link] where mkdm=" & MKDM & "", "aaa")
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Attributes.Add("onmouseover", "OnMouseOver(this)")
+            GridView1.Rows(i).Attributes.Add("onmouseout", "OnMouseOut(this)")
+            GridView1.Rows(i).Attributes.Add("id", "gridview1_" & GridView1.DataKeys(i).Item(0))
+            '换成下列方法.可以选择,而且第一列选择列也有效
+            'GridView1.Rows(i).Attributes.Add("onmouseup", "gpc(" & GridView1.DataKeys(i).Item(0) & ",this," & i & ");")        
+            For j = 1 To GridView1.Columns.Count - 1
+                'GridView1.Rows(i).Cells(j).Attributes.Add("onmouseup", "gpc(" & GridView1.DataKeys(i).Item(0) & ",gridview1_" & GridView1.DataKeys(i).Item(0) & "," & i & ");")
+                GridView1.Rows(i).Cells(j).Attributes.Add("onmouseup", "GridViewChangeColor(" & GridView1.DataKeys(i).Item(0) & ",gridview1_" & GridView1.DataKeys(i).Item(0) & "," & i & ");")
+            Next
+
+            FID = GridView1.DataKeys(i).Item(0)
+            FileName = BaseUrl & FID & ".xml"
+
+            '对已经选择的进行重新选择
+            Try
+                Dim tmp() As String = Split(Selecteds, ",")
+                For j = 0 To tmp.Length - 1
+                    If FID.ToString = tmp(j) Then
+                        Dim ck As CheckBox = GridView1.Rows(i).Cells(0).Controls(1)
+                        ck.Checked = True
+                    End If
+                Next
+            Catch ex As Exception
+            End Try
+
+            If hasTable = False Then
+                '从xml中得到数据
+                If Base.XmlClass.GetXmlFile(FileName) Is Nothing Then
+                    '表示找不到记录，则显示空记录
+                    For j = 0 To ShowTb.Rows.Count - 1
+                        GridView1.Rows(i).Cells(j + 1).Text = "空"
+                    Next
+                Else
+                    '再列自定义的列
+                    For j = 0 To ShowTb.Rows.Count - 1
+                        If NodePermStr.ToString.IndexOf(ShowTb.Rows(j).Item(1).ToString.Replace("<", "").Replace(">", "")) >= 0 Then
+                            GridView1.Rows(i).Cells(j + 1).Text = "<center>***</center>"
+                        Else
+                            Dim dd As System.Xml.XmlNode = Base.XmlClass.FindNode("//" & ShowTb.Rows(j).Item(1).ToString.Replace("<", "").Replace(">", ""))
+                            If dd Is Nothing Then
+                                GridView1.Rows(i).Cells(j + 1).Text = "空"
+                            Else
+                                If dd.ChildNodes.Item(0) Is Nothing Then
+                                    GridView1.Rows(i).Cells(j + 1).Text = "空"
+                                Else
+                                    If dd.ChildNodes.Item(0).Value Is Nothing Then
+                                        If dd.HasChildNodes = True Then     '当是父节点.但是存在子节点时.则显示子节点的内容(或是超文本框)
+                                            Dim TempOut As String = dd.ChildNodes.Item(0).OuterXml.ToString.Trim
+                                            If TempOut.Length >= 100 Then
+                                                GridView1.Rows(i).Cells(j + 1).Text = Server.HtmlEncode(TempOut.Substring(0, 98)) & "..."
+                                            Else
+                                                GridView1.Rows(i).Cells(j + 1).Text = Server.HtmlEncode(TempOut)
+                                            End If
+                                        Else
+                                            GridView1.Rows(i).Cells(j + 1).Text = "空"
+                                        End If
+                                    Else
+                                        If dd.ChildNodes.Item(0).Value.ToString.Trim.Length >= 100 Then
+                                            GridView1.Rows(i).Cells(j + 1).Text = Server.HtmlEncode(dd.ChildNodes.Item(0).Value.ToString.Substring(0, 98)) & "..."
+                                        Else
+                                            GridView1.Rows(i).Cells(j + 1).Text = Server.HtmlEncode(dd.ChildNodes.Item(0).Value)
+                                        End If
+                                    End If
+                                End If
+                            End If
+                        End If
+
+                        If j = 0 Then           '当是自定义列第一列时
+                            'Dim State As String
+                            'Try
+                            '    State = Base.DB.ExeScalar("Select state from   XX_XMJC where FID=" & FID).ToString()
+                            'Catch ex As Exception
+                            '    State = "0"
+                            'End Try
+
+                            'Select Case State
+                            '    Case "0"    '[修改]
+                            '        GridView1.Rows(i).Cells(1).Text = GridView1.Rows(i).Cells(1).Text & "<img src='../../images/Ext.UI/resources/images/default/form/exclamation.gif'>"
+                            '    Case "-1"    '[完成]
+                            '        GridView1.Rows(i).Cells(1).Text = GridView1.Rows(i).Cells(1).Text & "<img src='../../images/Ext.UI/resources/images/default/dd/drop-yes.gif'>"
+                            '    Case "-2"   '[取消]
+                            '        GridView1.Rows(i).Cells(1).Text = GridView1.Rows(i).Cells(1).Text & "<img src='../../images/Ext.UI/resources/images/default/dd/drop-no.gif'>"
+                            '    Case Else
+                            '        GridView1.Rows(i).Cells(1).Text = GridView1.Rows(i).Cells(1).Text & "<img src='../../images/Ext.UI/resources/images/default/form/exclamation.gif'>"
+                            'End Select
+
+                            Tb = Base.DB.Table("SELECT Lock,TopNum FROM XX_XMJC WHERE FID =" & FID, "ddd")
+                            If Tb.Rows.Count > 0 Then
+                                Try         '添加锁定图标
+                                    LockFlag = Tb.Rows(0)("Lock")
+                                Catch ex As Exception
+                                    LockFlag = 0
+                                End Try
+
+                                If LockFlag > 0 Then
+                                    GridView1.Rows(i).Cells(1).Text = "<img src='../../images/Ext.UI/resources/images/default/grid/hmenu-lock.gif'>" & GridView1.Rows(i).Cells(1).Text
+                                End If
+
+                                Try
+                                    TopNum = Tb.Rows(0)("TopNum")
+                                Catch ex As Exception
+                                    TopNum = 0
+                                End Try
+                                If TopNum > 0 Then
+                                    GridView1.Rows(i).Cells(1).Text = "<img src='../../images/Ext.UI/resources/images/default/grid/col-move-bottom.gif'>&nbsp;" & GridView1.Rows(i).Cells(1).Text
+                                End If
+
+                            End If
+
+                        End If
+                    Next
+                End If
+            Else
+                '从数据库中得到数据
+                GridView1.DataSource = TempTable
+                Tb = Base.DB.Table("SELECT Lock,TopNum FROM XX_XMJC WHERE FID =" & FID, "ddd")
+                If Tb.Rows.Count > 0 Then
+                    Try         '添加锁定图标
+                        LockFlag = Tb.Rows(0)("Lock")
+                    Catch ex As Exception
+                        LockFlag = 0
+                    End Try
+
+                    If LockFlag > 0 Then
+                        GridView1.Rows(i).Cells(1).Text = "<img src='../../images/Ext.UI/resources/images/default/grid/hmenu-lock.gif'>" & GridView1.Rows(i).Cells(1).Text
+                    End If
+
+                    Try
+                        TopNum = Tb.Rows(0)("TopNum")
+                    Catch ex As Exception
+                        TopNum = 0
+                    End Try
+                    If TopNum > 0 Then
+                        GridView1.Rows(i).Cells(1).Text = "<img src='../../images/Ext.UI/resources/images/default/grid/col-move-bottom.gif'>&nbsp;" & GridView1.Rows(i).Cells(1).Text
+                    End If
+                End If
+            End If
+
+            '******字段颜色**Start***
+            ysTb = Base.DB.Table("Select value from Xconfig where LCDM = " & LCDM & " and config='字段颜色' and UserID=" & UserID & " order by value desc", "Xconfig")
+            allysTb = Base.DB.Table("Select value from Xconfig where LCDM = " & LCDM & " and config='字段颜色全局' order by value desc", "Xconfig")
+            For j = 0 To ShowTb.Rows.Count - 1
+                For allys = 0 To allysTb.Rows.Count - 1
+                    Dim k() As String = Split(allysTb.Rows(allys).Item("value"), " ")
+                    If k(0) = GridView1.Columns(j + 1).HeaderText Then
+                        Select Case k(1)
+                            Case "小于"
+                                Try
+                                    If Convert.ToDouble(GridView1.Rows(i).Cells(j + 1).Text) < Convert.ToDouble(k(2)) Then
+                                        GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(k(3))
+                                        GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+
+                                    End If
+                                Catch ex As Exception
+
+                                    Try
+                                        If Convert.ToDateTime(GridView1.Rows(i).Cells(j + 1).Text).CompareTo(Convert.ToDateTime(k(2))) < 0 Then
+                                            GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(k(3))
+                                            GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+                                        End If
+                                    Catch ex1 As Exception
+
+                                    End Try
+                                End Try
+                            Case "等于"
+                                If GridView1.Rows(i).Cells(j + 1).Text = k(2) Then
+                                    GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(k(3))
+                                    GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+                                End If
+                            Case "大于"
+                                Try
+                                    If Convert.ToDouble(GridView1.Rows(i).Cells(j + 1).Text) > Convert.ToDouble(k(2)) Then
+                                        GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(k(3))
+                                        GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+                                    End If
+                                Catch ex As Exception
+
+                                    Try
+                                        If Convert.ToDateTime(GridView1.Rows(i).Cells(j + 1).Text).CompareTo(Convert.ToDateTime(k(2))) > 0 Then
+                                            GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(k(3))
+                                            GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+                                        End If
+                                    Catch ex1 As Exception
+
+                                    End Try
+                                End Try
+                            Case "不等于"
+                                If GridView1.Rows(i).Cells(j + 1).Text <> k(2) Then
+                                    GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(k(3))
+                                    GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+                                End If
+                            Case "包含"
+                                If GridView1.Rows(i).Cells(j + 1).Text.Contains(k(2)) Then
+                                    GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(k(3))
+                                    GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+                                End If
+                            Case "不包含"
+                                If Not GridView1.Rows(i).Cells(j + 1).Text.Contains(k(2)) Then
+                                    GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(k(3))
+                                    GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+                                End If
+                            Case "超过天数"
+                                Try
+                                    If Date.Now().Date.CompareTo(Convert.ToDateTime(GridView1.Rows(i).Cells(j + 1).Text).Date.AddDays(k(2))) > 0 Then
+                                        GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(k(3))
+                                        GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+                                    End If
+                                Catch ex1 As Exception
+
+                                End Try
+                        End Select
+                    End If
+                Next
+                For ys = 0 To ysTb.Rows.Count - 1
+                    Dim kk() As String = Split(ysTb.Rows(ys).Item("value"), " ")
+                    If kk(0) = GridView1.Columns(j + 1).HeaderText Then
+                        Select Case kk(1)
+                            Case "小于"
+                                Try
+                                    If Convert.ToDouble(GridView1.Rows(i).Cells(j + 1).Text) < Convert.ToDouble(kk(2)) Then
+                                        GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(kk(3))
+                                        GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+
+                                    End If
+                                Catch ex As Exception
+
+                                    Try
+                                        If Convert.ToDateTime(GridView1.Rows(i).Cells(j + 1).Text).CompareTo(Convert.ToDateTime(kk(2))) < 0 Then
+                                            GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(kk(3))
+                                            GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+                                        End If
+                                    Catch ex1 As Exception
+
+                                    End Try
+                                End Try
+                            Case "等于"
+                                If GridView1.Rows(i).Cells(j + 1).Text = kk(2) Then
+                                    GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(kk(3))
+                                    GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+                                End If
+                            Case "大于"
+                                Try
+                                    If Convert.ToDouble(GridView1.Rows(i).Cells(j + 1).Text) > Convert.ToDouble(kk(2)) Then
+                                        GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(kk(3))
+                                        GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+                                    End If
+                                Catch ex As Exception
+
+                                    Try
+                                        If Convert.ToDateTime(GridView1.Rows(i).Cells(j + 1).Text).CompareTo(Convert.ToDateTime(kk(2))) > 0 Then
+                                            GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(kk(3))
+                                            GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+                                        End If
+                                    Catch ex1 As Exception
+
+                                    End Try
+                                End Try
+                            Case "不等于"
+                                If GridView1.Rows(i).Cells(j + 1).Text <> kk(2) Then
+                                    GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(kk(3))
+                                    GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+                                End If
+                            Case "包含"
+                                If GridView1.Rows(i).Cells(j + 1).Text.Contains(kk(2)) Then
+                                    GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(kk(3))
+                                    GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+                                End If
+                            Case "不包含"
+                                If Not GridView1.Rows(i).Cells(j + 1).Text.Contains(kk(2)) Then
+                                    GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(kk(3))
+                                    GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+                                End If
+                            Case "超过天数"
+                                Try
+                                    If Date.Now().Date.CompareTo(Convert.ToDateTime(GridView1.Rows(i).Cells(j + 1).Text).Date.AddDays(kk(2))) > 0 Then
+                                        GridView1.Rows(i).Cells(j + 1).ForeColor = strTocolor(kk(3))
+                                        GridView1.Rows(i).Cells(j + 1).Font.Bold = True
+                                    End If
+                                Catch ex1 As Exception
+
+                                End Try
+                        End Select
+                    End If
+                Next
+            Next
+            '******字段颜色**End***
+            Tb = Base.DB.Table("Select TagName From [Form_Tags],[Form_Tags_List] where [Form_Tags_List].TID=Form_Tags.tagid and Form_Tags.Userid=" & UserID & " and Form_Tags.Fid=" & FID, "ddd")
+            For j = 0 To Tb.Rows.Count - 1
+                GridView1.Rows(i).Cells(1).Text = "<span style='background-color:#dcdcdc;padding:2px 4px 2px 4px;'>" & Tb.Rows(j).Item(0).ToString.Trim & "</span><span style='padding-left:4px;'></span>" & GridView1.Rows(i).Cells(1).Text
+            Next
+            If columndt.Rows.Count > 0 Then
+                Dim k, s As Integer
+                s = 0
+                For k = GridView1.Columns.Count - columndt.Rows.Count To GridView1.Columns.Count - 1
+                    If columndt.Rows(s)("lcdm_link").ToString = LCDM Then
+                        GridView1.Rows(i).Cells(k).Text = "<a href='javascript:void(0);' onclick=""window.open('../Forms/OpenInfoPath.aspx?fid=" & GridView1.DataKeys(i).Item(0) & "','打开表单','height=500, width=700, top=100, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=no');""><span style=''>" & columndt.Rows(s)("showname").ToString & "</span></a>"
+                    Else
+                        GridView1.Rows(i).Cells(k).Text = "<a href='javascript:void(0);' onclick=""window.open('../Forms/FunctionNoLC.aspx?LCDM=" & columndt.Rows(s)("lcdm_link").ToString & "&value=" & GridView1.DataKeys(i).Item(0) & "','新建表单','height=500, width=700, top=100, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=no');""><span style=''>" & columndt.Rows(s)("showname").ToString & "</span></a>"
+                    End If
+                    s = s + 1
+                Next
+            End If
+        Next
+        GridView1.Columns(GridView1.Columns.Count - 1).Visible = False
+        PageBar.InnerHtml = Base.pub.WritePage(GridView1, MaxPage)
+    End Sub
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        SortGridview()
+    End Sub
+
+    Protected Sub GridView1_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs) Handles GridView1.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            e.Row.Attributes.Add("OnDblClick", "DbClickEvent('" & GridView1.DataKeys(e.Row.RowIndex).Item(0) & "')")
+            e.Row.Attributes("style") = "Cursor:hand"
+        End If
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        Dim ShowTb As New Data.DataTable
+        ShowTb = Base.DB.Table("Select ShowName,NodeName from ShowList_LCDM where LCDM = " & LCDM, "ShowList_LCDM")
+        MaxTitle = ShowTb.Rows.Count
+
+        Dim index As Integer = e.NewSelectedIndex
+        Dim Fid As String = GridView1.Rows(index).Cells(MaxTitle + 1).Text
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("SELECT LCMC FROM GY_LCDM where LCDM = " & LCDM, "GY_LCDM")
+        If tb Is Nothing Then
+            Base.Js.alert(Me, "参数错误或非法访问")
+            Response.End()
+        End If
+
+        '从模板信息表中,得到当前模板的模板名
+        tb = Base.DB.Table("select xsndir,MKMC,MKDM from GY_MKXX where NoLCDM = " & LCDM, "GY_MKXX")
+        Dim XsnDir As String = tb.Rows(0).Item(0).ToString.Trim
+        Dim XMMC As String = tb.Rows(0).Item(1).ToString.Trim
+        Dim MKDM As Integer = tb.Rows(0).Item(2)
+        Dim XmlFileName As String = Server.MapPath("../../") & "\TemplateLibrary\" & XsnDir & "\template.xml"
+        Dim DFileName As String = Server.MapPath("../../") & "\FormFolder\" & XMMC & "\" & Fid & ".xml"
+        '如果文件不存在，则生成
+        If File.Exists(DFileName) = False Then
+            File.Copy(XmlFileName, DFileName)
+        End If
+
+        tb = Base.DB.Table("select XMDM from XX_XMJC where fid = " & Fid, "XX_XMJC")
+        If tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "非法操作!")
+        End If
+
+
+        tb = Base.DB.Table("select XMDM from XX_XMJC where fid = " & Fid, "XX_XMJC")
+        If tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "非法操作!")
+        End If
+        Dim XMDM As String = tb.Rows(0).Item(0)
+
+        Dim WriteFlag As Boolean    '表单可写标志
+        '这里对表单进行处理，判断表单是只读，或是可写的，或是没有权限的。
+        Dim Qx As Integer = Base.GetUserHaveQX(UserID, MKDM)
+        '这里对表单进行处理，判断表单是只读，或是可写的，或是没有权限的。
+        If Qx <= 0 Then
+            Base.Js.alert(Me, "无权打开此表单，请联系管理员")
+            Exit Sub
+        End If
+        If Qx >= 2 Then
+            WriteFlag = True
+        Else
+            WriteFlag = False
+        End If
+
+        Dim Result As String = Base.AutoFillDate(DFileName, Fid, XMDM, Login_User, WriteFlag, 0)
+        If Not Result Is Nothing Then               '对自动生成的值进行相应的填写
+            Base.Js.alert(Me, Result)
+            Exit Sub
+        End If
+        '新的打开方式，直接输出
+        Response.Redirect("../Forms/OpenInfoPath.aspx?FID=" & Fid)
+
+        '复制一份到临时文件,进行操作
+        'tb = Nothing
+        'Try
+        '    File.Delete(Server.MapPath("../../") & "\FormFolder\_sunfun-system-temp\" & XMMC & "-" & Fid & ".xml")
+        '    File.Copy(DFileName, Server.MapPath("../../") & "\FormFolder\_sunfun-system-temp\" & XMMC & "-" & Fid & ".xml")
+        '    Response.Redirect("../../" & "\FormFolder\_sunfun-system-temp\" & XMMC & "-" & Fid & ".xml")
+        'Catch ex As Exception
+        '    Base.Js.alert(Me, "已经有人打开了此表单")
+        'End Try
+    End Sub
+
+    Protected Sub GridView1_Sorting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSortEventArgs) Handles GridView1.Sorting
+        If hasTable = False Then
+            TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, e.SortExpression, False)
+            MaxPage = TempTable.Rows.Count
+        End If
+        Dim Dv As New Data.DataView(TempTable)
+        Dim TempSort As String
+        TempSort = ViewState("sortDirection")
+        If TempSort = "" Then
+            Dv.Sort = e.SortExpression
+        Else
+            Dim ls As String()
+            ls = TempSort.Split(" ")
+            If ls(0) = e.SortExpression And ls.GetUpperBound(0) = 0 Then
+                Dv.Sort = e.SortExpression & " desc"
+            Else
+                Dv.Sort = e.SortExpression
+            End If
+        End If
+        ViewState("sortDirection") = Dv.Sort
+
+        GridView1.DataSource = Dv
+        GridView1.DataBind()
+
+    End Sub
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+
+        GridView1.SelectedIndex = -1
+        LoadTagBind()               '重新绑定标签
+        If hasTable = False Then
+            SelectSQL = CheckKind(Kind)         '得到查询语句
+            TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", False)
+        Else
+            SelectSQL = CheckKind(Kind)         '得到查询语句
+            SelectSQL = SelectSQL.Replace(",GY_XMXX.XMDM,XX_XMJC.state", "") '转换sql语句，防止出错
+            TempTable = Base.FillDataToGridviewBySQL(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, False)
+            GridView1.DataSource = TempTable
+        End If
+        MaxPage = TempTable.Rows.Count
+        GridView1.DataBind()
+    End Sub
+
+
+    Sub SortGridview()
+        Dim ls As String()
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLMapping").ToLower <> "true" Or hasTable = False Then
+            Try
+                ls = ViewState("sortDirection").ToString.Split(" ")
+                TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, ls(0), False)
+            Catch ex As Exception
+                TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", False)
+            End Try
+        End If
+        MaxPage = TempTable.Rows.Count
+        Dim Dv As New Data.DataView(TempTable)
+        Dim TempSort As String
+        TempSort = ViewState("sortDirection")
+        If TempSort <> "" Then
+            Dv.Sort = TempSort
+            ViewState("sortDirection") = Dv.Sort
+        End If
+        GridView1.DataSource = Dv
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub DropDownList1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles DropDownList1.SelectedIndexChanged
+        Dim Sidx As Integer = DropDownList1.SelectedValue
+        Dim DropValue As Integer = DropDownList1.SelectedValue
+        Dim ck As CheckBox
+        Dim i As Integer
+        Dim FID As Integer
+
+        If Sidx = 4 Or Sidx = 5 Or Sidx = 6 Then
+            If Base.GetUserHaveQX(UserID, MKDM) < 8 Then
+                Base.Js.alert(Me, "权限不够.你必须拥有删除表单权限才能使用功能!")
+                Exit Sub
+            End If
+        Else
+            If Base.GetUserHaveQX(UserID, MKDM) < 2 Then
+                Base.Js.alert(Me, "权限不够.你必须拥有写表单的权限才能使用此功能!")
+                Exit Sub
+            End If
+        End If
+
+        Dim tb As New DataTable
+        Dim tmpstr As String = ""
+        For i = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                FID = GridView1.DataKeys(i).Item(0)
+                Selecteds += "," & FID
+                Select Case Sidx
+                    Case 1      '设置成[完成]状态
+                        Base.DB.Query("update XX_XMJC set State=-1 where FID=" & FID)
+                        Base.SynFormState(FID, MKMC, Login_User)            '同步状态
+                    Case 2      '设置成[修改]状态
+                        Base.DB.Query("update XX_XMJC set State=0 where FID=" & FID)
+                        Base.SynFormState(FID, MKMC, Login_User)            '同步状态
+                    Case 3      '设置成[取消]状态
+                        Base.DB.Query("update XX_XMJC set State=-2 where FID=" & FID)
+                        Base.SynFormState(FID, MKMC, Login_User)            '同步状态
+                    Case 4      '删除表单功能
+                        tb = Base.DB.Table("SELECT XMSM,isDel FROM GY_XMXX where XMDM=" & FID, "XMSM")
+                        If tb.Rows.Count > 0 Then
+                            Dim XMSM As String = tb.Rows(0)(0)
+                            Dim isDel As String
+                            Try
+                                isDel = tb.Rows(0)(1)
+                            Catch ex As Exception
+                                isDel = 0
+                            End Try
+
+                            If Base.GetUserHaveQX(UserID, MKDM) < 8 Then
+                                If XMSM = Login_User Then
+                                    If isDel = "1" Then
+                                        Base.Js.alert(Me, "此表单正处于流程内，目前无法删除。")
+                                        Exit Sub
+                                    End If
+                                Else
+                                    Base.Js.alert(Me, "权限不够.你必须拥有删除表单权限才能使用功能!")
+                                    Exit Sub
+                                End If
+                            End If
+                        End If
+                        tb = Base.DB.Table("Select FID From XX_XMJC where XMZT is null and FID=" & FID, "XMJC")
+                        If tb.Rows.Count > 0 Then           '表示是无流程的表单.进行删除
+                            Dim str As String
+                            str = Base.DeleteForm(FID, MKMC, UserID, Login_User)
+                            'GridView1.DataBind()
+                            Base.Js.alert(Me, str)
+                        End If
+                    Case 5      '锁定所选表单
+                        Base.DB.Query("update XX_XMJC set Lock=1,LockUserID=" & UserID & " where FID=" & FID)
+                    Case 6      '解锁表单
+                        tb = Base.DB.Table("select LockUserID from XX_XMJC where Lock=1 and FID=" & FID, "LockUserID")
+                        If tb.Rows.Count > 0 Then
+                            Dim LockUserID As String = tb.Rows(0)(0)
+                            tb = Base.DB.Table("select YGDM,YGXM,DLMC from GY_YGDM where YGDM =" & LockUserID, "YGDM")
+                            If tb.Rows.Count > 0 Then
+                                Dim LockUserYGXM As String = tb.Rows(0)(1)
+                                Dim LockUserDLMC As String = tb.Rows(0)(2)
+                                If LockUserID <> "" Then
+                                    If LockUserID = UserID Then
+                                        Base.DB.Query("update XX_XMJC set Lock=0,LockUserID=null where FID=" & FID)
+                                    Else
+                                        Base.Js.alert(Me, "该表单已被 " & LockUserYGXM & "(" & LockUserDLMC & ") 锁定，您无权解锁该表单！")
+                                    End If
+                                Else
+                                    Base.DB.Query("update XX_XMJC set Lock=0,LockUserID=null where FID=" & FID)
+                                End If
+                            Else
+                                Base.DB.Query("update XX_XMJC set Lock=0,LockUserID=null where FID=" & FID)
+                            End If
+                        End If
+                    Case 7      '置顶表单
+                        Dim MaxTop As Integer
+                        tb = Base.DB.Table("select max(topnum) from XX_XMJC where mkdm=" & MKDM, "Topnum")
+                        If tb.Rows.Count > 0 Then
+                            If IsDBNull(tb.Rows(0)(0)) = True Then
+                                MaxTop = 1
+                            Else
+                                MaxTop = tb.Rows(0)(0)
+                            End If
+                        Else
+                            MaxTop = 1
+                        End If
+                        Base.DB.Query("update XX_XMJC set TopNum=" & MaxTop + 1 & " where FID=" & FID)
+                    Case 8      '取消置顶
+                        Base.DB.Query("update XX_XMJC set TopNum=-1 where FID=" & FID)
+                    Case 9          '分发
+                        tmpstr = tmpstr & GridView1.DataKeys(i).Item(0).ToString & ","
+                    Case 10         '取消分发
+                        Base.DB.Query("Delete Gy_XmXd where  FQR=" & UserID & " and FID=" & FID)
+                    Case 11         '查看修改历史            
+                        Base.Js.OpenWindow(Me, "../modify/modifylist.aspx?FID=" & FID, "查看修改历史", "height=500, width=820, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes")
+                    Case Else
+                        Base.DB.Query("Update XX_XMJC set State=" & DropValue & " where FID=" & FID)
+                        Base.SynFormState(FID, MKMC, Login_User)            '同步状态
+                End Select
+            End If
+        Next
+
+        If Sidx = 9 Then
+            Base.Js.OpenWindow(Me, "../desktop/WriteSendMessage.aspx?Kind=1&FID=" & tmpstr, "分发表单", "height=500, width=820, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes")
+        End If
+        'If Sidx = 10 Then
+        '    Base.Js.OpenWindow(Me, "../desktop/WriteSendMessage.aspx?Kind=2&FID=" & tmpstr, "审阅表单", "height=500, width=820, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes")
+        'End If
+
+
+        '重新刷新界面
+        Try
+            SelectSQL = CheckKind(filterlist.SelectedValue)         '得到查询语句
+        Catch ex As Exception
+        End Try
+
+        If hasTable = False Then
+            TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", False)
+        Else
+            SelectSQL = SelectSQL.Replace(",GY_XMXX.XMDM,XX_XMJC.state", "") '转换sql语句，防止出错
+            TempTable = Base.FillDataToGridviewBySQL(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, False)
+            GridView1.DataSource = TempTable
+        End If
+
+        MaxPage = TempTable.Rows.Count
+        GridView1.DataBind()
+        DropDownList1.SelectedIndex = 0
+        DropDownList1.DataBind()
+    End Sub
+
+    Protected Sub filterlist_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles filterlist.SelectedIndexChanged
+        Kind = filterlist.SelectedValue
+        SelectSQL = CheckKind(Kind)
+
+        If hasTable = False Then
+            TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", False)
+        Else
+            SelectSQL = SelectSQL.Replace(",GY_XMXX.XMDM,XX_XMJC.state", "") '转换sql语句，防止出错
+            TempTable = Base.FillDataToGridviewBySQL(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, False)
+            GridView1.DataSource = TempTable
+        End If
+
+        MaxPage = TempTable.Rows.Count
+        GridView1.DataBind()
+    End Sub
+
+    ''' <summary>
+    ''' 根据类型得返回相应的ＳＱＬ语句
+    ''' </summary>
+    ''' <param name="Kind"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function CheckKind(ByVal Kind As Integer) As String
+        If Kind = 0 Then
+            Response.Write("非法访问,请联系管理员！")
+            Response.End()
+        End If
+        '根据流程,得到MKDM,以便显示全部以具表单代码为准的所有表单.
+        Dim listid As Integer = filterlist.SelectedValue
+
+        Dim fidstr As String
+
+
+        fidstr = "XX_XMJC.fid"
+
+
+        If listid < -2 Then
+            Select Case Kind
+                Case -11                    '全部列表
+                    Dim row As DataRow
+                    row = Base.DB.Row("SELECT MKDM FROM GY_MKXX WhERE NoLcDM =" & LCDM, "dd")
+                    If row Is Nothing Then      '找不到XMDM 表示是有流程的
+                        SelectSQL = "SELECT XX_XMJC.FID,GY_XMXX.XMDM,XX_XMJC.state FROM GY_XMXX,XX_XMJC where XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" & LCDM & " and (GY_XMXX.XMJD is not null) and (state<>-100 or state is null) and state<>-17 "
+                    Else
+                        SelectSQL = "SELECT XX_XMJC.FID,GY_XMXX.XMDM,XX_XMJC.state FROM GY_XMXX,XX_XMJC where XX_XMJC.MKDM = " & row("MKDM").ToString & " and XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null)  and (state<>-100 or state is null and state<>-17 )"
+                    End If
+                Case -12                    '我的列表
+                    SelectSQL = "SELECT XX_XMJC.FID,GY_XMXX.XMDM,XX_XMJC.state FROM GY_XMXX,XX_XMJC where ( (XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" & LCDM & " and (GY_XMXX.XMJD is not null) and GY_XMXX.XMSM='" & Login_User & "') and (state<>-100 or state is null)   or ( XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null) and GY_XMXX.LCDM=" & LCDM & " and " & fidstr & " in (select FID from GY_XmXD where YGDM=" & UserID & ") )  and (state<>-100 or state is null) and state<>-17 )"
+                Case -17                    '我的草稿
+                    SelectSQL = "SELECT XX_XMJC.FID,GY_XMXX.XMDM,XX_XMJC.state FROM GY_XMXX,XX_XMJC where ( (XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" & LCDM & " and (GY_XMXX.XMJD is not null) and GY_XMXX.XMSM='" & Login_User & "') and state = -17   or (XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null) And GY_XMXX.LCDM=" & LCDM & " and XX_XMJC.FID in (select FID from GY_XmXD where YGDM=" & UserID & ") )  and state = -17 )"
+                Case -13                    '已收列表
+                    SelectSQL = "SELECT XX_XMJC.FID,GY_XMXX.XMDM,XX_XMJC.state FROM GY_XMXX,XX_XMJC where XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null) and " & fidstr & " in (select FID from GY_XmXD where YGDM=" & UserID & ") and (state<>-100 or state is null) "
+                Case -14                    '已发列表
+                    SelectSQL = "SELECT XX_XMJC.FID,GY_XMXX.XMDM,XX_XMJC.state FROM GY_XMXX,XX_XMJC where XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null) and " & fidstr & " in (select FID from GY_XmXD where FQR=" & UserID & ") and (state<>-100 or state is null) "
+                Case -15                    '审阅发起列表
+                    SelectSQL = "SELECT XX_XMJC.FID,GY_XMXX.XMDM,XX_XMJC.state FROM GY_XMXX,XX_XMJC where XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null) and " & fidstr & " in (SELECT  FID FROM GY_XMSP, XX_XMJC where  XX_XMJC.XMDM= GY_XMSP.XMDM and  GY_XMSP.MKDM= XX_XMJC.MKDM and FQR='" & Login_User & "') and (state<>-100 or state is null) "
+                Case -16                    '审阅处理列表
+                    SelectSQL = "SELECT XX_XMJC.FID,GY_XMXX.XMDM,XX_XMJC.state FROM GY_XMXX,XX_XMJC where XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null) and " & fidstr & " in (SELECT  FID FROM GY_XMSP, XX_XMJC where  XX_XMJC.XMDM= GY_XMSP.XMDM and  GY_XMSP.MKDM= XX_XMJC.MKDM and YGDM=" & UserID & ") and (state<>-100 or state is null) "
+            End Select
+        Else            '表示是表单状态
+            If ShowList = True Then
+                If listid = 0 Then              '默认是null ,但是查0时为进行中.查不出来的.
+                    SelectSQL = "SELECT XX_XMJC.FID,GY_XMXX.XMDM,XX_XMJC.state FROM GY_XMXX,XX_XMJC where (XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" & LCDM & " and (GY_XMXX.XMJD is not null) and ( state=" & listid & " or state is null)  )"
+                Else
+                    SelectSQL = "SELECT XX_XMJC.FID,GY_XMXX.XMDM,XX_XMJC.state FROM GY_XMXX,XX_XMJC where (XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" & LCDM & " and (GY_XMXX.XMJD is not null) and state=" & listid & ")"
+                End If
+            Else
+                '表示没有列表功能．所以在我的表单里进行筛选
+                SelectSQL = "SELECT XX_XMJC.FID,GY_XMXX.XMDM,XX_XMJC.state FROM GY_XMXX,XX_XMJC where (((XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" & LCDM & " and (GY_XMXX.XMJD is not null) and GY_XMXX.XMSM='" & Login_User & "')  or (XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null) and " & fidstr & " in (select FID from GY_XmXD where YGDM=" & UserID & ")) ) and (GY_XMXX.XMJD is not null) and state=" & listid & ")"
+            End If
+        End If
+        Dim DropValue As Integer = DropDownList2.SelectedValue
+        If DropValue > 0 Then           '添加标签过滤
+            SelectSQL += " and XX_XMJC.FID in (Select FID From Form_Tags where UserID=" & UserID & " and TagID=" & DropValue & ")"
+        End If
+        'Response.Write("<br><br><br><br>")
+        'Response.Write(SelectSQL)
+        Return SelectSQL
+
+    End Function
+
+    ''' <summary>
+    ''' 置顶
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    ''' <remarks></remarks>
+    Protected Sub Button4_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button4.Click
+        Dim ck As CheckBox
+        Dim i As Integer
+        Dim FID As Integer
+
+        If Base.GetUserHaveQX(UserID, MKDM) < 2 Then
+            Base.Js.alert(Me, "权限不够.你必须拥有写表单的权限才能使用此功能!")
+            Exit Sub
+        End If
+
+        Dim tb As New DataTable
+        Dim tmpstr As String = ""
+        For i = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                FID = GridView1.DataKeys(i).Item(0)
+                Dim MaxTop As Integer
+                tb = Base.DB.Table("select max(topnum) from XX_XMJC where mkdm=" & MKDM, "Topnum")
+                If tb.Rows.Count > 0 Then
+                    If IsDBNull(tb.Rows(0)(0)) = True Then
+                        MaxTop = 1
+                    Else
+                        MaxTop = tb.Rows(0)(0)
+                    End If
+                Else
+                    MaxTop = 1
+                End If
+                Base.DB.Query("update XX_XMJC set TopNum=" & MaxTop + 1 & " where FID=" & FID)
+            End If
+        Next
+
+        '重新刷新界面        
+        If hasTable = False Then
+            TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", False)
+        Else
+            SelectSQL = SelectSQL.Replace(",GY_XMXX.XMDM,XX_XMJC.state", "") '转换sql语句，防止出错
+            TempTable = Base.FillDataToGridviewBySQL(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, False)
+            GridView1.DataSource = TempTable
+        End If
+        MaxPage = TempTable.Rows.Count
+        GridView1.DataBind()
+        DropDownList1.SelectedIndex = 0
+        DropDownList1.DataBind()
+    End Sub
+
+    ''' <summary>
+    ''' 分发
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    ''' <remarks></remarks>
+    Protected Sub Button5_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button5.Click
+        Dim ck As CheckBox
+        Dim i As Integer
+        Dim FID As Integer
+
+        If Base.GetUserHaveQX(UserID, MKDM) < 2 Then
+            Base.Js.alert(Me, "权限不够.你必须拥有写表单的权限才能使用此功能!")
+            Exit Sub
+        End If
+
+        Dim tb As New DataTable
+        Dim tmpstr As String = ""
+        For i = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                FID = GridView1.DataKeys(i).Item(0)
+                tmpstr = tmpstr & GridView1.DataKeys(i).Item(0).ToString & ","
+            End If
+        Next
+        Base.Js.OpenWindow(Me, "../desktop/WriteSendMessage.aspx?Kind=1&FID=" & tmpstr, "分发表单", "height=500, width=820, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes")
+    End Sub
+
+    ''' <summary>
+    ''' 锁定
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    ''' <remarks></remarks>
+    Protected Sub Button6_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button6.Click
+        Dim ck As CheckBox
+        Dim i As Integer
+        Dim FID As Integer
+
+        If Base.GetUserHaveQX(UserID, MKDM) < 8 Then
+            Base.Js.alert(Me, "权限不够.你必须拥有删除表单权限才能使用功能!")
+            Exit Sub
+        End If
+
+        Dim tb As New DataTable
+        Dim tmpstr As String = ""
+        For i = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                FID = GridView1.DataKeys(i).Item(0)
+                '锁定所选表单
+                Base.DB.Query("update XX_XMJC set Lock=1 where FID=" & FID)
+
+            End If
+        Next
+
+        '重新刷新界面
+        If hasTable = False Then
+            TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", False)
+        Else
+            SelectSQL = SelectSQL.Replace(",GY_XMXX.XMDM,XX_XMJC.state", "") '转换sql语句，防止出错
+            TempTable = Base.FillDataToGridviewBySQL(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, False)
+            GridView1.DataSource = TempTable
+        End If
+        MaxPage = TempTable.Rows.Count
+        GridView1.DataBind()
+        DropDownList1.SelectedIndex = 0
+        DropDownList1.DataBind()
+    End Sub
+
+
+    ''' <summary>
+    ''' 打标签
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    ''' <remarks></remarks>
+    Protected Sub DropDownList2_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles DropDownList2.SelectedIndexChanged
+        Dim Sidx As Integer = DropDownList2.SelectedIndex
+        Dim DropValue As Integer = DropDownList2.SelectedValue
+        Dim ck As CheckBox
+        Dim i, FID As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                FID = GridView1.DataKeys(i).Item(0)
+                Selecteds += "," & FID
+                Select Case DropValue
+                    Case -1 '表示是头，不处理
+                    Case 0  '表示是清除
+                        Base.DB.Query("Delete [Form_Tags] where FID=" & FID)
+                    Case Else
+                        Dim Row As DataRow = Base.DB.Row("Select FID From Form_Tags where FID=" & FID & " and UserID=" & UserID & " and TagID=" & DropValue, "dd")
+                        If Row Is Nothing Then
+                            Base.DB.Query("INSERT INTO [Form_Tags]([UserID],[FID],[TagID]) values(" & UserID & "," & FID & "," & DropValue & ")")
+                        End If
+                End Select
+            End If
+        Next
+        '重新刷新界面
+        Try
+            SelectSQL = CheckKind(filterlist.SelectedValue)         '得到查询语句
+        Catch ex As Exception
+        End Try
+        If hasTable = True Then
+            TempTable = Base.FillDataToGridviewBySQL(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, False)
+            GridView1.DataSource = TempTable
+        Else
+            TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", False)
+        End If
+
+        MaxPage = TempTable.Rows.Count
+        GridView1.DataBind()
+        If DropValue = 0 Then           '当是清除表单
+            For i = 0 To GridView1.Rows.Count - 1
+                ck = GridView1.Rows(i).Cells(0).Controls(1)
+                ck.Checked = False
+            Next
+        End If
+        DropDownList1.SelectedIndex = 0
+        'DropDownList2.SelectedIndex = 0
+        DropDownList1.DataBind()
+    End Sub
+    Function strTocolor(ByVal colorStr As String) As Color
+        Select Case colorStr
+            Case "红色"
+                Return Color.Red
+            Case "粉色"
+                Return Color.Pink
+            Case "蓝色"
+                Return Color.Blue
+            Case "绿色"
+                Return Color.Green
+            Case "紫色"
+                Return Color.Purple
+            Case "灰色"
+                Return Color.Gray
+        End Select
+
+    End Function
+
+    
+End Class

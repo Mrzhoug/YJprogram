@@ -1,0 +1,32 @@
+﻿Imports Microsoft.VisualBasic
+
+Public Class GlobalServiceHandler
+    '写同步表
+    Private Shared Function SynSubmit(ByVal FID As Integer, ByVal Ftype As String) As Boolean
+        Dim sqlstr As String
+        sqlstr = "Insert into [SynSubmit](FID,[Ftype]) values(" & FID & ",'" & DoFilter.SQLFilter(Ftype) & "')"
+
+        Dim result As Integer
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("RegisterCompanyInfo---DelCompanyInfo 失败", ex.ToString())
+            Return False
+        End Try
+
+        If result > 0 Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+
+    Public Shared Function DoSubmitForm(ByVal FID As Integer) As Boolean
+        Return SynSubmit(FID, "提交")
+    End Function
+
+    Public Shared Function DoDelForm(ByVal FID As Integer) As Boolean
+        Return SynSubmit(FID, "删除")
+    End Function
+End Class

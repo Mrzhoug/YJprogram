@@ -1,0 +1,172 @@
+﻿
+Partial Class manager_Desktop_SetHomepage
+    Inherits System.Web.UI.Page
+    Dim base As New Base
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        If IsPostBack = False Then
+            loadhomepage()
+            loadmc()
+            If DropDownList1.SelectedValue = 0 Then
+                ddlhomepage.Visible = True
+                txturl.Visible = False
+                lblname.Visible = True
+                lblurl.Visible = False
+                txtname.Visible = True
+            Else
+                ddlhomepage.Visible = False
+                txturl.Visible = True
+                lblname.Visible = True
+                lblurl.Visible = True
+                txtname.Visible = True
+            End If
+        End If
+
+    End Sub
+
+    Private Sub loadhomepage()
+        Dim dt As New Data.DataTable
+        dt = base.DB.Table("select mkdm,mkmc from GY_MKXX", "dd")
+        Dim qb1 As New ListItem
+        qb1.Text = "信息中心"
+        qb1.Value = "0"
+        Dim i As Integer
+        ddlhomepage.Items.Add(qb1)
+        If dt.Rows.Count > 0 Then
+            For i = 0 To dt.Rows.Count - 1
+                Dim nr As New ListItem
+                nr.Text = dt.Rows(i)("mkmc")
+                nr.Value = dt.Rows(i)("mkdm")
+                ddlhomepage.Items.Add(nr)
+            Next
+        End If
+
+    End Sub
+
+    Private Sub loadmc()
+        Dim dt As New Data.DataTable
+        dt = base.DB.Table("select mkdm,mkmc,mktype,url from homepage", "dd")
+        If dt.Rows.Count > 0 Then
+            If dt.Rows(0)("mktype").ToString = 1 Then
+                DropDownList1.SelectedValue = 1
+                txturl.Text = dt.Rows(0)("url").ToString
+                txtname.Text = dt.Rows(0)("mkmc").ToString
+            Else
+                DropDownList1.SelectedValue = 0
+                ddlhomepage.SelectedValue = dt.Rows(0)("mkdm").ToString
+            End If
+        End If
+
+    End Sub
+
+    Protected Sub DropDownList1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles DropDownList1.SelectedIndexChanged
+        If DropDownList1.SelectedValue = 0 Then
+            ddlhomepage.Visible = True
+            txturl.Visible = False
+            lblname.Visible = True
+            lblurl.Visible = False
+            txtname.Visible = True
+        Else
+            ddlhomepage.Visible = False
+            txturl.Visible = True
+            lblname.Visible = True
+            lblurl.Visible = True
+            txtname.Visible = True
+        End If
+    End Sub
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+        Dim dt As New Data.DataTable
+        dt = base.DB.Table("select mkdm,mkmc from GY_MKXX where NoLCDM >0", "dd")
+        If dt.Rows.Count > 0 Then
+            Dim i As Integer
+            For i = 0 To dt.Rows.Count - 1
+                Dim Tmp As String = ""
+                Dim Row As Data.DataRow = base.DB.Row("Select * From WebInfoPath_MenuConfig where mkdm=" & dt.Rows(0)(0).ToString, "dd")
+                If Row Is Nothing Then
+                    base.DB.Query("INSERT INTO WebInfoPath_MenuConfig (MKDM,Config1,Config2,Config3,Config4,Config5,Config6,Config7,Config8)VALUES(" & dt.Rows(0)(0).ToString & ",0,0,0,0,0,0,0,0)")
+                End If
+                Tmp = "UPdate WebInfoPath_MenuConfig set "
+                If CheckBox1.Checked = True Then Tmp += "Config1=1 " Else Tmp += " Config1=0"
+                If CheckBox2.Checked = True Then Tmp += ", Config2=1 " Else Tmp += ", Config2=0 "
+                If CheckBox3.Checked = True Then Tmp += ", Config3=1 " Else Tmp += ", Config3=0 "
+                If CheckBox4.Checked = True Then Tmp += ", Config4=1 " Else Tmp += ", Config4=0 "
+                If CheckBox5.Checked = True Then Tmp += ", Config5=1 " Else Tmp += ", Config5=0 "
+                If CheckBox6.Checked = True Then Tmp += ", Config6=1 " Else Tmp += ", Config6=0 "
+                If CheckBox7.Checked = True Then Tmp += ", Config7=1 " Else Tmp += ", Config7=0 "
+                If CheckBox8.Checked = True Then Tmp += ", Config8=1 " Else Tmp += ", Config8=0 "
+                If CheckBox16.Checked = True Then Tmp += ", Config9=1 " Else Tmp += ", Config9=0 "
+                base.DB.Query(Tmp & " where mkdm=" & dt.Rows(0)(0).ToString)
+            Next
+        End If
+
+        base.Js.alert(Me, "配置保存成功")
+    End Sub
+
+    Protected Sub Button4_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button4.Click
+
+        Dim ConfigStr As String = ""
+        If CheckBox10.Checked = True Then ConfigStr = "1" Else ConfigStr = "0"
+        If CheckBox11.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If CheckBox12.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If CheckBox13.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If CheckBox14.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If CheckBox15.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If CheckBox17.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        UpdateConfig("表单列表页按钮配置", ConfigStr)
+        base.Js.alert(Me, "配置保存成功")
+    End Sub
+    Sub UpdateConfig(ByVal Op As String, ByVal kind As String)
+        Dim tb As New Data.DataTable
+        tb = base.DB.Table("Select NoLCDM from GY_MKXX where NoLCDM >0", "123")
+        If tb.Rows.Count > 0 Then
+            Dim i As Integer
+            For i = 0 To tb.Rows.Count - 1
+                If base.DB.GetRowCount("select value from Xconfig where Config='" & Op & "' and LCDM=" & tb.Rows(i)(0).ToString & " and UserID=0", "Xconfig") > 0 Then
+                    base.DB.Query("update Xconfig set [value]='" & kind & "' where Config='" & Op & "' and LCDM=" & tb.Rows(i)(0).ToString & " and UserID = 0")
+                Else
+                    base.DB.Query("insert into Xconfig(Config,UserID,value,LCDM) values('" & Op & "',0,'" & kind & "'," & tb.Rows(i)(0).ToString & ")")
+                End If
+            Next
+        End If
+    End Sub
+
+    Protected Sub Button10_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button10.Click
+        Dim ConfigStr As String = ""
+        If cb_showListMenu1.Checked = True Then ConfigStr = "1" Else ConfigStr = "0"
+        If cb_showListMenu2.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If cb_showListMenu3.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If cb_showListMenu4.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If cb_showListMenu5.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If cb_showListMenu6.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If cb_showListMenu7.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        UpdateConfig("显示列菜单按钮配置", ConfigStr)
+        base.Js.alert(Me, "配置保存成功")
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Try
+            If txtname.Text.Trim.Length < 0 Then
+                base.Js.alert(Me, "名称不能为空")
+                Exit Sub
+            End If
+            Dim mktype As String = ""
+            Dim mkdm As String = ""
+            Dim url As String = ""
+            Dim mkmc As String = ""
+            mktype = DropDownList1.SelectedValue
+            mkdm = ddlhomepage.SelectedValue
+            url = txturl.Text
+            mkmc = txtname.Text
+            base.DB.Query("delete homepage")
+            base.DB.Query("insert into homepage(mkdm,mktype,mkmc,url) values(" & base.SqlFilter(mkdm) & ",'" & base.SqlFilter(mktype) & "','" & base.SqlFilter(mkmc) & "','" & base.SqlFilter(url) & "')")
+        Catch ex As Exception
+            base.Js.alert(Me, "保存失败")
+        End Try
+        base.Js.alert(Me, "保存成功")
+    End Sub
+
+    Protected Sub ddlhomepage_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles ddlhomepage.SelectedIndexChanged
+        txtname.Text = ddlhomepage.SelectedItem.Text
+    End Sub
+End Class

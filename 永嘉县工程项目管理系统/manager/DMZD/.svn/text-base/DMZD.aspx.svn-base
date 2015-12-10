@@ -1,0 +1,47 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="DMZD.aspx.vb" Inherits="manager_DMZD_DMZD" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>无标题页</title>
+    <link href="../../images/Styles.css" type="text/css" />
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT [DMXH], [DMSB], [SSDM], [DMMC] FROM [GY_DMZD]"></asp:SqlDataSource>
+    
+    </div>
+        <asp:Label ID="Label1" runat="server" Text="代码序号:" Width="74px"></asp:Label>&nbsp;
+        <asp:TextBox ID="TextBox1" runat="server"></asp:TextBox>
+        &nbsp;
+        <asp:Label ID="Label2" runat="server" Text="代码识别:" Width="74px"></asp:Label>
+        <asp:TextBox ID="TextBox2" runat="server"></asp:TextBox>&nbsp;<br />
+        <asp:Label ID="Label3" runat="server" Text="所属代码:" Width="74px"></asp:Label>&nbsp;
+        <asp:TextBox ID="TextBox3" runat="server"></asp:TextBox>
+        &nbsp;
+        <asp:Label ID="Label4" runat="server" Text="代码名称:" Width="74px"></asp:Label>
+        <asp:TextBox ID="TextBox4" runat="server"></asp:TextBox><br />
+        <asp:Button ID="Button1" runat="server" Text="确定" Width="55px" />
+        &nbsp; &nbsp; &nbsp;
+        <asp:Label ID="Label5" runat="server" Font-Bold="True" Width="150px"></asp:Label><br />
+        &nbsp;<asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="DMXH" SkinID="GridViewSkin1"
+            DataSourceID="SqlDataSource1" CellPadding="4" ForeColor="Black" BackColor="White" BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" Font-Size="11pt">
+            <Columns>
+                <asp:BoundField DataField="DMXH" HeaderText="代码序号" ReadOnly="True" SortExpression="DMXH" />
+                <asp:BoundField DataField="DMSB" HeaderText="代码识别" SortExpression="DMSB" />
+                <asp:BoundField DataField="SSDM" HeaderText="所属代码" SortExpression="SSDM" />
+                <asp:BoundField DataField="DMMC" HeaderText="代码名称" SortExpression="DMMC" />
+                <asp:CommandField ShowEditButton="True" />
+                <asp:CommandField ShowDeleteButton="True" />
+            </Columns>
+            <FooterStyle BackColor="#CCCC99" />
+            <RowStyle BackColor="White" />
+            <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+            <PagerStyle BackColor="#F7F7DE" ForeColor="Black" HorizontalAlign="Right" />
+            <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" />
+            <AlternatingRowStyle BackColor="White" />
+        </asp:GridView>
+    </form>
+</body>
+</html>

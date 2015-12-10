@@ -1,0 +1,219 @@
+﻿
+Partial Class Menu_ButtonBar
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Public str As String
+    Public Advanced As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Dim LCDM As String
+        LCDM = Request("LCDM")
+        If LCDM Is Nothing Then
+            Base.Js.alert(Me, "非法访问!")
+            Response.End()
+        End If
+        If Base.Js.IsInt(LCDM) = False Then
+            Base.Js.alert(Me, "非法访问!")
+            Response.End()
+        End If
+        Try
+            Advanced = Request("Advanced")
+        Catch ex As Exception
+            Advanced = 0
+        End Try
+
+        Response.Write("<script language=javascript>")
+        Response.Write("var lcdm='" & LCDM & "';")
+        Response.Write("</script>" & vbCrLf)
+
+        If Page.IsPostBack = False Then
+            '这里做一些表单选项的操作
+
+
+
+            bindToolBar(LCDM)
+
+
+
+            Dim OpKind As Integer = Base.GetOpenConfig("打开选项", 0, LCDM)
+            Dim tb As New Data.DataTable
+            '当是打开表单做为返回时,不开启打开选项功能
+            Select Case OpKind
+                Case 1
+                    '默认不操作
+                Case 2
+                    '自动新建表单
+                    'Base.Js.WriteScript(Me, "parent.main1.location='../manager/Forms/FunctionNoLC.aspx?LCDM=" & LCDM & "';")
+                    AutoRunScript.InnerHtml = "<script language=javascript>window.open('../manager/Forms/FunctionNoLC.aspx?LCDM=" & LCDM & "','打开表单','height=500, width=700, top=100, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');</script>"
+                Case 3
+                    '自动打开第一张单
+                    tb = Base.DB.Table("SELECT top 1 XX_XMJC.FID,GY_XMXX.XMDM FROM GY_XMXX,XX_XMJC where XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" & LCDM & " and (GY_XMXX.XMJD is not null) order by TopNum DESC,GY_XMXX.XMDM desc", "XX_XMJC")
+                    If tb.Rows.Count > 0 Then
+                        AutoRunScript.InnerHtml = "<script language=javascript>window.open('../manager/Forms/OpenInfoPath.aspx?FID=" & tb.Rows(0)(0) & "','打开表单','height=500, width=700, top=100, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');</script>"
+                    End If
+                Case Else
+                    '默认不操作
+            End Select
+        End If
+    End Sub
+
+
+    Sub bindToolBar(ByVal LCDM As Integer)
+
+
+
+        str = str & "var tb = new Ext.Toolbar();"
+        str = str & "tb.render('toolbar');"
+        str = str & "    tb.add(""-"","
+
+
+
+        Dim ConfigStr As String
+        ConfigStr = Base.ReadConfig("显示列菜单按钮配置", LCDM)
+        If ConfigStr.Length > 0 Then
+            Dim ConfigTmp() As String = ConfigStr.Split(",")
+
+            If ConfigTmp(0) = "1" Then
+                str = str & "{"
+                str = str & "icon:   '../images/Ext.UI/icons/fam/add.gif', "
+                str = str & "    	iconCls: 'blist',"
+                str = str & "text: '新建表单&nbsp;',"
+                str = str & "handler: onItemClick"
+                str = str & "},""-"","
+            End If
+
+
+            If ConfigTmp(1) = "1" Then
+                str = str & "{"
+                str = str & "icon: '../images/Ext.UI/icons/fam/application_view_list.png', "
+                str = str & "iconCls: 'blist',"
+                str = str & "text: '表单列表&nbsp;',"
+                str = str & "handler: onItemClick"
+                str = str & "},""-"","
+            End If
+
+            If ConfigTmp(2) = "1" Then
+                str = str & "{"
+                str = str & "icon: '../images/Ext.UI/icons/fam/report.png', "
+                str = str & "iconCls: 'blist',"
+                str = str & "text: '报表模式&nbsp;',"
+                str = str & "handler: onItemClick"
+                str = str & "},""-"","
+            End If
+
+            If ConfigTmp(3) = "1" Then
+                str = str & "{"
+                str = str & "icon: '../images/Ext.UI/icons/fam/plugin.gif', "
+                str = str & "iconCls: 'blist',"
+                str = str & "text: '管理标签&nbsp;',"
+                str = str & "handler: onItemClick"
+                str = str & "},""-"","
+            End If
+
+            If ConfigTmp(4) = "1" Then
+                str = str & "{"
+                str = str & "icon: '../images/Ext.UI/icons/fam/cog.png', "
+                str = str & "iconCls: 'blist',"
+                str = str & "text: '个人配置&nbsp;',"
+                str = str & "handler: onItemClick"
+                str = str & "},""-"","
+
+            End If
+
+            If ConfigTmp(5) = "1" Then
+                If Login_User = "admin" Then
+                    str = str & "{"
+                    str = str & "icon: '../images/Ext.UI/icons/fam/cog.png', "
+                    str = str & "iconCls: 'blist',"
+                    str = str & "text: '全局配置&nbsp;',"
+                    str = str & "handler: onItemClick"
+                    str = str & "},""-"","
+                End If
+
+            End If
+            If ConfigTmp(6) = "1" Then
+                str = str & "{"
+                str = str & "icon: '../images/Ext.UI/icons/fam/application_view_list.png', "
+                str = str & "iconCls: 'blist',"
+                str = str & "text: '导入数据&nbsp;',"
+                str = str & "handler: onItemClick"
+                str = str & "},""-"","
+            End If
+            Try
+                str = str.Substring(0, str.LastIndexOf(",""-"","))
+            Catch ex As Exception
+                str = ""
+            End Try
+
+
+        Else
+            str = str & "{"
+            str = str & "icon:   '../images/Ext.UI/icons/fam/add.gif', "
+            str = str & "    	iconCls: 'blist',"
+            str = str & "text: '新建表单&nbsp;',"
+            str = str & "handler: onItemClick"
+            str = str & "},""-"","
+
+            str = str & "{"
+            str = str & "icon: '../images/Ext.UI/icons/fam/application_view_list.png', "
+            str = str & "iconCls: 'blist',"
+            str = str & "text: '表单列表&nbsp;',"
+            str = str & "handler: onItemClick"
+            str = str & "},""-"","
+
+            str = str & "{"
+            str = str & "icon: '../images/Ext.UI/icons/fam/report.png', "
+            str = str & "iconCls: 'blist',"
+            str = str & "text: '报表模式&nbsp;',"
+            str = str & "handler: onItemClick"
+            str = str & "},""-"","
+
+            str = str & "{"
+            str = str & "icon: '../images/Ext.UI/icons/fam/plugin.gif', "
+            str = str & "iconCls: 'blist',"
+            str = str & "text: '管理标签&nbsp;',"
+            str = str & "handler: onItemClick"
+            str = str & "},""-"","
+
+            str = str & "{"
+            str = str & "icon: '../images/Ext.UI/icons/fam/cog.png', "
+            str = str & "iconCls: 'blist',"
+            str = str & "text: '个人配置&nbsp;',"
+            str = str & "handler: onItemClick"
+            str = str & "},""-"","
+
+            If Login_User = "admin" Then
+                str = str & "{"
+                str = str & "icon: '../images/Ext.UI/icons/fam/cog.png', "
+                str = str & "iconCls: 'blist',"
+                str = str & "text: '全局配置&nbsp;',"
+                str = str & "handler: onItemClick"
+                str = str & "},""-"","
+            End If
+
+            str = str & "{"
+            str = str & "icon: '../images/Ext.UI/icons/fam/application_view_list.png', "
+            str = str & "iconCls: 'blist',"
+            str = str & "text: '导入数据&nbsp;',"
+            str = str & "handler: onItemClick"
+            str = str & "}"
+        End If
+
+
+
+
+        If str = "" Then
+
+        Else
+            str = str & ");"
+        End If
+
+
+    End Sub
+
+End Class

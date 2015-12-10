@@ -1,0 +1,49 @@
+﻿
+Partial Class manager_YGDM_Register
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking("../manager/YGDM/Default.aspx")   '检测文件检测
+    End Sub
+
+    Protected Sub Button1_Click1(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        '因为员工姓名可以重名，所以无法判断重复性．
+        '所以只判断登陆名
+        If Xm.Text.Trim.Length = 0 Or LoginName.Text.Trim.Length = 0 Then
+            Xm.Focus()
+            Base.Js.alert(Me, "请确定用户名称与登陆账号是否不为空！")
+            Exit Sub
+        End If
+
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("select YGDM from GY_YGDM where DLMC='" & Base.SqlFilter(LoginName.Text.ToLower) & "' ", "GY_YGDM")
+        If Tb.Rows.Count > 0 Then
+            Base.Js.alert(Me, "你所输入的登陆账号已经存在,请重输")
+            Exit Sub
+        End If
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.ADUserAuthentication").ToLower = "true" Then
+            Try
+                Dim NetCmd As New netcommand.net
+                Dim Result As String = NetCmd.FindUser(LoginName.Text.Trim.ToLower)
+                If Result.IndexOf("命令成功完成") > 0 Then
+                    Base.Js.alert(Me, "你所输入的登陆账号已经存在,请重输")
+                    Exit Sub
+                End If
+            Catch ex As Exception
+                Base.Js.alert(Me, "暂时不能进行添加操作，如果有问题请联系管理员！")
+                Exit Sub
+            End Try
+        End If
+
+        Dim sql As String
+        sql = "insert into GY_YGDM(YGXM,dlmc,QYBZ,DLPWD) values('" & Base.SqlFilter(Xm.Text) & "', '" & Base.SqlFilter(LoginName.Text.ToLower) & "',1,'" & Base.EnCrypt.MD5("888000") & "');Select YGDM from GY_YGDM where YGDM = @@IDENTITY"
+        Dim YGDM As Integer = Base.DB.ExeScalar(sql)
+        Dim Result1 As String = Base.UpdateUserContent(YGDM, 2)
+        If Not Result1 Is Nothing Then
+            Base.Js.alert(Me, Result1)
+        Else
+            Base.Js.CloseGoTo(Me, Xm.Text.Trim & "新建成功,初始密码为:888000", "default.aspx")
+        End If
+
+    End Sub
+End Class

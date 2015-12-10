@@ -1,0 +1,125 @@
+﻿Imports System.Collections.Generic
+
+
+Partial Class manager_FileManager_PublicFolderPermissions
+    Inherits System.Web.UI.Page
+
+    Dim UserInfo As New UserInfo
+    Dim FileManager As New FileManager
+
+    Dim userName As String
+    Dim userID As Integer
+    Dim belongFolderID As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Try
+            belongFolderID = Convert.ToInt32(Request.QueryString("belongFolderID"))
+        Catch ex As Exception
+            belongFolderID = 0
+        End Try
+
+        userName = UserInfo.GetWebUserName()
+        userID = UserInfo.GetUserID(userName)
+
+        Dim userPermission As New MPublicFolderPermissions
+        userPermission = FileManager.GetUserPermission(userID, belongFolderID)
+
+
+        If belongFolderID <> 0 Then
+            If Not userPermission.CanSetPower Then
+                Response.Write("非法访问")
+                Response.End()
+            End If
+        End If
+
+        If belongFolderID = 0 And userName <> "admin" Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+
+        If Not IsPostBack Then
+            Dim urlStr As String = String.Empty
+            urlStr += "<hr width='98%' /><b>&nbsp;&nbsp;&nbsp;当前路径:</b>["
+
+            Dim currentPath As String
+            currentPath = FileManager.GetFolderPath(belongFolderID, userName)
+            Dim basePath As String
+            basePath = FileManager.GetPulicFolderPath(0)
+            Dim tempstr As String
+            tempstr = currentPath.Replace(basePath, "")
+            Dim temp As String()
+            temp = tempstr.Split("\")
+
+            Dim tempPath As String = String.Empty
+            For i As Integer = 0 To temp.Length - 2
+                tempPath += temp(i) + "\"
+                '通过路径获取文件夹ID
+                Dim folderID As Integer = FileManager.GetFolderIDByFolderPath(basePath + tempPath)
+                urlStr += "<a href='PublicFolderPermissions.aspx?belongFolderID=" + folderID.ToString() + "'>" & temp(i) & "(公共)</a>\"
+            Next
+
+            urlStr += "]"
+            Dim thisBelongFolderID As String = FileManager.GetBelongFolderID(belongFolderID)
+            If Not thisBelongFolderID = 0 Then
+                urlStr += "&nbsp;&nbsp;<a href='PublicFolderPermissions.aspx?belongFolderID=" + thisBelongFolderID.ToString() + "'>返回上一级目录</a><br/>"
+            End If
+            lb_path.Text = urlStr
+
+            bind()
+        End If
+
+    End Sub
+
+
+
+    Sub bind()
+        Dim list As New List(Of MShowData)
+        list = FileManager.GetPublicFolderData(belongFolderID)
+
+
+        GridView1.DataSource = list
+        GridView1.DataBind()
+
+        PageBar.InnerHtml = DoJS.WriteGridViewFoot(GridView1, list.Count)
+
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            Dim folderID As Integer = GridView1.DataKeys(i)("ThisID")
+            Dim isPublicFolder As Boolean = Convert.ToBoolean(GridView1.DataKeys(i)("isPublicFolder"))
+
+
+            Dim tempPermissions As New MPublicFolderPermissions
+            tempPermissions = FileManager.GetUserPermission(userID, folderID)
+
+            GridView1.Rows(i).Cells(0).Text = i + 1
+            If tempPermissions.CanSetPower Then
+                GridView1.Rows(i).Cells(3).Text = "<a href='#' onclick='javascript:PublicFolderPermissionsSetting(" + folderID.ToString() + ")'>权限设置</a>"
+                GridView1.Rows(i).Cells(1).Text = "<a href='PublicFolderPermissions.aspx?belongFolderID=" + folderID.ToString() + "'>" + GridView1.Rows(i).Cells(1).Text + "</a>"
+
+            Else
+                GridView1.Rows(i).Cells(3).Text = "--"
+            End If
+
+            '如果为根目录而且用户名为"admin"
+            If belongFolderID = 0 And userName = "admin" Then
+                GridView1.Rows(i).Cells(3).Text = "<a href='#' onclick='javascript:PublicFolderPermissionsSetting(" + folderID.ToString() + ")'>权限设置</a>"
+            End If
+
+            If isPublicFolder Then
+                GridView1.Rows(i).Cells(1).Text += "(公共)"
+            End If
+
+        Next
+
+    End Sub
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        bind()
+    End Sub
+End Class

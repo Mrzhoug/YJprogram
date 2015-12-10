@@ -1,0 +1,76 @@
+﻿
+Partial Class HomePage_DepartmentsSearch
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Logined As Boolean = False
+    Dim RowCount As Integer
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+
+        Dim i As Integer
+        Dim tb As New Data.DataTable
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Cells(0).Text = "<center><a href='NewTable.aspx?KSDM=" & GridView1.DataKeys(i).Item(0) & "'>" & GridView1.Rows(i).Cells(0).Text & "</a></center>"
+            If Logined = True Then
+                tb = Base.DB.Table("SELECT DepartmentsUser.state FROM  DepartmentsUser,EnterprisesTable where EnterprisesTable.Cid=DepartmentsUser.CompanyID and EnterprisesTable.Username='" & Base.SqlFilter(Session("LoginName")) & "' and DepartmentsUser.Ksdm=" & GridView1.DataKeys(i).Item(0), "gdsaga")
+                If tb.Rows.Count > 0 Then
+                    If tb.Rows(0)(0) = 1 Then
+                        GridView1.Rows(i).Cells(2).Text = "<center>已开通</center>"
+                    Else
+                        GridView1.Rows(i).Cells(2).Text = "<center>已申请</center>"
+                    End If
+                End If
+            End If
+        Next
+
+        PageBar.InnerHtml = Base.pub.WritePage(GridView1, RowCount)
+    End Sub
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+    End Sub
+
+    Protected Sub GridView1_RowCommand(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewCommandEventArgs) Handles GridView1.RowCommand
+        If e.CommandName = "RegUser" Then
+            Dim KSDM As Integer = GridView1.DataKeys(e.CommandArgument).Item(0)
+            Dim tb As New Data.DataTable
+            Dim CompanyId As Integer
+            tb = Base.DB.Table("SELECT cid FROM EnterprisesTable where Username='" & Base.SqlFilter(Session("LoginName")) & "'", "dd")
+            If tb.Rows.Count > 0 Then
+                CompanyId = tb.Rows(0)(0)
+            Else
+                Base.Js.alert(Me, "非法访问！")
+                Exit Sub
+            End If
+            Base.DB.Query("insert into  DepartmentsUser(KSDM,ComPanyID,State,JoinDate) values (" & KSDM & "," & CompanyId & ",0,getdate())")
+            If Base.DB.ErrorMessage Is Nothing Then
+                Base.Js.alert(Me, "已经成功提交申请！")
+            Else
+                Base.Js.alert(Me, "提交申请失败，你稍候再试，或联系管理员！")
+            End If
+        End If
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        Dim KSDM As Integer = GridView1.DataKeys(e.NewSelectedIndex).Item(0)
+        Response.Redirect("NewTable.aspx?KSDM=" & KSDM)
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim SqlQuerry As String = TextBox1.Text.Trim
+        If SqlQuerry.Length > 0 Then
+            Conn.SelectCommand = "SELECT [KSDM], [KSMC] FROM [GY_KSDM] where KSMC like '%" & Base.SqlFilter(SqlQuerry) & "%'"
+        Else
+            Conn.SelectCommand = "SELECT [KSDM], [KSMC] FROM [GY_KSDM]"
+        End If
+        Logined = Base.HomePageUserCheck()
+        If Logined = False Then GridView1.Columns(2).Visible = False
+
+        RowCount = Base.DB.GetRowCount(Conn.SelectCommand.ToString, "dd")
+    End Sub
+End Class

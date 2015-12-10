@@ -1,0 +1,1949 @@
+﻿Imports Microsoft.VisualBasic
+Imports System.IO
+Imports System.Collections.Generic
+Imports System.Data.SqlClient
+
+Public Class FileManager
+
+    Public Shared ReadOnly FolderPath As String = System.AppDomain.CurrentDomain.BaseDirectory
+
+
+#Region "GridView信息显示函数"
+
+    ''' <summary>
+    ''' 获取显示信息（包括文件夹与文件信息）
+    ''' </summary>
+    ''' <param name="belongFolderID">隶属文件夹ID（0为根目录）</param>
+    ''' <param name="userID">用户ID</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetShowData(ByVal belongFolderID As Integer, ByVal userID As Integer) As List(Of MShowData)
+
+        Dim i As Integer
+
+        Dim sqlstr As String = String.Empty
+        Dim dt As New DataTable
+
+        Dim showDatas As New List(Of MShowData)
+
+        '获取公共文件夹列表
+        sqlstr = "select * from FileManager_FolderInfos where BelongFolderID = " + belongFolderID.ToString() + " and isPublicFolder = 'true'"
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        For i = 0 To dt.Rows.Count - 1
+            Dim showData As New MShowData
+            showData.ID = Guid.NewGuid()
+            showData.ThisID = Convert.ToInt32(dt.Rows(i).Item("id"))
+            showData.Name = dt.Rows(i).Item("FolderName").ToString()
+            showData.Type = "folder"
+            showData.CreateTime = Convert.ToDateTime(dt.Rows(i).Item("CreateTime"))
+
+            If IsDBNull(dt.Rows(i).Item("IsSharedFolder")) Then
+                showData.IsSharedFolder = False
+            Else
+                showData.IsSharedFolder = Convert.ToBoolean(dt.Rows(i).Item("IsSharedFolder"))
+            End If
+
+            If IsDBNull(dt.Rows(i).Item("IsPublicFolder")) Then
+                showData.IsPublicFolder = False
+            Else
+                showData.IsPublicFolder = Convert.ToBoolean(dt.Rows(i).Item("IsPublicFolder"))
+            End If
+
+            showDatas.Add(showData)
+        Next
+
+        '获取用户私有文件夹
+        sqlstr = "select * from FileManager_FolderInfos where BelongFolderID = " + belongFolderID.ToString() + " and  (isPublicFolder = 'false' or isPublicFolder is null) and CreateUserID='" & userID & "'"
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        '添加文件夹信息
+        For i = 0 To dt.Rows.Count - 1
+            Dim showData As New MShowData
+            showData.ID = Guid.NewGuid()
+            showData.ThisID = Convert.ToInt32(dt.Rows(i).Item("id"))
+            showData.Name = dt.Rows(i).Item("FolderName").ToString()
+            showData.Type = "folder"
+            showData.CreateTime = Convert.ToDateTime(dt.Rows(i).Item("CreateTime"))
+
+            If IsDBNull(dt.Rows(i).Item("IsSharedFolder")) Then
+                showData.IsSharedFolder = False
+            Else
+                showData.IsSharedFolder = Convert.ToBoolean(dt.Rows(i).Item("IsSharedFolder"))
+            End If
+
+            If IsDBNull(dt.Rows(i).Item("IsPublicFolder")) Then
+                showData.IsPublicFolder = False
+            Else
+                showData.IsPublicFolder = Convert.ToBoolean(dt.Rows(i).Item("IsPublicFolder"))
+            End If
+
+            showDatas.Add(showData)
+        Next
+
+
+        If IsPublicFolder(belongFolderID) Then
+            '公共文件夹下的文件所有用户都可见
+            sqlstr = "select * from FileManager_FileInfos where BelongFolderID = " + belongFolderID.ToString() + ""
+        Else
+            '私有文件夹只能看见自己的文件
+            sqlstr = "select * from FileManager_FileInfos where BelongFolderID = " + belongFolderID.ToString() + " and CreateUserID = " + userID.ToString()
+        End If
+
+
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        For i = 0 To dt.Rows.Count - 1
+            Dim showData As New MShowData
+            showData.ID = Guid.NewGuid()
+            showData.ThisID = Convert.ToInt32(dt.Rows(i).Item("id"))
+            showData.Name = dt.Rows(i).Item("FileName").ToString()
+            showData.FileSize = dt.Rows(i).Item("FileSize").ToString()
+            showData.FileType = dt.Rows(i).Item("FileType").ToString()
+            showData.FilePath = dt.Rows(i).Item("FilePath").ToString()
+            showData.Type = "file"
+            showData.CreateTime = Convert.ToDateTime(dt.Rows(i).Item("CreateTime"))
+
+            showDatas.Add(showData)
+        Next
+
+        Return showDatas
+
+    End Function
+
+    ''' <summary>
+    ''' 获取公共文件夹信息
+    ''' </summary>
+    ''' <param name="belongFolderID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetPublicFolderData(ByVal belongFolderID As Integer) As List(Of MShowData)
+        Dim sqlstr As String
+        Dim dt As New DataTable
+        Dim showDatas As New List(Of MShowData)
+
+        sqlstr = "select * from FileManager_FolderInfos where BelongFolderID = " + belongFolderID.ToString() + "  and isPublicFolder = 'true'"
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        For i As Integer = 0 To dt.Rows.Count - 1
+            Dim showData As New MShowData
+            showData.ID = Guid.NewGuid()
+            showData.ThisID = Convert.ToInt32(dt.Rows(i).Item("id"))
+            showData.Name = dt.Rows(i).Item("FolderName").ToString()
+            showData.Type = "folder"
+            showData.CreateTime = Convert.ToDateTime(dt.Rows(i).Item("CreateTime"))
+
+            If IsDBNull(dt.Rows(i).Item("IsSharedFolder")) Then
+                showData.IsSharedFolder = False
+            Else
+                showData.IsSharedFolder = Convert.ToBoolean(dt.Rows(i).Item("IsSharedFolder"))
+            End If
+
+            If IsDBNull(dt.Rows(i).Item("IsPublicFolder")) Then
+                showData.IsPublicFolder = False
+            Else
+                showData.IsPublicFolder = Convert.ToBoolean(dt.Rows(i).Item("IsPublicFolder"))
+            End If
+
+            showDatas.Add(showData)
+        Next
+
+        Return showDatas
+    End Function
+
+
+    Public Function GetSharedData(ByVal userID As Integer, ByVal folderID As Integer) As List(Of MShowData)
+
+        Dim sqlstr As String
+        Dim dt As New DataTable
+        Dim showDatas As New List(Of MShowData)
+
+        If folderID = 0 Then
+            sqlstr = "select FileManager_FolderInfos.* from FileManager_FolderInfos,FileManager_ShareFolder where (GetUserID = '*' or GetUserID like '%" + userID.ToString() + ",%') and FileManager_FolderInfos.id = FileManager_ShareFolder.folderID"
+        Else
+            sqlstr = "select * from FileManager_FolderInfos where BelongFolderID = " + folderID.ToString() + " and  (isPublicFolder = 'false' or isPublicFolder is null)"
+        End If
+
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        For i As Integer = 0 To dt.Rows.Count - 1
+            Dim showData As New MShowData
+            showData.ID = Guid.NewGuid()
+            showData.ThisID = Convert.ToInt32(dt.Rows(i).Item("id"))
+            showData.Name = dt.Rows(i).Item("FolderName").ToString()
+            showData.Type = "folder"
+            showData.CreateTime = Convert.ToDateTime(dt.Rows(i).Item("CreateTime"))
+
+            If IsDBNull(dt.Rows(i).Item("IsSharedFolder")) Then
+                showData.IsSharedFolder = False
+            Else
+                showData.IsSharedFolder = Convert.ToBoolean(dt.Rows(i).Item("IsSharedFolder"))
+            End If
+
+            If IsDBNull(dt.Rows(i).Item("IsPublicFolder")) Then
+                showData.IsPublicFolder = False
+            Else
+                showData.IsPublicFolder = Convert.ToBoolean(dt.Rows(i).Item("IsPublicFolder"))
+            End If
+
+            showDatas.Add(showData)
+        Next
+
+
+        If folderID <> 0 Then
+
+            sqlstr = "select * from FileManager_FileInfos where BelongFolderID = " + folderID.ToString() + ""
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+            For i As Integer = 0 To dt.Rows.Count - 1
+                Dim showData As New MShowData
+                showData.ID = Guid.NewGuid()
+                showData.ThisID = Convert.ToInt32(dt.Rows(i).Item("id"))
+                showData.Name = dt.Rows(i).Item("FileName").ToString()
+                showData.FileSize = dt.Rows(i).Item("FileSize").ToString()
+                showData.FileType = dt.Rows(i).Item("FileType").ToString()
+                showData.FilePath = dt.Rows(i).Item("FilePath").ToString()
+                showData.Type = "file"
+                showData.CreateTime = Convert.ToDateTime(dt.Rows(i).Item("CreateTime"))
+
+                showDatas.Add(showData)
+            Next
+
+        End If
+        Return showDatas
+    End Function
+
+
+
+
+
+#End Region
+
+#Region "文件夹操作函数"
+
+
+    ''' <summary>
+    ''' 获取文件夹名称
+    ''' </summary>
+    ''' <param name="folderID">文件夹ID</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetFolderName(ByVal folderID As Integer) As String
+
+        Dim sqlstr As String
+        sqlstr = "select FolderName from FileManager_FolderInfos where id = " + folderID.ToString()
+
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+        If dt.Rows.Count > 0 Then
+            Return dt.Rows(0).Item(0)
+        Else
+            Return ""
+        End If
+
+    End Function
+
+
+    ''' <summary>
+    ''' 通过文件夹路径获取文件夹ID
+    ''' </summary>
+    ''' <param name="folderPath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function GetFolderIDByFolderPath(ByVal folderPath As String) As Integer
+        Dim sqlstr As String
+        sqlstr = "select id from FileManager_FolderInfos where folderPath = '" + folderPath.ToString() + "'"
+
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+        If dt.Rows.Count > 0 Then
+            Return dt.Rows(0).Item(0)
+        Else
+            Return 0
+        End If
+    End Function
+
+
+    ''' <summary>
+    ''' 获取上级文件夹ID
+    ''' </summary>
+    ''' <param name="folderID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetBelongFolderID(ByVal folderID As Integer) As Integer
+        Dim sqlstr As String
+        sqlstr = "select BelongFolderID from FileManager_FolderInfos where id = " + folderID.ToString()
+
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+        If dt.Rows.Count > 0 Then
+            Return dt.Rows(0).Item(0)
+        Else
+            Return 0
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 通过上级文件夹ID，获取所有文件夹
+    ''' </summary>
+    ''' <param name="belongFolderID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetFolderInfosByBelongFolderID(ByVal belongFolderID As Integer, ByVal userID As Integer) As List(Of MFolderInfo)
+        Dim sqlstr As String
+        Dim dt As New DataTable
+
+        Dim FolderInfos As New List(Of MFolderInfo)
+
+        '获取公共文件夹
+        sqlstr = "select * from FileManager_FolderInfos where BelongFolderID = " + belongFolderID.ToString() + " and ispublicfolder='true' "
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        If dt.Rows.Count > 0 Then
+            For i As Integer = 0 To dt.Rows.Count - 1
+                Dim temp As New MFolderInfo
+                temp.ID = Convert.ToInt32(dt.Rows(i).Item("id"))
+                temp.FolderName = dt.Rows(i).Item("FolderName").ToString()
+                temp.FolderPath = dt.Rows(i).Item("FolderPath").ToString()
+                temp.CreateTime = dt.Rows(i).Item("CreateTime")
+                temp.CreateUserID = Convert.ToInt32(dt.Rows(i).Item("CreateUserID"))
+                temp.BelongFolderID = Convert.ToInt32(dt.Rows(i).Item("BelongFolderID"))
+                temp.IsSharedFolder = Convert.ToBoolean(dt.Rows(i).Item("IsSharedFolder"))
+                If IsDBNull(dt.Rows(i).Item("IsPublicFolder")) Then
+                    temp.IsPublicFolder = False
+                Else
+                    temp.IsPublicFolder = Convert.ToBoolean(dt.Rows(i).Item("IsPublicFolder"))
+                End If
+                FolderInfos.Add(temp)
+            Next
+        End If
+
+        '获取私人文件夹
+        sqlstr = "select * from FileManager_FolderInfos where BelongFolderID = " + belongFolderID.ToString() + "  and (ispublicfolder='false' or ispublicfolder is null) and CreateUserID=" + userID.ToString()
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        If dt.Rows.Count > 0 Then
+            For i As Integer = 0 To dt.Rows.Count - 1
+                Dim temp As New MFolderInfo
+                temp.ID = Convert.ToInt32(dt.Rows(i).Item("id"))
+                temp.FolderName = dt.Rows(i).Item("FolderName").ToString()
+                temp.FolderPath = dt.Rows(i).Item("FolderPath").ToString()
+                temp.CreateTime = dt.Rows(i).Item("CreateTime")
+                temp.CreateUserID = Convert.ToInt32(dt.Rows(i).Item("CreateUserID"))
+                temp.BelongFolderID = Convert.ToInt32(dt.Rows(i).Item("BelongFolderID"))
+                temp.IsSharedFolder = Convert.ToBoolean(dt.Rows(i).Item("IsSharedFolder"))
+                If IsDBNull(dt.Rows(i).Item("IsPublicFolder")) Then
+                    temp.IsPublicFolder = False
+                Else
+                    temp.IsPublicFolder = Convert.ToBoolean(dt.Rows(i).Item("IsPublicFolder"))
+                End If
+                FolderInfos.Add(temp)
+            Next
+        End If
+
+        Return FolderInfos
+    End Function
+
+
+    ''' <summary>
+    ''' 获取文件夹路径
+    ''' </summary>
+    ''' <param name="belongFolderID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetFolderPath(ByVal belongFolderID As Integer, ByVal username As String) As String
+
+        If belongFolderID = 0 Then
+            Return FolderPath + "PersonalFolders\" + username + "\"
+        Else
+            Dim sqlstr As String
+            sqlstr = "select FolderPath from FileManager_FolderInfos where id = " + belongFolderID.ToString()
+
+            Dim dt As New DataTable
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+            If dt.Rows.Count > 0 Then
+                Return dt.Rows(0).Item(0)
+            Else
+                Return FolderPath
+            End If
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 获取文件夹路径
+    ''' </summary>
+    ''' <param name="folderID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetFolderPathByFolderID(ByVal folderID As Integer) As String
+        Dim sqlstr As String
+        sqlstr = "select FolderPath from FileManager_FolderInfos where id = " + folderID.ToString()
+
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+        If dt.Rows.Count > 0 Then
+            Return dt.Rows(0).Item(0)
+        Else
+            Return FolderPath
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 检测文件夹是否已存在
+    ''' </summary>
+    ''' <param name="userName"></param>
+    ''' <param name="belongFolderID"></param>
+    ''' <param name="newFolderName"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function IsExistFolder(ByVal userName As String, ByVal belongFolderID As Integer, ByVal newFolderName As String) As Boolean
+        Dim path As String = String.Empty
+        path = GetFolderPath(belongFolderID, userName) + newFolderName + "\"
+        Return IO.Directory.Exists(path)
+    End Function
+
+    ''' <summary>
+    ''' 检测文件夹是否已存在(重命名)
+    ''' </summary>
+    ''' <param name="userName"></param>
+    ''' <param name="newFolderName"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function IsExistFolder_FolderID(ByVal userName As String, ByVal folderID As Integer, ByVal newFolderName As String) As Boolean
+        Dim path As String = String.Empty
+        path = GetFolderPath(GetBelongFolderID(folderID), userName) + newFolderName + "\"
+        Return IO.Directory.Exists(path)
+    End Function
+
+
+    ''' <summary>
+    ''' 创建文件夹
+    ''' </summary>
+    ''' <param name="belongFolderID">隶属文件夹ID</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function CreateFolder(ByVal userName As String, ByVal belongFolderID As Integer, ByVal newFolderName As String, ByVal isPublic As Boolean) As Boolean
+        '创建文件夹的规制
+        Dim path As String = String.Empty
+
+        If isPublic Then
+            path = GetPulicFolderPath(belongFolderID) + newFolderName + "\"
+        Else
+            path = GetFolderPath(belongFolderID, userName) + newFolderName + "\"
+        End If
+
+
+
+        If IO.Directory.Exists(path) Then
+            Return False
+        End If
+
+        Try
+            IO.Directory.CreateDirectory(path)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "CreateFolder", "创建文件夹失败", ex.ToString())
+            Return False
+        End Try
+
+        Dim UserInfo As New UserInfo
+
+        Dim sqlstr As String
+        sqlstr = "insert into filemanager_folderinfos "
+        sqlstr += "(FolderName,"
+        sqlstr += "FolderPath,"
+        sqlstr += "CreateTime,"
+        sqlstr += "CreateUserID,"
+        sqlstr += "BelongFolderID,"
+        sqlstr += "IsSharedFolder,"
+        sqlstr += "IsPublicFolder) "
+        sqlstr += " values "
+        sqlstr += "('" & newFolderName & "',"
+        sqlstr += "'" & path & "',"
+        sqlstr += "'" & DateTime.Now.ToString() & "',"
+        sqlstr += "'" & UserInfo.GetUserID(userName) & "',"
+        sqlstr += "'" & belongFolderID & "',"
+        sqlstr += "'False',"
+        sqlstr += "'" & isPublic.ToString() & "') ;"
+        sqlstr += "select @@identity as id;"
+
+
+        Dim dt As New DataTable
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "CreateFolder", "插入数据库失败", ex.ToString())
+            Return False
+        End Try
+
+
+        If isPublic And belongFolderID <> 0 And Not IsDBNull(dt.Rows(0).Item(0)) Then
+            AddNewFolderPermissions(belongFolderID, dt.Rows(0).Item(0))
+        End If
+
+        If IsDBNull(dt.Rows(0).Item(0)) Then
+            Return False
+        Else
+            Return True
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 创建文件夹
+    ''' </summary>
+    ''' <param name="belongFolderID">隶属文件夹ID</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function CreateFolder(ByVal userName As String, ByVal belongFolderID As Integer, ByVal newFolderName As String) As Boolean
+        '创建文件夹的规制
+        Dim path As String = String.Empty
+        path = GetFolderPath(belongFolderID, userName) + newFolderName + "\"
+
+        If IO.Directory.Exists(path) Then
+            Return False
+        End If
+
+        Try
+            IO.Directory.CreateDirectory(path)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "CreateFolder", "创建文件夹失败", ex.ToString())
+            Return False
+        End Try
+
+        Dim UserInfo As New UserInfo
+
+        Dim sqlstr As String
+        sqlstr = "insert into filemanager_folderinfos "
+        sqlstr += "(FolderName,"
+        sqlstr += "FolderPath,"
+        sqlstr += "CreateTime,"
+        sqlstr += "CreateUserID,"
+        sqlstr += "BelongFolderID,"
+        sqlstr += "IsSharedFolder) "
+        sqlstr += " values "
+        sqlstr += "('" & newFolderName & "',"
+        sqlstr += "'" & path & "',"
+        sqlstr += "'" & DateTime.Now.ToString() & "',"
+        sqlstr += "'" & UserInfo.GetUserID(userName) & "',"
+        sqlstr += "'" & belongFolderID & "',"
+        sqlstr += "'False') "
+
+        Dim result As Integer
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "CreateFolder", "插入数据库失败", ex.ToString())
+            Return False
+        End Try
+
+        If result <> 1 Then
+            Return False
+        Else
+            Return True
+        End If
+    End Function
+
+
+    ''' <summary>
+    ''' 重命名文件夹
+    ''' </summary>
+    ''' <param name="folderID"></param>
+    ''' <param name="newName"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function RenameFolder(ByVal folderID As Integer, ByVal newName As String) As Boolean
+        Dim oldPath As String = GetFolderPathByFolderID(folderID)
+        Dim oldName As String = GetFolderName(folderID)
+        Dim newPath As String = oldPath.Replace(oldName, newName)
+
+        If IO.Directory.Exists(newPath) Then
+            Return False
+        Else
+
+            Try
+                IO.Directory.Move(oldPath, newPath)
+            Catch ex As Exception
+                DoLog.LogErrorToFile("FileManager", "RenameFolder", "文件夹移动失败", ex.ToString())
+                Return False
+            End Try
+
+            Dim sqlstr As String
+            sqlstr = "update FileManager_FolderInfos set FolderName = '" + newName + "' , CreateTime = '" + DateTime.Now.ToString() + "' where id = " + folderID.ToString() + ";"
+            sqlstr += "update FileManager_FolderInfos set FolderPath = replace(FolderPath,'" + oldPath + "','" + newPath + "') where FolderPath like '%" & oldPath + "%';"
+            sqlstr += "update FileManager_FileInfos set FilePath = replace(FilePath,'" + oldPath + "','" + newPath + "') where FilePath like '%" & oldPath + "%';"
+
+            Dim result As Integer
+            Try
+                result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+            Catch ex As Exception
+                IO.Directory.Move(newPath, oldPath)
+                DoLog.LogErrorToFile("FileManager", "RenameFolder", "修改数据库失败", ex.ToString())
+                Return False
+            End Try
+
+            If result > 0 Then
+                Return True
+            Else
+                IO.Directory.Move(newPath, oldPath)
+                Return False
+            End If
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 删除文件夹
+    ''' </summary>
+    ''' <param name="folderID">文件夹ID</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function DeleteFolder(ByVal folderID As Integer) As Boolean
+
+        Dim path As String
+        path = GetFolderPathByFolderID(folderID)
+
+        If IO.Directory.Exists(path) Then
+            Try
+                IO.Directory.Delete(path, True)
+            Catch ex As Exception
+                DoLog.LogErrorToFile("FileManager", "DeleteFolder", "删除文件夹失败", ex.ToString())
+                Return False
+            End Try
+        End If
+
+
+
+        Dim sqlstr As String
+        sqlstr = "delete from FileManager_FolderInfos where folderPath like '%" + path + "%';"
+        sqlstr += "delete from FileManager_FileInfos where filePath like '%" + path + "%'"
+
+        Dim result As Integer
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "RenameFolder", "删除数据库文件夹信息失败", ex.ToString())
+            Return False
+        End Try
+
+        If result > 0 Then
+
+            DeleteAllSharedInfo(folderID)
+            Return True
+        Else
+            Return False
+        End If
+
+    End Function
+
+    Public Function CopyFolder(ByVal username As String, ByVal currentFolderID As Integer, ByVal targetFolderID As Integer) As Boolean
+
+        Dim currentFolderName As String = GetFolderName(currentFolderID)
+        Dim currentFolderPath As String = GetFolderPath(currentFolderID, username)
+
+
+        Dim targetFolderName As String = GetFolderName(targetFolderID)
+        Dim targetFolderPath As String = GetFolderPath(targetFolderID, username)
+
+
+        If IsPublicFolder(targetFolderID) Then
+            targetFolderPath = GetPulicFolderPath(targetFolderID)
+        End If
+
+
+
+        If IO.Directory.Exists(currentFolderPath) And IO.Directory.Exists(targetFolderPath) Then
+
+            Dim UserInfo As New UserInfo
+            Dim userID As Integer
+            userID = UserInfo.GetUserID(username)
+            Try
+                If CopyDirectory(currentFolderPath, targetFolderPath + currentFolderName + "\", targetFolderID, userID, True, IsPublicFolder(targetFolderID)) Then
+                    Return True
+                Else
+                    Return False
+                End If
+            Catch ex As Exception
+                DoLog.LogErrorToFile("FileManager", "CopyFolder", "复制文件夹失败", ex.ToString())
+                Return False
+            End Try
+        Else
+            Return False
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 复制文件夹
+    ''' </summary>
+    ''' <param name="currentFolderPath">源文件夹路径</param>
+    ''' <param name="targetFolderPath">目标文件夹路径</param>
+    ''' <param name="belongFolderID">隶属文件夹ID</param>
+    ''' <param name="userID">用户ID</param>
+    ''' <param name="isRoot">是否复制原来的文件夹，或者是单单复制源文件夹下内容</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function CopyDirectory(ByVal currentFolderPath As String, ByVal targetFolderPath As String, ByVal belongFolderID As Integer, ByVal userID As Integer, ByVal isRoot As Boolean, ByVal isPublic As Boolean) As Boolean
+
+        Try
+            If Directory.Exists(targetFolderPath) = False Then
+                Directory.CreateDirectory(targetFolderPath)
+            End If
+            If isRoot Then
+                Dim sqlstr As String
+                sqlstr = "insert into filemanager_folderinfos "
+                sqlstr += "(FolderName,"
+                sqlstr += "FolderPath,"
+                sqlstr += "CreateTime,"
+                sqlstr += "CreateUserID,"
+                sqlstr += "BelongFolderID,"
+                sqlstr += "IsSharedFolder,"
+                sqlstr += "IsPublicFolder) "
+                sqlstr += " values "
+                sqlstr += "('" + Path.GetFileName(targetFolderPath.Substring(0, targetFolderPath.LastIndexOf("\"))) + "',"
+                sqlstr += "'" + targetFolderPath + "',"
+                sqlstr += "'" & DateTime.Now.ToString() & "',"
+                sqlstr += "'" & userID & "',"
+                sqlstr += "'" & belongFolderID & "',"
+                sqlstr += "'False',"
+                sqlstr += "'" & isPublic.ToString & "');"
+                sqlstr += "select @@identity "
+
+                Dim dt As New DataTable
+                dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+                If dt.Rows.Count > 0 Then
+
+                    '如果为公共文件夹，则拷贝该文件夹的权限
+                    If isPublic Then
+                        AddNewFolderPermissions(belongFolderID, dt.Rows(0).Item(0))
+                    End If
+
+                    belongFolderID = dt.Rows(0).Item(0)
+                End If
+            End If
+
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "CopyDirectory", "新建目标文件夹失败", ex.ToString())
+            Return False
+        End Try
+
+        Dim filelist As String() = Directory.GetFileSystemEntries(currentFolderPath)
+        For i As Integer = 0 To filelist.Length - 1
+
+            '如果要拷贝的文件为文件夹，那么创建该文件夹
+            If Directory.Exists(filelist(i)) Then
+
+                Dim sqlstr As String
+                sqlstr = "insert into filemanager_folderinfos "
+                sqlstr += "(FolderName,"
+                sqlstr += "FolderPath,"
+                sqlstr += "CreateTime,"
+                sqlstr += "CreateUserID,"
+                sqlstr += "BelongFolderID,"
+                sqlstr += "IsSharedFolder,"
+                sqlstr += "IsPublicFolder) "
+                sqlstr += " values "
+                sqlstr += "('" + Path.GetFileName(filelist(i)) + "',"
+                sqlstr += "'" + targetFolderPath + Path.GetFileName(filelist(i)) + "\',"
+                sqlstr += "'" & DateTime.Now.ToString() & "',"
+                sqlstr += "'" & userID & "',"
+                sqlstr += "'" & belongFolderID & "',"
+                sqlstr += "'False',"
+                sqlstr += "'" & isPublic.ToString & "');"
+                sqlstr += "select @@identity "
+
+                Try
+                    Dim dt As New DataTable
+                    dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+                    Dim newBelongFolderID As Integer
+                    If dt.Rows.Count > 0 Then
+                        newBelongFolderID = dt.Rows(0).Item(0)
+                    End If
+
+
+                    '如果为公共文件夹，则拷贝该文件夹的权限
+                    If isPublic Then
+                        AddNewFolderPermissions(belongFolderID, newBelongFolderID)
+                    End If
+
+                    CopyDirectory(filelist(i) + "\", targetFolderPath + Path.GetFileName(filelist(i)) + "\", newBelongFolderID, userID, False, isPublic)
+                Catch ex As Exception
+                    DoLog.LogErrorToFile("FileManager", "CopyDirectory", "复制文件夹失败", ex.ToString())
+                    Return False
+                End Try
+            Else
+                Dim fileInfo As New FileInfo(filelist(i))
+                '文件名
+                Dim fileName As String
+                fileName = fileInfo.Name
+
+
+                Dim fileExtension As String
+                '获取文件后缀名
+                fileExtension = fileInfo.Extension
+
+
+                Dim filePath As String
+                filePath = targetFolderPath + fileName
+
+
+                Dim sqlstr As String
+                sqlstr = " insert into FileManager_FileInfos "
+
+                sqlstr += " (FileName"
+                sqlstr += ",FileType"
+                sqlstr += ",FileSize"
+                sqlstr += ",FilePath"
+                sqlstr += ",CreateTime"
+                sqlstr += ",CreateUserID"
+                sqlstr += ",BelongFolderID)"
+                sqlstr += " values "
+                sqlstr += "('" + fileName + "'"
+                sqlstr += ",'" + fileExtension + "'"
+                sqlstr += ",'" + fileInfo.Length.ToString() + "'"
+                sqlstr += ",'" + filePath + "'"
+                sqlstr += ",'" + DateTime.Now + "'"
+                sqlstr += ",'" + userID.ToString() + "'"
+                sqlstr += ",'" + belongFolderID.ToString() + "')"
+
+                Try
+                    Dim result As Integer
+                    Try
+                        result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+                    Catch ex As Exception
+                        DoLog.LogErrorToFile("FileManager", "CopyDirectory", "拷贝文件插入数据库失败", ex.ToString())
+                    End Try
+
+                    File.Copy(filelist(i), filePath)
+                Catch ex As Exception
+                    DoLog.LogErrorToFile("FileManager", "CopyDirectory", "复制文件失败", ex.ToString())
+                    Return False
+                End Try
+
+            End If
+        Next
+        Return True
+    End Function
+
+
+    ''' <summary>
+    ''' 移动文件夹
+    ''' </summary>
+    ''' <param name="currentFolderID">文件夹ID</param>
+    ''' <param name="targetFolderID">移动目标文件夹ID</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function MoveFolder(ByVal currentFolderID As Integer, ByVal targetFolderID As Integer, ByVal userName As String, ByVal userID As Integer) As Boolean
+
+
+        Dim currentFolderName As String = GetFolderName(currentFolderID)
+        Dim currentFolderPath As String = GetFolderPath(currentFolderID, userName)
+        Dim isPublic_currentFolderID As Boolean = IsPublicFolder(currentFolderID)
+        If isPublic_currentFolderID Then
+            currentFolderPath = GetPulicFolderPath(currentFolderID)
+        End If
+
+        Dim targetFolderName As String = GetFolderName(targetFolderID)
+        Dim targetFolderPath As String = GetFolderPath(targetFolderID, userName)
+        Dim isPublic_targetFolder As Boolean = IsPublicFolder(targetFolderID)
+        If isPublic_targetFolder Then
+            targetFolderPath = GetPulicFolderPath(targetFolderID)
+        End If
+
+
+
+
+
+
+        If IO.Directory.Exists(currentFolderPath) And IO.Directory.Exists(targetFolderPath) Then
+
+
+            Try
+                IO.Directory.Move(currentFolderPath, targetFolderPath + currentFolderName + "\")
+            Catch ex As Exception
+                DoLog.LogErrorToFile("FileManager", "MoveFolder", "移动文件夹失败", ex.ToString())
+                Return False
+            End Try
+
+
+
+            Dim sqlstr As String
+            sqlstr = String.Empty
+
+            '如果目标为公共文件夹
+            If isPublic_targetFolder Then
+                '更新所有该文件夹下的文件夹、文件存在数据库中的内容，由于PATH是唯一的所以可以直接通过LIKE进行查找
+                sqlstr += "update FileManager_FolderInfos set FolderPath = replace(FolderPath,'" & currentFolderPath & "','" & targetFolderPath + currentFolderName + "\" + "'),ispublicfolder='true' where FolderPath like '%" & currentFolderPath + "%';"
+                sqlstr += "update FileManager_FolderInfos set BelongFolderID = " + targetFolderID.ToString() + " where id=" + currentFolderID.ToString() + ";"
+                sqlstr += "update FileManager_FileInfos set FilePath = replace(FilePath,'" & currentFolderPath & "','" & targetFolderPath + currentFolderName + "\" & "') where FilePath like '%" & currentFolderPath & "%'"
+            Else
+                '更新所有该文件夹下的文件夹、文件存在数据库中的内容，由于PATH是唯一的所以可以直接通过LIKE进行查找
+
+                sqlstr += "update FileManager_FolderInfos set FolderPath = replace(FolderPath,'" & currentFolderPath & "','" & targetFolderPath + currentFolderName + "\" + "'),ispublicfolder='false',createuserid='" + userID.ToString() + "' where FolderPath like '%" & currentFolderPath + "%';"
+                sqlstr += "update FileManager_FolderInfos set BelongFolderID = " + targetFolderID.ToString() + " where id=" + currentFolderID.ToString() + ";"
+                sqlstr += "update FileManager_FileInfos set FilePath = replace(FilePath,'" & currentFolderPath & "','" & targetFolderPath + currentFolderName + "\" & "'),createuserid='" + userID.ToString() + "' where FilePath like '%" & currentFolderPath & "%'"
+
+            End If
+
+
+
+            Dim result As Integer
+            Try
+                result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+            Catch ex As Exception
+                IO.Directory.Move(targetFolderPath + currentFolderName + "\", currentFolderPath)
+                DoLog.LogErrorToFile("FileManager", "MoveFolder", "更新文件夹信息失败", ex.ToString())
+                Return False
+            End Try
+
+            If result > 0 Then
+
+                '复制公共文件夹权限
+                If IsPublicFolder(targetFolderID) Then
+                    AddNewFolderPermissions(targetFolderID, currentFolderID)
+                End If
+
+                Return True
+            Else
+                IO.Directory.Move(targetFolderPath + currentFolderName + "\", currentFolderPath)
+                Return False
+            End If
+        Else
+            Return False
+        End If
+
+    End Function
+
+#End Region
+
+#Region "公共文件夹操作函数"
+    ''' <summary>
+    ''' 获取公共文件夹路径
+    ''' </summary>
+    ''' <param name="belongFolderID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetPulicFolderPath(ByVal belongFolderID As Integer) As String
+
+        If belongFolderID = 0 Then
+            Return FolderPath + "PersonalFolders\PublicFolder\"
+        Else
+            Dim sqlstr As String
+            sqlstr = "select FolderPath from FileManager_FolderInfos where id = " + belongFolderID.ToString()
+
+            Dim dt As New DataTable
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+            If dt.Rows.Count > 0 Then
+                Return dt.Rows(0).Item(0)
+            Else
+                Return FolderPath
+            End If
+        End If
+
+    End Function
+
+    ''' <summary>
+    ''' 检测公共文件夹是否存在
+    ''' </summary>
+    ''' <param name="belongFolderID"></param>
+    ''' <param name="folderName"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function IsExistPublicFolder(ByVal belongFolderID As Integer, ByVal folderName As String) As Boolean
+        Return IO.Directory.Exists(GetPulicFolderPath(belongFolderID) + folderName + "\")
+    End Function
+
+    ''' <summary>
+    ''' 检测文件夹是否为公共文件夹
+    ''' </summary>
+    ''' <param name="folderID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function IsPublicFolder(ByVal folderID As Integer) As Boolean
+        Dim sqlstr As String
+        sqlstr = "select ispublicfolder from FileManager_FolderInfos where id = " + folderID.ToString()
+
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+        If dt.Rows.Count > 0 Then
+
+
+            If IsDBNull(dt.Rows(0).Item(0)) Then
+                Return False
+            Else
+                Return Convert.ToBoolean(dt.Rows(0).Item(0))
+            End If
+        Else
+            Return False
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 获取用户在某文件夹下的权限信息
+    ''' </summary>
+    ''' <param name="userID"></param>
+    ''' <param name="folderID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetUserPermission(ByVal userID As Integer, ByVal folderID As Integer) As MPublicFolderPermissions
+        Dim sqlstr As String
+        sqlstr = "select * from FileManager_PulbicFolderPermissions where FolderID = " + folderID.ToString() + " and userID =" + userID.ToString()
+
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+        Dim temp As New MPublicFolderPermissions
+
+        If dt.Rows.Count > 0 Then
+            temp.ID = Convert.ToInt32(dt.Rows(0).Item("id"))
+            temp.FolderID = Convert.ToInt32(dt.Rows(0).Item("FolderID"))
+            temp.UserID = Convert.ToInt32(dt.Rows(0).Item("userid"))
+
+            If IsDBNull(dt.Rows(0).Item("CanCreateFolder")) Then
+                temp.CanCreateFolder = False
+            Else
+                temp.CanCreateFolder = Convert.ToBoolean(dt.Rows(0).Item("CanCreateFolder"))
+            End If
+
+            If IsDBNull(dt.Rows(0).Item("CanUpload")) Then
+                temp.CanUpload = False
+            Else
+                temp.CanUpload = Convert.ToBoolean(dt.Rows(0).Item("CanUpload"))
+            End If
+
+            If IsDBNull(dt.Rows(0).Item("CanDelete")) Then
+                temp.CanDelete = False
+            Else
+                temp.CanDelete = Convert.ToBoolean(dt.Rows(0).Item("CanDelete"))
+            End If
+
+            If IsDBNull(dt.Rows(0).Item("CanRename")) Then
+                temp.CanRename = False
+            Else
+                temp.CanRename = Convert.ToBoolean(dt.Rows(0).Item("CanRename"))
+            End If
+
+            If IsDBNull(dt.Rows(0).Item("CanMove")) Then
+                temp.CanMove = False
+            Else
+                temp.CanMove = Convert.ToBoolean(dt.Rows(0).Item("CanMove"))
+            End If
+
+            If IsDBNull(dt.Rows(0).Item("CanCopy")) Then
+                temp.CanCopy = False
+            Else
+                temp.CanCopy = Convert.ToBoolean(dt.Rows(0).Item("CanCopy"))
+            End If
+
+            If IsDBNull(dt.Rows(0).Item("CanSetPower")) Then
+                temp.CanSetPower = False
+            Else
+                temp.CanSetPower = Convert.ToBoolean(dt.Rows(0).Item("CanSetPower"))
+            End If
+
+        End If
+
+        Return temp
+
+    End Function
+
+    ''' <summary>
+    ''' 获取已分配权限的用户信息
+    ''' </summary>
+    ''' <param name="folderID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetUserPermissions(ByVal folderID As Integer) As List(Of MPublicFolderPermissions)
+        Dim sqlstr As String
+        sqlstr = "select * from FileManager_PulbicFolderPermissions where FolderID = " + folderID.ToString()
+
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+        Dim list As New List(Of MPublicFolderPermissions)
+
+        If dt.Rows.Count > 0 Then
+
+            For i As Integer = 0 To dt.Rows.Count - 1
+                Dim temp As New MPublicFolderPermissions
+
+                temp.ID = Convert.ToInt32(dt.Rows(i).Item("id"))
+                temp.FolderID = Convert.ToInt32(dt.Rows(i).Item("FolderID"))
+                temp.UserID = Convert.ToInt32(dt.Rows(i).Item("userid"))
+
+                If IsDBNull(dt.Rows(i).Item("CanCreateFolder")) Then
+                    temp.CanCreateFolder = False
+                Else
+                    temp.CanCreateFolder = Convert.ToBoolean(dt.Rows(i).Item("CanCreateFolder"))
+                End If
+
+                If IsDBNull(dt.Rows(i).Item("CanUpload")) Then
+                    temp.CanUpload = False
+                Else
+                    temp.CanUpload = Convert.ToBoolean(dt.Rows(i).Item("CanUpload"))
+                End If
+
+                If IsDBNull(dt.Rows(i).Item("CanDelete")) Then
+                    temp.CanDelete = False
+                Else
+                    temp.CanDelete = Convert.ToBoolean(dt.Rows(i).Item("CanDelete"))
+                End If
+
+                If IsDBNull(dt.Rows(i).Item("CanRename")) Then
+                    temp.CanRename = False
+                Else
+                    temp.CanRename = Convert.ToBoolean(dt.Rows(i).Item("CanRename"))
+                End If
+
+                If IsDBNull(dt.Rows(i).Item("CanMove")) Then
+                    temp.CanMove = False
+                Else
+                    temp.CanMove = Convert.ToBoolean(dt.Rows(i).Item("CanMove"))
+                End If
+
+                If IsDBNull(dt.Rows(i).Item("CanCopy")) Then
+                    temp.CanCopy = False
+                Else
+                    temp.CanCopy = Convert.ToBoolean(dt.Rows(i).Item("CanCopy"))
+                End If
+
+                If IsDBNull(dt.Rows(i).Item("CanSetPower")) Then
+                    temp.CanSetPower = False
+                Else
+                    temp.CanSetPower = Convert.ToBoolean(dt.Rows(i).Item("CanSetPower"))
+                End If
+
+                list.Add(temp)
+            Next
+
+        End If
+
+        Return list
+    End Function
+
+    ''' <summary>
+    ''' 获取未分配权限的用户信息
+    ''' </summary>
+    ''' <param name="folderID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetRestUserPermissions(ByVal folderID As Integer) As List(Of MUserInfo)
+
+        Dim sqlstr As String
+        sqlstr = "select * from gy_ygdm where ygdm not in(select userID from FileManager_PulbicFolderPermissions where FolderID = " + folderID.ToString() + ")"
+
+
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+
+        Dim list As New List(Of MUserInfo)
+
+        If dt.Rows.Count > 0 Then
+
+
+            For i As Integer = 0 To dt.Rows.Count - 1
+                Dim temp As New MUserInfo
+
+                temp.UserID = Convert.ToInt32(dt.Rows(i).Item("YGDM"))
+
+                If IsDBNull(dt.Rows(i).Item("ssks")) Then
+                    temp.DepartmentID = 0
+                Else
+                    temp.DepartmentID = Convert.ToInt32(dt.Rows(i).Item("ssks"))
+                End If
+
+                temp.LoginName = dt.Rows(i).Item("DLMC").ToString()
+                temp.RealName = dt.Rows(i).Item("ygxm").ToString()
+
+                list.Add(temp)
+            Next
+
+        End If
+
+        Return list
+    End Function
+
+    ''' <summary>
+    ''' 添加用户权限
+    ''' </summary>
+    ''' <param name="folderID"></param>
+    ''' <param name="userID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function AddUserPermissions(ByVal folderID As Integer, ByVal userID As Integer) As Boolean
+        Dim sqlstr As String
+        sqlstr = "insert into FileManager_PulbicFolderPermissions (folderID,userID) values (" + folderID.ToString() + "," + userID.ToString() + ") "
+
+        Dim result As Integer
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "AddUserPermissions", "添加用户权限失败", ex.ToString())
+            Return False
+        End Try
+
+        If result <> 1 Then
+            Return False
+        Else
+            Return True
+        End If
+
+    End Function
+
+    ''' <summary>
+    ''' 自动添加公共文件夹下用户权限
+    ''' </summary>
+    ''' <param name="belongFolderID"></param>
+    ''' <param name="folderID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function AddNewFolderPermissions(ByVal belongFolderID As Integer, ByVal folderID As Integer) As Boolean
+        Dim sqlstr As String
+        sqlstr = "select * from FileManager_PulbicFolderPermissions where FolderID = " + belongFolderID.ToString()
+
+        Dim dt As New DataTable
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+
+
+            For i As Integer = 0 To dt.Rows.Count - 1
+
+
+                Dim userID As Integer
+                Dim CanCreateFolder As Boolean
+                Dim CanUpload As Boolean
+                Dim CanDelete As Boolean
+                Dim CanRename As Boolean
+                Dim CanMove As Boolean
+                Dim CanCopy As Boolean
+                Dim CanSetPower As Boolean
+
+                userID = Convert.ToInt32(dt.Rows(i).Item("userID"))
+
+                If IsDBNull(dt.Rows(i).Item("CanCreateFolder")) Then
+                    CanCreateFolder = False
+                Else
+                    CanCreateFolder = Convert.ToBoolean(dt.Rows(i).Item("CanCreateFolder"))
+                End If
+
+                If IsDBNull(dt.Rows(i).Item("CanUpload")) Then
+                    CanUpload = False
+                Else
+                    CanUpload = Convert.ToBoolean(dt.Rows(i).Item("CanUpload"))
+                End If
+
+                If IsDBNull(dt.Rows(i).Item("CanDelete")) Then
+                    CanDelete = False
+                Else
+                    CanDelete = Convert.ToBoolean(dt.Rows(i).Item("CanDelete"))
+                End If
+
+                If IsDBNull(dt.Rows(i).Item("CanRename")) Then
+                    CanRename = False
+                Else
+                    CanRename = Convert.ToBoolean(dt.Rows(i).Item("CanRename"))
+                End If
+
+                If IsDBNull(dt.Rows(i).Item("CanMove")) Then
+                    CanMove = False
+                Else
+                    CanMove = Convert.ToBoolean(dt.Rows(i).Item("CanMove"))
+                End If
+
+                If IsDBNull(dt.Rows(i).Item("CanCopy")) Then
+                    CanCopy = False
+                Else
+                    CanCopy = Convert.ToBoolean(dt.Rows(i).Item("CanCopy"))
+                End If
+
+                If IsDBNull(dt.Rows(i).Item("CanSetPower")) Then
+                    CanSetPower = False
+                Else
+                    CanSetPower = Convert.ToBoolean(dt.Rows(i).Item("CanSetPower"))
+                End If
+
+
+                sqlstr = "insert into FileManager_PulbicFolderPermissions "
+                sqlstr += " (FolderID,UserID,CanCreateFolder,CanUpload,CanDelete,CanRename,CanMove,CanCopy,CanSetPower)"
+                sqlstr += " values "
+                sqlstr += " (@FolderID,@UserID,@CanCreateFolder,@CanUpload,@CanDelete,@CanRename,@CanMove,@CanCopy,@CanSetPower)"
+
+                Dim params As SqlParameter() = New SqlParameter() _
+                    { _
+                        New SqlParameter("@FolderID", folderID), _
+                        New SqlParameter("@UserID", userID), _
+                        New SqlParameter("@CanCreateFolder", CanCreateFolder), _
+                        New SqlParameter("@CanUpload", CanUpload), _
+                        New SqlParameter("@CanDelete", CanDelete), _
+                        New SqlParameter("@CanRename", CanRename), _
+                        New SqlParameter("@CanMove", CanMove), _
+                        New SqlParameter("@CanCopy", CanCopy), _
+                        New SqlParameter("@CanSetPower", CanSetPower) _
+                    }
+                SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, params)
+            Next
+            Return True
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "AddNewFolderPermissions", "自动添加公共文件夹下用户权限失败", ex.ToString())
+            Return False
+        End Try
+
+    End Function
+
+    ''' <summary>
+    ''' 设置用户权限
+    ''' </summary>
+    ''' <param name="id"></param>
+    ''' <param name="canCreateFolder"></param>
+    ''' <param name="canUpload"></param>
+    ''' <param name="canDelete"></param>
+    ''' <param name="canCopy"></param>
+    ''' <param name="canMove"></param>
+    ''' <param name="canRename"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function SetUserPermissions(ByVal id As Integer, ByVal canCreateFolder As Boolean, ByVal canUpload As Boolean, ByVal canDelete As Boolean, ByVal canRename As Boolean, ByVal canMove As Boolean, ByVal canCopy As Boolean, ByVal canSetPower As Boolean) As Boolean
+
+        Dim sqlstr As String
+        sqlstr = "update FileManager_PulbicFolderPermissions set "
+        sqlstr += "canCreateFolder = '" + canCreateFolder.ToString() + "', "
+        sqlstr += "canUpload = '" + canUpload.ToString() + "', "
+        sqlstr += "canDelete = '" + canDelete.ToString() + "', "
+        sqlstr += "CanRename = '" + canRename.ToString() + "', "
+        sqlstr += "CanMove = '" + canMove.ToString() + "', "
+        sqlstr += "CanCopy = '" + canCopy.ToString() + "', "
+        sqlstr += "CanSetPower = '" + canSetPower.ToString() + "' "
+        sqlstr += "where id=" + id.ToString()
+
+
+        Dim result As Integer
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "AddUserPermissions", "添加用户权限失败", ex.ToString())
+            Return False
+        End Try
+
+        If result <> 1 Then
+            Return False
+        Else
+            Return True
+        End If
+    End Function
+
+
+    ''' <summary>
+    ''' 移除用户权限
+    ''' </summary>
+    ''' <param name="folderID"></param>
+    ''' <param name="userID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function RemoveUserPermissions(ByVal folderID As Integer, ByVal userID As Integer) As Boolean
+        Dim sqlstr As String
+        sqlstr = "delete FileManager_PulbicFolderPermissions where folderID = " + folderID.ToString() + " and userID=" + userID.ToString()
+
+        Dim result As Integer
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "RemoveUserPermissions", "移除用户权限失败", ex.ToString())
+            Return False
+        End Try
+
+        If result <> 1 Then
+            Return False
+        Else
+            Return True
+        End If
+    End Function
+
+#End Region
+
+#Region "文件操作函数"
+
+    ''' <summary>
+    ''' 获取文件名称
+    ''' </summary>
+    ''' <param name="fileID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetFileName(ByVal fileID As Integer) As String
+        Dim sqlstr As String
+        sqlstr = "select FileName from FileManager_FileInfos where id = " + fileID.ToString()
+
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+        If dt.Rows.Count > 0 Then
+            Return dt.Rows(0).Item(0)
+        Else
+            Return ""
+        End If
+
+    End Function
+
+
+    ''' <summary>
+    ''' 上传文件
+    ''' </summary>
+    ''' <param name="file">文件流</param>
+    ''' <param name="createUserID">上传人名称</param>
+    ''' <param name="belongFolderID">目标文件夹ID</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function UploadFile(ByVal file As HttpPostedFile, ByVal createUserID As Integer, ByVal belongFolderID As Integer) As Boolean
+
+
+        Dim UserInfo As New UserInfo
+
+        '文件名
+        Dim fileName As String
+        fileName = file.FileName
+
+
+        Dim fileExtension As String
+        '获取文件后缀名
+        fileExtension = fileName.Substring(fileName.LastIndexOf("."), fileName.Length - fileName.LastIndexOf("."))
+        fileName = fileName.Replace(fileExtension, "") + DateTime.Now.ToString("yyyyMMddHHmmss") + fileExtension
+
+
+
+        '当前用户名称
+        Dim username As String = UserInfo.GetUserLoginName(createUserID)
+
+        Dim path As String = GetFolderPath(belongFolderID, username)
+        '文件保存路径
+        Dim filePath As String = path + fileName
+
+        '保存文件
+        Try
+            file.SaveAs(filePath)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "UploadFile", "文件保存失败", ex.ToString())
+            Return False
+        End Try
+
+
+        Dim sqlstr As String
+
+        sqlstr = " insert into FileManager_FileInfos "
+
+        sqlstr += " (FileName"
+        sqlstr += ",FileType"
+        sqlstr += ",FileSize"
+        sqlstr += ",FilePath"
+        sqlstr += ",CreateTime"
+        sqlstr += ",CreateUserID"
+        sqlstr += ",BelongFolderID)"
+        sqlstr += " values "
+        sqlstr += "('" + fileName + "'"
+        sqlstr += ",'" + fileExtension + "'"
+        sqlstr += ",'" + file.ContentLength.ToString() + "'"
+        sqlstr += ",'" + filePath + "'"
+        sqlstr += ",'" + DateTime.Now + "'"
+        sqlstr += ",'" + createUserID.ToString() + "'"
+        sqlstr += ",'" + belongFolderID.ToString() + "')"
+
+
+        Dim result As Integer
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            IO.File.Delete(filePath)
+            DoLog.LogErrorToFile("FileManager", "UploadFile", "插入数据库失败", ex.ToString())
+        End Try
+
+        If result <> 0 Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 获取文件路径
+    ''' </summary>
+    ''' <param name="fileID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetFilePath(ByVal fileID As Integer) As String
+
+        Dim sqlstr As String
+        sqlstr = "select FilePath from FileManager_FileInfos where id=" + fileID.ToString()
+
+        Dim dt As New DataTable
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "GetFilePath", "获取文件路径失败", ex.ToString())
+        End Try
+
+
+        If dt.Rows.Count > 0 Then
+            Return dt.Rows(0).Item(0).ToString()
+        Else
+            Return ""
+        End If
+
+    End Function
+
+    ''' <summary>
+    ''' 获取文件隶属文件夹ID
+    ''' </summary>
+    ''' <param name="fileID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetFileBelongFolderID(ByVal fileID As Integer) As Integer
+
+        Dim sqlstr As String
+        sqlstr = "select BelongFolderID from FileManager_FileInfos where id=" + fileID.ToString()
+
+        Dim dt As New DataTable
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "GetFileBelongFolderID", "获取文件隶属文件夹ID失败", ex.ToString())
+        End Try
+
+
+        If dt.Rows.Count > 0 Then
+            Return dt.Rows(0).Item(0)
+        Else
+            Return -1
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 是否已存在该文件（重命名）
+    ''' </summary>
+    ''' <param name="fileID"></param>
+    ''' <param name="newFileName"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function IsExistFile_FileID(ByVal fileID As Integer, ByVal newFileName As String) As String
+        Dim filePath As String
+        filePath = GetFilePath(fileID)
+
+        Dim fileName As String
+        fileName = GetFileName(fileID)
+
+
+        Dim newFilePath As String
+        newFilePath = filePath.Replace(filePath, fileName)
+
+        Return File.Exists(newFilePath)
+
+    End Function
+
+
+
+    ''' <summary>
+    ''' 删除文件
+    ''' </summary>
+    ''' <param name="fileID">文件ID</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function DeleteFile(ByVal fileID As Integer) As Boolean
+
+        Dim path As String
+        path = GetFilePath(fileID)
+
+        If IO.File.Exists(path) Then
+            Try
+                IO.File.Delete(path)
+            Catch ex As Exception
+                DoLog.LogErrorToFile("FileManager", "DeleteFile", "删除文件失败", ex.ToString())
+                Return False
+            End Try
+        End If
+
+
+        '数据库文件夹与文件信息级联，无需重新对文件信息进行删除
+        Dim sqlstr As String
+        sqlstr = "delete from FileManager_FileInfos where ID = " + fileID.ToString()
+
+        Dim result As Integer
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "DeleteFile", "删除数据库文件信息失败", ex.ToString())
+            Return False
+        End Try
+
+        If result > 0 Then
+            Return True
+        Else
+            Return False
+        End If
+        Return False
+    End Function
+
+
+    ''' <summary>
+    ''' 更新文件
+    ''' </summary>
+    ''' <param name="fileID">文件ID</param>
+    ''' <param name="newName">新文件名</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function RenameFile(ByVal fileID As Integer, ByVal newName As String) As Boolean
+
+        Dim oldPath As String = GetFilePath(fileID)
+        Dim oldName As String = GetFileName(fileID)
+        Dim newPath As String = oldPath.Replace(oldName, newName)
+
+        If IO.File.Exists(newPath) Then
+            Return False
+        Else
+            Try
+                File.Move(oldPath, newPath)
+            Catch ex As Exception
+                DoLog.LogErrorToFile("FileManager", "RenameFile", "文件重命名失败", ex.ToString())
+                Return False
+            End Try
+
+
+            Dim sqlstr As String
+            sqlstr = "update FileManager_FileInfos set FileName = '" + newName + "',filePath ='" + newPath + "', CreateTime = '" + DateTime.Now.ToString() + "'where id = " + fileID.ToString()
+
+            Dim result As Integer
+            Try
+                result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+            Catch ex As Exception
+                IO.Directory.Move(newPath, oldPath)
+                DoLog.LogErrorToFile("FileManager", "RenameFile", "修改数据库失败", ex.ToString())
+                Return False
+            End Try
+
+            If result > 0 Then
+                Return True
+            Else
+                IO.File.Move(newPath, oldPath)
+                Return False
+            End If
+        End If
+    End Function
+
+
+    ''' <summary>
+    ''' 移动文件
+    ''' </summary>
+    ''' <param name="fileID">文件ID</param>
+    ''' <param name="targetFolderID">目标文件夹ID</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function MoveFile(ByRef fileID As Integer, ByVal targetFolderID As Integer, ByVal userID As Integer, ByVal userName As String) As Boolean
+
+        Dim filePath As String
+        '文件路径
+        filePath = GetFilePath(fileID)
+        Dim fileName As String
+        '文件名
+        fileName = GetFileName(fileID)
+
+        Dim targetFolderPath As String
+        Dim isPublicFolder_targetFolder As Boolean = IsPublicFolder(targetFolderID)
+
+        '移至文件夹路径
+        If isPublicFolder_targetFolder Then
+            targetFolderPath = GetPulicFolderPath(targetFolderID)
+        Else
+            targetFolderPath = GetFolderPath(targetFolderID, userName)
+        End If
+
+
+
+
+        Dim newPath As String
+        newPath = targetFolderPath + fileName
+
+        Try
+            File.Move(filePath, newPath)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "MoveFile", "移动文件失败", ex.ToString())
+            Return False
+        End Try
+
+        Dim sqlstr As String
+
+
+        If isPublicFolder_targetFolder Then
+            sqlstr = "update FileManager_FileInfos set FilePath = '" + newPath + "',BelongFolderID = '" + targetFolderID.ToString() + "',CreateTime='" + DateTime.Now().ToString() + "',createUserID=" + userID.ToString() + " where ID = " + fileID.ToString()
+        Else
+            sqlstr = "update FileManager_FileInfos set FilePath = '" + newPath + "',BelongFolderID = '" + targetFolderID.ToString() + "',CreateTime='" + DateTime.Now().ToString() + "' where ID = " + fileID.ToString()
+        End If
+
+        Dim result As Integer
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            IO.File.Move(newPath, filePath)
+            DoLog.LogErrorToFile("FileManager", "RenameFile", "修改数据库失败", ex.ToString())
+            Return False
+        End Try
+
+        If result > 0 Then
+            Return True
+        Else
+            IO.File.Move(newPath, filePath)
+            Return False
+        End If
+
+    End Function
+
+    ''' <summary>
+    ''' 拷贝文件
+    ''' </summary>
+    ''' <param name="fileID">文件ID</param>
+    ''' <param name="targetFolderID">目标文件夹ID</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function CopyFile(ByRef fileID As Integer, ByVal targetFolderID As Integer, ByVal userID As Integer, ByVal userName As String) As Boolean
+
+        Dim filePath As String
+        '文件路径
+        filePath = GetFilePath(fileID)
+        Dim fileName As String
+        '文件名
+        fileName = GetFileName(fileID)
+
+        Dim targetFolderPath As String
+        '移至文件夹路径
+        targetFolderPath = GetFolderPath(targetFolderID, userName)
+
+        Dim newPath As String
+        newPath = targetFolderPath + fileName
+
+        Try
+            File.Copy(filePath, newPath)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "MoveFile", "移动文件失败", ex.ToString())
+            Return False
+        End Try
+
+        Dim fileInfo As New FileInfo(newPath)
+
+        Dim sqlstr As String
+        sqlstr = " insert into FileManager_FileInfos "
+        sqlstr += " (FileName"
+        sqlstr += ",FileType"
+        sqlstr += ",FileSize"
+        sqlstr += ",FilePath"
+        sqlstr += ",CreateTime"
+        sqlstr += ",CreateUserID"
+        sqlstr += ",BelongFolderID)"
+        sqlstr += " values "
+        sqlstr += "('" + fileName + "'"
+        sqlstr += ",'" + fileInfo.Extension + "'"
+        sqlstr += ",'" + fileInfo.Length.ToString() + "'"
+        sqlstr += ",'" + newPath + "'"
+        sqlstr += ",'" + DateTime.Now + "'"
+        sqlstr += ",'" + userID.ToString() + "'"
+        sqlstr += ",'" + targetFolderID.ToString() + "')"
+
+        Dim result As Integer
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            IO.File.Move(newPath, filePath)
+            DoLog.LogErrorToFile("FileManager", "RenameFile", "修改数据库失败", ex.ToString())
+            Return False
+        End Try
+
+        If result > 0 Then
+            Return True
+        Else
+            IO.File.Move(newPath, filePath)
+            Return False
+        End If
+
+    End Function
+
+
+
+#End Region
+
+#Region "文件夹共享操作"
+
+    ''' <summary>
+    ''' 获取文件夹共享人
+    ''' </summary>
+    ''' <param name="folderID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetSharedFolderGiveUser(ByVal folderID As Integer) As Integer
+        Dim dt As New DataTable
+        Dim sqlstr As String
+
+        sqlstr = "select GiveUserId from FileManager_ShareFolder where folderID=" + folderID.ToString()
+
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+            If dt.Rows.Count > 0 Then
+                Return Convert.ToInt32(dt.Rows(0).Item(0))
+            Else
+                Return 0
+            End If
+
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "GetShareFolderUser", "获取文件夹共享人失败", ex.ToString())
+            Return 0
+        End Try
+
+
+
+    End Function
+
+    ''' <summary>
+    ''' 获取是否问共享文件
+    ''' </summary>
+    ''' <param name="folderID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function IsSharedFolder(ByVal folderID As Integer) As Boolean
+        Dim dt As New DataTable
+        Dim sqlstr As String
+
+        sqlstr = "select issharedfolder from FileManager_FolderInfos where ID=" + folderID.ToString()
+
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+            If dt.Rows.Count > 0 Then
+
+
+                If IsDBNull(dt.Rows(0).Item(0)) Then
+                    Return False
+                Else
+                    Return Convert.ToInt32(dt.Rows(0).Item(0))
+                End If
+
+            Else
+                Return False
+            End If
+
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "IsSharedFolder", "获取是否为共享文件失败", ex.ToString())
+            Return 0
+        End Try
+
+    End Function
+
+    ''' <summary>
+    ''' 删除文件夹所有共享信息
+    ''' </summary>
+    ''' <param name="folderID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function DeleteAllSharedInfo(ByVal folderID As Integer) As Boolean
+
+        Dim sqlstr As String
+        Dim result As Integer
+
+        sqlstr = "delete from FileManager_ShareFolder where FolderID = " + folderID.ToString()
+
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "AddSharedFolderInfo", "删除原先文件夹共享信息失败", ex.ToString())
+            Return False
+        End Try
+
+        If result < 0 Then
+            Return False
+        Else
+            Return True
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 获取文件夹共享信息失败
+    ''' </summary>
+    ''' <param name="folderID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetShareFolderUser(ByVal folderID As Integer) As ArrayList
+        Dim dt As New DataTable
+        Dim sqlstr As String
+
+        sqlstr = "select GetUserId from FileManager_ShareFolder where folderID=" + folderID.ToString()
+
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+            Dim SharedUserID As New ArrayList
+            If dt.Rows.Count > 0 Then
+
+                If dt.Rows(0).Item(0).ToString() = "*" Then
+                    SharedUserID.Add("*")
+                Else
+                    Dim temp() As String = Split(dt.Rows(0)("getuserid").ToString(), ",")
+
+                    For i As Integer = 0 To temp.Length - 1
+                        SharedUserID.Add(temp(i))
+                    Next
+                End If
+            End If
+            Return SharedUserID
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "GetShareFolderUser", "获取文件夹共享信息失败", ex.ToString())
+            Return Nothing
+        End Try
+    End Function
+
+
+    Public Function AddSharedFolderInfo(ByVal giveUserID As Integer, ByVal toUserID As String, ByVal folderID As Integer) As Boolean
+
+        Dim sqlstr As String
+        Dim result As Integer
+
+        sqlstr = "delete from FileManager_ShareFolder where FolderID = " + folderID.ToString()
+
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "AddSharedFolderInfo", "删除原先文件夹共享信息失败", ex.ToString())
+            Return False
+        End Try
+
+        If result < 0 Then
+            Return False
+        End If
+
+
+        sqlstr = "insert into FileManager_ShareFolder (GiveUserId,GetUserId,FolderID,ShareTime,ShareAbout) values ('" + giveUserID.ToString() + "','" + toUserID + "','" + folderID.ToString() + "','" + DateTime.Now.ToString() + "','')"
+
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "AddSharedFolderInfo", "删除原先文件夹共享信息失败", ex.ToString())
+            Return False
+        End Try
+
+        If result < 0 Then
+            Return False
+        End If
+
+
+        If toUserID.Length = 0 Then
+            sqlstr = "update FileManager_FolderInfos set IsSharedFolder = 'false' where id=" + folderID.ToString()
+        Else
+            sqlstr = "update FileManager_FolderInfos set IsSharedFolder = 'true' where id=" + folderID.ToString()
+        End If
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FileManager", "AddSharedFolderInfo", "删除原先文件夹共享信息失败", ex.ToString())
+            Return False
+        End Try
+
+        If result > 0 Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+
+#End Region
+
+End Class

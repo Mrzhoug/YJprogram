@@ -1,0 +1,34 @@
+﻿
+Partial Class HomePage_DefinePart_Ks_Notice
+    Inherits System.Web.UI.UserControl
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs)
+        Dim Base As New Base
+        Dim KSDM As Integer
+        Try
+            KSDM = Request("KSDM")
+        Catch ex As Exception
+            KSDM = 0
+        End Try
+
+        Dim Dt As New Data.DataTable
+        If Page.IsPostBack = False Then
+            Dt = Base.DB.Table("select top 10 * from ks_Notice where ksdm=" & KSDM & " order by [uptime] desc", "managelist")
+            If Dt.Rows.Count > 0 Then
+                Dim i As Integer = 0
+                Dim str, str1 As String
+                str = ""
+                For i = 0 To Dt.Rows.Count - 1
+                    str1 = Dt.Rows(i)("title")
+                    If str1.Length > 14 Then
+                        str1 = str1.Substring(0, 11) & "..."
+                    End If
+                    str = str & "<TR><TD  style='WIDTH: 18px; HEIGHT: 19px' align=right><IMG src='images/news1.gif'/> </TD><TD style='HEIGHT: 19px' align=left >&nbsp;<a href='HomePageNoticeShow.aspx?Kind=KS&cid=" & Dt.Rows(i)("cid").ToString & "'>" & str1 & "</a></TD></TR><tr><TD  style='WIDTH: 18px; HEIGHT: 19px' align=right></TD><TD style='HEIGHT: 19px' align=left >&nbsp;[" & CDate(Dt.Rows(i)("uptime").ToString).Date & "]</TD></tr><tr><td></td><td height=1  background='../images/point_line.gif'></td></tr>"
+                Next
+                conte.InnerHtml = str
+            End If
+            Dt = Nothing
+        End If
+        Base = Nothing
+    End Sub
+End Class

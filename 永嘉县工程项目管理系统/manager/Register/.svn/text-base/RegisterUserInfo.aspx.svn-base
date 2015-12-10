@@ -1,0 +1,164 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="RegisterUserInfo.aspx.vb"
+    Inherits="manager_Register_RegisterUserInfo" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>企业申请信息</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet" />
+    <script src="../../Pub/jquery-1.8.0.js" type="text/javascript"></script>
+    <script src="../../Pub/jquery.ui.js" type="text/javascript"></script>
+    <link href="../../App_Themes/redmond/jquery.ui.css" type="text/css" rel="Stylesheet" />
+</head>
+<body>
+    <center>
+        <form id="form1" runat="server" style="width: 830px">
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);"><span>
+                    企业申请信息</span></a></li>
+            </ul>
+        </div>
+        <div class="main" style="border: none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th class="title">
+                            <span style="color: Red">*</span>用户名
+                        </th>
+                        <td colspan="3" style="text-align: left">
+                            <asp:Label ID="lb_username" runat="server" Text=""></asp:Label>
+                            <%--<asp:TextBox ID="tb_username" runat="server" Width="95%"></asp:TextBox>--%>
+                        </td>
+                    </tr>                    
+                    <tr>
+                        <th class="title">
+                            <span style="color: Red">*</span>单位名称
+                        </th>
+                        <td colspan="3" style="text-align: left">
+                            <asp:Label ID="lb_companyName" runat="server" Text=""></asp:Label>
+                            <%--<asp:TextBox ID="tb_companyName" runat="server" Width="95%"></asp:TextBox>--%>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="title">
+                            <span style="color: Red">*</span>注册号:
+                        </th>
+                        <td style="text-align: left">
+                            <asp:Label ID="lb_companyNo" runat="server" Text=""></asp:Label>
+                            <%--<asp:TextBox ID="tb_companyNo" runat="server" Width="95%"></asp:TextBox>--%>
+                        </td>
+                        <th>
+                            成立时间：
+                        </th>
+                        <td style="text-align: left">
+                            <asp:Label ID="lb_companyCreateTime" runat="server" Text=""></asp:Label>
+                            <%--<asp:TextBox ID="tb_companyCreateTime" runat="server" Width="95%"></asp:TextBox>--%>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="title">
+                            <span style="color: Red">*</span>法人代表:
+                        </th>
+                        <td style="text-align: left">
+                            <asp:Label ID="lb_companyOwner" runat="server" Text=""></asp:Label>
+                            <%--<asp:TextBox ID="tb_companyOwner" runat="server" Width="95%"></asp:TextBox>--%>
+                        </td>
+                        <th class="title">
+                            联系方式:
+                        </th>
+                        <td style="text-align: left">                            
+                            <asp:Label ID="lb_companyOwnerTel" runat="server" Text=""></asp:Label>
+                            <%--<asp:TextBox ID="tb_companyOwnerTel" runat="server" Width="95%"></asp:TextBox>--%>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="title">
+                            <span style="color: Red">*</span>联系人:
+                        </th>
+                        <td style="text-align: left">
+                            <asp:Label ID="lb_companyContacts" runat="server" Text=""></asp:Label>
+                            <%--<asp:TextBox ID="tb_companyContacts" runat="server" Width="95%"></asp:TextBox>--%>
+                        </td>
+                        <th class="title">
+                            <span style="color: Red">*</span>联系方式:
+                        </th>
+                        <td style="text-align: left">
+                            <asp:Label ID="lb_companyContactsTel" runat="server" Text=""></asp:Label>
+                            <%--<asp:TextBox ID="tb_companyContactsTel" runat="server" Width="95%"></asp:TextBox>--%>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="title">
+                            <span style="color: Red">*</span>单位地址:
+                        </th>
+                        <td colspan="3" style="text-align: left">
+                            <asp:Label ID="lb_companyAddress" runat="server" Text=""></asp:Label>
+                            <%--<asp:TextBox ID="tb_companyAddress" runat="server" Width="95%"></asp:TextBox>--%>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="title">
+                            公司类型:
+                        </th>
+                        <td style="text-align: left">
+                            <asp:Label ID="lb_companyType" runat="server" Text=""></asp:Label>
+                            <%--<asp:TextBox ID="tb_companyType" runat="server" Width="95%"></asp:TextBox>--%>
+                        </td>
+                        <th>
+                            注册资本：
+                        </th>
+                        <td style="text-align: left">
+                            <asp:Label ID="lb_companyMoney" runat="server" Text=""></asp:Label>
+                            <%--<asp:TextBox ID="tb_companyMoney" runat="server" Width="95%"></asp:TextBox>--%>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="title">
+                            从业人数
+                        </th>
+                        <td style="text-align: left">
+                            <asp:Label ID="lb_peopleNum" runat="server" Text=""></asp:Label>
+                            <%--<asp:TextBox ID="tb_peopleNum" runat="server" Width="95%"></asp:TextBox>--%>
+                        </td>
+                        <th>
+                            一级建造师：
+                        </th>
+                        <td style="text-align: left">
+                            <asp:Label ID="lb_peopleNum1" runat="server" Text=""></asp:Label>
+                            <%--<asp:TextBox ID="tb_peopleNum1" runat="server" Width="95%"></asp:TextBox>--%>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="title">
+                            二级建造师
+                        </th>
+                        <td style="text-align: left">
+                            <asp:Label ID="lb_peopleNum2" runat="server" Text=""></asp:Label>
+                            <%--<asp:TextBox ID="tb_peopleNum2" runat="server" Width="95%"></asp:TextBox>--%>
+                        </td>
+                        <th>
+                            技术人员人数 ：
+                        </th>
+                        <td style="text-align: left">
+                            <asp:Label ID="lb_peopleNum3" runat="server" Text=""></asp:Label>
+                            <%--<asp:TextBox ID="tb_peopleNum3" runat="server" Width="95%"></asp:TextBox>--%>
+                        </td>
+                    </tr>
+                    <tr style="height: 80px">
+                        <th>
+                            <span style="color: Red">*</span>营业执照
+                        </th>
+                        <td colspan="3" style="text-align: left; vertical-align: top">
+                            <br />
+                            <asp:Image ID="Image1" runat="server" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        </form>
+    </center>
+</body>
+</html>

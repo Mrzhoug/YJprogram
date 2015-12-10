@@ -1,0 +1,413 @@
+﻿
+Partial Class manager_Config_NoLC
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim LCDM As Integer
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim MKDM As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Dim tb As New Data.DataTable
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Try
+            MKDM = Request("MKDM")
+        Catch ex As Exception
+            Base.Js.alert(Me, "参数错误！")
+            Response.End()
+        End Try
+
+        tb = Base.DB.Table("Select NoLCDM from GY_MKXX where MKDM=" & MKDM, "123")
+        If tb.Rows.Count <= 0 Then
+            Base.Js.alert(Me, "功能不存在，可能已经被删除")
+            Response.End()
+        End If
+        LCDM = tb.Rows(0)("NoLCDM")
+
+        conn.SelectParameters("LCDM").DefaultValue = LCDM
+
+        'formmanage.InnerHtml = "<a href='../XJXM/Form_Manage_NoLC.aspx?LCDM=" & LCDM & "'>表单管理</a>"
+        formmanage.InnerHtml = ""
+        DefaultRow.InnerHtml = "<a href='javascript:void(0);' onclick="" if (confirm('你确定要自定义显示列吗? \n如果你做了修改，所有用户将看到你修改后的!')!=true) { return false; }window.open('../CreateFunction/ShowListModify.aspx?LCDM=" & LCDM & "','自定义显示列','height=650, width=550, top=200, left=370, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no');"">自定义显示列</a>"
+        If Page.IsPostBack = False Then
+
+            '打开表单菜单配置
+            Dim Row As Data.DataRow
+            Try
+                Row = Base.DB.Row("Select * From WebInfoPath_MenuConfig Where MKDM=" & MKDM, "dd")
+            Catch ex As Exception
+                Base.CreateTable(1, "WebInfoPath_MenuConfig")
+                Row = Nothing
+            End Try
+            If Not Row Is Nothing Then
+                If Row.Item("Config1").ToString = "True" Then CheckBox1.Checked = True
+                If Row.Item("Config2").ToString = "True" Then CheckBox2.Checked = True
+                If Row.Item("Config3").ToString = "True" Then CheckBox3.Checked = True
+                If Row.Item("Config4").ToString = "True" Then CheckBox4.Checked = True
+                If Row.Item("Config5").ToString = "True" Then CheckBox5.Checked = True
+                If Row.Item("Config6").ToString = "True" Then CheckBox6.Checked = True
+                If Row.Item("Config7").ToString = "True" Then CheckBox7.Checked = True
+                If Row.Item("Config8").ToString = "True" Then CheckBox8.Checked = True
+                If Row.Item("Config9").ToString = "True" Then CheckBox16.Checked = True
+            End If
+
+            '表单打开的长和宽
+            TextBox2.Text = Base.ReadConfig("表单打开长度", LCDM)
+            TextBox3.Text = Base.ReadConfig("表单打开宽度", LCDM)
+
+
+            '菜单新建链接
+            Dim MenuNew As String = Base.ReadConfig("菜单新建链接", LCDM)
+            If MenuNew = "1" Or MenuNew = "" Then CheckBox9.Checked = True
+
+            Dim LeftOpen As String = Base.ReadConfig("右边打开窗口", LCDM)
+            If LeftOpen = "1" Or LeftOpen = "" Then CheckBox18.Checked = True
+
+
+
+
+            Dim ConfigStr As String = Base.ReadConfig("表单列表页按钮配置", LCDM)
+            If ConfigStr.Length > 0 Then
+                Dim ConfigTmp() As String = ConfigStr.Split(",")
+                Try
+                    If ConfigTmp(0) = "1" Then CheckBox10.Checked = True
+                Catch ex As Exception
+                    CheckBox10.Checked = False
+                End Try
+
+                Try
+                    If ConfigTmp(1) = "1" Then CheckBox11.Checked = True
+                Catch ex As Exception
+                    CheckBox11.Checked = False
+                End Try
+
+                Try
+                    If ConfigTmp(2) = "1" Then CheckBox12.Checked = True
+                Catch ex As Exception
+                    CheckBox12.Checked = False
+                End Try
+
+                Try
+                    If ConfigTmp(3) = "1" Then CheckBox13.Checked = True
+                Catch ex As Exception
+                    CheckBox3.Checked = False
+                End Try
+
+                Try
+                    If ConfigTmp(4) = "1" Then CheckBox14.Checked = True
+                Catch ex As Exception
+                    CheckBox14.Checked = False
+                End Try
+
+                Try
+                    If ConfigTmp(5) = "1" Then CheckBox15.Checked = True
+                Catch ex As Exception
+                    CheckBox15.Checked = False
+                End Try
+
+                Try
+                    If ConfigTmp(6) = "1" Then CheckBox17.Checked = True
+                Catch ex As Exception
+                    CheckBox17.Checked = False
+                End Try
+
+            Else
+                CheckBox10.Checked = True
+                CheckBox11.Checked = True
+                CheckBox12.Checked = True
+                CheckBox13.Checked = True
+                CheckBox14.Checked = True
+                CheckBox15.Checked = True
+                CheckBox17.Checked = True
+            End If
+
+
+
+            ConfigStr = Base.ReadConfig("显示列菜单按钮配置", LCDM)
+            If ConfigStr.Length > 0 Then
+                Dim ConfigTmp() As String = ConfigStr.Split(",")
+                Try
+                    If ConfigTmp(0) = "1" Then cb_showListMenu1.Checked = True
+                Catch ex As Exception
+                    cb_showListMenu1.Checked = False
+                End Try
+
+                Try
+                    If ConfigTmp(1) = "1" Then cb_showListMenu2.Checked = True
+                Catch ex As Exception
+                    cb_showListMenu2.Checked = False
+                End Try
+
+                Try
+                    If ConfigTmp(2) = "1" Then cb_showListMenu3.Checked = True
+                Catch ex As Exception
+                    cb_showListMenu3.Checked = False
+                End Try
+
+                Try
+                    If ConfigTmp(3) = "1" Then cb_showListMenu4.Checked = True
+                Catch ex As Exception
+                    cb_showListMenu4.Checked = False
+                End Try
+
+                Try
+                    If ConfigTmp(4) = "1" Then cb_showListMenu5.Checked = True
+                Catch ex As Exception
+                    cb_showListMenu5.Checked = False
+                End Try
+
+                Try
+                    If ConfigTmp(5) = "1" Then cb_showListMenu6.Checked = True
+                Catch ex As Exception
+                    cb_showListMenu6.Checked = False
+                End Try
+
+                Try
+                    If ConfigTmp(6) = "1" Then cb_showListMenu7.Checked = True
+                Catch ex As Exception
+                    cb_showListMenu7.Checked = False
+                End Try
+
+            Else
+                cb_showListMenu1.Checked = True
+                cb_showListMenu2.Checked = True
+                cb_showListMenu3.Checked = True
+                cb_showListMenu4.Checked = True
+                cb_showListMenu5.Checked = True
+                cb_showListMenu6.Checked = True
+                cb_showListMenu7.Checked = True
+            End If
+
+
+
+
+            '打开方式
+            tb = Base.DB.Table("SELECT value  FROM Xconfig where Config = '打开方式' and LCDM=" & LCDM & " and UserID = 0", "Xconfig")
+            If tb.Rows.Count > 0 Then
+                Dim Check As String
+                If IsDBNull(tb.Rows(0).Item(0)) = True Then
+                    Check = "4"
+                Else
+                    Check = tb.Rows(0)(0).ToString
+                End If
+
+                Select Case Check
+                    Case "3"    '以InfoPath打开
+                        RadioButton3.Checked = True
+                    Case "4"    '以ＷＥＢ方式打开
+                        RadioButton4.Checked = True
+                    Case "5" '报表方式打开,样式文件
+                        RadioButton2.Checked = True
+                    Case Else
+                        RadioButton4.Checked = True
+                End Select
+            Else
+                RadioButton4.Checked = True
+            End If
+
+
+            '打开选项
+            tb = Base.DB.Table("SELECT value  FROM Xconfig where Config = '打开选项' and LCDM=" & LCDM & " and UserID = 0", "Xconfig")
+            If tb.Rows.Count > 0 Then
+                Dim check2 As String
+                If IsDBNull(tb.Rows(0)(0)) = True Then
+                    check2 = 1
+                Else
+                    check2 = tb.Rows(0)(0).ToString
+                End If
+                Select Case check2
+                    Case "1"
+                        option1.Checked = True
+                    Case "2"
+                        option2.Checked = True
+                    Case "3"
+                        option3.Checked = True
+                    Case Else
+                        option1.Checked = True
+                End Select
+            Else
+                option1.Checked = True
+            End If
+        End If
+    End Sub
+
+    Sub UpdateConfig(ByVal Op As String, ByVal kind As String)
+        'If Base.DB.GetRowCount("select value from Xconfig where Config='" & Op & "' and LCDM=" & LCDM & " and UserID=" & UserID, "Xconfig") > 0 Then
+        '    Base.DB.Query("update Xconfig set [value]='" & kind & "' where Config='" & Op & "' and LCDM=" & LCDM & " and UserID = " & UserID)
+        'Else
+        '    Base.DB.Query("insert into Xconfig(Config,UserID,value,LCDM) values('" & Op & "'," & UserID & ",'" & kind & "'," & LCDM & ")")
+        'End If
+        If Base.DB.GetRowCount("select value from Xconfig where Config='" & Op & "' and LCDM=" & LCDM & " and UserID=0", "Xconfig") > 0 Then
+            Base.DB.Query("update Xconfig set [value]='" & kind & "' where Config='" & Op & "' and LCDM=" & LCDM & " and UserID = 0")
+        Else
+            Base.DB.Query("insert into Xconfig(Config,UserID,value,LCDM) values('" & Op & "',0,'" & kind & "'," & LCDM & ")")
+        End If
+    End Sub
+
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim Lable As String = TextBox1.Text
+        If Base.DB.GetRowCount("select value from Xconfig where Config='表单标签' and LCDM=" & LCDM & " and [value]='" & Base.SqlFilter(Lable) & "'", "Xconfig") > 0 Then
+            Base.Js.alert(Me, Lable & "已经存在")
+        Else
+            Base.DB.Query("insert into Xconfig(Config,UserID,value,LCDM) values('表单标签',0,'" & Base.SqlFilter(Lable) & "'," & LCDM & ")")
+        End If
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_RowUpdating(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewUpdateEventArgs) Handles GridView1.RowUpdating
+        Dim cid As Integer = GridView1.DataKeys(e.RowIndex).Item(0)
+        Dim tmp As String = e.NewValues(0)
+        Response.Write(tmp)
+        If Base.DB.GetRowCount("Select value from Xconfig where config='表单标签' and lcdm=" & LCDM & " and [value]='" & Base.SqlFilter(tmp) & "'", "dd") > 0 Then
+            conn.UpdateCommand = "update Xconfig set Value='" & Base.SqlFilter(tmp) & "' where config='表单标签' and cid = -1"
+            Base.Js.alert(Me, tmp & " 已经存在")
+        Else
+            conn.UpdateCommand = "update Xconfig set Value='" & Base.SqlFilter(tmp) & "' where config='表单标签' and cid = " & cid
+        End If
+        conn.Update()
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+    End Sub
+
+
+    ''' <summary>
+    ''' 删除
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    ''' <remarks></remarks>
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        Dim cid As Integer = GridView1.DataKeys(e.NewSelectedIndex).Item(0)
+        Base.DB.Query("delete Xconfig where cid = " & cid)
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+        Dim Tmp As String = ""
+        Dim Row As Data.DataRow = Base.DB.Row("Select * From WebInfoPath_MenuConfig where mkdm=" & MKDM, "dd")
+        If Row Is Nothing Then
+            Base.DB.Query("INSERT INTO WebInfoPath_MenuConfig (MKDM,Config1,Config2,Config3,Config4,Config5,Config6,Config7,Config8)VALUES(" & MKDM & ",0,0,0,0,0,0,0,0)")
+        End If
+        Tmp = "UPdate WebInfoPath_MenuConfig set "
+        If CheckBox1.Checked = True Then Tmp += "Config1=1 " Else Tmp += " Config1=0"
+        If CheckBox2.Checked = True Then Tmp += ", Config2=1 " Else Tmp += ", Config2=0 "
+        If CheckBox3.Checked = True Then Tmp += ", Config3=1 " Else Tmp += ", Config3=0 "
+        If CheckBox4.Checked = True Then Tmp += ", Config4=1 " Else Tmp += ", Config4=0 "
+        If CheckBox5.Checked = True Then Tmp += ", Config5=1 " Else Tmp += ", Config5=0 "
+        If CheckBox6.Checked = True Then Tmp += ", Config6=1 " Else Tmp += ", Config6=0 "
+        If CheckBox7.Checked = True Then Tmp += ", Config7=1 " Else Tmp += ", Config7=0 "
+        If CheckBox8.Checked = True Then Tmp += ", Config8=1 " Else Tmp += ", Config8=0 "
+        If CheckBox16.Checked = True Then Tmp += ", Config9=1 " Else Tmp += ", Config9=0 "
+        Base.DB.Query(Tmp & " where mkdm=" & MKDM)
+        Base.Js.alert(Me, "配置保存成功")
+
+    End Sub
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+        If CheckBox9.Checked = True Then
+            UpdateConfig("菜单新建链接", 1)
+        Else
+            UpdateConfig("菜单新建链接", 0)
+        End If
+        Base.Js.alert(Me, "配置保存成功")
+    End Sub
+
+    Protected Sub Button4_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button4.Click
+
+        Dim ConfigStr As String = ""
+        If CheckBox10.Checked = True Then ConfigStr = "1" Else ConfigStr = "0"
+        If CheckBox11.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If CheckBox12.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If CheckBox13.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If CheckBox14.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If CheckBox15.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If CheckBox17.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        UpdateConfig("表单列表页按钮配置", ConfigStr)
+        Base.Js.alert(Me, "配置保存成功")
+
+    End Sub
+
+    '表单列表页按钮配置
+    '菜单新建链接
+    '打开方式
+    '打开选项
+    '表单标签
+
+    Protected Sub Button5_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button5.Click
+        Dim _Width, _Height As Integer
+        Try
+            _Width = Int(TextBox2.text)
+        Catch ex As Exception
+            _Width = 0
+        End Try
+
+        Try
+            _Height = Int(TextBox3.Text)
+        Catch ex As Exception
+            _Height = 0
+        End Try
+        UpdateConfig("表单打开长度", _Width)
+        UpdateConfig("表单打开宽度", _Height)
+        Base.Js.alert(Me, "配置保存成功")
+
+
+
+    End Sub
+
+    Protected Sub Button6_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button6.Click
+        If RadioButton2.Checked Then
+            UpdateConfig("打开方式", 5)
+        End If
+        If RadioButton4.Checked Then
+            UpdateConfig("打开方式", 4)
+        End If
+        If RadioButton3.Checked Then
+            UpdateConfig("打开方式", 3)
+        End If
+        Base.Js.alert(Me, "保存成功")
+    End Sub
+
+    Protected Sub Button7_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button7.Click
+        If option1.Checked Then
+            UpdateConfig("打开选项", 1)
+        End If
+        If option2.Checked Then
+            UpdateConfig("打开选项", 2)
+        End If
+        If option3.Checked Then
+            UpdateConfig("打开选项", 3)
+        End If
+        Base.Js.alert(Me, "保存成功")
+    End Sub
+
+    Protected Sub Button8_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button8.Click
+        Base.Js.OpenWindow(Me, "../AdvancedSearch/AdvancedSearchSetting.aspx?mkdm=" + MKDM.ToString(), "设置高级搜素", "height=500, width=550, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes")
+    End Sub
+
+    Protected Sub Button9_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button9.Click
+        If CheckBox18.Checked = True Then
+            UpdateConfig("右边打开窗口", 1)
+        Else
+            UpdateConfig("右边打开窗口", 0)
+        End If
+        Base.Js.alert(Me, "配置保存成功")
+    End Sub
+
+    Protected Sub Button10_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button10.Click
+        Dim ConfigStr As String = ""
+        If cb_showListMenu1.Checked = True Then ConfigStr = "1" Else ConfigStr = "0"
+        If cb_showListMenu2.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If cb_showListMenu3.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If cb_showListMenu4.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If cb_showListMenu5.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If cb_showListMenu6.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        If cb_showListMenu7.Checked = True Then ConfigStr = ConfigStr & ",1" Else ConfigStr = ConfigStr & ",0"
+        UpdateConfig("显示列菜单按钮配置", ConfigStr)
+        Base.Js.alert(Me, "配置保存成功")
+    End Sub
+End Class

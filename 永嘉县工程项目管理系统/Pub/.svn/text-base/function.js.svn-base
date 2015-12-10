@@ -1,0 +1,520 @@
+﻿// JScript File
+var http_request;       //定义ajax的对象     
+
+//Trim,LTrim,Rtrim属性
+String.prototype.Trim = function(){
+    return this.replace(/(^s*)|(s*$)/g, "");
+}
+String.prototype.LTrim = function(){
+    return this.replace(/(^s*)/g, "");
+}
+String.prototype.Rtrim = function(){
+    return this.replace(/(s*$)/g, "");
+}
+
+//初始化Ajax对象
+function   initXMLHttp()   {   
+    if   (window.XMLHttpRequest)   {   //   Mozilla,   Safari,...   
+        http_request   =   new   XMLHttpRequest();   
+        if   (http_request.overrideMimeType)   {   
+            http_request.overrideMimeType('text/xml');   
+        }   
+    }   else   if   (window.ActiveXObject)   {   //   IE   
+        try   {   
+            http_request   =   new   ActiveXObject("Msxml2.XMLHTTP");   
+        }   catch   (e)   {   
+            try   {   
+                http_request   =   new   ActiveXObject("Microsoft.XMLHTTP");   
+            }   catch   (e)   {}   
+        }   
+    }   
+    if   (!http_request)   {   
+        alert("您需要升级您的浏览器！");   
+        return   false;   
+    }   
+} 
+
+//得到URL里的内容.
+function GetStreamFile(Url)
+{
+  var results;
+  http_request.open("GET",Url,false);
+  http_request.send(null);   
+  results = http_request.responseText;
+  return results;
+}
+
+
+//右键菜单的复制功能
+function copy(data)
+    {
+        window.clipboardData.setData('text',data);
+    }
+
+//有流程的新建项目
+function CreateXMXX(lcdm)
+		{
+            window.open('../XJXM/add_xmxx.aspx?LCDM=' + lcdm ,'新建流程','height=300, width=550, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');
+		}
+
+function test()
+{
+		alert("this is a test");
+}
+
+//无流程的新建项目
+function CreateXMXM_NOLC(lcdm,menuid)
+{
+		window.open('../Manager/Forms/FunctionNoLC.aspx?LCDM=' + lcdm + '&MenuID=' + menuid ,'新建表单','height=500, width=700, top=100, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');
+}
+
+//打开表单的双击事件,无流程
+//function DbClickEvent(fid)
+//		{
+//		    alert(fid);
+//		    alert("111");
+//		    window.open('../Forms/OpenInfoPath.aspx?FID=' + fid ,'打开表单_' + fid,'height=500, width=700, top=100, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');
+//		}
+//打开表单的双击事件
+function DbClickEvent(fid,menuid)
+		{		    
+		    // 对FID的内容进行过滤，由于传过来的可能是多个传，如果 fid=12452&msgid=11232   导致&在弹出框的名字里出现时，导致异常。
+		    var tmpfid = fid;
+		    
+		    try //容错处理
+		    {   
+                var idx = tmpfid.indexOf("&");
+            }
+            catch(err)
+            {
+                idx = 0;
+            }
+            if (idx>0)	//双击事件有流程
+            {
+                tmpfid = tmpfid.substring(0,idx);        
+		        window.open('../Forms/OpenInfoPath.aspx?FID=' + fid + '&MenuID=' + menuid,'打开表单_' + tmpfid,'height=500, width=700, top=100, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');
+		    }
+		    else  //无流程
+		    {
+		        window.open('../Forms/OpenInfoPath.aspx?FID=' + fid ,'打开表单_' + fid,'height=500, width=700, top=100, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');
+		    }
+		}		
+
+//信息中心双击事件
+function DesktopDbClickEvent1(fid,msgid)
+{
+    window.open('../Forms/OpenInfoPath.aspx?FID=' + fid + '&msgid=' + msgid + '&ImportFid=' + msgid, '打开表单_' + fid, 'height=500, width=700, top=100, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');
+}
+
+
+//打开修订
+function DbClickEventXMXD(cid)
+		{
+		    window.open('../Forms/ProjectXd.aspx?CID=' + cid ,'修订表单','height=500, width=700, top=100, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');
+		}
+		
+//打开表单的双击事件，无流程，申请审批
+function DbClickEventSP(fid)
+		{
+		    window.location.href="../Forms/FormSP_NoLc.aspx?FID=" + fid;
+		}
+
+//打开表单的双击事件，无流程，查看审批情况
+function DbClickEventLookSP(fid)
+		{
+            window.open('ShowAbout_XMSP_NoLc.aspx?SID=' + fid ,'查看审批情况','height=300, width=550, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes');
+		}
+		
+		
+//查看短消息的双击事件		
+function DbClickEventLookSendMessage(fid)
+		{
+		    window.open('LookSendMessage.aspx?SID=' + fid ,'查看短消息','height=500, width=820, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes');
+		}
+		
+//编写短消息
+function WriteSendMessage()
+		{
+		    window.open('WriteSendMessage.aspx','编写信息','height=520, width=820, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes');
+		}		
+//查看公告
+function DbClickEventLookPublicMessage(pid)
+        {
+            window.open('../Desktop/LookPublicMessage.aspx?PID=' + pid ,'查看公告','height=500, width=700, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes');
+        }		
+//编写公告
+function WritePublicMessage()
+        {
+            window.open('WritePublicMessage.aspx','编写公告','height=520, width=700, top=150, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes');
+        }		
+		
+//返回桌面
+function BackDesktop(openwindow)
+        {
+            if (openwindow==1)          //如果是弹开对话
+            {
+                opener.window.parent.showTab('Manager/Desktop/MyDeskTop.aspx','信息中心','desktop');
+            }
+            else
+            {
+                window.parent.showTab('Manager/Desktop/MyDeskTop.aspx','信息中心','desktop');
+            }
+            
+        }
+//项目审批的双击事件 		
+function DbClickEventXMSP(fid)
+        {
+            window.open('XMSP.aspx?CID=' + fid ,'信息审阅','height=500, width=700, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes');
+            //window.location.href="XMSP.aspx?CID=" + fid;
+        }
+        
+//有流程情况下,双击显示流程图
+function DbClickEventLCMAP(xmdm)
+{
+	window.open('../XJXM/ProjectMap.aspx?XMDM=' + xmdm,'流程图','height=450, width=750, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');	
+}        
+//有流程的情况下。点击功能列表时的双击事件        
+function DbClickEventXJJC(xmdm,mkdm,flag)
+        {
+            //window.location.href="../Forms/Function.aspx?XMDM=" + xmdm + "&MKDM=" +  mkdm +  "&Flag=" +  flag;
+            window.open('../Forms/Function.aspx?XMDM=' + xmdm + '&MKDM=' +  mkdm +  '&Flag=' +  flag,'打开表单','height=300, width=550, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');
+        }
+//编辑显示列时，双击进行编辑显示组内的功能
+function OnDblClickGroupFunSetting(groupid)
+        {
+            window.open('ShowMenu_FunSetting.aspx?group_id=' + groupid ,'组内模块维护','height=550, width=1000, top=50, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes');
+        }
+        
+function ClickEvent(d)
+		{
+		    window.alert("事件类型: OnClick  作用对象: " + d); 		   
+		}
+
+function GridViewItemKeyDownEvent(d)
+		{
+		    window.alert("事件类型: GridViewItemKeyDownEvent  作用对象: " + d);	   
+		}
+		
+//按Alt + (1 to 5)运行
+function KeyDownEvent()
+		{
+		    if( event.altKey && event.keyCode > 48 && event.keyCode < 54 )		    
+		    {                
+		        window.alert("事件类型: FormKeyDownEvent  选中记录数: " + ( parseInt(event.keyCode) - 48 )); 
+		    }		   		   
+	    } 
+
+//GridView的鼠标移动效果	    
+function OMOver1(obj)
+        {
+            if (obj.style.backgroundColor=='#fafafa')
+        		{
+            	obj.style.backgroundColor='#f1f1f1'
+            	obj.style.color='#000000';
+            }
+            if (obj.style.backgroundColor=='white' || obj.style.backgroundColor=='')
+        		{
+            	obj.style.backgroundColor='#f1f1f2'
+            	obj.style.color='#000000';
+            }
+        }
+function OMOut1(obj)
+        {
+        	if (obj.style.backgroundColor=='#f1f1f1')
+        		{
+            	obj.style.backgroundColor='#FAFAFA';
+            	obj.style.color='#000000';
+            }
+            if (obj.style.backgroundColor=='#f1f1f2')
+        		{
+            	obj.style.backgroundColor='white';
+            	obj.style.color='#000000';
+            }
+        }
+        
+	       
+//GridView的鼠标移动效果	    
+function OnMouseOver(obj)
+        {
+            if (obj.style.backgroundColor=='#fafafa')
+        		{
+            	obj.style.backgroundColor='#f1f1f1'
+            	obj.style.color='#000000';
+            }
+            if (obj.style.backgroundColor=='white')
+        		{
+            	obj.style.backgroundColor='#f1f1f2'
+            	obj.style.color='#000000';
+            }
+        }
+function OnMouseOut(obj)
+        {
+        	if (obj.style.backgroundColor=='#f1f1f1')
+        		{
+            	obj.style.backgroundColor='#FAFAFA';
+            	obj.style.color='#000000';
+            }
+            if (obj.style.backgroundColor=='#f1f1f2')
+        		{
+            	obj.style.backgroundColor='white';
+            	obj.style.color='#000000';
+            }
+        }
+        
+        
+//将Gridview里的内容复制到内存中去.        
+function CopyDateToClip(gv)
+{
+    var tempstr="";
+    var gvlist=document.getElementById(gv);
+    for(var j = 0; j < gvlist.rows.length; j++)
+    {
+        for(var i = 0; i < gvlist.rows[j].cells.length; i++)
+        {
+            tempstr += gvlist.rows[j].cells[i].innerText + "\t";
+        }
+        tempstr += "\n";
+    }
+    window.clipboardData.setData('Text',tempstr); 
+    alert("内容已经复制到剪切板中");
+    return false;
+}        
+
+//显示/隐藏对象
+function show(objname)
+{
+    var obj = document.getElementById(objname);
+    if (obj.style.display=="")
+    {
+        obj.style.display= "none";
+    }
+    else
+    {   
+        obj.style.display= "";
+    }
+}
+
+//全选，一个页面可以存在多个全选
+function chk(chk,id,idx)
+{
+    var oEvent = document.all(id);
+    var chks = oEvent.getElementsByTagName("INPUT");
+    for(var i=0; i<chks.length; i++)
+    {
+     //只有标志CheckBox的,才是选择列的.
+        var u=chks[i].id;
+        if (chks[i].id.indexOf("CheckBox" + idx) > -1 && chks[i].type=="checkbox" )
+        { 
+            chks[i].checked=chk.checked;
+        } 
+    }
+}
+
+
+//checkbox的全选
+function SelectCheckboxAll(chk,id)
+{
+     var oEvent = document.all(id);
+     var chks = oEvent.getElementsByTagName("INPUT");
+     for(var i=0; i<chks.length; i++)
+        {
+            if(chks[i].type=="checkbox")
+            chks[i].checked=chk.checked;
+        }
+}
+
+//显示/隐藏对象
+function show_desktop(objname,img1)
+{
+    var obj = document.getElementById(objname);
+    if (obj.style.display=="")
+    {
+        obj.style.display= "none";
+        img1.src='../../images/Ext.UI/resources/images/default/tree/elbow-plus-nl.gif';        
+    }
+    else
+    {   
+        obj.style.display= "";
+        img1.src='../../images/Ext.UI/resources/images/default/tree/elbow-minus-nl.gif';
+    }
+}
+
+function GridViewChangeColor(cid,obj,idx)
+{
+//用来将选中的行进行换背景色.未选中的.清除原来选中的标记  
+    var obj1 = document.getElementById("GridView1");
+    for(i=1;i<obj1.rows.length;i++)
+    {
+        if (obj1.rows[i].id==obj.id)
+        {
+            obj.style.backgroundColor='#CE5D5A';
+            obj.style.color='White';
+        }
+        else
+        {
+            obj1.rows[i].style.backgroundColor='white';
+            obj1.rows[i].style.color='#000000';
+        }
+    }
+}
+
+
+
+//弹出窗体,带参数
+function openwindow(url,title,parameters)
+{
+    if (parameters=='')
+    {
+        window.open(url,title,'height=300, width=650, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes');    
+    }
+    else
+    {
+        window.open(url,title,parameters);
+    }
+}
+    
+    //设置Cookies
+function SetCookie(sName, sValue) {
+    document.cookie = sName + "=" + escape(sValue) + "; ";
+}
+        
+//读取Cookies
+function GetCookie(sName) {
+	var aCookie = document.cookie.split("; ");
+	for (var i = 0; i < aCookie.length; i++) {
+
+		var aCrumb = aCookie[i].split("=");
+		if (sName == aCrumb[0])
+		    return unescape(aCrumb[1]);
+	}
+}
+		
+//用在上传附件时。弹出来进度对话框
+function showProgress() {
+	var ary = document.getElementsByTagName('INPUT');
+	var openBar = false;
+	for (var i = 0; i < ary.length; i++) {
+		var obj = ary[i];
+		if (obj.type == 'file') {
+		    if (obj.value != '') {
+		        openBar = true;
+		        break;
+		    }
+		}
+	}
+	if (openBar) {
+		window.showModelessDialog('../../ProgressBar.aspx?UploadID=' + document.all.UploadID.value, window, 'status:no;dialogWidth:500px;dialogHeight:250px;center:yes;help:no;');
+	}
+}
+
+
+
+
+
+
+function onclickmodify() {
+	var Allinput = document.getElementsByTagName('TEXTAREA');
+	for (var i = 0; i < Allinput.length; i++) {
+		if (Allinput[i].id.indexOf('window.open.商品代码_协议') > 0) {
+		    Allinput[i].onclick = function tst1() {
+		        var returnstr = window.showModalDialog("OpenWindow.aspx?kind=xy", '', "dialogWidth=400px;dialogHeight=500px");
+		        if (returnstr != null) {
+		            this.value = returnstr;
+		            this.onchange();
+		        }
+		    }
+		}
+		if (Allinput[i].id.indexOf('window.open.商品代码_招标') > 0) {
+		    Allinput[i].onclick = function tst() {
+		        var returnstr = window.showModalDialog("OpenWindow.aspx?kind=zb", '', "dialogWidth=400px;dialogHeight=500px");
+		        if (returnstr != null) {
+		            this.value = returnstr;
+		            this.onchange();
+		        }
+		    }
+		}
+	}
+	var Allinput = document.getElementsByTagName('INPUT');
+	for (var i = 0; i < Allinput.length; i++) {
+	    if (Allinput[i].id.indexOf('windows.suggest') > 0) {
+		    Allinput[i].onTextChange = function tst1() {
+		        var returnstr = window.showModalDialog("OpenWindow.aspx?kind=xy", '', "dialogWidth=400px;dialogHeight=500px");
+		        if (returnstr != null) {
+		            this.value = returnstr;
+		            this.onchange();
+		        }
+		    }
+		}
+		if (Allinput[i].id.indexOf('window.open.商品代码_招标') > 0) {
+		    Allinput[i].onclick = function tst() {
+		        var returnstr = window.showModalDialog("OpenWindow.aspx?kind=zb", '', "dialogWidth=400px;dialogHeight=500px");
+		        if (returnstr != null) {
+		            this.value = returnstr;
+		            this.onchange();
+		        }
+		    }
+		}
+
+		//针对附件打开的问题
+		var Allinput = document.getElementsByTagName('A');
+		for (var i = 0; i < Allinput.length; i++) {
+		    if (Allinput[i].id.indexOf('my:技术配置_招标') > 0) {
+		        Allinput[i].target = "_blank";
+		    }
+
+		    if (Allinput[i].id.indexOf('my:技术配置') > 0) {
+		        if (Allinput[i].innerHTML == "[请选择一个文件...]") {
+		            Allinput[i].innerHTML = "附件";
+		        }
+		    }
+		}
+	}
+}
+
+
+
+
+function openWindow(url, title, windowWidth, windowHeight, toolbar, menubar, scrollbars, resizable, location, status) {
+
+    var statusStr = "height=" + windowHeight + ", width=" + windowWidth + ", top=" + ((parseInt(screen.availHeight) - parseInt(windowHeight)) / 2) + ", left=" + ((parseInt(screen.availWidth) - parseInt(windowWidth)) / 2) + ",";
+
+    if (toolbar == true) {
+        statusStr += "toolbar=yes,"
+    }
+    else {
+        statusStr += "toolbar=no,"
+    }
+    if (menubar == true) {
+        statusStr += "menubar=yes,"
+    }
+    else {
+        statusStr += "menubar=no,"
+    }
+    if (scrollbars == true) {
+        statusStr += "scrollbars=yes,"
+    }
+    else {
+        statusStr += "scrollbars=no,"
+    }
+    if (resizable == true) {
+        statusStr += "resizable=yes,"
+    }
+    else {
+        statusStr += "resizable=no,"
+    }
+    if (location == true) {
+        statusStr += "location=yes,"
+    }
+    else {
+        statusStr += "location=no,"
+    }
+    if (status == true) {
+        statusStr += "status=yes"
+    }
+    else {
+        statusStr += "status=no"
+    }
+
+    window.open(url, title, statusStr)
+    return false;
+}

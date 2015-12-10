@@ -1,0 +1,85 @@
+﻿Imports System.Xml
+Partial Class Public_w_Public_Form_Show
+    Inherits System.Web.UI.Page
+    Dim Fid As Integer
+    Dim Base As New Base
+    Dim Base64 As New SunFun.Base64
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Try
+            FID = Request("FID")
+        Catch ex As Exception
+            FID = 0
+        End Try
+        Dim Tb As New Data.DataTable
+
+        '根据ＦＩＤ得到相关的信息        
+        Tb = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir,GY_MKXX.MKDM,XX_XMJC.XMDM,[View] FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & Fid & ")", "XX_XMJC")
+        If Tb.Rows.Count = 0 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+        Me.Title = Tb.Rows(0)(1)
+        Response.Write("<script language=javascript>" & vbCrLf & "var cid=" & Fid & ";" & vbCrLf & "</script>")
+        Dim MKMC As String = Tb.Rows(0).Item(1)
+        Dim XsnDir As String = Tb.Rows(0).Item(2).ToString.Trim
+        Dim MKDM As Integer = Tb.Rows(0).Item(3)
+
+        '判断有没有共享此表单出来
+        Tb = Base.DB.Table("Select PublicForm from GY_LCDM,GY_MKXX where GY_LCDM.LCDM=GY_MKXX.NoLcDm and PublicForm=1 And PublicList=1 and GY_MKXX.MKDM=" & MKDM, "dd")
+        If Tb.Rows.Count = 0 Then
+            Response.Write("你无权打开此表单")
+            Response.End()
+        End If
+
+        Dim uri As String = Server.MapPath("../../") & "TemplateLibrary\" & XsnDir & ".xsn"
+        If IO.File.Exists(uri) = False Then
+            Response.Write("模板不存在,或是已经被删除,请检查!")
+            Response.End()
+        End If
+        Dim PublicUrl As String = Request("publicurl")
+        Dim Form As InfoJetSoft.Service.InfoJetForm = Nothing
+        If IO.File.Exists(Server.MapPath("../../") & "\FormFolder\" & MKMC & "\" & Fid & ".xml") = False Then
+            Response.Write("表单不存在,或是已经被删除,请检查!")
+            Response.End()
+        End If
+        Dim xml As String = Base.pub.Text_File_Read(Server.MapPath("../../") & "\FormFolder\" & MKMC & "\" & Fid & ".xml")
+
+        Dim Fs As IO.FileStream = New IO.FileStream(uri, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read)  '当False为True是.向文件添加内容
+        Dim xsnContent(Fs.Length) As Byte
+        Dim strread As New IO.BinaryReader(Fs) '流处理要传输的文件
+        strread.Read(xsnContent, 0, xsnContent.Length)
+
+        '得到列表后,进行检测,模板是否已经注册过.
+        Dim uriList As String() = InfoJetSoft.Service.InfoJetService.List()
+        Dim RegFlag As Boolean = False
+        Dim i As Integer
+        For i = 0 To uriList.GetUpperBound(0)
+            If uriList(i).IndexOf("/" & XsnDir & ".xsn") > 0 Then
+                PublicUrl = uriList(i)
+                RegFlag = True
+                Exit For
+            End If
+        Next
+
+        If RegFlag = False Then
+            Try
+                PublicUrl = InfoJetSoft.Service.InfoJetService.Register(Context, xsnContent)
+            Catch ex As Exception
+                Response.Write("打开时出现意外,请稍候再试!如果再试还是不行,请联系管理员!")
+                Response.End()
+            End Try
+        End If
+
+        If Not PublicUrl Is Nothing Then
+            Try
+                Form = InfoJetSoft.Service.InfoJetService.BuildFormByXML(Context, PublicUrl, xml, "")
+            Catch ex As Exception
+                Base.Js.alert(Me, "打开出错,请稍候再试!如果再试还是不行,请联系管理员!")
+                xDocContent.Text = "打开出错,请稍候再试!如果再试还是不行,请联系管理员!"
+                Exit Sub
+            End Try
+            xDocContent.Text = Form.Xhtml
+        End If
+    End Sub
+
+End Class

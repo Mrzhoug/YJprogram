@@ -1,0 +1,124 @@
+﻿Imports System.Data
+Imports System.IO
+Imports System.Xml
+Partial Class manager_lctmanage_addlc
+    Inherits System.Web.UI.Page
+    Dim base As New Base
+    Dim lcid As String = ""
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+
+        ' If lcid.Length > 0 Then
+        Dim days As Integer = 0
+        Try
+            days = Convert.ToInt32(txtdays.Text.Trim)
+        Catch ex As Exception
+            days = 0
+        End Try
+        base.DB.Query("update lc_order set shapeid='" & base.SqlFilter(txttxid.Text.Trim) & "',lczt='" & base.SqlFilter(txtlczt.Text.Trim) & "',days=" & base.SqlFilter(days) & " where id=" & DropDownList3.SelectedValue & "")
+        base.Js.alert(Me, "修改成功")
+        'Else
+        '    base.DB.Query("update lc_order set shapeid='" & base.SqlFilter(txttxid.Text.Trim) & "',lczt='" & base.SqlFilter(txtlczt.Text.Trim) & "' where id=" & DropDownList3.SelectedValue & "")
+        '    base.Js.alert(Me, "修改成功")
+        'End If
+    End Sub
+    Dim xmldoc As New XmlDocument
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        If Not base.CheckUserAuthentication() Then
+            Response.Write("非法访问！")
+            Response.End()
+        End If
+        Try
+            lcid = base.SqlFilter(Request("lcid"))
+        Catch ex As Exception
+        End Try
+        lcid = 3
+        If lcid.Length > 0 Then
+            DropDownList3.Visible = True
+        Else
+            txtlcmc.Visible = True
+        End If
+        'getbm()
+        If Not IsPostBack Then
+            If lcid.Length > 0 Then
+                Dim td As New DataTable
+                td = base.DB.Table("select * from  lc_order  where id=" & lcid, "tb")
+                If td.Rows.Count > 0 Then
+                    'DropDownList2.SelectedValue = td.Rows(0)("lcbs").ToString
+                    loadlx()
+                    DropDownList3.SelectedValue = td.Rows(0)("id").ToString
+                    txttxid.Text = td.Rows(0)("shapeid").ToString
+                    txtlczt.Text = td.Rows(0)("lczt").ToString
+                    'Dim bm As String = td.Rows(0)("bm").ToString
+                    'ddlbm.SelectedValue = td.Rows(0)("bm").ToString
+                    txtdays.Text = td.Rows(0)("days").ToString
+                End If
+            End If
+        End If
+
+    End Sub
+
+    Private Sub loadlx()
+
+        Dim lcmctb As New DataTable
+        'Response.Write(DropDownList2.SelectedValue)
+        'Exit Sub
+        lcmctb = base.DB.Table("select id,lcname,bm,days from lc_order ", "lc")
+        DropDownList3.DataSource = lcmctb
+        DropDownList3.DataTextField = "lcname"
+        DropDownList3.DataValueField = "id"
+        'Dim bm As String = lcmctb.Rows(0)("bm").ToString
+        'ddlbm.SelectedValue = lcmctb.Rows(0)("bm").ToString
+        txtdays.Text = lcmctb.Rows(0)("days").ToString
+        DropDownList3.DataBind()
+    End Sub
+
+    Private Sub loadtxid()
+        If DropDownList3.SelectedValue.Length > 0 Then
+            Dim lcmctb As New DataTable
+            lcmctb = base.DB.Table("select lcname,shapeid,lczt,bm,days from lc_order where id=" & DropDownList3.SelectedValue & "", "lc")
+            If (lcmctb.Rows.Count > 0) Then
+                txttxid.Text = lcmctb.Rows(0)("shapeid").ToString
+                txtlczt.Text = lcmctb.Rows(0)("lczt").ToString
+                'Dim bm As String = lcmctb.Rows(0)("bm").ToString
+                'ddlbm.SelectedValue = lcmctb.Rows(0)("bm").ToString
+                txtdays.Text = lcmctb.Rows(0)("days").ToString
+            End If
+        End If
+
+
+    End Sub
+
+    'Protected Sub DropDownList2_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles DropDownList2.SelectedIndexChanged
+    '    If lcid.Length > 0 Then
+    '        loadlx()
+    '        loadtxid()
+    '    End If
+
+    'End Sub
+
+
+    ''' <summary>
+    ''' 根据XmlDocument对像.得到命名空间
+    ''' </summary>
+    ''' <param name="xmlDoc"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function GetXmlNamespaceManager(ByVal xmlDoc As XmlDocument) As XmlNamespaceManager
+
+        Dim names As XmlNamespaceManager = New XmlNamespaceManager(xmlDoc.NameTable)
+        names.AddNamespace("v", "urn:schemas-microsoft-com:vml")
+        names.AddNamespace("w", "http://schemas.openxmlformats.org/wordprocessingml/2006/main")
+        names.AddNamespace("pkg", "http://schemas.microsoft.com/office/2006/xmlPackage")
+        names.AddNamespace("o", "urn:schemas-microsoft-com:office:office")
+        Return names
+    End Function
+
+    Protected Sub DropDownList3_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles DropDownList3.SelectedIndexChanged
+
+        If lcid.Length > 0 Then
+            loadtxid()
+        End If
+
+    End Sub
+End Class

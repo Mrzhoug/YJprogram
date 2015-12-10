@@ -1,0 +1,54 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="PublicFolderPermissions.aspx.vb"
+    Inherits="manager_FileManager_PublicFolderPermissions" Theme="SkinFile" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>公共文件夹权限管理</title>
+    <link rel="Stylesheet" type="text/css" href="../../App_Themes/StyleSheet.css" />
+    <link rel="stylesheet" type="text/css" href="../../App_Themes/colorbox.css" />
+    <script type="text/javascript" src="../../Pub/jquery-1.8.0.js"></script>
+    <script type="text/javascript">
+
+        function PublicFolderPermissionsSetting(folderID) {
+            window.open('PublicFolderPermissionsSetting.aspx?folderID=' + folderID, '共享文件夹', 'height=550,width=1000,top=160,left=220,toolbar=no,menubar=no,scrollbars=yes,location=no, status=no');
+            return false;
+        }
+
+    </script>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <center>
+        <br />
+        <asp:Label ID="lb_path" runat="server" Text=""></asp:Label>
+        <br />
+        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="name,type,ThisID,isSharedFolder,isPublicFolder"
+            HorizontalAlign="Center" Width="98%" SkinID="GridViewSkin1" CellPadding="0" BorderWidth="1px"
+            AllowPaging="True">
+            <Columns>
+                <asp:BoundField HeaderText="序号">
+                    <ItemStyle HorizontalAlign="Center" Width="30px" />
+                </asp:BoundField>
+                <asp:BoundField DataField="name" HeaderText="名称" SortExpression="名称"></asp:BoundField>
+                <asp:BoundField DataField="CreateTime" HeaderText="最后修改时间">
+                    <ItemStyle HorizontalAlign="Center" Width="120px" />
+                </asp:BoundField>
+                <asp:TemplateField HeaderText="编辑权限">
+                    <ItemStyle HorizontalAlign="Center" Width="150px" />
+                </asp:TemplateField>
+                <asp:CommandField ShowSelectButton="True" Visible="False" />
+            </Columns>
+            <PagerSettings Visible="False" />
+        </asp:GridView>
+        <table style="width: 98%; height: 26px; text-align: center; vertical-align: middle;
+            background-color: #EBECEE;">
+            <tr>
+                <td id="PageBar" runat="server" align="center">
+                </td>
+            </tr>
+        </table>
+    </center>
+    </form>
+</body>
+</html>

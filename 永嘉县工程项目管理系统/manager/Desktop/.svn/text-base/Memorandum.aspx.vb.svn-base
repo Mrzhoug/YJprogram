@@ -1,0 +1,34 @@
+﻿
+Partial Class manager_Desktop_Memorandum
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim UserName As String
+    Dim UserID As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        UserName = Base.GetWebUserName
+        UserID = Base.GetUserID(UserName)
+        If Page.IsPostBack = False Then
+            Dim tb As New Data.DataTable
+            tb = Base.DB.Table("SELECT Content FROM Memorandum where UserID=" & UserID, "Memorandum")
+            If tb.Rows.Count = 0 Then
+                Txtcom.Value = "暂无备忘录"
+                Base.DB.Query("Insert into Memorandum(UserID,Content) values(" & UserID & ",'')")
+            Else
+                Txtcom.Value = Server.HtmlDecode(tb.Rows(0)("Content").ToString)
+            End If
+        End If
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim sql As String
+        Try
+            sql = "update Memorandum set content='" & Server.HtmlEncode(Base.SqlFilter(Txtcom.Value)) & "' where UserID=" & UserID
+            Base.DB.Query(sql)
+        Catch ex As Exception
+            Base.Js.WriteScript(Me, "window.parent.MessageBox('操作失败','更新备忘录失败');")
+            Exit Sub
+        End Try
+        Base.Js.WriteScript(Me, "window.parent.MessageBox('操作成功','更新备忘录成功');")
+    End Sub
+End Class

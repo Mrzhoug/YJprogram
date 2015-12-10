@@ -1,0 +1,61 @@
+﻿<%@ Master Language="VB" CodeFile="MasterPage.master.vb" Inherits="HomePage_MasterPage" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>主页</title>
+  <style type="text/css"> 
+<!-- 
+A { text-decoration: none} 
+--> 
+</style>
+</head>
+<body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+    <form id="form1" runat="server">
+<!-- ImageReady Slices (风格1.jpg) -->
+<table id="Table_01" width="1002" height="401" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td rowspan="5" style=" background:url(images/风格1_01.jpg);width:77; height:400"></td>
+<!--		<td style="background:url(images/页面1_03.gif); height:28; font-size: 10pt; color:Red;" colspan="2" >&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="this.style.behavior='url(#default#homepage)';this.setHomePage('http://www.sunfunsoft.com');"><span style="color:Red;TEXT-DECORATION: none">设为首页</span></a> |&nbsp; <a href="javascript:window.external.AddFavorite('http://www.sunfunsoft.com','温州集中申报统计系统')"><span style="color:Red;TEXT-DECORATION: none">加入收藏</span></a> |&nbsp; 简体版 |&nbsp; 英文版&nbsp;
+        </td> -->
+        <td colspan="2"></td>
+		<td rowspan="5" style="background:url(images/风格1_07.jpg);width:75;height:400"></td>
+	</tr>
+	<tr>
+		<td colspan="2" align="center" ><img src="images/logo.gif" /></td>
+	</tr> 
+	<tr>
+		<td height="24" background="images/页面2_05.gif" style="font-size: 10pt; color: #003333;" colspan="2" valign="bottom">&nbsp;&nbsp;&nbsp;&nbsp;
+		<a href="EnterprisesLogin.aspx"><span style="color:#bb2200;TEXT-DECORATION: none; font-weight:bold">网站首页</span></a> |&nbsp;
+<!--		<a href='EnterprisesReg.aspx'><span style="color:#bb2200;TEXT-DECORATION: none; font-weight:bold">企业注册</span></a> |&nbsp;  -->
+		<a href="UseAbout.aspx"><span style="color:#bb2200;TEXT-DECORATION: none; font-weight:bold">使用说明</span></a> |&nbsp; 
+		<a href="NewTable.aspx"><span style="color:#bb2200;TEXT-DECORATION: none; font-weight:bold">最新表单</span></a> |&nbsp; 
+		</td>
+	</tr>
+	<tr>
+		<td height="5" colspan="2" valign="bottom"></td>
+	</tr>
+	<tr>
+		<td colspan="2" valign="top" height="400">
+		<asp:contentplaceholder id="ContentPlaceHolder1" runat="server">
+        </asp:contentplaceholder>
+        </td>
+	</tr>
+	<tr><td colspan="4" align=center style="font-size: 10pt; color: blank;" ><hr />
+	 &nbsp;Copyright @ 2007 <a href="http://www.wzit.gov.cn">温州市信息化管理办公室管理</a> All Rights Reserved &nbsp; 
+        <br />地址：市行政管理中心主楼7楼&nbsp;&nbsp;&nbsp;&nbsp;联系电话：88967062&nbsp;&nbsp;&nbsp;&nbsp;技术支持：<a href="http://www.sun-fun.com.cn">sunfun</a>
+        <br /></td></tr>
+	<tr>
+		<td>
+			<img src="images/spacer.gif" width="77" height="1" alt=""></td>
+		<td>
+			<img src="images/spacer.gif" width="503" height="1" alt=""></td>
+		<td>
+			<img src="images/spacer.gif" width="347" height="1" alt=""></td>
+		<td>
+			<img src="images/spacer.gif" width="75" height="1" alt=""></td>
+	</tr>
+</table>
+<!-- End ImageReady Slices -->
+</form>
+</body>
+</html>

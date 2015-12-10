@@ -1,0 +1,118 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title>InfoJet Service</title>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <style>
+        td
+        {
+            font-size: 11px;
+            font-family: verdana;
+        }
+        input
+        {
+            font-size: 11px;
+            font-family: verdana;
+        }
+    </style>
+    <base target="_self">
+</head>
+<body style='padding: 0; margin: 0;' onload="doLoad()">
+
+    <script>
+        var InfoJet_AllowedFileTypes = null;
+        var InfoJet_AllowedFileTypeNames = "";
+        //CID 0641 //2010.11.06 //Begin
+        var opener = null;
+        var limitedFileTypesText = "Please upload only {0} files.";
+        //CID 0641 //2010.11.06 //End
+        function doLoad() {
+            document.title = "Attach File";
+            var parent = window.dialogArguments[0];
+            //CID 0844 //2011.03.24 //Begin
+            var action = parent.InfoJet_ResolveServiceAction();
+            //CID 0844 //2011.03.24 //End
+            document.forms["uploadform"].action = action;
+            //CID 0033 //2008.06.28 //Begin
+            document.getElementById("formId").value = window.dialogArguments[2];
+            //CID 0033 //2008.06.28 //End
+            //CID 0495 //2010.02.05 //Begin
+            var allowedFileTypes = window.dialogArguments[3];
+            if (allowedFileTypes != null && allowedFileTypes.length > 0) {
+                InfoJet_AllowedFileTypes = allowedFileTypes.split(";");
+                for (var i = 0; i < InfoJet_AllowedFileTypes.length; i++) {
+                    InfoJet_AllowedFileTypes[i] = "." + InfoJet_AllowedFileTypes[i].toLowerCase();
+                    if (i == (InfoJet_AllowedFileTypes.length - 1)) {
+                        InfoJet_AllowedFileTypeNames = InfoJet_AllowedFileTypeNames + InfoJet_AllowedFileTypes[i];
+                    } else {
+                        InfoJet_AllowedFileTypeNames = InfoJet_AllowedFileTypeNames + InfoJet_AllowedFileTypes[i] + ", ";
+                    }
+                }
+                var allowedFileTypesSpan = document.getElementById("allowedFileTypesSpan");
+                allowedFileTypesSpan.innerHTML = "(" + InfoJet_AllowedFileTypeNames + ")";
+            }
+            //CID 0495 //2010.02.05 //End
+            //CID 0641 //2010.11.06 //Begin
+            opener = parent;
+            UseLocalResources();
+            //CID 0641 //2010.11.06 //End
+        }
+        //CID 0641 //2010.11.06 //Begin
+        function UseLocalResources() { 
+            var res = opener.InfoJet_LocalResources["UploadFileDialogResources"];
+            if (res != null) {
+                document.title = res["Title"];
+                document.getElementById("buttonOK").value = res["OK"];
+                document.getElementById("buttonCancel").value = res["Cancel"];
+                document.getElementById("selectFileText").innerHTML = res["SelectFileText"];
+                limitedFileTypesText = res["LimitedFileTypesText"];
+                limitedFileTypesText = limitedFileTypesText.replace("{0}", InfoJet_AllowedFileTypeNames);
+            }
+        }
+        //CID 0641 //2010.11.06 //End
+        function doSubmit() {
+            var uploadFilePath = document.getElementById("UploadFile").value.toLowerCase();
+            if (InfoJet_AllowedFileTypes != null) {
+                for (var i = 0; i < InfoJet_AllowedFileTypes.length; i++) {
+                    var allowedFileType = InfoJet_AllowedFileTypes[i];
+                    if (uploadFilePath.lastIndexOf(allowedFileType) == (uploadFilePath.length - allowedFileType.length)) {
+                        document.forms["uploadform"].submit();
+                        return;
+                    }
+                }
+                alert(limitedFileTypesText);
+            } else {
+                document.forms["uploadform"].submit();
+            }
+        }
+        //CID 0495 //2010.02.05 //End
+    </script>
+
+    <table align="center" height="100%">
+        <form action='' id='uploadform' name='uploadform' method='post' enctype='multipart/form-data'>
+        <input type='hidden' name='xdoc_param_command' value='Update_File' id="Hidden1">
+        <input type='hidden' name='xdoc_param_uploadfile_type' value='xFileAttachment'>
+        <input type='hidden' name='xdoc_param_form_id' value='' id="formId">
+        <tr>
+            <td>
+                <span id="selectFileText">Please select a file to upload</span><span id="allowedFileTypesSpan"></span>:
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type='file' id='UploadFile' name='UploadFile' style='width: 456px'>
+            </td>
+        </tr>
+        <tr>
+            <td align="right">
+                <input type='button' value='    OK    ' id="buttonOK" name="Submit1" onclick="doSubmit();">&nbsp;&nbsp;<input
+                    type='button' value=' Cancel ' onclick='window.close();' id="buttonCancel" name="Button1">
+            </td>
+        </tr>
+        </form>
+    </table>
+</body>
+</html>

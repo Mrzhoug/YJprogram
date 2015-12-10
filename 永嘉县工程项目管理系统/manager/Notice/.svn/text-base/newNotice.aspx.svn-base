@@ -1,0 +1,151 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="newNotice.aspx.vb" Inherits="manager_Notice_newNotice" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>提醒管理</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+    <script type="text/javascript">
+        function selectUser(where) {
+            var obj1 = document.getElementById(where);         //ID列表
+            var resultstr = "";
+            resultstr = window.showModalDialog("../Dialog/UserDialog.aspx", "用户选择", "dialogWidth=300px;dialogHeight=450px");
+            var namelist = "";
+            var idlist = "";
+            var tmpid = "," + obj1.value;
+            if (resultstr != null) {
+                var tmp = resultstr.split(",");
+                for (var i = 0; i < tmp.length; i++) {
+                    if (tmp[i] != "") {
+                        var tmp1 = tmp[i].split("|");
+                        if (tmpid.indexOf(',' + tmp1[0] + ',') < 0) {
+                            namelist = namelist + tmp1[1] + ",";
+                            idlist = idlist + tmp1[0] + ",";
+                        }
+                    }
+                }
+            }
+            var obj = document.getElementById(where);
+            obj.value = namelist;
+
+            //obj1.value += idlist;
+        }
+        function addFormOwner(where) {
+            var obj1 = document.getElementById(where);
+            obj1.value += "[touser:表单创建者],";
+
+        }
+    </script>
+</head>
+<body>
+    <center>
+    <form id="form1" runat="server" style="width:570px">
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>提醒管理</span></a></li>
+            </ul>
+        </div>
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">                    
+                    <tr>
+                        <th align="right">
+                            提醒表单名：
+                        </th>
+                        <td width="70%" style="text-align:left">
+                            <asp:DropDownList ID="DDLFormList" runat="server" AutoPostBack="True" Width="150px" >
+                            </asp:DropDownList>
+                            <asp:CheckBox ID="CKisEnable" runat="server" Text="是否启用" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            提醒表单节点选择：
+                        </th>
+                        <td  style="text-align:left">
+                            <asp:DropDownList ID="DDLNodeList" runat="server" Width="150px">
+                                <asp:ListItem Value="0">默认</asp:ListItem>
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+
+
+                    <tr>
+                        <th>
+                            提醒条件类型：                        
+                        </th>
+                        <td>
+                            <asp:DropDownList ID="DDLNoticeType" runat="server" Width="150px" AutoPostBack=true>
+                                <asp:ListItem Value="typeNumber">数值型</asp:ListItem>
+                                <asp:ListItem Value="typeDate">日期型</asp:ListItem>
+                                <asp:ListItem Value="typeString">字符串型</asp:ListItem>                                
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>
+                            条件：
+                        </th>
+                        <td style="text-align:left">
+                            <asp:DropDownList ID="DDLSymbol" runat="server" Width="150px">
+                                <asp:ListItem Value="&gt;">大于</asp:ListItem>
+                                <asp:ListItem Value="&lt;">小于</asp:ListItem>
+                                <asp:ListItem Value="=">等于</asp:ListItem>
+                                <asp:ListItem Value="!=">不等于</asp:ListItem>
+                                <asp:ListItem Value="like">包含</asp:ListItem>                            
+                            </asp:DropDownList>
+                            <asp:TextBox ID="TBCondition" runat="server" Width="150px"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            提醒编辑：
+                        </th>
+                        <td  style="text-align:left">
+
+                            <asp:DropDownList ID="DDLSendContentNodeName" runat="server" Width="150px">
+                                <asp:ListItem Text="无"></asp:ListItem>
+                            </asp:DropDownList>
+                            <asp:TextBox id="TBSendContentText" runat="server" Width="150px"></asp:TextBox>
+        		            <asp:Button ID="btnContentAdd" runat="server" Text="添 加" CssClass="btnsubmit" />
+                            
+                           
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <th>
+                            提醒内容：
+                        </th>
+                        <td>                            
+                            <asp:Label ID="LBSendContent" runat="server" Text="空"></asp:Label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <asp:Button ID="btnContentClear" runat="server" Text="清 除" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>
+                            发送至：
+                        </th>
+                        <td  style="text-align:left">                            
+                            <asp:TextBox ID="TBToWhere" runat="server" onclick="selectUser('TBToWhere');" Width="150px"></asp:TextBox>
+                            <input id="Button2" type="button" value="表单发起者" onclick="addFormOwner('TBToWhere')" class="btnsubmit" />
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2" style="text-align:center">
+                            <asp:Button ID="BtnConfirm" runat="server" Text="确 定" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+    </center>
+</body>
+</html>

@@ -1,0 +1,186 @@
+﻿Imports System.Xml
+Partial Class manager_Forms_ReportsColManage
+    Inherits System.Web.UI.Page
+
+    Dim Base As New Base
+    Dim LCDM As String
+    Dim LcFlag As Boolean
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim i As Integer
+        LCDM = Request("LCDM")
+        If LCDM Is Nothing Then
+            Base.Js.alert(Me, "参数错误或非法访问")
+            Response.End()
+        End If
+        If Base.Js.IsInt(LCDM) = False Then
+            Base.Js.alert(Me, "参数错误或非法访问")
+            Response.End()
+        End If
+        Dim tb As New Data.DataTable
+
+
+        '这里判断LCDM是否有流程
+        tb = Base.DB.Table("SELECT LCMC,LCSM,Flag FROM GY_LCDM where LCDM=" & LCDM, "GY_LCDM")
+        If tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "功能模板有问题!")
+            Response.End()
+        Else
+            If IsDBNull(tb.Rows(0).Item(2)) = True Then
+                LcFlag = True
+            Else
+                If tb.Rows(0).Item(2) = 0 Then              ' Flag=1表示无流程
+                    LcFlag = True
+                Else
+                    LcFlag = False
+                End If
+            End If
+        End If
+
+        If LcFlag = False Then
+            '得到无流程的情况下的模块信息里的INFOPATH模板名.
+            tb = Base.DB.Table("select NoLcDM,XsnDir from [GY_MKXX] where NoLcDM = " & LCDM, "GY_MKXX")
+            If tb.Rows.Count <= 0 Then
+                Base.Js.alert(Me, "功能模板有问题!")
+                Exit Sub
+            End If
+        Else
+            '在有流程的情况找到模块的信息里的INFOPATH模板名
+            '先得到当前流程的,第一个状态
+            Dim XMZT As String
+            tb = Base.DB.Table("SELECT XMZT FROM GY_XMZT WHERE LCDM = " & LCDM, "GY_XMZT")
+            If tb.Rows.Count = 0 Then
+                Base.Js.closestr(Me, "该流程未找到状态.无法编辑显示列,你先添加状态!")
+                Exit Sub
+            Else
+                XMZT = tb.Rows(0).Item(0)
+            End If
+            '再根据状态.得到第一个功能模块
+            Dim MKDM As String
+            tb = Base.DB.Table("SELECT MKDM FROM GY_ZTMX where XMZT = " & XMZT, "XX_XMJC")
+            If tb.Rows.Count = 0 Then
+                Base.Js.alert(Me, "第一个状态中无功能模块.无法编辑显示列,请先添加功能模块!")
+                Exit Sub
+            Else
+                MKDM = tb.Rows(0).Item(0)
+            End If
+            '再根据模块得到INFOPATH模板名
+            tb = Base.DB.Table("SELECT NoLcDM, XsnDir FROM GY_MKXX WHERE MKDM = " & MKDM, "GY_MKXX")
+            If tb.Rows.Count <= 0 Then
+                Base.Js.alert(Me, "功能模板有问题!")
+                Exit Sub
+            End If
+        End If
+
+
+        Dim filename As String = Server.MapPath("../../") & "TemplateLibrary\" & tb.Rows(0).Item(1).ToString.Trim & "\template.xml"
+        If IO.File.Exists(filename) = False Then
+            Base.Js.alert(Me, "模板存问题,请刷新模板!")
+            Exit Sub
+        End If
+        Dim node As XmlNode = Base.XmlClass.GetXmlFile(filename)
+        Dim ListNodeName As String()
+        Try
+            ListNodeName = Base.XmlClass.GetNodeNameList(node.ChildNodes(0))
+        Catch ex As Exception
+            Base.Js.alert(Me, "模板存在问题,请不要最外的重复节添加节点.请修改模板重,重新上传并重新建功能.")
+            Exit Sub
+        End Try
+
+
+        NodeName.DataSource = ListNodeName
+        If Page.IsPostBack = False Then
+            NodeName.DataBind()
+            '恢复原来的字段样式
+            tb = Base.DB.Table("select LCDM,ShowName,NodeName from ReportsList_LCDM where LCDM = " & LCDM & " order by ID ", "ShowList_LCDM")
+            If tb.Rows.Count = 0 Then
+                tb = Base.DB.Table("select LCDM,ShowName,NodeName from ShowList_LCDM where LCDM = " & LCDM & " order by ID ", "ShowList_LCDM")
+            End If
+            If tb.Rows.Count = 0 Then
+                For i = 0 To NodeName.Items.Count - 1
+                    If i > 2 Then Exit Sub
+                    Dim Index As Integer = NodeName.Items(i).Text.LastIndexOf(":")
+                    ListBox1.Items.Add(NodeName.Items(i).Text.Substring(Index + 1).Replace("<", "").Replace(">", "") & "   |   " & NodeName.Items(i).Text)
+                Next
+            Else
+                For i = 0 To tb.Rows.Count - 1
+                    ListBox1.Items.Add(tb.Rows(i).Item(1).ToString.Trim & "   |   " & tb.Rows(i).Item(2).ToString.Trim)
+                Next
+            End If
+
+        End If
+        Button4.Attributes.Add("onclick", "return confirm('你确定保存吗？　如果原来存在样式，系统将清除原来的显示样式！')")
+
+    End Sub
+
+    Protected Sub ListAdd_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles ListAdd.Click
+        If ShowName.Text.Trim.Length = 0 Then
+            Base.Js.alert(Me, "请输入要显示字段的名称．")
+            Exit Sub
+        End If
+        ListBox1.Items.Add(ShowName.Text.Trim & "   |   " & NodeName.SelectedItem.Text)
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim TempIndex As Integer = ListBox1.SelectedIndex
+        If TempIndex = -1 Then
+            Base.Js.alert(Me, "你没有选中任何行")
+            Exit Sub
+        End If
+
+        If TempIndex = 0 Then
+            Base.Js.alert(Me, "你所选中的内容已经是第一条记录了,不能再向上移了")
+            Exit Sub
+        End If
+        '开始交换数据
+        Dim TempString As String
+        TempString = ListBox1.Items(TempIndex - 1).Text
+        ListBox1.Items(TempIndex - 1).Text = ListBox1.Items(TempIndex).Text
+        ListBox1.Items(TempIndex).Text = TempString
+        '复位到原来选中的那条记录
+        ListBox1.SelectedIndex = TempIndex - 1
+    End Sub
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+        Dim TempIndex As Integer = ListBox1.SelectedIndex
+        If TempIndex = -1 Then
+            Base.Js.alert(Me, "你没有选中任何行")
+            Exit Sub
+        End If
+
+        If TempIndex = ListBox1.Items.Count - 1 Then
+            Base.Js.alert(Me, "你所选中的内容已经是最后一条记录了,不能再向下移了")
+            Exit Sub
+        End If
+        '开始交换数据
+        Dim TempString As String
+        TempString = ListBox1.Items(TempIndex + 1).Text
+        ListBox1.Items(TempIndex + 1).Text = ListBox1.Items(TempIndex).Text
+        ListBox1.Items(TempIndex).Text = TempString
+        '复位到原来选中的那条记录
+        ListBox1.SelectedIndex = TempIndex + 1
+    End Sub
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+        Dim TempIndex As Integer = ListBox1.SelectedIndex
+        If TempIndex = -1 Then
+            Base.Js.alert(Me, "你没有选中任何行")
+            Exit Sub
+        End If
+        ListBox1.Items.RemoveAt(TempIndex)      '移除
+    End Sub
+
+    Protected Sub Button4_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button4.Click
+        Dim i As Integer
+        Dim TempString As String()
+        '先清除原来的显示样式　
+        Base.DB.Query("delete ReportsList_LCDM where LCDM = " & LCDM)
+        For i = 0 To ListBox1.Items.Count - 1
+            TempString = ListBox1.Items(i).Text.Split("|")
+            Try
+                Base.DB.Query("insert into ReportsList_LCDM(LCDM,ShowName,NodeName) values(" & LCDM & ",'" & TempString(0).Trim & "','" & TempString(1).Trim & "')")
+            Catch ex As Exception
+            End Try
+        Next
+        Base.Js.alert(Me, "已经保存成功.")
+    End Sub
+End Class

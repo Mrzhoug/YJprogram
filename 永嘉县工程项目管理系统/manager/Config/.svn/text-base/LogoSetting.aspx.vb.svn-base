@@ -1,0 +1,27 @@
+﻿
+Partial Class manager_Config_LogoSetting
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        '文件上传功能,大小为1M
+        If FileUpload1.PostedFile.ContentLength = 0 Then Exit Sub
+        Base.Upload.Sizes = 1000 * 1024
+        Base.Upload.Path = "../../images"
+        Base.Upload.FileType = "gif"
+        Base.Upload.ReWriteFlag = True
+        If Base.Upload.FileSaveAs(FileUpload1, "Logo.gif") = True Then
+            Image1.ImageUrl = "../../images/logo.gif"
+            Base.Js.alert(Me, "上传成功")
+        Else
+            Base.Js.alert(Me, Base.Upload.ReturnMessage)
+        End If
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        If System.IO.File.Exists(Server.MapPath("../../images/logo.gif")) = True Then
+            Image1.ImageUrl = "../../images/logo.gif"
+        Else
+            Image1.ImageUrl = "../../Menu/images/logo_100A.gif"
+        End If
+    End Sub
+End Class

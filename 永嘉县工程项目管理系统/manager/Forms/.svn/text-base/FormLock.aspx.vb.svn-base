@@ -1,0 +1,47 @@
+﻿
+Partial Class manager_Forms_FormLock
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim LCDM As Integer
+    Dim MKDM As Integer
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim Cid As Integer
+    Dim Lock As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Try
+            LCDM = Request("LCDM")
+            Cid = Request("Fid")
+            Lock = Request("Lock")
+        Catch ex As Exception
+            Base.Js.alert(Me, "参数错误或非法访问")
+            Exit Sub
+        End Try
+
+        '先得到MKDM
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("select MKDM from XX_XMJC where FID=" & Cid, "XX_XMJC")
+        If tb.Rows.Count <= 0 Then
+            Base.Js.alert(Me, "非法访问!")
+            Exit Sub
+        End If
+        MKDM = tb.Rows(0)(0)
+
+        If Base.GetUserHaveQX(UserID, MKDM) < 8 Then
+            Base.Js.alert(Me, "你无权使用锁定功能.你必须有删除权限才能使用!")
+            Exit Sub
+        End If
+
+        Base.DB.Query("update XX_XMJC set Lock=" & Lock & " where FID=" & Cid)
+        If Lock = 1 Then
+            Base.Js.alert(Me, "锁定操作成功", "../XJXM/ShowList.aspx?LCDM=" & LCDM)
+        Else
+            Base.Js.alert(Me, "解锁操作成功", "../XJXM/ShowList.aspx?LCDM=" & LCDM)
+        End If
+
+    End Sub
+End Class

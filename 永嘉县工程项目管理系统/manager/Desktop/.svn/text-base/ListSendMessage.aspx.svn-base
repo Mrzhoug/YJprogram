@@ -1,0 +1,171 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ListSendMessage.aspx.vb" Inherits="manager_Desktop_ListSendMessage" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>查看短消息具体内容</title>
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    
+    
+    <script  language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+    <script language="javascript" type="text/javascript" >
+     <!--
+     function aajs()
+     {
+       document.getElementById("jsfs").value='1';
+       document.getElementById('tdjs').className='dmenu';
+       document.getElementById('tdfs').className='dback';
+       document.getElementById('fs').style.display='none';
+       document.getElementById('js').style.display='block';
+     }
+     
+      function aafs()
+     {
+       document.getElementById("jsfs").value='2';
+       document.getElementById('tdjs').className='dback';
+       document.getElementById('tdfs').className='dmenu';
+       document.getElementById('js').style.display='none';
+       document.getElementById('fs').style.display='block';
+     }
+     
+     function bx()
+     {
+       document.getElementById('tdbx').className='dmenu';
+     }
+     
+     function mouseout()
+     {
+       document.getElementById('tdbx').className='dback';
+     }
+     
+     function fy()
+     {
+        var txt=document.getElementById('jsfs').value;
+        if(txt=="1")
+       {
+         document.getElementById('fs').style.display='none';
+         document.getElementById('js').style.display='block';
+         document.getElementById('tdjs').className='dmenu';
+        document.getElementById('tdfs').className='dback';
+        document.getElementById('tdbx').className='dback';
+       }
+       else if(txt=="2")
+       {
+        document.getElementById('js').style.display='none';
+        document.getElementById('fs').style.display='block';
+        document.getElementById('tdjs').className='dback';
+       document.getElementById('tdfs').className='dmenu';
+       document.getElementById('tdbx').className='dback';
+       }
+       else
+       {
+         document.getElementById('js').style.display='block';
+         document.getElementById('fs').style.display='none';
+          document.getElementById('tdjs').className='dmenu';
+        document.getElementById('tdfs').className='dback';
+        document.getElementById('tdbx').className='dback';
+       }
+     }
+     -->
+    </script>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div >
+      <table id="bt" border="0" cellpadding="0" cellspacing="0">
+      <tr align="center" height="20ps"><td >
+          &nbsp;&nbsp;&nbsp;
+      </td>
+       <td width="70ps" id="tdbx" class="dback" onclick="WriteSendMessage();" onmousemove="bx();this.style.cursor='hand';" onmouseout="mouseout();"><a href='javascript:void(0);' onclick="WriteSendMessage();" style="text-decoration: none;color: #0099cc;" hidefocus="hideFocus">编写消息</a></td>
+      <td width="70ps" id="tdjs" class="dmenu" onclick='javascript:aajs()' onmousemove="this.style.cursor='hand';"><a href='#' style="text-decoration: none; color: #0099cc;" onclick='javascript:aajs()' hidefocus="hideFocus">接收信息</a></td>
+      <td width="70ps" id="tdfs" class="dback" onclick='javascript:aafs()' onmousemove="this.style.cursor='hand';"><a href='#' style="text-decoration: none; color: #0099cc;" onclick='javascript:aafs()' hidefocus="hideFocus">发送信息</a></td>
+     </tr>
+      </table>
+        <table id="js" border="0" width="100%" cellpadding="0" cellspacing="0">
+        <tr><td>
+        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" 
+                BackColor="White" SkinID="GVSkin_ShowPage"
+            BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" DataSourceID="ReviceMessage"
+            ForeColor="Black" HorizontalAlign="Center" Width="98%" AllowPaging="True" 
+                OnPageIndexChanging="GridView1_PageIndexChanging" DataKeyNames="cid" 
+                OnDataBound="GridView1_DataBound" OnRowDeleting="GridView1_RowDeleting">
+            <FooterStyle BackColor="#CCCC99" />
+            <Columns>
+                <asp:BoundField DataField="YGXM" HeaderText="消息来源" SortExpression="YGXM" >
+                    <ItemStyle HorizontalAlign="Center" Width="80px" />
+                </asp:BoundField>
+                <asp:BoundField DataField="Title" HeaderText="接收信息" SortExpression="Title" />
+                <asp:BoundField DataField="ToIdList" HeaderText="发送名单" SortExpression="ToIdList" />
+                <asp:BoundField DataField="SendDate" HeaderText="时间" SortExpression="SendDate" >
+                    <ItemStyle HorizontalAlign="Center" Width="110px" />
+                </asp:BoundField>
+                <asp:TemplateField HeaderText="回复">
+                    <ItemStyle HorizontalAlign="Center" Width="30px" />
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="删除" ShowHeader="False">
+                    <ItemTemplate>
+                        <asp:LinkButton ID="LinkButton1" runat="server" CausesValidation="False" CommandName="Delete"  OnClientClick="return confirm('确定要删除这条信息吗？')" 
+                            Text="删除"></asp:LinkButton>
+                    </ItemTemplate>
+                    <ItemStyle Width="30px" />
+                </asp:TemplateField>
+            </Columns>
+            <RowStyle BackColor="White" />
+            <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+            <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Center" />
+            <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" />
+            <AlternatingRowStyle BackColor="White" />
+        </asp:GridView>
+        <asp:SqlDataSource ID="ReviceMessage" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT ToIdList,[SendMessage].[Cid], [SendMessage].[FromID], SendMessage.Title,[SendMessage].[Content], [SendMessage].[UpID], [SendMessage].[LookFlag],GY_YGDM.YGXM,[SendMessage].SendDate FROM [SendMessage],GY_YGDM WHERE ([ToID] = @ToID) and GY_YGDM.YGDM=[SendMessage].FromID  order by SendMessage.SendDate desc">
+            <SelectParameters>
+                <asp:Parameter DefaultValue="-1" Name="ToID" Type="Decimal" />
+            </SelectParameters>
+        </asp:SqlDataSource>
+        </td></tr>
+       </table>
+       <table id="fs" border="0" width="100%" cellpadding="0" cellspacing="0" style="display:none">
+       <tr><td>
+    <asp:GridView ID="GridView2" runat="server" AutoGenerateColumns="False" BackColor="White" SkinID="GVSkin_ShowPage"
+            BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" DataSourceID="SendMessage"
+            ForeColor="Black" HorizontalAlign="Center" Width="98%" AllowPaging="True" PageSize="10" DataKeyNames="cid" Font-Size="9pt">
+            <FooterStyle BackColor="#CCCC99" />
+            <Columns>
+                <asp:BoundField DataField="YGXM" HeaderText="发送对象" SortExpression="YGXM" >
+                    <ItemStyle HorizontalAlign="Center" Width="80px" />
+                </asp:BoundField>
+                <asp:BoundField DataField="Title" HeaderText="发送信息" SortExpression="Title" />
+                <asp:BoundField DataField="ToIdList" HeaderText="发送名单" SortExpression="ToIdList" />
+                <asp:BoundField DataField="SendDate" HeaderText="时间" SortExpression="SendDate" >
+                    <ItemStyle HorizontalAlign="Center" Width="110px" />
+                </asp:BoundField>
+                <asp:TemplateField HeaderText="查看">
+                    <ItemStyle HorizontalAlign="Center" Width="30px" />
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="删除" ShowHeader="False">
+                    <ItemTemplate>
+                        <asp:LinkButton ID="LinkButton1" runat="server" CausesValidation="False" CommandName="Delete" OnClientClick="return confirm('确定要删除这条信息吗？')" 
+                            Text="删除"></asp:LinkButton>
+                    </ItemTemplate>
+                    <ItemStyle Width="30px" />
+                </asp:TemplateField>
+            </Columns>
+            <RowStyle BackColor="White" />
+            <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+            <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Center" BorderColor="White" />
+            <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" />
+            <AlternatingRowStyle BackColor="White" />
+        </asp:GridView>
+        <asp:SqlDataSource ID="SendMessage" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT ToIdList,[SendMessage].[Cid], [SendMessage].[FromID], SendMessage.Title,[SendMessage].[Content], [SendMessage].[UpID], [SendMessage].[LookFlag],GY_YGDM.YGXM,[SendMessage].SendDate FROM [SendMessage],GY_YGDM WHERE ([ToID] = 0) and GY_YGDM.YGDM=[SendMessage].FromID and Fromid=@FromID  order by SendMessage.SendDate desc">
+            <SelectParameters>
+                <asp:Parameter DefaultValue="-1" Name="FromID" Type="Decimal" />
+            </SelectParameters>
+        </asp:SqlDataSource>
+        </td></tr></table>
+    </div>
+    <span id="spanjs" runat="server"></span>
+    <input id="jsfs" runat="server" value="" type="hidden" />
+    <div id="dv" runat="server"></div>
+    </form>
+</body>
+</html>

@@ -1,0 +1,12 @@
+﻿
+Partial Class NewDefault
+    Inherits System.Web.UI.Page
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '判断是否采用TABS的界面.如果不是.则跳回老的界面
+        Dim Base As New Base
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.Tabs").ToLower = "true" Then
+            Response.Redirect("Main.aspx")
+        End If
+    End Sub
+End Class

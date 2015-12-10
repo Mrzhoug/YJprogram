@@ -1,0 +1,242 @@
+﻿Imports System.Collections.Generic
+Imports System.IO
+
+
+Partial Class manager_FileManager_SharedFolderList
+    Inherits System.Web.UI.Page
+
+    Dim UserInfo As New UserInfo
+    Dim FileManager As New FileManager
+
+    Dim userName As String
+    Dim userID As Integer
+    Dim belongFolderID As Integer
+    Dim sharedFolderID As Integer
+
+    Dim fileID As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Try
+            belongFolderID = Convert.ToInt32(Request.QueryString("belongFolderID"))
+        Catch ex As Exception
+            belongFolderID = 0
+        End Try
+
+        Try
+            sharedFolderID = Convert.ToInt32(Request.QueryString("sharedFolderID"))
+        Catch ex As Exception
+            sharedFolderID = 0
+        End Try
+
+        Try
+            fileID = Convert.ToInt32(Request.QueryString("fileID"))
+        Catch ex As Exception
+            fileID = 0
+        End Try
+
+        '判断是否为非法访问
+        If sharedFolderID <> 0 Then
+            '如果主目录不为共享目录，那么为非法访问
+            If Not FileManager.IsSharedFolder(sharedFolderID) Then
+                Response.Write("非法访问")
+                Response.End()
+            End If
+
+            Dim sharedFilePath As String = FileManager.GetFolderPathByFolderID(sharedFolderID)
+            Dim belongFolderPath As String = FileManager.GetFolderPathByFolderID(belongFolderID)
+            '若子目录文件夹路径信息不包含主目录路径信息，那么为非法访问
+            If belongFolderPath.IndexOf(sharedFilePath) < 0 Then
+                Response.Write("非法访问")
+                Response.End()
+            End If
+
+        End If
+
+
+        '判断是否非法访问文件ID
+        If fileID <> 0 Then
+            Dim filePath As String = FileManager.GetFilePath(fileID)
+            Dim sharedFilePath As String = FileManager.GetFolderPathByFolderID(sharedFolderID)
+
+            If filePath.IndexOf(sharedFilePath) < 0 Then
+                Response.Write("非法访问")
+                Response.End()
+            End If
+
+            If File.Exists(filePath) Then
+                PrintContent(filePath)
+            Else
+                DoJS.alert(Me, "文件路径错误!")
+            End If
+        End If
+
+        userName = UserInfo.GetWebUserName()
+        userID = UserInfo.GetUserID(userName)
+
+        If Not IsPostBack Then
+
+
+            If sharedFolderID <> 0 And belongFolderID <> 0 Then
+                Dim urlStr As String = String.Empty
+                urlStr += "<b>&nbsp;&nbsp;&nbsp;当前路径:</b>["
+
+                Dim tempstr As String
+                Dim basePath As String
+                Dim currentPath As String
+                basePath = FileManager.GetFolderPathByFolderID(sharedFolderID).Replace(FileManager.GetFolderName(sharedFolderID) + "\", "")
+                currentPath = FileManager.GetFolderPathByFolderID(belongFolderID)
+                tempstr = currentPath.Replace(basePath, "")
+
+                Dim temp As String()
+                temp = tempstr.Split("\")
+
+                Dim tempPath As String = String.Empty
+                For i As Integer = 0 To temp.Length - 2
+                    tempPath += temp(i) + "\"
+                    '通过路径获取文件夹ID
+                    Dim folderID As Integer = FileManager.GetFolderIDByFolderPath(basePath + tempPath)
+                    urlStr += "<a href='SharedFolderList.aspx?belongFolderID=" + folderID.ToString() + "&sharedFolderID=" + sharedFolderID.ToString() + "'>" & temp(i) & "</a>\"
+                Next
+
+                urlStr += "]"
+                Dim thisBelongFolderID As String = FileManager.GetBelongFolderID(belongFolderID)
+                If Not thisBelongFolderID = 0 Then
+                    urlStr += "&nbsp;&nbsp;<a href='SharedFolderList.aspx?belongFolderID=" + thisBelongFolderID.ToString() + "&sharedFolderID=" + sharedFolderID.ToString() + "'>返回上一级目录</a><br/>"
+                Else
+                    urlStr += "&nbsp;&nbsp;<a href='SharedFolderList.aspx'>返回上一级目录</a><br/>"
+                End If
+                lb_path.Text = urlStr
+            End If
+
+            bind()
+        End If
+
+    End Sub
+
+
+    Sub bind()
+        Dim list As New List(Of MShowData)
+        list = FileManager.GetSharedData(userID, belongFolderID)
+
+
+        GridView1.DataSource = list
+        GridView1.DataBind()
+
+        PageBar.InnerHtml = DoJS.WriteGridViewFoot(GridView1, list.Count)
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+
+            Dim type As String
+            type = GridView1.DataKeys(i)("type")
+            GridView1.Rows(i).Cells(0).Text = i + 1
+
+            If type = "folder" Then
+
+                Dim folderID As Integer = GridView1.DataKeys(i)("ThisID")
+                Dim isSharedFolder As Boolean = Convert.ToBoolean(GridView1.DataKeys(i)("isSharedFolder"))
+                Dim _isPublicFolder As Boolean = Convert.ToBoolean(GridView1.DataKeys(i)("isPublicFolder"))
+
+                GridView1.Rows(i).Cells(2).Text = "--"
+                GridView1.Rows(i).Cells(3).Text = "文件夹"
+
+                If sharedFolderID = 0 Then
+                    GridView1.Rows(i).Cells(1).Text = "<a href='SharedFolderList.aspx?belongFolderID=" + folderID.ToString() + "&sharedFolderID=" + folderID.ToString() + "'>" + GridView1.Rows(i).Cells(1).Text + "</a>"
+                    GridView1.Rows(i).Cells(5).Text = UserInfo.GetUserRealName(FileManager.GetSharedFolderGiveUser(folderID))
+                Else
+                    GridView1.Rows(i).Cells(1).Text = "<a href='SharedFolderList.aspx?belongFolderID=" + folderID.ToString() + "&sharedFolderID=" + sharedFolderID.ToString() + "'>" + GridView1.Rows(i).Cells(1).Text + "</a>"
+                    GridView1.Rows(i).Cells(5).Text = UserInfo.GetUserRealName(FileManager.GetSharedFolderGiveUser(sharedFolderID))
+                End If
+
+
+                GridView1.Rows(i).Cells(1).Text = "<img src='../../images/FileManage/FOLDER.GIF'>&nbsp;" + GridView1.Rows(i).Cells(1).Text
+            Else
+                Dim fileID As Integer = GridView1.DataKeys(i)("ThisID")
+                Dim fileType As String = GridView1.Rows(i).Cells(3).Text
+                GridView1.Rows(i).Cells(1).Text = "<img src='../../images/FileManage/" + CheckFileType(fileType) + "'><a href='SharedFolderList.aspx?belongFolderID=" + belongFolderID.ToString() + "&sharedFolderID=" + sharedFolderID.ToString() + "&fileID=" + fileID.ToString() + "'>" + GridView1.Rows(i).Cells(1).Text + "</a>"
+
+                GridView1.Rows(i).Cells(5).Text = UserInfo.GetUserRealName(FileManager.GetSharedFolderGiveUser(sharedFolderID))
+
+                '获取文件大小
+                Dim fileSize As Integer = GridView1.Rows(i).Cells(2).Text
+                Dim fileSizeKB As Double = fileSize / 1024
+                GridView1.Rows(i).Cells(2).Text = fileSizeKB.ToString("f2") + "K"
+            End If
+        Next
+    End Sub
+
+    Function CheckFileType(ByVal FileType As String) As String
+        Dim Result As String
+        FileType = FileType.ToLower
+        Select Case FileType
+            Case ".doc"
+                Result = "DOC.GIF"
+            Case ".txt"
+                Result = "TXT.GIF"
+            Case ".zip"
+                Result = "ZIP.GIF"
+            Case ".rar"
+                Result = "ZIP.GIF"
+            Case ".xls"
+                Result = "XLS.GIF"
+            Case ".pic"
+                Result = "PIC.GIF"
+            Case ".gif"
+                Result = "PIC.GIF"
+            Case ".bmp"
+                Result = "PIC.GIF"
+            Case ".jpg"
+                Result = "PIC.GIF"
+            Case ".ppt"
+                Result = "PPT.GIF"
+            Case ".pdf"
+                Result = "pdf.gif"
+            Case ".wav"
+                Result = "WAV.GIF"
+            Case ".mdb"
+                Result = "MDB.GIF"
+            Case ".mpg"
+                Result = "MPG.GIF"
+            Case Else
+                Result = "other.gif"
+        End Select
+        Return Result
+    End Function
+
+    Sub PrintContent(ByVal FileName As String)
+        Dim stream As FileStream = New FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.Read)
+        Dim Type1 As String
+        Type1 = FileName.Substring(FileName.LastIndexOf("."))
+
+        Dim DownFileName As String
+        Dim idx As Integer = FileName.LastIndexOf("\")
+        If idx > 0 Then
+            DownFileName = FileName.Substring(idx + 1)
+        Else
+            DownFileName = FileName
+        End If
+
+        Try
+            Dim bufSize As Integer = stream.Length
+            Dim buf(bufSize) As Byte
+            Dim bytesRead As Integer = stream.Read(buf, 0, bufSize)
+            Dim UTF8 As Encoding = Encoding.GetEncoding("GB2312")
+            Response.ContentEncoding = UTF8
+            Response.AddHeader("Content-Disposition", "attachment; filename=" & HttpUtility.UrlEncode(DownFileName, Encoding.UTF8))
+            Response.AddHeader("Content-Length", bufSize.ToString())
+            Response.OutputStream.Write(buf, 0, bytesRead)
+            Response.End()
+        Catch ex As Exception
+            DoJS.alert(Me, "打开出错.")
+        End Try
+    End Sub
+
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        bind()
+    End Sub
+End Class

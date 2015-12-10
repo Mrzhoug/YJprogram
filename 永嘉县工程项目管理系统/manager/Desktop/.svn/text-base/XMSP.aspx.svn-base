@@ -1,0 +1,86 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="XMSP.aspx.vb" Inherits="manager_Desktop_XMSP" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>项目审阅</title>
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+<script language="javascript" type="text/javascript">
+<!--
+
+function InsertYJ(temp)
+{
+var obj = document.getElementById("TextBox2"); 
+obj.value = temp.options[temp.selectedIndex].text;
+
+}
+
+// -->
+</script>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+    <center><font style="font-size:9pt;">[<a href="javascript:void(0);" onclick="BackDesktop(1);window.close();">返回信息中心</a>]</font></center>
+        <table>
+            <tr>
+                <td valign="top" style="width: 30px">
+                </td>
+                <td rowspan="3" style="width: 17px" valign="top">
+        <asp:Panel ID="Panel4" runat="server" Height="190px" Width="350px" GroupingText="审阅说明">
+            <center>
+                &nbsp;&nbsp;
+            <asp:Button ID="Button4" runat="server" OnClick="Button4_Click" Text="查看审阅内容" />&nbsp;&nbsp;
+                <asp:Button ID="Button7" runat="server" Text="修改审阅内容" OnClick="Button7_Click" /></center>
+            <asp:TextBox ID="TextBox1" runat="server" Height="121px" Width="330px" TextMode="MultiLine"></asp:TextBox>
+            &nbsp;<br />
+                </asp:Panel>
+        <asp:Panel ID="Panel3" runat="server" Height="155px" Width="350px" GroupingText="审阅意见">
+            &nbsp;<asp:DropDownList ID="DropDownList1" runat="server" AutoPostBack="True" OnSelectedIndexChanged="DropDownList1_SelectedIndexChanged" Width="248px">
+                <asp:ListItem Value="0" Selected="True">请选择相应的操作</asp:ListItem>
+                <asp:ListItem Value="1">我同意就结束了</asp:ListItem>
+                <asp:ListItem Value="2">我同意,还要给别人看看</asp:ListItem>
+                <asp:ListItem Value="3">不关我的事</asp:ListItem>
+                <asp:ListItem Value="4">先修改再给我看</asp:ListItem>
+                <asp:ListItem Value="5">我不同意</asp:ListItem>
+                <asp:ListItem Value="6">以我的意见为准，其他不要管</asp:ListItem>
+            </asp:DropDownList>
+            <asp:Button ID="Button8" runat="server" Text="确定意见" OnClick="Button8_Click" /><br />
+            <asp:TextBox ID="TextBox2" runat="server" Height="80px" Width="328px" TextMode="MultiLine"></asp:TextBox>
+            &nbsp;&nbsp;&nbsp;<br />
+            &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+            </asp:Panel>
+            <asp:Panel ID="Panel5" runat="server" GroupingText="通知方式" Height="50px" HorizontalAlign="Center"
+                Width="350px">
+                <asp:CheckBox ID="CheckBox1" runat="server" Text="内部消息" Checked="true" />&nbsp;
+                <asp:CheckBox ID="CheckBox2" runat="server" Enabled="False" Text="手机短消息" />&nbsp;
+                <asp:CheckBox ID="CheckBox3" runat="server" Text="电子邮件" Enabled="False" />&nbsp;
+                <asp:CheckBox ID="CheckBox4" runat="server" Text="系统公告" /></asp:Panel>
+        <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>" SelectCommand="SELECT YGDM,YGXM FROM GY_YGDM where YGDM not in(select YGDM from GY_XMSP)" ></asp:SqlDataSource>
+                </td>
+                <td rowspan="3" valign="top">
+        <asp:Panel ID="Panel2" runat="server" BorderWidth="0px" Height="490px" Width="200px" GroupingText="转发名单" Visible="False" ScrollBars="Auto">
+        <asp:CheckBoxList ID="CheckBoxList2" runat="server" Width="180px" DataSourceID="Conn" DataTextField="KSMC" DataValueField="KSDM" RepeatColumns="1" Height="7px">
+        <asp:ListItem selected  value="0">请选择</asp:ListItem> 
+        <asp:ListItem value="1">我同意就结束了</asp:ListItem>
+        <asp:ListItem value="2">我同意,还要给别人看看</asp:ListItem>
+        <asp:ListItem value="3">不关我的事</asp:ListItem>
+        <asp:ListItem value="4">先修改再给我看</asp:ListItem>
+        <asp:ListItem value="5">我不同意</asp:ListItem>
+        <asp:ListItem value="6">以我的意见为准,其他不要管</asp:ListItem>
+        </asp:CheckBoxList>
+            </asp:Panel>
+                </td>
+                <td colspan="2" rowspan="3" valign="top">
+        <asp:Panel ID="Panel1" runat="server" BorderWidth="0px" Height="490px" Width="200px" GroupingText="审阅情况" BorderStyle="None" ScrollBars="Auto">
+        <asp:CheckBoxList ID="CheckBoxList1"
+            runat="server" Height="1px" Width="180px" RepeatColumns="1" Enabled="False" EnableTheming="True"></asp:CheckBoxList></asp:Panel>
+                </td>
+            </tr>
+
+        </table>
+        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+    </div>
+    </form>
+</body>
+</html>

@@ -1,0 +1,167 @@
+﻿
+Partial Class manager_Group_info_ShowGroupSetting
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Base.Checking("../manager/Group_info/group.aspx")
+    End Sub
+
+    Protected Sub GridView1_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs) Handles GridView1.RowDataBound
+        e.Row.Cells(e.Row.Cells.Count - 1).Attributes.Add("style", "display:none")
+        If e.Row.RowType = DataControlRowType.DataRow And GridView1.EditIndex = -1 Then
+            '鼠标效果
+            CType(e.Row.Cells(4).Controls(0), LinkButton).Attributes.Add("onclick", "return confirm('你确定要删除此组名吗?');")
+            e.Row.Attributes.Add("Onclick", "javascript:__doPostBack('Gridview1','Select$" & e.Row.RowIndex & "')")
+        End If
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i, j As Integer
+        Dim dt As New Data.DataTable
+        Dim MKMC As String
+        Dim LCDM As Integer
+
+        If GridView1.Rows.Count >= 30 Then              '当是测试版本时,显示组超过三十个就不能添加了
+            Button1.Enabled = False
+        End If
+
+        For i = 0 To GridView1.Rows.Count - 1
+            Dim GroupID As String = GridView1.DataKeys(i).Item(0).ToString
+
+
+            If GridView1.DataKeys(i).Item(1).ToString.Trim <> "" Then
+                LCDM = GridView1.DataKeys(i).Item(1)
+
+                dt = Base.DB.Table("select ztmc from GY_LCDM,Gy_xmzt ,Gy_ztmx where Gy_lcdm.Lcdm = Gy_xmzt.lcdm and gy_xmzt.xmzt = gy_ztmx.xmzt and gy_lcdm.lcdm = " & LCDM & " order by GY_XMZT.Orderby,GY_XMZT.XMZT", "GY_LCDM")
+                If dt.Rows.Count > 0 Then
+                    MKMC = "<font color=red>流程状态</font>：[" & dt.Rows(0)("ztmc").ToString.Trim & ""
+                    For j = 1 To dt.Rows.Count - 1
+                        MKMC += "] , [" & dt.Rows(j)("ztmc").ToString.Trim
+                    Next
+                    GridView1.Rows(i).Cells(1).Text = MKMC & "]"
+                Else
+                    GridView1.Rows(i).Cells(1).Text = "<空>"
+                End If
+
+                GridView1.Rows(i).Cells(2).Text = "流程组"
+                GridView1.Rows(i).Cells(4).Text = " -- "
+            Else
+                '组内功能
+                dt = Base.DB.Table("select GY_MKXX.MKDM, GY_MKXX.MKMC, GY_GROUP_INFO.GROUP_ID from [GY_MKXX],[GY_GROUP_INFO] " & _
+                                                              "where GY_MKXX.MKDM = GY_GROUP_INFO.MKDM and GY_GROUP_INFO.group_id =" & GroupID & " order by Gy_group_Info.OrderBy ", "GY_MKXX")
+                If dt.Rows.Count > 0 Then
+                    MKMC = "[" & dt.Rows(0)("mkmc").ToString.Trim & ""
+                    For j = 1 To dt.Rows.Count - 1
+                        MKMC += "] , [" & dt.Rows(j)("mkmc").ToString.Trim
+                    Next
+                    GridView1.Rows(i).Cells(1).Text = MKMC & "]"
+                Else
+                    GridView1.Rows(i).Cells(1).Text = "<空>"
+                End If
+                GridView1.Rows(i).Cells(2).Text = "<a href='javascript:void(0)' onclick='OnDblClickGroupFunSetting(" & GroupID & ")'>组内菜单</a>"
+            End If
+
+            If i <> GridView1.SelectedIndex Then
+                GridView1.Rows(i).Attributes.Add("onmouseover", "OnMouseOver(this)")
+                GridView1.Rows(i).Attributes.Add("onmouseout", "OnMouseOut(this)")
+                GridView1.Rows(i).Attributes("style") = "Cursor:hand"
+            Else
+                GridView1.Rows(i).Attributes.Clear()
+            End If
+
+        Next
+        If GridView1.SelectedIndex = 0 Then MoveUp.Enabled = False Else MoveUp.Enabled = True
+        If GridView1.SelectedIndex = GridView1.Rows.Count - 1 Then MoveDown.Enabled = False Else MoveDown.Enabled = True
+        If GridView1.SelectedIndex = -1 Then
+            MoveUp.Enabled = False
+            MoveDown.Enabled = False
+        End If
+    End Sub
+
+
+    Protected Sub GridView1_RowUpdating(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewUpdateEventArgs) Handles GridView1.RowUpdating
+        Dim GroupID As Integer = GridView1.DataKeys(e.RowIndex).Item(0)
+        Conn.UpdateCommand = "Update GY_Group set Group_Name = '" & e.NewValues(0) & "' where Group_ID = " & GroupID
+        Conn.Update()
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        '主要是在绑定的情况下，得不到SelectedIndex 所以在这里设置一下。再绑定一下。
+        GridView1.SelectedIndex = e.NewSelectedIndex
+        GridView1.DataBind()
+    End Sub
+
+
+    Protected Sub Button1_Click1(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim GroupName As String = TextBox1.Text.Trim
+        If GroupName.Length = 0 Then
+            Base.Js.WriteScript(Me, "window.parent.MessageBox('操作失败','组名不能为空！');")
+            Exit Sub
+        End If
+        '先检测是否在,只判断显示组。不判断权限组的组名
+        If Base.DB.GetRowCount("select Group_Id From Gy_Group Where Group_Name = '" & Base.SqlFilter(GroupName) & "' and Group_Kind=1", "Gy_Group") <= 0 Then
+            Base.DB.Query("Insert into Gy_Group( Group_name,Group_Kind) values ('" & Base.SqlFilter(GroupName) & "',1)")
+            GridView1.DataBind()
+            Base.Js.WriteScript(Me, "window.parent.MessageBox('操作成功','新建组" & Base.SqlFilter(GroupName) & "成功！');")
+        Else
+            Base.Js.WriteScript(Me, "window.parent.MessageBox('操作失败','当前已有重复的组名已经存在！');")
+        End If
+    End Sub
+
+    Protected Sub GridView1_RowDeleting1(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs) Handles GridView1.RowDeleting
+        Dim GroupID As String = GridView1.DataKeys(e.RowIndex).Item(0).ToString
+        Conn.DeleteCommand = "delete [GY_GROUP] where GROUP_ID=-1"
+        If Base.DB.Table("SELECT Group_ID FROM GY_GROUP_INFO where Group_ID= " & GroupID, "GY_YGQX").Rows.Count > 0 Then
+            Base.Js.WriteScript(Me, "window.parent.MessageBox('操作失败','删除失败，该组内还有模块,你先删除.！');")
+            Exit Sub
+        End If
+
+        If Base.DB.Table("SELECT YGDM FROM GY_YGQX where Group_Id = " & GroupID, "GY_YGQX").Rows.Count > 0 Then
+            Base.Js.WriteScript(Me, "window.parent.MessageBox('操作失败','删除失败，该组内还有用户,你先删除.！');")
+            Exit Sub
+        End If
+
+        Try
+            Conn.DeleteCommand = "delete [GY_GROUP] where GROUP_ID=" & GroupID
+            Conn.Delete()
+        Catch ex As System.Data.SqlClient.SqlException
+            Base.Js.WriteScript(Me, "window.parent.MessageBox('操作失败','删除失败，该组内还有模块或用户,你先删除.！');")
+            Exit Sub
+        Catch ex As Exception
+            Base.Js.WriteScript(Me, "window.parent.MessageBox('操作失败','删除失败,请稍后再试！');")
+            Exit Sub
+        End Try
+        Base.Js.WriteScript(Me, "window.parent.MessageBox('操作成功','删除显示组成功！');")
+    End Sub
+
+    Protected Sub MoveUp_Click1(ByVal sender As Object, ByVal e As System.EventArgs) Handles MoveUp.Click
+        Dim SelectIndex As Integer = GridView1.SelectedIndex
+        Dim i, OrderBy As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            OrderBy = (i + 1) * 10
+            If i = SelectIndex Then OrderBy -= 15
+            Base.DB.Query("Update GY_GROUP set Orderby=" & OrderBy & " where GROUP_ID = " & GridView1.DataKeys(i).Item(0))
+        Next
+        GridView1.SelectedIndex -= 1
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub MoveDown_Click1(ByVal sender As Object, ByVal e As System.EventArgs) Handles MoveDown.Click
+        Dim SelectIndex As Integer = GridView1.SelectedIndex
+        Dim i, OrderBy As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            OrderBy = (i + 1) * 10
+            If i = SelectIndex Then OrderBy += 15
+            Base.DB.Query("Update GY_GROUP set Orderby=" & OrderBy & " where GROUP_ID = " & GridView1.DataKeys(i).Item(0))
+        Next
+        GridView1.SelectedIndex += 1
+        GridView1.DataBind()
+    End Sub
+End Class

@@ -1,0 +1,75 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="DYList.aspx.vb" Inherits="manager_Desktop_DYList" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>订阅列表</title>
+    <link rel="Stylesheet" type="text/css" href="../../App_Themes/StyleSheet.css" />
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+</head>
+<script language="javascript" type="text/javascript" >
+<!--
+function show(objname)
+{
+    var obj = document.getElementById(objname);
+    if (obj.style.display=="")
+    {
+        obj.style.display= "none";
+    }
+    else
+    {   
+        obj.style.display= "";
+    }
+}
+-->
+</script>
+<body>
+    <form id="form1" runat="server">
+    <br />
+        &nbsp;&nbsp;&nbsp;关键字：<asp:TextBox ID="TextBox1" runat="server" Width="384px"></asp:TextBox>&nbsp;
+        <asp:Button ID="Button1" runat="server" Text=" 查 询 " OnClick="Button1_Click" CssClass="btnsubmit" />&nbsp;
+        <input id="Button2" type="button" value="订阅设置" onclick="window.location.href='OrderForm.aspx';" class="btnsubmit" />&nbsp;
+        <asp:Button ID="Button3" runat="server" Text="删除记录" OnClientClick="return confirm('你确定要删除所选记录吗？')"  CssClass="btnsubmit" />
+        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" BackColor="White" SkinID="GVSkin_ShowPage"
+            BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" DataKeyNames="CID,DLMC,MKDM,XMDM,msgid"
+            DataSourceID="Conn" ForeColor="Black"  Width="98%" HorizontalAlign="Center" AllowPaging="True" PageSize="15" Font-Size="9pt">
+            <FooterStyle BackColor="#CCCC99" />
+            <RowStyle BackColor="White" />
+            <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+            <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Right" />
+            <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" />
+            <AlternatingRowStyle BackColor="White" />
+            <Columns>
+                <asp:TemplateField>
+                    <HeaderTemplate>
+                        <asp:CheckBox ID="CheckBox2" runat="server" onclick="SelectCheckboxAll(this,'GridView1')" />
+                    </HeaderTemplate>
+                    <ItemStyle HorizontalAlign="Center" Width="25px" />
+                    <ItemTemplate>
+                        <asp:CheckBox ID="CheckBox1" runat="server" />
+                    </ItemTemplate>
+                </asp:TemplateField>
+                <asp:BoundField DataField="YGXM" HeaderText="操作者" SortExpression="YGXM" >
+                    <ItemStyle HorizontalAlign="Center" />
+                </asp:BoundField>
+                <asp:BoundField DataField="MKMC" HeaderText="表单名称" SortExpression="MKMC" >
+                    <ItemStyle HorizontalAlign="Center" />
+                </asp:BoundField>
+                <asp:BoundField DataField="OpDate" HeaderText="操作日期" SortExpression="OpDate" >
+                    <ItemStyle HorizontalAlign="Center" />
+                </asp:BoundField>
+                <asp:TemplateField HeaderText="显示自定义列（点击可显示多列)"></asp:TemplateField>
+                <asp:CommandField SelectText="查看" ShowSelectButton="True" >
+                    <ItemStyle HorizontalAlign="Center" Width="25px" />
+                </asp:CommandField>
+            </Columns>
+        </asp:GridView>
+        <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT Order_Form_Log.CID, Order_Form_Log.UserID, GY_LCDM.LCMC,GY_MKXX.MKMC,Order_Form_Log.LCDM, GY_YGDM.YGXM, Order_Form_Log.XMDM,  Order_Form_Log.MKDM, Order_Form_Log.OpDate,DLMC,Order_Form_Log.msgid FROM Order_Form_Log, GY_LCDM,GY_MKXX,GY_YGDM where GY_YGDM.YGDM = Order_Form_Log.OpUserID and  GY_LCDM.LCDM = Order_Form_Log.LCDM  and GY_MKXX.MKDM = Order_Form_Log.MKDM and Order_Form_Log.UserID = @UserID order by Order_Form_Log.CID desc,Order_Form_Log.LookFlag">
+            <SelectParameters>
+                <asp:Parameter DefaultValue="-1" Name="UserID" />
+            </SelectParameters>
+        </asp:SqlDataSource>
+    
+    </form>
+</body>
+</html>

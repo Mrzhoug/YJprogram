@@ -1,0 +1,61 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="UserDialog.aspx.vb" Inherits="manager_Dialog_UserDialog" %>
+<%@ OutputCache Duration="3" VaryByParam="Key" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>用户选择</title>
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div id="Okbutton1"><center><input onclick="testok();" type='button' value=' 添 加 ' />&nbsp;&nbsp;<input onclick="testAllok();" type='button' value=' 全 选 ' /></center></div>
+    <div>关键字：<input id="Text1" type="text" onkeyup="changes(this);" onchange="changes(this);" /></div>
+    <div id="outstr" runat="server"></div>
+    <div id="Okbutton2"><center><input onclick="testok();" type='button' value=' 添 加 ' />&nbsp;&nbsp;<input onclick="testAllok();" type='button' value=' 全 选 ' /></center></div>
+    </form>
+</body>
+</html>
+<script language="javascript" type="text/javascript">
+    function changes(obj)
+    {
+        if (obj.value=="") { return;}
+        initXMLHttp();
+        var retstr = GetStreamFile("UserDialog.aspx?Key=" + escape(obj.value) + "%20");
+        var obj1 = document.getElementById("outstr");
+        if ( retstr!=null )  obj1.innerHTML = retstr;
+    }
+    function testok()
+    {
+        var result = "";
+        for(var   i=0;i<document.form1.elements.length;i++)
+        {   
+            var e=document.form1.elements[i];   
+            if (e.type == 'checkbox')
+            {   
+                if (e.checked == true) 
+                {
+                    result = result + e.value + ",";
+                }
+            }    
+        }   
+        window.returnValue = result;
+        window.close();
+    }
+    function testAllok()
+    {
+        var result = "";
+        for(var   i=0;i<document.form1.elements.length;i++)
+        {   
+            var e=document.form1.elements[i];   
+            if (e.type == 'checkbox')
+            {   
+                result = result + e.value + ",";
+            }    
+        }   
+        window.returnValue = result;
+        window.close();
+    }
+    
+    </script>

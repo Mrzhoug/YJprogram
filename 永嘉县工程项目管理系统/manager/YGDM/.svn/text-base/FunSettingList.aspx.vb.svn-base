@@ -1,0 +1,27 @@
+﻿
+Partial Class manager_YGDM_FunSettingList
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking("../manager/YGDM/Default.aspx")
+
+        Dim Group_ID As Integer
+        Try
+            Group_ID = Request("groupid")
+        Catch ex As Exception
+            Group_ID = 0
+        End Try
+
+        Dim dr As DataRow
+        dr = Base.DB.Row("select group_name from gy_group where group_id = " & Group_ID, "GroupInfo")
+
+        If dr Is Nothing Then
+            Base.Js.closestr(Me, "没有您想查看的组，请从正确途径打开些网页！")
+        Else
+            group_name.InnerHtml = "【" & dr.Item("group_name") & "】组"
+        End If
+        Conn1.SelectParameters("GroupID").DefaultValue = Group_ID
+
+    End Sub
+End Class

@@ -1,0 +1,44 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="updatefile.aspx.vb" Inherits="manager_Personbag_updatefile" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link href="../../Pub/Uploadify/uploadify.css" rel="Stylesheet" type="text/css" />
+ <script type="text/javascript" src="../../Pub/Uploadify/jquery-1.8.0.js"></script>
+    <script type="text/javascript" src="../../Pub/Uploadify/jquery.uploadify.js"></script>
+<script language="javascript" type="text/javascript" >
+<!--
+    $(function () {
+        $("#uploadify").uploadify({
+            height: 25,
+            width: 75,
+            swf: '../../Pub/Uploadify/uploadify.swf',
+            uploader: 'FormAnnexHandler2.aspx',
+            formData: {
+                'flpath': '<%=flpath %>' 
+                
+            },          
+            buttonText: '选择文件',
+            cancelImg: true,
+            onQueueComplete: function (queueData) {
+                alert('上传成功');
+                //window.location = window.location;
+                window.opener.location.reload();
+            },
+            onError: function (event, queueID, fileObj) {
+                alert("文件:" + fileObj.name + "上传失败");
+            }
+        });
+    });
+    </script>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title></title>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>   
+     <input type="button" name="uploadify" id="uploadify"/>
+      如果无法正常使用，请先安装Flash插件。<a href="../../install_flash_player_ax.exe">点击下载</a>
+    </div>
+    </form>
+</body>
+</html>

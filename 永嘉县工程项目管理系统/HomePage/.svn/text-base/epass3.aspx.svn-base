@@ -1,0 +1,35 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="epass3.aspx.vb" Inherits="HomePage_epass3" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>无标题页</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <center>
+                    <asp:Label ID="Label2" runat="server" Text="您的密码保护问题："></asp:Label>
+                    <asp:DropDownList ID="DropDownList1" runat="server" Width="167px">
+                        <asp:ListItem>请选择一个问题</asp:ListItem>
+                        <asp:ListItem>我就读的第一所学校名称？</asp:ListItem>
+                        <asp:ListItem>我最喜欢的休闲运动是什么？</asp:ListItem>
+                        <asp:ListItem>我最喜欢的运动员是谁？</asp:ListItem>
+                        <asp:ListItem>我最喜欢的物品的名称？</asp:ListItem>
+                        <asp:ListItem>我最喜欢的歌曲？</asp:ListItem>
+                        <asp:ListItem>我最喜欢的食物？</asp:ListItem>
+                        <asp:ListItem>我最爱的人的名字？</asp:ListItem>
+                        <asp:ListItem>我最爱的电影？</asp:ListItem>
+                        <asp:ListItem>我妈妈的生日？</asp:ListItem>
+                        <asp:ListItem>我的初恋日期？</asp:ListItem>
+                    </asp:DropDownList>
+        <br />
+                    <asp:Label ID="Label3" runat="server" Text="您  的  答  案："></asp:Label>
+                    <asp:TextBox ID="txtAnswer" runat="server" Width="119px"></asp:TextBox>
+        <br />
+                    <asp:Button ID="reg" runat="server" Text="设置" /><br />
+        <br />
+       </ center>
+    </form>
+</body>
+</html>

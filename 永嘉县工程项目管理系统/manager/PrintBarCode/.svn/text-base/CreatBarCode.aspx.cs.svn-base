@@ -1,0 +1,32 @@
+﻿using System;
+using GenCode128;
+using System.Drawing;
+
+public partial class Manage_PrintBarCode_CreatBarCode : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        string barcode = Request.QueryString["barcode"].ToString();     
+
+        System.IO.MemoryStream ms = new System.IO.MemoryStream();
+        System.Drawing.Image myimg = Code128Rendering.MakeBarcodeImage(barcode, 1, true);
+
+        Bitmap bt = new Bitmap(myimg.Width + 42, myimg.Height + 12);
+
+        Graphics g = Graphics.FromImage(bt);
+        g.Clear(Color.White);
+        Font font = new Font("宋体", 10);
+
+        SolidBrush sbrush = new SolidBrush(Color.Black);
+        g.DrawImage(myimg, new PointF(22, 0));
+
+        string str = "SN:" + barcode;
+        g.DrawString(str, font, sbrush, new PointF(50, myimg.Height + 1));   
+        bt.Save(ms, System.Drawing.Imaging.ImageFormat.Gif);
+        Response.ClearContent();
+        Response.ContentType = "image/Gif";
+        Response.BinaryWrite(ms.ToArray());
+        Response.End();
+       // printbc.InnerText = "<script language='JavaScript' type='text/javascript'>preview();</script>";
+    }
+}

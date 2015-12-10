@@ -1,0 +1,74 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Login.aspx.vb" Inherits="Login" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>登陆界面</title>
+</head>
+<body style="margin:0">
+   <form id="form1" runat="server">
+    <table border="0" width="1002" height="560" cellpadding="0" cellspacing="0" style="background-image:url(images/skin1/back.gif); ">
+    <tr><td style="height: 274px">&nbsp;</td></tr>
+    <tr><td align="right">
+        <table border="0" cellpadding="0" cellspacing="0" style="width:456px;">
+        <tr>
+          <td align="left"><input id="UName" name="UName" type="text" size="17" maxlength="16" />
+          </td><td width="182">&nbsp;</td>
+        </tr>
+        </table>
+    </td></tr>
+	<tr><td height="7"></td></tr>
+	<tr><td align="right">
+        <table border="0" cellpadding="0" cellspacing="0" style="width:456px;">
+        <tr><td align="left"><input type="password" name="pwd" id="pwd" style="width:135px;" maxlength="16"  onkeydown="EnterRedirect();" />
+		</td><td width="182">&nbsp;</td></tr>
+        </table>
+    </td></tr>
+    <tr><td height="3"></td></tr>
+	<tr><td align="right">
+        <table border="0" cellpadding="0" cellspacing="0" style="width:456px; height:24px;">
+            <tr>
+            <td align="left"><input  onkeydown="EnterRedirect();" id="ImageCode" name="ImageCode" type="text" style="width:75px" maxlength="16" runat="server" /><asp:Image ID="Image1" runat="server" Height="22px" ImageUrl="ImageCode.aspx" />
+            </td><td>&nbsp;</td>
+            </tr>
+        </table>
+    </td></tr>
+	<tr><td height="6"></td></tr>
+	<tr><td align="right">
+		<table border="0" cellpadding="0" cellspacing="0" style="width:478px;">
+        <tr><td align="right" width="63"><a href="javascript:FormSubmit()"><img src="images/skin1/submit.gif" border="0" /></a>
+		</td><td align="left" valign="top"><a href="javascript:form1.reset()"><img src="images/skin1/reset.gif" border="0" /></a></td></tr>
+        </table>
+	</td></tr>
+	
+	<tr><td height="185">&nbsp;</td></tr>
+    </table>
+    </form>
+
+</body>
+</html>
+<script language="javascript" type="text/javascript" >
+    var uname =document.getElementById("UName");
+    uname.focus(); 
+	
+function FormSubmit()
+{
+	var Un = form1.UName.value;
+	var Pd = form1.pwd.value;
+	if (Un=="" || Pd=="")
+	{
+		alert("用户名和密码不能为空!");
+		return false;
+	}
+	form1.submit();
+	
+}
+
+function   EnterRedirect()
+{
+	if(event.keyCode==13)
+		FormSubmit();
+}
+
+</script>

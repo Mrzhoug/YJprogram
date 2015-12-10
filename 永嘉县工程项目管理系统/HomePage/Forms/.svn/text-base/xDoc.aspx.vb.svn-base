@@ -1,0 +1,21 @@
+﻿
+Partial Class HomePage_Forms_xDoc
+    Inherits System.Web.UI.Page
+
+    Dim Base As New Base
+
+    Protected Overrides Sub Render(ByVal output As HtmlTextWriter)
+        Dim PublicUrl As String = Context.Request.Params("xdoc_param_xsn_uri")
+        Base.InfoJetRegister(PublicUrl, Server.MapPath("../../"))
+        Try
+            Dim form As InfoJetSoft.Service.InfoJetForm = InfoJetSoft.Service.InfoJetService.UpdateForm(Context, "")
+            output.Write(form.Xhtml)
+            output.Close()
+        Catch ex As Exception
+            Response.Write(ex.Message + "<br>")
+            Response.Write(ex.StackTrace)
+            output.Close()
+        End Try
+    End Sub
+
+End Class

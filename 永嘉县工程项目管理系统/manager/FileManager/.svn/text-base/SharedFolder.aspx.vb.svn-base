@@ -1,0 +1,157 @@
+﻿
+Partial Class manager_FileManager_SharedFolder
+    Inherits System.Web.UI.Page
+
+    Dim UserInfo As New UserInfo
+    Dim FileManager As New FileManager
+
+    Public currentUserID As String
+    Public folderID As Integer
+
+    Dim chk As New Web.UI.WebControls.CheckBox
+
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        currentUserID = UserInfo.GetUserID(UserInfo.GetWebUserName())
+        Try
+            folderID = Convert.ToInt32(Request.QueryString("folderID"))
+        Catch ex As Exception
+            folderID = 0
+        End Try
+
+        If currentUserID = 0 Or folderID = 0 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+
+        bind()
+    End Sub
+
+
+    Sub bind()
+        
+        Dim GetUserID As New ArrayList
+
+
+        If FileManager.IsSharedFolder(folderID) Then
+            GetUserID = FileManager.GetShareFolderUser(folderID)
+
+            If GetUserID.Count = 1 And GetUserID(0) = "*" Then
+                selectALL.Attributes("checked") = "checked"
+            End If
+        End If
+
+        Dim str As String = String.Empty
+
+        Dim dt As New DataTable
+        Dim sqlstr As String
+
+        sqlstr = "select * from gy_ksdm"
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+        If dt.Rows.Count > 0 Then
+
+            For i As Integer = 0 To dt.Rows.Count - 1
+                Dim ksdm As Integer = dt.Rows(i).Item("ksdm")
+                Dim ksmc As String = dt.Rows(i).Item("ksmc").ToString()
+
+                Dim cb As New CheckBox
+                cb.Text = ksmc
+
+                str = str & "    <tr>" & vbCrLf
+                str = str & "        <th style='text-align:left' colspan='3'>" & vbCrLf
+                str = str & "            <input id='CB_KSDM_" & ksdm & "' type='checkbox' value='" & ksdm & "' class='KSDM' onclick=""selectBelongCB('CB_KSDM_" & ksdm & "','CLASS_KSDM_" & ksdm & "')""/><label for='CB_KSDM_" & ksdm & "'>" & ksmc & "</label>" & vbCrLf
+                str = str & "            <a href='#' onclick='javascript:opentest(" & i & ")'>展开</a>"
+                str = str & "        </th>" & vbCrLf
+                str = str & ""
+                str = str & "    </tr>" & vbCrLf
+
+                Dim dtUser As New DataTable
+                sqlstr = "select * from gy_ygdm where ssks=" & ksdm
+                dtUser = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+                For j As Integer = 0 To dtUser.Rows.Count - 1
+
+                    Dim userID As Integer
+                    Dim userName As String
+                    Dim userLoginName As String
+                    userID = Convert.ToInt32(dtUser.Rows(j).Item("ygdm"))
+                    userName = dtUser.Rows(j).Item("ygxm").ToString()
+                    userLoginName = dtUser.Rows(j).Item("dlmc").ToString()
+
+                    If j Mod 3 = 0 Then
+                        str = str & "    <tr class='test" & i & "'>" & vbCrLf
+                    End If
+
+                    str = str & "        <td>" & vbCrLf
+                    str = str & "        <div class='div" & i & "'>" & vbCrLf
+                    str = str & "           <input id='CB_YGDM_" & userID & "' class='CLASS_KSDM_" & ksdm & "' type='checkbox' value='" & userID & "' onclick=""unselectCB('CB_YGDM_" & userID & "','CB_KSDM_" & ksdm & "')"""
+
+                    If GetUserID.Contains(userID.ToString()) Then
+                        str = str & " checked='checked'"
+                    End If
+
+                    str = str & "            /><label for='CB_YGDM_" & userID & "'>" & userName & "</label>" & vbCrLf
+                    str = str & "        </div>"
+                    str = str & "        </td>" & vbCrLf
+
+                    If j Mod 3 = 2 Then
+                        str = str & "    </tr>" & vbCrLf
+                    End If
+                    If j Mod 3 <> 2 And j = dtUser.Rows.Count - 1 Then
+                        str = str & "    </tr>" & vbCrLf
+                    End If
+                Next
+            Next
+        End If
+
+        str = str & "    <tr>" & vbCrLf
+        str = str & "        <th style='text-align:left' colspan='3'>" & vbCrLf
+        str = str & "            <input id='CB_KSDM_0' type='checkbox' value='0' class='KSDM' onclick=""selectBelongCB('CB_KSDM_0','CLASS_KSDM_0')"" /><label for='CB_KSDM_0'>未分组</label>" & vbCrLf
+        str = str & "        </th>" & vbCrLf
+        str = str & ""
+        str = str & "    </tr>" & vbCrLf
+
+        sqlstr = "select * from gy_ygdm where ssks is null"
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+        For i As Integer = 0 To dt.Rows.Count - 1
+            Dim userID As Integer
+            Dim userName As String
+            Dim userLoginName As String
+
+            userID = Convert.ToInt32(dt.Rows(i).Item("ygdm"))
+            userName = dt.Rows(i).Item("ygxm").ToString()
+            userLoginName = dt.Rows(i).Item("dlmc").ToString()
+
+            If i Mod 3 = 0 Then
+                str = str & "    <tr>" & vbCrLf
+            End If
+
+
+            str = str & "        <td>" & vbCrLf
+            str = str & "           <input id='CB_YGDM_" & userID & "' class='CLASS_KSDM_0' type='checkbox' value='" & userID & "' onclick=""unselectCB('CB_YGDM_" & userID & "','CB_KSDM_0')"""
+
+            If GetUserID.Contains(userID.ToString()) Then
+                str = str & " checked='checked'"
+            End If
+            str = str & "           /><label for='CB_YGDM_" & userID & "'>" & userName & "</label>" & vbCrLf
+            str = str & "        </td>" & vbCrLf
+
+
+            If i Mod 3 = 2 Then
+                str = str & "    </tr>" & vbCrLf
+            End If
+        Next
+        If selectALL.Attributes("checked") = "checked" Then
+            str = str & ("<script>selectAllCB()</script>")
+        End If
+        tbody.InnerHtml = str
+
+
+    End Sub
+
+
+End Class

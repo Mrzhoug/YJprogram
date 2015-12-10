@@ -1,0 +1,90 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="FormSP_NoLc.aspx.vb" Inherits="manager_Forms_FormSP_NoLc" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>审阅功能</title>
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+    <script language="javascript" type="text/javascript">
+    function selectuser()
+    {
+        var obj1 = document.getElementById("userlist");         //ID列表
+        var resultstr  = "";
+        resultstr = window.showModalDialog("../Dialog/UserDialog.aspx","用户选择","dialogWidth=300px;dialogHeight=450px");
+        var namelist = "";
+        var idlist = "";
+        var tmpid  = "," + obj1.value;
+        if (resultstr !=null) 
+        {
+            var tmp = resultstr.split(",");
+            for (var i=0 ;i<tmp.length;i++)
+            {
+                if (tmp[i]!="")
+                {
+                    var tmp1 = tmp[i].split("|");
+                    if ( tmpid.indexOf(',' + tmp1[0] + ',') <0)
+                    {
+                        namelist = namelist + tmp1[1] + ",";
+                        idlist = idlist + tmp1[0] + ",";    
+                    }
+                }
+            }      
+        }
+        var obj = document.getElementById("Text1");
+        obj.value += namelist;
+        
+        obj1.value += idlist;
+    }
+    
+   
+    function clear1()
+    {
+        var obj = document.getElementById("Text1");
+        obj.value = "";
+        var obj1 = document.getElementById("userlist");
+        obj1.value = "";
+    }
+    
+    </script>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div align="center">
+        <br />
+        <br />
+        &nbsp;<table style="width: 584px" border="0" height="100">
+            <tr>
+                <td colspan="4" style="height: 26px" align="center">
+        <asp:Label ID="Title" runat="server" Height="41px" Text="标题" Width="576px" Font-Bold="True" Font-Size="14pt" Font-Names="幼圆"></asp:Label></td>
+            </tr>
+            <tr>
+                <td colspan="4" rowspan="4" valign="top" style="height: 258px">
+                <asp:Panel ID="Panel4" runat="server" Height="50px" Width="576px" GroupingText="发送人员清单">
+                <table><tr><td rowspan="2"><input id="Text1" readonly="readonly" style="width: 512px; height: 56px;" type="text" runat="server" /><input id="userlist" runat="server" readonly="" style="width: 552px" type="hidden" /></td><td><input id="Button7" onclick="selectuser()" type="button" value="添加" /></td></tr>
+                <tr><td><input id="Button5" onclick="clear1()" type="button" value="清空" /></td></tr>
+                </table>
+                </asp:Panel>
+                        
+                        
+                    <br />
+        <asp:Panel ID="Panel2" runat="server" GroupingText="审阅说明" Height="80px" Width="576px">
+            <asp:TextBox ID="TextBox1" runat="server" Height="88px" TextMode="MultiLine" Width="98%"></asp:TextBox></asp:Panel>
+                    <asp:CheckBox ID="CheckBox1" runat="server" Text="审批人可修改表单" AutoPostBack="True" OnCheckedChanged="CheckBox1_CheckedChanged" />
+                    &nbsp;&nbsp; &nbsp;&nbsp;
+                    <asp:Button ID="Button1" runat="server" Text=" 确 定 " />
+                    &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;
+                    <input id="Button2" type="button" value=" 关 闭 " onclick="window.close();" />
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<br />
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp;
+                    <br />
+                    
+                </td>
+            </tr>
+   
+        </table>
+        </div>
+        
+    </form>
+</body>
+</html>

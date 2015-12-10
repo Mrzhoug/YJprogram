@@ -1,0 +1,20 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="MyShareFilesList.aspx.vb" Inherits="manager_Personbag_MyShareFilesList" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head><title>文件管理</title>
+    
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    <style >
+    <!--
+    a:link{text-decoration:none;}
+    a:visited{text-decoration:none;}
+    a:hover{text-decoration:none;}
+    -->
+    </style>
+</head>
+<body>
+<form id="form1" runat="server" >
+    <span id="message" runat="server" ></span>
+    </form>
+</body>
+</html>

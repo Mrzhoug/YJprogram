@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<?mso-infoPathSolution name="urn:schemas-microsoft-com:office:infopath:kQE:-myXSD-2006-05-23T07-44-28" href="http://localhost/TemplateLibrary/任务单.xsn" solutionVersion="1.0.0.2399" productVersion="12.0.0" PIVersion="1.0.0.0" ?>
+<?mso-application progid="InfoPath.Document" versionProgid="InfoPath.Document.2"?><my:Xman xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns3="http://schemas.microsoft.com/office/infopath/2003/myXSD" xmlns:tr="http://schemas.microsoft.com/office/infopath/2003/sample/TravelRequest" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:ns2="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-30T00:40:51" xmlns:ns1="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-07-20T06:01:42" xmlns:ns4="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-08-12T00:41:12" xmlns:ns5="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-08-14T01:23:01" xmlns:dfs="http://schemas.microsoft.com/office/infopath/2003/dataFormSolution" xmlns:tns="http://tempuri.org/" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:ns6="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:my="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28" xmlns:xdEnvironment="http://schemas.microsoft.com/office/infopath/2006/xslt/environment" xmlns:xdUser="http://schemas.microsoft.com/office/infopath/2006/xslt/User" xmlns:xsf2="http://schemas.microsoft.com/office/infopath/2006/solutionDefinition/extensions" xmlns:xd="http://schemas.microsoft.com/office/infopath/2003"><my:RootNode><my:标题>
+<my:表单号>63</my:表单号>
+<my:状态>进行中</my:状态>
+<my:项目代码>63</my:项目代码>
+<my:操作者>admin</my:操作者>
+<my:填表时间>2015/3/17 9:40:52</my:填表时间>
+<my:视图>默认视图</my:视图>
+<my:验证码>a0cbe3050c5087e2cac544279a06f346</my:验证码>
+<my:传递值>0</my:传递值>
+<my:备用1>http://localhost/</my:备用1><my:备用2></my:备用2><my:备用3></my:备用3>
+<my:备用4></my:备用4>
+<my:备用5></my:备用5>
+<my:备用6></my:备用6>
+<my:备用7></my:备用7>
+<my:备用8></my:备用8>
+<my:备用9></my:备用9>
+<my:备用说明>备用1=主机域名,备用2=反写-记录-FID-XPATH-XML-记录-反写</my:备用说明>
+<my:审批信息><my:审批结果></my:审批结果><my:重复组><my:审批人></my:审批人><my:审批意见></my:审批意见><my:审批时间></my:审批时间></my:重复组></my:审批信息>
+</my:标题><my:其他><my:点击按钮>设计错误</my:点击按钮><my:流程状态>项目申请</my:流程状态></my:其他><my:内容><my:创建时间></my:创建时间><my:表单ID></my:表单ID><my:项目名称></my:项目名称><my:项目编号></my:项目编号><my:建设地点></my:建设地点><my:工程规模描述></my:工程规模描述><my:建设周期></my:建设周期><my:合同编号></my:合同编号><my:施工内容></my:施工内容><my:施工单位></my:施工单位><my:开工时间></my:开工时间><my:竣工时间></my:竣工时间><my:负责人></my:负责人><my:负责人联系电话></my:负责人联系电话></my:内容></my:RootNode></my:Xman>

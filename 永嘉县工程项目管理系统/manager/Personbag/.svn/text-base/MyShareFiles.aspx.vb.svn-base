@@ -1,0 +1,99 @@
+﻿
+Partial Class manager_Personbag_mysharefiles
+    Inherits System.Web.UI.Page
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim dt As New Data.DataTable
+        Dim dt1 As New Data.DataTable
+        Dim base As New Base
+        Dim ip As Integer
+        Dim sharetime As String
+        Dim sharer As String
+        Dim OutStr As String = ""
+        Dim OpFolder As String = ""
+        Dim OpFolder1 As String = ""
+        Dim Login_User As String
+        Dim UserID As Integer
+        '得到用户信息
+        Login_User = base.GetWebUserName
+        UserID = base.GetUserID(Login_User)
+
+        Dim RootPath As String = Request.MapPath("../../") & "PersonalFolders\" & Login_User & "\"
+        '得到操作目录        
+        Dim Folder As String = Server.UrlDecode(Request("Folder"))
+        If Folder = "" Then
+            dt = base.DB.Table("select * from sharefile,GY_YGDM where GY_YGDM.DLMC=sharefile.giveuserid and (getuserid='*' or getuserid like '%|" & base.GetWebUserName & "|%')", "sharefile")
+            If dt.Rows.Count = 0 Then
+                OutStr += "<center><br><br>暂时没有文件</center>"
+            Else
+                OutStr += "<table width=100% ><tr bgcolor='#eeccee' align=center><td width=40>序号</td><td>名称</td><td>大小(K)</td><td>类型</td><td width=160>共享时间</td><td width=80>共享者</td></tr>"
+                For ip = 0 To dt.Rows.Count - 1
+                    Replace(RootPath, "\" & base.GetWebUserName & "\", "\" & dt.Rows(0)("giveuserid"))
+                    OpFolder = dt.Rows(ip)("filepath")
+                    OpFolder1 = OpFolder.Substring(OpFolder.LastIndexOf("\") + 1)
+                    OpFolder = OpFolder.Substring(0, OpFolder.IndexOf("\"))
+
+                    ID = dt.Rows(ip)("id")
+                    sharetime = dt.Rows(ip)("sharetime")
+                    sharer = dt.Rows(ip)("giveuserid")
+                    dt1 = base.DB.Table("select ygxm from gy_ygdm where dlmc ='" & sharer & "'", "gy_ygdm")
+                    sharer = dt1.Rows(0)("ygxm")
+
+                    OutStr += "<tr align=center><td>" & ip + 1 & "</td>"
+                    OutStr += "<td align=left><img src='../../images/FileManage/FOLDER.GIF'> "
+                    If OpFolder = "" Then
+                        OutStr += "<a href='MyshareFileslist.aspx?id=" & ID & "'>" & OpFolder1 & "</a></td>"
+                    Else
+                        OutStr += "<a href='MyshareFileslist.aspx?id=" & ID & "'>" & OpFolder1 & "</a></td>"
+                    End If
+
+                    OutStr += "<td>&nbsp;</td>"
+                    OutStr += "<td>文件夹</td>"
+                    OutStr += "<td>" & sharetime & "</td>"
+                    OutStr += "<td>" & sharer & "</td>"
+                    OutStr += "</tr>"
+                Next
+            End If
+            OutStr += "</table>"
+        Else
+
+        End If
+        message.InnerHtml = OutStr
+    End Sub
+
+    Function CheckFileType(ByVal FileType As String) As String
+        Dim Result As String
+        FileType = filetype.ToLower
+        Select Case FileType
+            Case ".doc"
+                Result = "DOC.GIF"
+            Case ".txt"
+                Result = "TXT.GIF"
+            Case ".zip"
+                Result = "ZIP.GIF"
+            Case ".xls"
+                Result = "XLS.GIF"
+            Case ".pic"
+                Result = "PIC.GIF"
+            Case ".gif"
+                Result = "PIC.GIF"
+            Case ".bmp"
+                Result = "PIC.GIF"
+            Case ".jpg"
+                Result = "PIC.GIF"
+            Case ".ppt"
+                Result = "PPT.GIF"
+            Case ".pdf"
+                Result = "pdf.gif"
+            Case ".wav"
+                Result = "WAV.GIF"
+            Case ".mdb"
+                Result = "MDB.GIF"
+            Case ".mpg"
+                Result = "MPG.GIF"
+            Case Else
+                Result = "other.gif"
+        End Select
+        Return Result
+    End Function
+End Class

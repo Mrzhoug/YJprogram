@@ -1,0 +1,25 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="LogoSetting.aspx.vb" Inherits="manager_Config_LogoSetting" %>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>无标题页</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+<center>
+<br /><br />
+        首页Logo图片：要求460*36大小的GIF文件,图片采用覆盖上传方式。<br />
+        <br />
+        <asp:Panel ID="Panel1" runat="server" GroupingText="图片预览" Height="100px" Width="512px">
+            <br />
+            <asp:Image ID="Image1" runat="server" Height="36px" Width="460px" /><br />
+            <br />
+        </asp:Panel>
+        <asp:FileUpload ID="FileUpload1" runat="server" Width="448px" />
+        <asp:Button ID="Button1" runat="server" Text=" 上传 " />
+</center>
+        
+    </form>
+</body>
+</html>

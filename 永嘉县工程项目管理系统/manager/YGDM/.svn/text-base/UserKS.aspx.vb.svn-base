@@ -1,0 +1,70 @@
+﻿
+Partial Class manager_YGDM_UserKS
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim UserID As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Try
+            UserID = Request("UserID")
+        Catch ex As Exception
+            UserID = 0
+        End Try
+
+        Dim Tb As New DataTable
+        Tb = Base.DB.Table("SELECT [YGDM], [YGXM], [DLMC], [QYBZ], SSKS,Notes FROM GY_YGDM where YGDM=" & UserID, "dd")
+        If Tb.Rows.Count <= 0 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+        TextBox1.Text = Tb.Rows(0)("YGXM") & "(" & Tb.Rows(0)("DLMC") & ")"
+
+        If Page.IsPostBack = False Then
+            Create_FirstNode()
+            Dim SSKS As Integer
+            If IsDBNull(Tb.Rows(0)("SSKS")) = True Then
+                SSKS = -1
+            Else
+                SSKS = Tb.Rows(0)("SSKS")
+            End If
+            TextBox2.Text = Base.DB.ExeScalar("select KSMC from GY_KSDM where KSDM=" & SSKS)
+        End If
+    End Sub
+
+#Region "创建无限级TreeView"
+    Sub Create_FirstNode()
+        Dim i
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("SELECT ksdm,ksmc,UPks,bz FROM GY_KSDM  where UPKS IS NULL or UPKS=0 order by ksdm ", "GY_KSDM")
+        For i = 0 To Tb.Rows.Count - 1
+            Dim node1 As New TreeNode(Tb.Rows(i)(1).ToString, Tb.Rows(i)(0))
+            TreeView1.Nodes.Add(node1)
+            create_tree(TreeView1, node1, Tb.Rows(i)(0))
+        Next
+    End Sub
+    Sub create_tree(ByVal TreeView1 As TreeView, ByVal CurrentNode As TreeNode, ByVal UP As String)
+        Dim i As Integer
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("SELECT ksdm,ksmc,UPks,bz FROM GY_KSDM  where UPks='" & UP & "' order by ksdm ", "GY_KSDM")
+        For i = 0 To tb.Rows.Count - 1
+            Dim node1 As New TreeNode(tb.Rows(i)(1).ToString, tb.Rows(i)(0))
+            CurrentNode.ChildNodes.Add(node1)
+            create_tree(TreeView1, node1, tb.Rows(i)(0))
+        Next
+    End Sub
+#End Region
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        If TreeView1.SelectedNode Is Nothing Then
+            Base.Js.alert(Me, "请选择一个科室，然后按确定!")
+            Exit Sub
+        End If
+        TextBox2.Text = TreeView1.SelectedNode.Text
+        Base.DB.Query("update GY_YGDM set SSKS =" & TreeView1.SelectedNode.Value & "  where YGDM=" & UserID)
+        Dim Result As String = Base.UpdateUserContent(UserID, 2)
+        If Not Result Is Nothing Then
+            Base.Js.alert(Me, Result)
+        Else
+            Base.Js.CloseGoTo(Me, "修改成功", "Default.aspx")
+        End If
+    End Sub
+End Class

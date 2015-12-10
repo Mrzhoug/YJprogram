@@ -1,0 +1,202 @@
+﻿
+Partial Class manager_ProcessManager_processConditionSetting
+    Inherits System.Web.UI.Page
+
+    Dim Base As New Base
+    Dim dt As New DataTable
+    Dim statusID As Integer
+    Dim conditionID As Integer
+    Dim sqlstr As String
+    Dim processID As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Try
+            statusID = Convert.ToInt32(Request("statusID"))
+        Catch ex As Exception
+            statusID = 0
+        End Try
+
+        Try
+            conditionID = Convert.ToInt32(Request("conditionID"))
+        Catch ex As Exception
+            conditionID = 0
+        End Try
+
+
+
+
+        If Not IsPostBack Then
+            Dim mkdm As Integer
+
+            sqlstr = "select process.id,process.processName,process.processForm,processStatus.statusName from process,processStatus where process.id = ProcessStatus.processID and ProcessStatus.id = " & statusID
+            dt = Base.DB.Table(sqlstr, "dd")
+
+            If dt.Rows.Count > 0 Then
+                mkdm = dt.Rows(0).Item("processForm").ToString()
+                processID = dt.Rows(0).Item("id").ToString()
+
+                txtProFormName.Text = Base.GetMKMCByMKDM(mkdm)
+                txtProName.Text = dt.Rows(0).Item("processName").ToString()
+                txtProStatusName.Text = dt.Rows(0).Item("statusName").ToString()
+
+                ResetFormNode(attentionNodeName, mkdm)
+                ResetFormNode(SendContentNodeName, mkdm)
+
+            Else
+                Response.Write("非法参数")
+                Response.End()
+            End If
+
+            sqlstr = "select * from processStatus where processID = " & processID & " and ID != " & statusID
+            dt = Base.DB.Table(sqlstr, "dd")
+            If dt.Rows.Count <> 0 Then
+                Dim i As Integer
+                For i = 0 To dt.Rows.Count - 1
+
+                    Dim item As New ListItem
+                    item.Text = dt.Rows(i).Item("statusName").ToString()
+
+                    item.Value = dt.Rows(i).Item("id").ToString()
+                    nextProcessSetting.Items.Add(item)
+                Next
+            End If
+
+            'conditionID不为0，表示为编辑模式。初始化内容
+            If conditionID <> 0 Then
+                span1.InnerText = "修改流程"
+                sqlstr = "select * from processCondition where id=" & conditionID & " and statusID=" & statusID
+                dt = Base.DB.Table(sqlstr, "dd")
+
+                If dt.Rows.Count <> 0 Then
+
+                    If Not IsDBNull(dt.Rows(0).Item("touserlist")) Then
+                        TBUserlist.Text = dt.Rows(0).Item("touserlist").ToString()
+                    End If
+
+                    If Not IsDBNull(dt.Rows(0).Item("attentionNode")) Then
+                        attentionNodeName.Items.FindByText(dt.Rows(0).Item("attentionNode").ToString()).Selected = True
+                    End If
+
+                    If Not IsDBNull(dt.Rows(0).Item("sendContent")) Then
+                        sendContentText.Text = dt.Rows(0).Item("sendContent").ToString()
+                    End If
+
+                    nextProcessSetting.Items.FindByValue(dt.Rows(0).Item("nextStatusID").ToString()).Selected = True
+
+                Else
+                    Response.Write("非法参数")
+                    Response.End()
+                End If
+            End If
+        End If
+
+
+
+    End Sub
+
+
+
+    Sub ResetFormNode(ByVal nodeName As DropDownList, ByVal MKDM As String)
+        Dim FormName As String
+        Dim Row As DataRow = Base.DB.Row("select XsnDir,MKMC,MKDM from [GY_MKXX] where MKDM = " & MKDM, "dd")
+        If Row Is Nothing Then
+            NodeName.Items.Clear()
+            Exit Sub
+        Else
+            FormName = Row.Item("XsnDir").ToString.Trim
+            Dim filename As String = Server.MapPath("../../") & "TemplateLibrary\" & FormName & "\template.xml"
+            If IO.File.Exists(filename) = False Then
+                Base.Js.showalert(Me, "模板存问题,请刷新模板!")
+                Exit Sub
+            End If
+            Dim node As System.Xml.XmlNode = Base.XmlClass.GetXmlFile(filename)
+            Dim ListNodeName As String()
+            Dim tempstr As String()
+            Try
+                tempstr = Base.XmlClass.GetNodeNameList(node.ChildNodes(0))
+                ReDim ListNodeName(tempstr.Length - 1)
+                Dim i As Integer = 0
+                For i = 0 To tempstr.Length - 1
+                    'ListNodeName(i) = tempstr(i).Replace("<", "").Replace(">", "")
+                    Dim item As New ListItem
+                    item.Text = tempstr(i).Replace("<", "").Replace(">", "")
+
+                    item.Value = tempstr(i).Replace("<", "").Replace(">", "")
+                    nodeName.Items.Add(item)
+                Next
+            Catch ex As Exception
+                Base.Js.alert(Me, "模板存在问题,请不要最外的重复节添加节点.请修改模板重,重新上传并重新建功能.")
+                Exit Sub
+            End Try
+            'NodeName.DataSource = ListNodeName
+            'NodeName.DataBind()
+        End If
+    End Sub
+
+    Protected Sub btnContentAdd_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnContentAdd.Click
+        Dim strSendContent As String
+        If sendContentText.Text = "空" Then
+            strSendContent = ""
+        Else
+            strSendContent = sendContentText.Text
+        End If
+
+        If SendContentNodeName.SelectedItem.Text <> "无" Then
+            strSendContent = strSendContent & "[node:" & SendContentNodeName.SelectedItem.Text & "]"
+        End If
+
+        If TBSendContentText.Text <> "" Then
+            strSendContent = strSendContent & TBSendContentText.Text
+        End If
+
+        sendContentText.Text = strSendContent
+
+    End Sub
+
+    Protected Sub btnContentClear_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnContentClear.Click
+        sendContentText.Text = "空"
+    End Sub
+
+    Protected Sub btnConfirm_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnConfirm.Click
+        'If TBUserlist.Text = "" Then
+        '    Base.Js.alert(Me, "请选择需要发送的用户")
+        'End If
+
+
+
+        If conditionID = 0 Then
+
+            Dim maxOrder As Integer
+            sqlstr = "select max([order]) from processcondition where statusID  = " & statusID
+            dt = Base.DB.Table(sqlstr, "dd")
+            If dt.Rows.Count > 0 Then
+                If IsDBNull(dt.Rows(0).Item(0)) Then
+                    maxOrder = 1
+                Else
+                    maxOrder = Convert.ToInt32(dt.Rows(0).Item(0)) + 1
+                End If
+            Else
+                maxOrder = 1
+            End If
+
+            sqlstr = "insert into processCondition (statusID,nextStatusID,toUserList,sendContent,attentionNode,[order]) values(" & statusID & "," & nextProcessSetting.SelectedItem.Value & ",'" & TBUserlist.Text & "','" & sendContentText.Text & "','" & attentionNodeName.SelectedItem.Text & "'," & maxOrder & ")"
+            Base.DB.Query(sqlstr)
+            Response.Write("<script>window.opener.location.href=window.opener.location.href</script>")
+            Base.Js.closestr(Me, "添加成功")
+        Else
+
+
+
+            sqlstr = "update processCondition set nextStatusID = " & nextProcessSetting.SelectedItem.Value & ",toUserList='" & TBUserlist.Text & "',sendContent='" & sendContentText.Text & "',attentionNode='" & attentionNodeName.SelectedItem.Text & "' where id=" & conditionID
+            'sqlstr = "insert into processCondition (statusID,nextStatusID,toUserList,sendContent,attentionNode,[order]) values(" & statusID & "," & nextProcessSetting.SelectedItem.Value & ",'" & TBUserlist.Text & "','" & sendContentText.Text & "','" & attentionNodeName.SelectedItem.Text & "'," & maxOrder & ")"
+            Base.DB.Query(sqlstr)
+            Response.Write("<script>window.opener.location.href=window.opener.location.href</script>")
+            Base.Js.closestr(Me, "修改成功")
+
+        End If
+
+
+
+
+    End Sub
+End Class

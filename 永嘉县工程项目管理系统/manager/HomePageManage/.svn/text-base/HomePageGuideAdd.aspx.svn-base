@@ -1,0 +1,52 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="HomePageGuideAdd.aspx.vb" Inherits="manager_HomePageManage_HomePageGuideAdd" EnableSessionState="True" %>
+
+<%@ Register Assembly="FreeTextBox" Namespace="FreeTextBoxControls" TagPrefix="FTB" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>添加/编辑新闻</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        &nbsp;<table border="0" cellpadding="0" cellspacing="0" style="width: 820px">
+            <tr>
+                <td style="width: 64px">
+                </td>
+                <td style="width: 615px;" align="center">
+                    办事指南</td>
+                <td style="width: 100px">
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 64px; text-align: right; height: 24px;">
+                    标题：</td>
+                <td style="width: 615px; height: 24px;">
+                    <asp:TextBox ID="TextBox1" runat="server" Width="592px"></asp:TextBox><asp:RequiredFieldValidator
+                        ID="RequiredFieldValidator1" runat="server" ControlToValidate="TextBox1" ErrorMessage="*"></asp:RequiredFieldValidator></td>
+                <td style="width: 100px; height: 24px;">
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 64px; text-align: right;">
+                    内容：</td>
+                <td style="text-align: left; width: 615px;">
+                    <ftb:freetextbox id="Content" runat="server" Height="400px"></ftb:freetextbox>
+                </td>
+                <td style="width: 100px">
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 64px; height: 24px;">
+                </td>
+                <td style="height: 24px; width: 615px;" align="center">
+                    <asp:Button ID="Button1" runat="server"  Text=" 发 布 " OnClick="Button1_Click" BackColor="Gainsboro" BorderStyle="Outset" />
+                    <input id="Button2" type="button" value=" 返 回 " onclick="javascript:history.back(-1);" /></td>
+                <td style="height: 24px">
+                </td>
+            </tr>
+        </table>
+    </div>
+    </form>
+</body>
+</html>

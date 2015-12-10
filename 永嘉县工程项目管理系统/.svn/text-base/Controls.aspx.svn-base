@@ -1,0 +1,38 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Controls.aspx.vb" Inherits="Controls" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>控件安装</title>
+    <link href="images/Styles.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div style="visibility:hidden;">
+        <object id="Xman" classid="CLSID:EAFA9174-B955-4DC3-B450-031001466185" codebase="SunFun.CAB#version=1,0,0,0"></object>
+    </div>
+    打开表单出错，请检察以下情况：<br />
+        <br />
+    <span style="font-size:10pt; "><b>1、是否成功安装打开控件。</b></span>
+        <br />
+        &nbsp;&nbsp; 安装方法：添加此站点为信任站点，并对信任站点的安全级别设置为默认，<br />
+        &nbsp;&nbsp; 点击地址栏下的提示栏中的安装此控件，在弹出的对话框中，选择安装。<br />
+        <br />
+    <span style="font-size:10pt; "><b>2、是否IE禁用了此控件。</b></span><br />
+        &nbsp;&nbsp; 检测方法：IE菜单上[工具],再选择[管理加载项],在弹出的对话框查看<br />
+        &nbsp;&nbsp; [sunfun.xman]控件是否被禁用，如果是，则启用此控件。<br />
+        <br />
+    <span style="font-size:10pt; "><b>3、本机是否安装了Microsoft InfoPath 
+        <br />
+        <br />
+        4、如果IE插件还是不行.可以下载此控件,解压后双击"注册.bat"<br />
+        </b></span>&nbsp;&nbsp;<a href="sunfun.rar">下载控件</a><br />
+       <br />
+        注：如果不想安装控件或是InfoPath，可以暂时选择用WEB方式打开，<br />
+        在表单列表处，选择[系统配置]，在打开方式中，选择[以Web方式打开]
+        
+
+    </form>
+</body>
+</html>

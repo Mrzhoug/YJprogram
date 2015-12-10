@@ -1,0 +1,46 @@
+﻿Imports System.IO
+Partial Class Public_ExportWord
+    Inherits System.Web.UI.Page
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim FileName As String
+        Dim Path As String = ""
+        Try
+            Path = Request.ServerVariables("QUERY_STRING")
+        Catch ex As Exception
+            Path = ""
+        End Try
+        If Path.Trim = "" Then Response.End()
+        FileName = Server.MapPath(Server.UrlDecode(Path))
+        If IO.File.Exists(FileName) = False Then
+            Response.Write("文件不存在，请与管理员联系")
+            Response.End()
+        End If
+
+        Dim stream As FileStream = New FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.Read)
+        Dim Type1 As String
+        Type1 = FileName.Substring(FileName.LastIndexOf("."))
+
+        Dim DownFileName As String
+        Dim idx As Integer = FileName.LastIndexOf("\")
+        If idx > 0 Then
+            DownFileName = FileName.Substring(idx + 1)
+        Else
+            DownFileName = FileName
+        End If
+        DownFileName = DownFileName.Replace(".mht", "").Replace(".MHT", "")
+        Try
+            Dim bufSize As Integer = stream.Length
+            Dim buf(bufSize) As Byte
+            Dim bytesRead As Integer = stream.Read(buf, 0, bufSize)
+            Dim UTF8 As Encoding = Encoding.GetEncoding("GB2312")
+            Response.ContentEncoding = UTF8
+            Response.AddHeader("Content-Disposition", "attachment; filename=" & HttpUtility.UrlEncode(DownFileName, Encoding.UTF8) & ".doc")
+            Response.AddHeader("Content-Length", bufSize.ToString())
+            Response.OutputStream.Write(buf, 0, bytesRead)
+            Response.End()
+        Catch ex As Exception
+            Response.Write("打开出错.")
+        End Try
+    End Sub
+End Class

@@ -1,0 +1,97 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="AnnexManage.aspx.vb" Inherits="HomePage_AnnexManage" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>附件管理</title>
+  <style type="text/css"> 
+<!-- 
+A { text-decoration: none} 
+--> 
+</style>
+</head>
+<body style="margin:0">
+<form id="form1" runat="server">
+ <table border="0" style="width: 490px;" cellpadding="0" cellspacing="0">
+	<tr>
+	<td valign="top">
+        <!--企业注册信息开始 -->
+        <br />
+        &nbsp;<span style="font-size: 11pt">附件类型：</span><asp:DropDownList ID="DropDownList1"
+            runat="server" AutoPostBack="True">
+            <asp:ListItem>工商注册</asp:ListItem>
+            <asp:ListItem>税务登记</asp:ListItem>
+            <asp:ListItem>其他文件</asp:ListItem>
+        </asp:DropDownList>
+        <span style="font-size: 11pt">附件名称：</span>
+        <asp:TextBox ID="TextBox1" runat="server" Width="172px">工商注册</asp:TextBox>&nbsp;<asp:CheckBox
+            ID="CheckBox1" runat="server" Font-Size="11pt" Text="覆盖" /><br />
+       &nbsp;<span style="font-size: 11pt">选择文件：</span><asp:FileUpload ID="FileUpload1"
+            runat="server" Width="310px" />
+        &nbsp;
+        <asp:Button ID="Button1" runat="server" Text=" 上 传 " /><br /><span style="color:Red">
+        &nbsp;<span style="font-size: 11pt">
+            提示:如果钩选[覆盖],若服务器上此文件名已经存在,系统将覆盖文件</span>.<br />
+        </span><br />
+        <!--企业注册信息结束 -->
+        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" CellPadding="4"
+            DataSourceID="Conn" Font-Size="9pt" HorizontalAlign="Center" Width="98%" DataKeyNames="AnnexPath,Uid">
+            <Columns>
+                <asp:TemplateField HeaderText="序号">
+                    <ItemStyle HorizontalAlign="Center" Width="40px" />
+                </asp:TemplateField>
+                <asp:BoundField DataField="AnnexName" HeaderText="附件名称" SortExpression="AnnexName" />
+                <asp:BoundField DataField="AnnexPath" HeaderText="文件名" />
+                <asp:BoundField DataField="UpTime" HeaderText="上传时间" SortExpression="UpTime">
+                    <ItemStyle HorizontalAlign="Center" Width="100px" />
+                </asp:BoundField>
+                <asp:TemplateField HeaderText="查看">
+                    <ItemStyle HorizontalAlign="Center" Width="40px" />
+                </asp:TemplateField>
+                <asp:CommandField ShowDeleteButton="True">
+                    <ItemStyle HorizontalAlign="Center" Width="40px" />
+                </asp:CommandField>
+                <asp:TemplateField HeaderText="复制URL">
+                    <ItemStyle HorizontalAlign="Center" Width="60px" />
+                </asp:TemplateField>
+            </Columns>
+            <HeaderStyle BackColor="#E0E0E0" />
+        </asp:GridView>
+        <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT [Uid], [AnnexName], [UpTime],AnnexPath FROM [EP_Annex] WHERE ([CompanyID] = @CompanyID)">
+            <SelectParameters>
+                <asp:Parameter Name="CompanyID" Type="Decimal" />
+            </SelectParameters>
+        </asp:SqlDataSource>
+    </td>
+	</tr>
+</table>     
+</form>
+</body>
+</html>
+
+
+<script language="javascript" type="text/javascript">
+<!--
+function copyurl(str)
+{
+    window.clipboardData.setData('Text', "http://www.clicktone.net.cn/homepage/" + str);
+    alert("Url已经复制到剪切板中");
+}
+
+-->
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,281 @@
+K 25
+svn:wc:ra_dav:version-url
+V 178
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager
+END
+RenameFile.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 194
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/RenameFile.aspx
+END
+MoveFolder.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 197
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/MoveFolder.aspx.vb
+END
+CopyFileHandler.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 199
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/CopyFileHandler.aspx
+END
+SharedFolder.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 199
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/SharedFolder.aspx.vb
+END
+RenameFolder.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 199
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/RenameFolder.aspx.vb
+END
+PublicFolderPermissions.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 210
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/PublicFolderPermissions.aspx.vb
+END
+MoveFile.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 195
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/MoveFile.aspx.vb
+END
+CopyFolder.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 197
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/CopyFolder.aspx.vb
+END
+RenameFile.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 197
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/RenameFile.aspx.vb
+END
+GetFolderInfosHandler.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 208
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/GetFolderInfosHandler.aspx.vb
+END
+CopyFile.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 195
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/CopyFile.aspx.vb
+END
+UploadFile.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 194
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/UploadFile.aspx
+END
+FileUploadHandler.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 204
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/FileUploadHandler.aspx.vb
+END
+Default.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 194
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/Default.aspx.vb
+END
+SharedFolderList.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 200
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/SharedFolderList.aspx
+END
+CreateFolder.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 196
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/CreateFolder.aspx
+END
+MoveFolder.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 194
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/MoveFolder.aspx
+END
+SharedFolder.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 196
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/SharedFolder.aspx
+END
+DeleteFolder.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 199
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/DeleteFolder.aspx.vb
+END
+CreateFolder.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 199
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/CreateFolder.aspx.vb
+END
+PublicFolderPermissions.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 207
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/PublicFolderPermissions.aspx
+END
+MoveFolderHandler.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 204
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/MoveFolderHandler.aspx.vb
+END
+MoveFile.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 192
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/MoveFile.aspx
+END
+CopyFolder.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 194
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/CopyFolder.aspx
+END
+SharedFolderHandler.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 206
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/SharedFolderHandler.aspx.vb
+END
+GetFolderInfosHandler.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 205
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/GetFolderInfosHandler.aspx
+END
+DeleteFile.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 197
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/DeleteFile.aspx.vb
+END
+PublicFolderPermissionsSetting.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 217
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/PublicFolderPermissionsSetting.aspx.vb
+END
+MoveFileHandler.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 202
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/MoveFileHandler.aspx.vb
+END
+CopyFile.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 192
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/CopyFile.aspx
+END
+CopyFolderHandler.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 204
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/CopyFolderHandler.aspx.vb
+END
+SelectFolder.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 196
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/SelectFolder.aspx
+END
+CopyFileHandler.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 202
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/CopyFileHandler.aspx.vb
+END
+SelectFolder.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 199
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/SelectFolder.aspx.vb
+END
+FileUploadHandler.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 201
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/FileUploadHandler.aspx
+END
+Default.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 191
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/Default.aspx
+END
+UploadFile.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 197
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/UploadFile.aspx.vb
+END
+DeleteFolder.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 196
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/DeleteFolder.aspx
+END
+MoveFolderHandler.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 201
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/MoveFolderHandler.aspx
+END
+SharedFolderHandler.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 203
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/SharedFolderHandler.aspx
+END
+DeleteFile.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 194
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/DeleteFile.aspx
+END
+RenameFolder.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 196
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/RenameFolder.aspx
+END
+PublicFolderPermissionsSetting.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 214
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/PublicFolderPermissionsSetting.aspx
+END
+MoveFileHandler.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 199
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/MoveFileHandler.aspx
+END
+CopyFolderHandler.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 201
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/CopyFolderHandler.aspx
+END
+SharedFolderList.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 203
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/FileManager/SharedFolderList.aspx.vb
+END

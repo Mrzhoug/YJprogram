@@ -1,0 +1,39 @@
+﻿
+Partial Class manager_FileManager_SharedFolderHandler
+    Inherits System.Web.UI.Page
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Dim folderID As Integer
+        Try
+            folderID = Convert.ToInt32(Request("folderID"))
+        Catch ex As Exception
+            Response.Write("非法访问")
+            Response.End()
+        End Try
+
+        Dim toUserID As String
+        Try
+            toUserID = Request("name")
+        Catch ex As Exception
+            toUserID = ""
+            Response.Write("非法访问")
+        End Try
+
+        Dim giveUserID As Integer
+        Try
+            giveUserID = Request("userID")
+        Catch ex As Exception
+            giveUserID = -1
+            Response.Write("非法访问")
+            Response.End()
+        End Try
+
+        Dim FileManager As New FileManager
+        If FileManager.AddSharedFolderInfo(giveUserID, toUserID, folderID) Then
+            Response.Write("设置成功")
+        Else
+            Response.Write("设置失败")
+        End If
+    End Sub
+End Class

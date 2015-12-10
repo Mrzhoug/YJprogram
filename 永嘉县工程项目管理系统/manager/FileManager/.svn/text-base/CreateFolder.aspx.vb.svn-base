@@ -1,0 +1,88 @@
+﻿
+Partial Class manager_FileManager_CreateFolder
+    Inherits System.Web.UI.Page
+
+    Dim UserInfo As New UserInfo
+    Dim FileManager As New FileManager
+
+    Dim belongFolderID As Integer
+    Public isPublicFolder As Boolean
+    Dim username As String
+    Dim userid As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+
+        Try
+            belongFolderID = Convert.ToInt32(Request("belongFolderID"))
+        Catch ex As Exception
+            belongFolderID = 0
+        End Try
+
+        Try
+            isPublicFolder = Convert.ToBoolean(Request("isPublic"))
+        Catch ex As Exception
+            isPublicFolder = False
+        End Try
+
+
+
+        If FileManager.IsPublicFolder(belongFolderID) Then
+            isPublicFolder = True
+        End If
+
+
+        username = UserInfo.GetWebUserName
+        userid = UserInfo.GetUserID(username)
+
+        If userid = -1 Then
+            Response.End()
+        End If
+
+
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim newFolderName As String = DoFilter.SQLFilter(tb_folderName.Text)
+
+
+
+        If isPublicFolder Then
+
+
+            If belongFolderID = 0 And username = "admin" Then
+
+            Else
+                If Not FileManager.GetUserPermission(userid, belongFolderID).CanCreateFolder Then
+                    DoJS.alert(Me, "您在该文件夹下没有新建文件夹的权利！")
+                    Return
+                End If
+            End If
+
+
+
+            If FileManager.IsExistPublicFolder(belongFolderID, newFolderName) Then
+                DoJS.alert(Me, "文件夹已存在！")
+                Return
+            Else
+                If FileManager.CreateFolder(username, belongFolderID, newFolderName, True) Then
+                    DoJS.alert(Me, "新建成功")
+                Else
+                    DoJS.alert(Me, "新建失败")
+                End If
+            End If
+
+        Else
+            If FileManager.IsExistFolder(username, belongFolderID, newFolderName) Then
+                DoJS.alert(Me, "文件夹已存在！")
+                Return
+            Else
+                If FileManager.CreateFolder(username, belongFolderID, newFolderName) Then
+                    DoJS.alert(Me, "新建成功")
+                Else
+                    DoJS.alert(Me, "新建失败")
+                End If
+            End If
+        End If
+    End Sub
+End Class

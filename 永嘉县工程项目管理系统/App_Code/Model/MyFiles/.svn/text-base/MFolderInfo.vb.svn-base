@@ -1,0 +1,138 @@
+﻿Imports Microsoft.VisualBasic
+
+Public Class MFolderInfo
+
+    Private _id As Integer
+    ''' <summary>
+    ''' ID
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property ID() As Integer
+        Get
+            Return _id
+        End Get
+        Set(ByVal value As Integer)
+            _id = value
+        End Set
+    End Property
+
+    Private _folderName As String
+    ''' <summary>
+    ''' 文件夹名称
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property FolderName() As String
+        Get
+            Return _folderName
+        End Get
+        Set(ByVal value As String)
+            _folderName = value
+        End Set
+    End Property
+
+    Private _folderPath As String
+    ''' <summary>
+    ''' 文件夹路径
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property FolderPath() As String
+        Get
+            Return _folderPath
+        End Get
+        Set(ByVal value As String)
+            _folderPath = value
+        End Set
+    End Property
+
+    Private _createTime As DateTime
+    ''' <summary>
+    ''' 创建时间
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property CreateTime() As DateTime
+        Get
+            Return _createTime
+        End Get
+        Set(ByVal value As DateTime)
+            _createTime = value
+        End Set
+    End Property
+
+
+    Private _createUserID As Integer
+    ''' <summary>
+    ''' 创建用户ID
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property CreateUserID() As Integer
+        Get
+            Return _createUserID
+        End Get
+        Set(ByVal value As Integer)
+            _createUserID = value
+        End Set
+    End Property
+
+    Private _belongFolderID As Integer
+    ''' <summary>
+    ''' 隶属文件夹ID
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property BelongFolderID() As Integer
+        Get
+            Return _belongFolderID
+        End Get
+        Set(ByVal value As Integer)
+            _belongFolderID = value
+        End Set
+    End Property
+
+    Private _isSharedFolder As Boolean
+    ''' <summary>
+    ''' 是否为共享文件夹
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property IsSharedFolder() As Boolean
+        Get
+            Return _isSharedFolder
+        End Get
+        Set(ByVal value As Boolean)
+            _isSharedFolder = value
+        End Set
+    End Property
+
+
+
+    Private _isPublicFolder As Boolean
+    ''' <summary>
+    ''' 是否为公共文件夹
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property IsPublicFolder() As Boolean
+        Get
+            Return _isPublicFolder
+        End Get
+        Set(ByVal value As Boolean)
+            _isPublicFolder = value
+        End Set
+    End Property
+
+
+
+End Class

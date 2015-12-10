@@ -1,0 +1,58 @@
+﻿
+Imports System.Web.Mail
+Partial Class HomePage_Enterprisespass2
+    Inherits System.Web.UI.Page
+
+    Dim Base As New Base
+    Dim TitleStr As String
+    Dim Host As String
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        TitleStr = Base.pub.GetWebConfig("SunfunSoft.Xman.Title").ToString
+        Host = Base.GetHost
+    End Sub
+   
+    Sub sendemail(ByVal userName As String)
+        Dim myMail As New MailMessage
+        Dim body As String = ""
+        Dim ta As Data.DataTable
+        ta = Base.DB.Table("select YGDM from GY_YGDM where DLMC='" & Base.SqlFilter(userName) & "'", "EnterprisesTable")
+
+        If ta.Rows.Count > 0 Then
+            Dim rnd As New Random
+            Dim pwd As String = rnd.Next(50000000, 100000000)
+            Base.DB.Query("update GY_YGDM set DLPWD='" & Base.EnCrypt.MD5(pwd) & "' where YGDM=" & ta.Rows(0)("YGDM"))
+            myMail.From = "clicktone@tom.com"
+            SmtpMail.SmtpServer = "smtp.tom.com"
+            myMail.Fields.Add("http://schemas.microsoft.com/cdo/configuration/smtpauthenticate", "1")
+            myMail.Fields.Add("http://schemas.microsoft.com/cdo/configuration/sendusername", "clicktone@tom.com")
+            myMail.Fields.Add("http://schemas.microsoft.com/cdo/configuration/sendpassword", "sunfun")
+            myMail.To = Txtemail.Text.Trim
+            myMail.Subject = TitleStr & "修改密码通知"
+
+            myMail.BodyFormat = MailFormat.Html
+
+            body = body & "<html>"
+            body = body & "<body>"
+            body = body & "<pre id=""content"" style=""width:100%;white-space:normal;word-wrap:break-word;word-break:keep-all;"">"
+            body = body & "亲爱的" & TitleStr & "用户" & userName & "您好："
+            body = body & "<br>    您的密码已被初始为：" & pwd
+            body = body & "<br>    请您务必在第一时间登录系统修改密码"
+            body = body & "<br>    <a href='" & Host & "'>" & Host & "</a>"
+            body = body & "<br>                                                                                                   " & TitleStr
+            body = body & "</pre>"
+            body = body & "</body>"
+            body = body & "</html>"
+
+            myMail.Body = body
+            SmtpMail.Send(myMail)
+            Base.Js.alert(Me, "邮件以发送，请查收！")
+        Else
+            Base.Js.alert(Me, "您输入有误，请重输！")
+        End If
+    End Sub
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+        sendemail(Base.SqlFilter(Txtemail.Text.Trim))
+    End Sub
+
+End Class

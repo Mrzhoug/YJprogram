@@ -1,0 +1,33 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="OnLinePerson.aspx.vb" Inherits="Menu_OnLinePerson"  Theme="SkinFile"  %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>无标题页</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="YGDM,CID"
+            DataSourceID="Conn" AllowPaging="True" PageSize="15" SkinID="GridViewSkin1">
+            <Columns>
+                <asp:BoundField DataField="YGXM" HeaderText="用户名称" SortExpression="YGXM" >
+                    <ItemStyle HorizontalAlign="Center" />
+                </asp:BoundField>
+                <asp:BoundField DataField="DLMC" HeaderText="用户名" SortExpression="DLMC" >
+                    <ItemStyle HorizontalAlign="Center" />
+                </asp:BoundField>
+                <asp:BoundField DataField="Date1" HeaderText="最后活动时间" SortExpression="Date1" >
+                    <ItemStyle HorizontalAlign="Center" />
+                </asp:BoundField>
+            </Columns>
+        </asp:GridView>
+        <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT     * FROM GY_YGDM,Online_User where GY_YGDM.YGDM = OnLine_User.UserID&#13;&#10;">
+        </asp:SqlDataSource>
+    
+    </div>
+    </form>
+</body>
+</html>

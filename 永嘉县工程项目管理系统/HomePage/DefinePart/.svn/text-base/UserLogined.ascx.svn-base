@@ -1,0 +1,41 @@
+﻿<%@ Control Language="VB" AutoEventWireup="false" CodeFile="UserLogined.ascx.vb" Inherits="HomePage_DefinePart_UserLogined" %>
+
+<style>
+input {
+	border-width: 0px;
+	border-bottom-width: 1px;
+	border-color: #AEA387;
+	padding: 1px 1px 1px 1px;
+	font-family: Tahoma, Verdana, "宋体"; 
+	font-size: 12px; 
+	height: 19px;
+	color: #554F3E; 
+	background-color: #ffffff; 
+}
+</style>
+
+<table id="Table2" width="250" style="height:250px;" border="0" cellpadding="0" cellspacing="0" runat="server">
+	<tr style="height:32px;">
+		<td><img src="images/页面2_19.gif" alt="" /></td>
+	</tr>
+	<tr>
+	<td style="background:url(images/页面2_11.gif); font-size:9pt;" valign=top >
+	   <table width="100%" align=center cellspacing="0" border=0>
+       <tr><td height="8"></td></tr>
+       <tr valign=top>
+        <td style="height: 106px;font-size:9pt;" align="center">
+      <table width="210" border="0" cellpadding="0" cellspacing="0">
+      <tr><td style="font-size:9pt; height:20px;" colspan="2"><b>用户名:&nbsp;<span id="LoginName1" runat="server" style="font-size:9pt;"></span></b></td></tr>
+      <tr><td style="font-size:9pt; height:20px;"><a href="MyForms.aspx">我的表单</a></td><td  style="font-size:9pt; height:20px;"><a href="ModifyContent.aspx">修改信息</a></td></tr> 
+      <tr><td style="font-size:9pt; height:20px;"><a href="javascript:void(0);" onclick="window.open('AnnexManage.aspx','附件管理','height=600, width=500, top=50, left=100, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=yes');">附件管理</a></td><td style="font-size:9pt; height:20px;"><a href="javascript:void(0);" onclick="window.open('ModifyPwd.aspx','显示表单列表','height=150, width=350, top=150, left=100, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=yes');">修改密码</a></td></tr> 
+      <tr><td style="font-size:9pt; height:20px;"><a href="logout.aspx">注销登陆</a></td><td></td></tr>
+      </table>
+
+        </td></tr>
+        <tr><td height="24"></td></tr>
+        </table>
+    </td>
+	</tr>
+	<tr><td height=7><img src="images/页面2_15.gif" alt="" /></td></tr>
+</table>
+

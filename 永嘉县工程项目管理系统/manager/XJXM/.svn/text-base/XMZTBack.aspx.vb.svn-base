@@ -1,0 +1,54 @@
+﻿
+Partial Class manager_XJXM_XMZTBack
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim XMDM, MKDM As Integer
+        Dim Tb As New Data.DataTable
+        Try
+            XMDM = Request("xmdm")
+            MKDM = Request("mkdm")
+        Catch ex As Exception
+            XMDM = 0
+            MKDM = 0
+        End Try
+
+        Dim XMZT_Value As String = String.Empty
+        '根据XMDM,MKDM.得到项目状态
+        Tb = Base.DB.Table("select MKDM,XMDM,XMZT from XX_XMJC where mkdm=" & MKDM & " and xmdm=" & XMDM, "XX_XMJC")
+        If Tb.Rows.Count = 0 Then
+            Response.Write("系统错误：系统中不存在此流程,请与管理员联系！")
+            Response.End()
+        End If
+        If IsDBNull(Tb.Rows(0).Item(2)) Then
+            Exit Sub        '无流程
+        Else
+            XMZT_Value = Tb.Rows(0).Item(2)
+        End If
+
+        Dim Sql As String
+        Dim i As Integer
+        '再列出项目的所有状态名,来找到当前功能的前一状态
+        Sql = "SELECT GY_XMZT.XMZT,GY_XMZT.ZTMC,GY_XMZT.OrderBy FROM  XX_XMJC, GY_XMZT"
+        Sql += " where XX_XMJC.XMZT = GY_XMZT.XMZT And XX_XMJC.XMDM = " & XMDM & " ORDER BY GY_XMZT.OrderBy, GY_XMZT.XMZT"
+        Tb = Base.DB.Table(Sql, "GY_XMZT")
+        '这种方式,如果一个流程中,一个功能模块存在于多个状态下.那状态退回就会混乱掉.
+        Dim TempXMZT As String = ""
+        Dim TempBZ As Boolean = False
+        For i = 0 To Tb.Rows.Count - 1
+            If Tb.Rows(i).Item(0) = XMZT_Value Then Exit For
+            TempXMZT += "," & Tb.Rows(i).Item(0)
+        Next
+
+        If Trim(TempXMZT) <> "" Then
+            TempXMZT = TempXMZT.Substring(1)
+            '状态回退到上一级
+            '接下来对当前状态的以后状态，清除所有完成标志与审批标志
+            Base.DB.Query("Update XX_XMJC set SPBZ = 1,WCBZ = 0  where XMZT in (" & TempXMZT & ") and XMDM = " & XMDM & " and (WCBZ = 1 and ( SPBZ=2 or SPBZ=4 or SPBZ=3))")
+            Base.DB.Query("Update XX_XMJC set WCBZ = 0  where XMZT in (" & TempXMZT & ") and XMDM = " & XMDM & " and (WCBZ = 1)")
+        End If
+
+        Response.Write("<script language='javascript'>window.close();</script>")
+
+    End Sub
+End Class

@@ -1,0 +1,40 @@
+﻿
+Partial Class HomePage_ModifyPwd
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim UserName As String
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+
+        If TextBox1.Text.Trim = "" Or TextBox2.Text.Trim = "" Or TextBox3.Text.Trim = "" Then
+            Base.Js.alert(Me, "请输入完整！")
+            Exit Sub
+        End If
+
+        If TextBox2.Text.Trim <> TextBox3.Text.Trim Then
+            Base.Js.alert(Me, "二次密码不一致，请确定！")
+            Exit Sub
+        End If
+
+        Dim tb As New DataTable
+        tb = Base.DB.Table("select YGDM from GY_YGDM where [DLMC]='" & Base.SqlFilter(UserName) & "' and [DLPWD]='" & Base.SqlFilter(Base.EnCrypt.MD5(TextBox1.Text.Trim)) & "'", "gdasg")
+        If tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "旧密码错误!")
+            Exit Sub
+        End If
+
+        Base.DB.Query("update GY_YGDM set DLPWD='" & Base.SqlFilter(Base.EnCrypt.MD5(TextBox2.Text.Trim)) & "' where YGDM=" & tb.Rows(0)(0))
+        If Base.DB.ErrorMessage.ToString.Length <= 0 Then
+            Base.Js.closestr(Me, "密码修改成功！")
+        Else
+            Base.Js.closestr(Me, "密码修改失败，请联系管理员！")
+        End If
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        UserName = Base.SqlFilter(Session("LoginName"))
+        If UserName.Trim = "" Then
+            Base.Js.closestr(Me, "登陆超时，你重新登陆！")
+            Exit Sub
+        End If
+    End Sub
+End Class

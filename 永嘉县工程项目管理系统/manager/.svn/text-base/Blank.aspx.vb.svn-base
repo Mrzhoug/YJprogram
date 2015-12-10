@@ -1,0 +1,13 @@
+﻿
+Partial Class manager_Blank
+    Inherits System.Web.UI.Page
+    Dim MsgStr As String
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Try
+            MsgStr = Request("Msg")
+        Catch ex As Exception
+            MsgStr = ""
+        End Try
+        Msg.Text = MsgStr
+    End Sub
+End Class

@@ -1,0 +1,90 @@
+﻿
+Partial Class manager_Group_info_NodePermList
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim GroupName As String = TextBox2.Text.Trim
+        '先检测是否在,只判断显示组。不判断权限组的组名
+        If Base.DB.GetRowCount("select Group_Id From Gy_Group Where Group_Name = '" & GroupName & "' and Group_Kind=2 ", "Gy_Group") <= 0 Then
+            Base.DB.Query("Insert into Gy_Group( Group_name,Group_Kind) values ('" & GroupName & "',2)")
+            GridView1.DataBind()
+            Response.Redirect("NodePermList.aspx")
+        Else
+            Base.Js.alert(Me, "当前已有重复的组名已经存在!")
+        End If
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        Dim dt As New Data.DataTable
+        For i = 0 To GridView1.Rows.Count - 1
+            Dim GroupID As String = GridView1.DataKeys(i).Item(0).ToString
+
+
+
+            '功能菜单
+            GridView1.Rows(i).Cells(1).Text = "<a href='javascript:void(0)' onclick=""window.open('NodePermManage.aspx?group_id=" & GroupID & "','组内模块维护','height=500, width=800, top=50, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')"">编辑组内模块</a>"
+            GridView1.Rows(i).Cells(2).Text = "<a href='javascript:void(0)' onclick=""window.open('group_user.aspx?group_id=" & GroupID & "','组内用户维护','height=550, width=800, top=50, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')"">编辑组内用户</a>"
+            If i <> GridView1.EditIndex Then
+                CType(GridView1.Rows(i).Cells(4).Controls(0), LinkButton).Attributes.Add("onclick", "return confirm('你确定要删除此组名吗?');")
+            End If
+            GridView1.Rows(i).Attributes.Add("onmouseover", "OnMouseOver(this)")
+            GridView1.Rows(i).Attributes.Add("onmouseout", "OnMouseOut(this)")
+        Next
+    End Sub
+
+    Protected Sub GridView1_RowCancelingEdit(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewCancelEditEventArgs) Handles GridView1.RowCancelingEdit
+        RequiredFieldValidator1.Enabled = True
+        TextBox2.Enabled = True
+    End Sub
+
+    Protected Sub GridView1_RowEditing(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewEditEventArgs) Handles GridView1.RowEditing
+        RequiredFieldValidator1.Enabled = False
+        TextBox2.Enabled = False
+    End Sub
+
+    Protected Sub GridView1_RowUpdating(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewUpdateEventArgs) Handles GridView1.RowUpdating
+        Dim GroupID As Integer = GridView1.DataKeys(e.RowIndex).Item(0)
+        Dim GroupName As String = e.NewValues(0).ToString().Trim
+        If Base.DB.GetRowCount("select Group_Id From Gy_Group Where Group_Name = '" & GroupName & "' and Group_Kind=2 and Group_id<>" & GroupID, "Gy_Group") <= 0 Then
+            Conn.UpdateCommand = "Update GY_Group set Group_Name = '" & e.NewValues(0) & "' where Group_ID = " & GroupID
+        Else
+            Conn.UpdateCommand = "Update GY_Group set Group_Name = '" & e.NewValues(0) & "' where Group_ID = -1"
+            Base.Js.alert(Me, "当前已有重复的组名已经存在!")
+        End If
+        Conn.Update()
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+        GridView1.SelectedIndex = -1
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        Dim GroupID As String = GridView1.DataKeys(e.NewSelectedIndex).Item(0).ToString
+
+        If Base.DB.Table("SELECT Group_ID FROM GY_GROUP_INFO where Group_ID= " & GroupID, "GY_YGQX").Rows.Count > 0 Then
+            Base.Js.alert(Me, "删除失败，该组内还有模块,你先删除.！")
+            Exit Sub
+        End If
+
+        If Base.DB.Table("SELECT YGDM FROM GY_YGQX where Group_Id = " & GroupID, "GY_YGQX").Rows.Count > 0 Then
+            Base.Js.alert(Me, "删除失败，该组内还有用户,你先删除.！")
+            Exit Sub
+        End If
+
+        Try
+            Conn.DeleteCommand = "delete [GY_GROUP] where GROUP_ID=" & GroupID
+            Conn.Delete()
+        Catch ex As System.Data.SqlClient.SqlException
+            Base.Js.alert(Me, "删除失败，该组内还有模块或用户,你先删除.！")
+        Catch ex As Exception
+            Base.Js.alert(Me, "删除失败,请稍后再试！")
+        End Try
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking()        '这里对文件进行权限限制
+    End Sub
+End Class

@@ -1,0 +1,127 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Default.aspx.vb" Inherits="manager_YGDM_Default" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+    <title>用户账号管理</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet" />
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+    <script type="text/javascript" src="../../Pub/jquery-1.8.0.js"></script>
+    <script type="text/javascript">
+        
+        function enable(userid) {
+            var str = "userid=" + userid + "&enable=1";
+            var message;
+            $.ajax(
+            {
+                type: "post",
+                url: "UserEnableHandler.aspx",
+                data: str,
+                success: function (msg) {
+                    alert(msg);
+                    $("#Button1").click();
+                }
+            }
+            );
+        }
+        
+        function disable(userid) {
+            var str = "userid=" + userid + "&enable=0";
+            var message;
+            $.ajax(
+            {
+                type: "post",
+                url: "UserEnableHandler.aspx",
+                data: str,
+                success: function (msg) {
+                    alert(msg);
+                    $("#Button1").click();
+                }
+            }
+            );
+        }
+
+    </script>
+</head>
+
+<body>
+    <form id="form1" runat="server">
+        &nbsp;&nbsp;&nbsp;
+        关键词：<asp:TextBox ID="TextBox1" runat="server" Width="293px"></asp:TextBox>
+
+        <asp:DropDownList ID="DropDownList1" runat="server">
+            <asp:ListItem Value="0">全部</asp:ListItem>
+        </asp:DropDownList>
+
+        <asp:Button ID="Button1" runat="server" Text=" 搜 索 " OnClick="Button1_Click" CssClass="btnsubmit" />
+        <input id="Button2" type="button" value="添加用户" class="btnsubmit" onclick="window.open('Register.aspx', '注册用户', 'height=250, width=400, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')" />
+        <input id="Button3" type="button" value="部门维护" class="btnsubmit" onclick="window.open('../KSDM/Default.aspx', '部门维护', 'height=500, width=650, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')" />
+        <asp:Button ID="Button4" runat="server" Text="删除所选" OnClientClick="return confirm('你确定要删除所选用户吗?');" CssClass="btnsubmit" />
+
+        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="YGDM,SSKS,DLMC,QYBZ,IsOut" SkinID="GridViewSkin1"
+            DataMember="DefaultView" DataSourceID="Conn" Width="98%" BackColor="White" BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" OnRowDeleting="GridView1_RowDeleting" Font-Size="9pt" ForeColor="Black" AllowPaging="True" OnRowDataBound="GridView1_RowDataBound" HorizontalAlign="Center">
+            <Columns>
+                <asp:TemplateField>
+                    <HeaderTemplate>
+                        <asp:CheckBox ID="CheckBox1" runat="server" onclick="SelectCheckboxAll(this,'GridView1');" />
+                    </HeaderTemplate>
+                    <ItemStyle HorizontalAlign="Center" Width="30px" />
+                    <ItemTemplate>
+                        <asp:CheckBox ID="CheckBox1" runat="server" />
+                    </ItemTemplate>
+                </asp:TemplateField>
+                <asp:BoundField DataField="YGDM" HeaderText="ID" InsertVisible="False" ReadOnly="True"
+                    SortExpression="YGDM">
+                    <ItemStyle Width="40px" />
+                </asp:BoundField>
+                <asp:TemplateField HeaderText="登陆账号" SortExpression="DLMC">
+                    <EditItemTemplate>
+                        <asp:Label ID="Label1" runat="server" Text='<%# Bind("DLMC") %>'></asp:Label>
+                    </EditItemTemplate>
+                    <ItemTemplate>
+                        <asp:Label ID="Label1" runat="server" Text='<%# Bind("DLMC") %>'></asp:Label>
+                    </ItemTemplate>
+                </asp:TemplateField>
+                <asp:BoundField DataField="YGXM" HeaderText="员工姓名" SortExpression="YGXM" />
+                <asp:BoundField DataField="SSKS" HeaderText="部门">
+                    <ItemStyle HorizontalAlign="Center" Width="100px" />
+                </asp:BoundField>
+                <asp:TemplateField HeaderText="详细信息">
+                    <ItemStyle HorizontalAlign="Center" Width="75px" />
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="修改密码">
+                    <ItemStyle HorizontalAlign="Center" Width="75px" />
+                </asp:TemplateField>
+                <asp:TemplateField HeaderText="现有权限">
+                    <ItemStyle HorizontalAlign="Center" Width="75px" />
+                </asp:TemplateField>
+
+                <asp:TemplateField HeaderText="启用/禁用">
+                    <ItemStyle HorizontalAlign="Center" Width="75px" />
+                </asp:TemplateField>
+
+
+                <asp:CommandField ShowSelectButton="True" Visible="False">
+                    <ItemStyle HorizontalAlign="Center" />
+                </asp:CommandField>
+            </Columns>
+            <FooterStyle BackColor="#CCCC99" />
+            <RowStyle BackColor="White" />
+            <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+            <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Center" />
+            <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" />
+            <AlternatingRowStyle BackColor="White" />
+            <PagerSettings Visible="False" />
+        </asp:GridView>
+
+        <table align="center" width="98%" height="26" valign="middle" bgcolor="#EBECEE">
+            <tr>
+                <td id="PageBar" runat="server" align="center"></td>
+            </tr>
+        </table>
+        <br />
+        &nbsp;&nbsp;&nbsp;<font color="red" style="font-size: 9pt;">注：如果账号处于"未知状态"，请联系超级管理员进行处理
+        <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT [YGDM], [YGXM], [DLMC], [QYBZ], [SSKS],Notes,Mobile FROM [GY_YGDM]"></asp:SqlDataSource>
+    </form>
+</body>
+</html>

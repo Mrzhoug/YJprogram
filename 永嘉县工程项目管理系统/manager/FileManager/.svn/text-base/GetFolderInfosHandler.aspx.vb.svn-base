@@ -1,0 +1,68 @@
+﻿Imports System.Collections.Generic
+Imports Newtonsoft.Json
+
+Partial Class manager_FileManager_GetFolderInfosHandler
+    Inherits System.Web.UI.Page
+
+    Dim FileManager As New FileManager
+    Dim UserInfo As New UserInfo
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim belongFolderID As Integer
+        Dim folderID As Integer
+
+        Try
+            folderID = Request.QueryString("folderID")
+        Catch ex As Exception
+            folderID = 0
+        End Try
+        Try
+            belongFolderID = Request.Form("id")
+        Catch ex As Exception
+            belongFolderID = 0
+        End Try
+
+        Response.Write(getTree(belongFolderID, folderID))
+
+    End Sub
+
+
+
+    Function getTree(ByVal belongFolderID As Integer, ByVal folderID As Integer) As String
+        Dim treeNodes As New List(Of MZTreeNodeJson)
+
+        Dim userID As Integer = UserInfo.GetUserID(UserInfo.GetWebUserName())
+
+        Dim folderInfos As New List(Of MFolderInfo)
+        folderInfos = FileManager.GetFolderInfosByBelongFolderID(belongFolderID, userID)
+
+        For i As Integer = 0 To folderInfos.Count - 1
+
+            If folderInfos(i).ID <> folderID Then
+                Dim node As New MZTreeNodeJson
+
+                node.id = folderInfos(i).ID
+
+                If folderInfos(i).IsPublicFolder Then
+                    node.name = folderInfos(i).FolderName + "(公共)"
+                Else
+                    node.name = folderInfos(i).FolderName
+                End If
+
+
+                node.isParent = True
+                node.pID = belongFolderID
+                'node.icon = "../../App_Themes/CommanIcons/user_group.gif"
+                node.drag = True
+                node.drop = True
+                treeNodes.Add(node)
+            End If
+        Next
+
+
+        Dim jsonStr As String = Newtonsoft.Json.JavaScriptConvert.SerializeObject(treeNodes)
+        Return jsonStr
+    End Function
+
+
+End Class

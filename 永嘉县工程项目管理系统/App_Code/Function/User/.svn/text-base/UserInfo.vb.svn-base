@@ -1,0 +1,196 @@
+﻿Imports Microsoft.VisualBasic
+
+Public Class UserInfo
+    Inherits System.Web.UI.Page
+
+    Public Function GetWebUserName() As String
+        Dim Login_User As String
+        If DoWebConfig.GetWebConfig("SunfunSoft.Xman.ADUserAuthentication").ToLower = "true" Then '得到当前的ＩＩＳ用户
+            Login_User = System.Web.HttpContext.Current.Request.ServerVariables("LOGON_USER")
+            Dim Temp As String() = Login_User.Split("\")
+            Login_User = Temp(Temp.GetUpperBound(0))
+        Else            '数据库验证方式
+            Dim Topstr As String = DoWebConfig.GetWebConfig("SunfunSoft.Xman.Session.TopStr").ToString
+
+            If Session(Topstr & "_UName") = "" Then
+                If HttpContext.Current.Request.Cookies(Topstr & "_UName") Is Nothing Then
+                    Login_User = ""
+                Else
+                    Login_User = HttpContext.Current.Request.Cookies(Topstr & "_UName").Value
+                End If
+            Else
+                Login_User = Session(Topstr & "_UName")
+            End If
+        End If
+
+        Dim sqlstr As String
+
+        Try
+            sqlstr = "update Online_User set Date1=getdate() where userid = " & GetUserID(Login_User)
+            SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("UserInfo-GetWebUserName =====> 更新用户状态失败", ex.ToString())
+        End Try
+
+        Return Login_User.ToLower()
+    End Function
+
+
+    ''' <summary>
+    ''' 根据用户名得到用户ID
+    ''' </summary>
+    ''' <param name="UserName"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function GetUserID(ByVal UserName As String) As Integer
+        Dim UserID As Integer
+        If UserName.Trim.Length = 0 Then UserID = -1
+        Dim dt As New DataTable
+        Dim sqlstr As String
+        Try
+            sqlstr = "select YGDM from GY_YGDM where DLMC ='" & DoFilter.SQLFilter(UserName) & "' and QYBZ=1"
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("UserInfo-GetUserID =====> 获取用户ID失败", ex.ToString())
+            UserID = -1
+        End Try
+        If dt.Rows.Count > 0 Then
+            UserID = dt.Rows(0).Item(0)
+        Else
+            UserID = -1
+        End If
+        Return UserID
+    End Function
+
+
+    ''' <summary>
+    ''' 通过用户ID获取用户名
+    ''' </summary>
+    ''' <param name="userID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function GetUserLoginName(ByVal userID As Integer) As String
+        Dim userLoginName As String
+
+        Dim dt As New DataTable
+        Dim sqlstr As String
+        sqlstr = "select dlmc from gy_ygdm where ygdm=" + userID.ToString()
+
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("UserInfo", "GetUserLoginName", "查询登录名称失败", ex.ToString())
+            userLoginName = ""
+        End Try
+
+
+        If dt.Rows.Count > 0 Then
+            userLoginName = dt.Rows(0).Item(0).ToString()
+        Else
+            userLoginName = ""
+        End If
+
+        Return userLoginName
+
+    End Function
+
+    ''' <summary>
+    ''' 通过用户ID获取用户真实姓名
+    ''' </summary>
+    ''' <param name="userID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function GetUserRealName(ByVal userID As Integer) As String
+        Dim userRealName As String
+
+        Dim dt As New DataTable
+        Dim sqlstr As String
+        sqlstr = "select ygxm from gy_ygdm where ygdm=" + userID.ToString()
+
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("UserInfo", "GetUserRealName", "查询真实姓名称失败", ex.ToString())
+            userRealName = ""
+        End Try
+
+
+        If dt.Rows.Count > 0 Then
+            userRealName = dt.Rows(0).Item(0).ToString()
+        Else
+            userRealName = ""
+        End If
+
+        Return userRealName
+
+    End Function
+
+    ''' <summary>
+    ''' 获取部门名称
+    ''' </summary>
+    ''' <param name="DepartmentID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function GetDepartmentName(ByVal DepartmentID As Integer) As String
+        Dim DepartmentName As String
+
+        Dim dt As New DataTable
+        Dim sqlstr As String
+        sqlstr = "select ksmc from gy_ksdm where ksdm=" + DepartmentID.ToString()
+
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("UserInfo", "GetDepartmentName", "查询部门名称失败", ex.ToString())
+            DepartmentName = ""
+        End Try
+
+
+        If dt.Rows.Count > 0 Then
+            DepartmentName = dt.Rows(0).Item(0).ToString()
+        Else
+            DepartmentName = ""
+        End If
+
+        Return DepartmentName
+    End Function
+
+    ''' <summary>
+    ''' 根据用户ID获取用户信息
+    ''' </summary>
+    ''' <param name="userID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function GetUserInfoByID(ByVal userID As Integer) As MUserInfo
+
+        Dim dt As New DataTable
+        Dim sqlstr As String
+        sqlstr = "select * from gy_ygdm where ygdm=" + userID.ToString()
+
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("UserInfo", "GetUserInfoByID", "", ex.ToString())
+            Return Nothing
+        End Try
+
+        Dim userInfo As New MUserInfo
+        userInfo.UserID = dt.Rows(0).Item("ygdm")
+        userInfo.LoginName = dt.Rows(0).Item("dlmc")
+        userInfo.RealName = dt.Rows(0).Item("ygxm")
+        Return userInfo
+    End Function
+
+    ''' <summary>
+    ''' 根据登录名获取用户信息
+    ''' </summary>
+    ''' <param name="userName">登录名称</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function GetUserInfoByUserName(ByVal userName As String) As MUserInfo
+        Return GetUserInfoByID(GetUserID(userName))
+    End Function
+
+
+
+End Class

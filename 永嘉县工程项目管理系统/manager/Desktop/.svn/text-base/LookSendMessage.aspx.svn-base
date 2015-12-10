@@ -1,0 +1,129 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="LookSendMessage.aspx.vb" Inherits="manager_Desktop_LookSendMessage" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>信息查看</title>
+    <link rel="Stylesheet" type="text/css" href="../../App_Themes/StyleSheet.css" />
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+    <script language="javascript" type="text/javascript">
+    function test11()
+    {
+        var resultstr  = "";
+        resultstr = window.showModalDialog("../Dialog/UserDialog.aspx","用户选择","dialogWidth=300px;dialogHeight=450px");
+        var namelist = "";
+        var idlist = "";
+        if (resultstr !=null) 
+        {
+            var tmp = resultstr.split(",");
+            for (var i=0 ;i<tmp.length;i++)
+            {
+                if (tmp[i]!="")
+                {
+                    var tmp1 = tmp[i].split("|");
+                    namelist = namelist + tmp1[1] + ",";
+                    idlist = idlist + tmp1[0] + ",";
+                }
+            }      
+        }
+        var obj = document.getElementById("Text1");
+        obj.value = namelist;
+        var obj1 = document.getElementById("userlist");
+        obj1.value = idlist;
+    }
+    function savetomyfile(fileID,msgID) {
+        window.open("../Personbag/FileOption.aspx?action=saveFile&fileID=" + fileID + "&msgID=" + msgID + "", "newwindow", "height=290,width=480,top=160,left=220,toolbar=no,menubar=no,scrollbars=yes,location=no, status=no");
+    }
+    
+    </script>
+</head>
+<body>
+    <form id="form1" runat="server">
+    
+<table border="0" cellpadding="2" cellspacing="0" width="100%" style=" background-color:#EFF5FB;">
+<tr><td style="width:10px;"></td><td style="height:35px; font-weight:bold; font-size:15pt;"><span id="Titles" runat="server" ></span></td></tr>
+<tr><td style="width:10px;"></td><td style="color:#999999">发 件 人：<span id="FormID" runat="server"></span></td></tr>
+<tr><td style="width:10px;"></td><td style="color:#999999">时　　间：<span id="Date1" runat="server"></span></td></tr>
+<tr><td style="width:10px;"></td><td style="color:#999999"><label runat="Server" id="textRece">收 件 人：</label><span id="rece" runat="server"></span></td></tr>
+<tr><td style="width:10px; height:5px;"></td><td></td></tr>
+</table>      
+<table cellpadding="8" style="background-color:#eeeeee;" width="100%">
+    <tr>
+    <td style=" background-color:White; margin-left:10px;">
+        <asp:Label ID="Content" runat="server" Height="100px" Text="Label" Width="556px"></asp:Label>
+    </td>
+    </tr>
+</table>
+        <br />
+<!--  表单附件 -->       
+<table border="0" cellpadding="2" cellspacing="0" width="100%" id="Panel4" runat="server">
+<tr><td style="background-color:#E0ECF9; height:30px;">&nbsp;&nbsp;表单附件</td></tr>
+<tr><td style="background-color:#E0ECF9;">
+    <table border="0" cellpadding="4" cellspacing="0" width="100%">
+    <tr><td style="background-color:White;">          
+            <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" BackColor="White"
+                BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" DataKeyNames="FID"
+                Font-Size="11pt" ForeColor="Black" HorizontalAlign="Center" PageSize="15" SkinID="GridViewSkin1"
+                Width="98%">
+                <PagerSettings Visible="False" />
+                <FooterStyle BackColor="#CCCC99" />
+                <RowStyle BackColor="White" />
+                <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+                <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Center" />
+                <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" HorizontalAlign="Center"
+                    Wrap="False" />
+                <AlternatingRowStyle BackColor="White" />
+            </asp:GridView>
+            <asp:TextBox ID="Fids" runat="server" ReadOnly="True" Visible="False" Width="592px"></asp:TextBox>
+            <center><asp:Button ID="Button1" runat="server" Text="返回列表" CssClass="btnsubmit" /></center>
+    </td>            
+    </tr>
+    </table>                    
+</td>            
+</tr>
+</table>    
+<!--  表单附件 -->
+
+<!--  文件附件 -->            
+    <span id="filelist" runat="server"></span>
+<!--  文件附件 -->                              
+<br />    
+<!--  快速回复 -->            
+<table border="0" cellpadding="2" cellspacing="0" width="100%">
+<tr><td style="background-color:#E0ECF9; height:30px;">&nbsp;&nbsp;快速回复</td></tr>
+<tr><td style="background-color:#E0ECF9;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr><td style="background-color:White;">
+            <table border="0" cellpadding="4" cellspacing="0">
+                <tr>
+                    <td>
+                    <asp:TextBox ID="ReContent" runat="server" Height="65px" TextMode="MultiLine" Width="580px"></asp:TextBox></td>
+                    <td style="width: 100px">
+                    <asp:CheckBox ID="CheckBox1" runat="server" Checked="True" Text="带附件回复" /><br />
+                    <asp:Button ID="Button2" runat="server" Text=" 发 送 " CssClass="btnsubmit" /><br />
+                    <asp:Button ID="Button3" runat="server" Text=" 转 发 " CssClass="btnsubmit"/></td>
+                </tr>
+            </table>
+    </td></tr>
+    </table>
+</td></tr>
+</table>  
+<!--  快速回复 -->                              
+        <br />
+<!--  抄送 -->       
+<table border="0" cellpadding="2" cellspacing="0" width="100%" id="Panel1" runat="server" visible="false">
+<tr><td style="background-color:#E0ECF9; height:30px;">&nbsp;&nbsp;抄送</td></tr>
+<tr><td style="background-color:#E0ECF9;">
+    <table border="0" cellpadding="4" cellspacing="0" width="100%">
+    <tr><td style="background-color:White;">   
+            <input style="width: 536px; height: 32px;" id="Text1" readonly="readonly" type="text">
+            <input id="Button6" onclick="test11()" type="button" value="选择人员"  class="btnsubmit">
+            <input style="width:456px;" id="userlist" readonly="" runat="server" type="hidden">
+    </td></tr>
+    </table>            
+</td></tr>
+</table>
+<!--  抄送 -->           
+    </form>
+</body>
+</html>
+

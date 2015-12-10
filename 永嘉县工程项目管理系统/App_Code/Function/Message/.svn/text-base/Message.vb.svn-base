@@ -1,0 +1,125 @@
+﻿Imports Microsoft.VisualBasic
+Imports System.Data.SqlClient
+
+Public Class Message
+
+
+
+    Enum MessageType
+        ''' <summary>
+        ''' 分发
+        ''' </summary>
+        ''' <remarks></remarks>
+        Distribution = 1
+
+        ''' <summary>
+        ''' 审阅
+        ''' </summary>
+        ''' <remarks></remarks>
+        Review = 2
+
+        ''' <summary>
+        ''' 订阅
+        ''' </summary>
+        ''' <remarks></remarks>
+        Subscribe = 3
+
+        ''' <summary>
+        ''' 公告
+        ''' </summary>
+        ''' <remarks></remarks>
+        PublicMessage = 4
+
+        ''' <summary>
+        ''' 项目分发
+        ''' </summary>
+        ''' <remarks></remarks>
+        ProjectDistribution = 5
+
+
+        ''' <summary>
+        ''' 短消息
+        ''' </summary>
+        ''' <remarks></remarks>
+        SortMessage = 6
+    End Enum
+
+
+    ''' <summary>
+    ''' 发送短消息
+    ''' </summary>
+    ''' <param name="toUserID"></param>
+    ''' <param name="fromUserID"></param>
+    ''' <param name="title"></param>
+    ''' <param name="content"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function SendSimpleSortMessage(ByVal toUserID As Integer, ByVal fromUserID As String, ByVal title As String, ByVal content As String) As Boolean
+        Dim sqlstr As String
+        sqlstr = "insert into SendMessage (FromID,Title,Content,ToID,SendDate,LookFlag,msgkind) values (@FromID,@Title,@Content,@ToID,@SendDate,@LookFlag,@msgkind)"
+
+        Dim params() As SqlParameter = New SqlParameter() { _
+            New SqlParameter("@FromID", fromUserID), _
+            New SqlParameter("@Title", title), _
+            New SqlParameter("@Content", content), _
+            New SqlParameter("@ToID", toUserID), _
+            New SqlParameter("@SendDate", DateTime.Now), _
+            New SqlParameter("@LookFlag", 0), _
+            New SqlParameter("@msgkind", MessageType.SortMessage) _
+            }
+
+        Dim result As String
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, params)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("RegisterCompanyInfo---AddCompanyInfo 失败", ex.ToString())
+            result = -1
+        End Try
+
+        If result > 0 Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 发送系统短消息
+    ''' </summary>
+    ''' <param name="toUserID"></param>
+    ''' <param name="title"></param>
+    ''' <param name="content"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function SendSystemMessage(ByVal toUserID As Integer, ByVal title As String, ByVal content As String) As Boolean
+        Dim sqlstr As String
+
+        sqlstr = "insert into SendMessage (FromID,Title,Content,ToID,SendDate,LookFlag,msgkind) values (@FromID,@Title,@Content,@ToID,@SendDate,@LookFlag,@msgkind)"
+
+        Dim params() As SqlParameter = New SqlParameter() { _
+            New SqlParameter("@FromID", 0), _
+            New SqlParameter("@Title", title), _
+            New SqlParameter("@Content", content), _
+            New SqlParameter("@ToID", toUserID), _
+            New SqlParameter("@SendDate", DateTime.Now), _
+            New SqlParameter("@LookFlag", 0), _
+            New SqlParameter("@msgkind", MessageType.SortMessage) _
+            }
+
+        Dim result As String
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, params)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("RegisterCompanyInfo---AddCompanyInfo 失败", ex.ToString())
+            result = -1
+        End Try
+
+        If result > 0 Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+
+End Class

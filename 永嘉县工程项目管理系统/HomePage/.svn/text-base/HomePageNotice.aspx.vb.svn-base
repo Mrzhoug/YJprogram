@@ -1,0 +1,32 @@
+﻿
+Partial Class HomePage_HomePageNotice
+    Inherits System.Web.UI.Page
+    Dim base As New Base
+    Dim Kind As String
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Cells(0).Text = i + 1
+            GridView1.Rows(i).Cells(1).Text = "<a href='HomePageNoticeShow.aspx?Kind=" & Kind & "&cid=" & GridView1.DataKeys(i).Item(0) & "'>" & GridView1.Rows(i).Cells(1).Text & "</a>"
+        Next
+        Dim RowCount As Integer = GridView1.Rows.Count
+        GridView1.AllowPaging = True
+        PageBar.InnerHtml = base.pub.WritePage(GridView1, RowCount)
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Try
+            Kind = Request("Kind")
+        Catch ex As Exception
+            Kind = ""
+        End Try
+
+        Dim tb As New Data.DataTable
+        If Kind = "KS" Then
+            Conn.SelectCommand = "SELECT [CId], [Title], [Content], [CheckNum], [UpTime] FROM [Ks_Notice]"
+        Else
+            Conn.SelectCommand = "SELECT [CId], [Title], [Content], [CheckNum], [UpTime] FROM [HomePageNotice]"
+        End If
+    End Sub
+End Class

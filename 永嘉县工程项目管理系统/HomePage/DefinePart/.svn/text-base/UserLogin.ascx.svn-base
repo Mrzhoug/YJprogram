@@ -1,0 +1,72 @@
+﻿<%@ Control Language="VB" AutoEventWireup="false" CodeFile="UserLogin.ascx.vb" Inherits="HomePage_DefinePart_UserLogin" %>
+<style>
+input {
+	border-width: 0px;
+	border-bottom-width: 1px;
+	border-color: #AEA387;
+	padding: 1px 1px 1px 1px;
+	font-family: Tahoma, Verdana, "宋体"; 
+	font-size: 12px; 
+	height: 19px;
+	color: #554F3E; 
+	background-color: #ffffff; 
+}
+</style>
+<script language="JavaScript">
+    <!--
+function document.onkeydown()   
+{   
+    if(event.keyCode==13)   
+    {   
+        document.form1.all.Button1.click();    //这里的submit是按钮的ID
+    }   
+}
+
+function   EnterRedirect()
+{
+    if(event.keyCode==13)
+        form1.submit();
+        //Obj.click();
+}
+    -->
+</script>
+
+
+<table id="Table_01" width="250" style="height:180px;" border="0" cellpadding="0" cellspacing="0" runat="server">
+	<tr style="height:32px;">
+		<td><img src="images/页面2_19.gif" alt="" /></td>
+	</tr>
+	<tr>
+	<td style="background:url(images/页面2_11.gif); font-size:9pt; width:100%; text-align:center;">
+	   <table width="100%" align="center" cellspacing="0" border="0">
+       <tr><td height="8" style="width: 16px"></td></tr>
+       <tr>
+        <td style="width:16px; height: 125px;"></td>
+        <td style="height: 125px; color:Red; font-size:9pt;"  >
+        &nbsp;&nbsp;用户名:
+        <asp:TextBox ID="TextBox1" runat="server" Width="97px"></asp:TextBox>&nbsp;
+    <input id="Button3" style="left: 13px; position: relative; top: 0px; width: 50px;" type="button" value="用户注册" onclick="location.href='EnterprisesReg.aspx'" tabindex="1" /><br />
+        &nbsp;&nbsp;密&nbsp;&nbsp;&nbsp;&nbsp;码:
+            <input id="password1" runat="server" style="width: 97px" type="password" />
+   <input id="Button4" style="left: 16px; position: relative; top: 0px; width: 50px;" type="button" value="找回密码" onclick="location.href='Enterprisespass.aspx'" tabindex="2" /><br />
+        &nbsp;&nbsp;验证码:
+            <asp:TextBox ID="TextBox3" runat="server" Width="38px" MaxLength="4"></asp:TextBox>
+            &nbsp; 
+            <asp:Image ID="Image1" runat="server" Height="20px" ImageUrl="../../ImageCode.aspx"
+                Style="left: 0px; position: relative; top: 3px" Width="48px" /><span id="span1" runat="server" ></span><br />
+<center><asp:Button ID="Button1" runat="server" Text="企业用户登陆" style="position: relative; top: 9px; left: 6px;" OnClick="Button1_Click" Width="75px" TabIndex="4" />
+            &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
+    <asp:Button ID="Button5" runat="server" Text="部门管理登陆" style="position: relative; top: 9px; left: 36px;" OnClick="Button5_Click" Width="75px" TabIndex="4" />
+    &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;
+    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;</center>
+            <center>
+                &nbsp;</center>
+            <center>
+                &nbsp;</center>
+        </td></tr>
+        <tr><td height="24" style="width: 16px"></td></tr>
+        </table>
+    </td>
+	</tr>
+	<tr><td><img src="images/页面2_15.gif" alt="" /></td></tr>
+</table>

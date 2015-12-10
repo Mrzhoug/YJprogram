@@ -1,0 +1,10 @@
+﻿
+Partial Class Menu_Logo
+    Inherits System.Web.UI.Page
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        If System.IO.File.Exists(Server.MapPath("../images/logo.gif")) = True Then
+            logo1.InnerHtml = "<img height=36 alt='logo' src='../images/logo.gif' width=460>"
+        End If
+    End Sub
+End Class

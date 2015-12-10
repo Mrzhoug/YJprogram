@@ -1,0 +1,134 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ShareFile.aspx.vb" Inherits="manager_Personbag_ShareFile" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>共享文件</title>
+    <link rel="Stylesheet" type="text/css" href="../../App_Themes/StyleSheet.css" />
+    <script type="text/javascript" src="../../Pub/jquery-1.8.0.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            opentest(0);
+        })
+
+        function selectAllCB() {
+            if ($("#selectALL").attr("checked") == "checked") {
+                $("#tbody input[type=checkbox]").each(function () {
+                    if (this.checked == false) {
+                        this.checked = true;
+                    }
+                });
+            }
+            else {
+                $("#tbody input[type=checkbox]").each(function () {
+                    if (this.checked == true) {
+                        this.checked = false;
+                    }
+                });
+            }
+        }
+
+        function selectBelongCB(thisName, childClassStr) {
+            if ($("#" + thisName + "").attr("checked") == "checked") {
+                $("." + childClassStr + "").each(function () {
+                    if (this.checked == false) {
+                        this.checked = true;                        
+                    }
+                });
+            }
+            else {
+                $("." + childClassStr + "").each(function () {
+                    if (this.checked == true) {
+                        this.checked = false;
+                    }
+                });
+                if ($("#selectALL").attr("checked") == "checked") {
+                    $("#selectALL").attr("checked", false);
+                }
+            }
+
+        }
+
+        function unselectCB(thisName, fatherName) {
+        
+            if ($("#" + thisName + "").attr("checked") != "checked") {
+                if ($("#" + fatherName + "").attr("checked") == "checked") {
+                    $("#" + fatherName + "").attr("checked", false);
+                }
+                if ($("#selectALL").attr("checked") == "checked") {
+                    $("#selectALL").attr("checked", false);
+                }
+            }
+        }
+
+
+        function ajaxSubmit() {
+            var str = "username=<%=currentUserName %>&folder=<%=decodeFolder %>&sharefile=<%=decodeShareFile %>&name=";
+            if ($("#selectALL").attr("checked") == "checked") {
+                str += "*"
+            }
+            else {
+                $("#tbody input[type=checkbox]").each(function () {
+
+                    if (this.id.indexOf("YGDM") && this.checked == true) {
+                        str += this.value + ",";
+                    }
+                });
+            }
+
+            $.ajax(
+            {
+                type: "post",
+                url: "shareFileHandle.ashx",
+                data: str,
+                async: false,
+                error: function (request) {
+                    alert("获取搜索数据失败！");
+                },
+                success: function (msg) {
+                    alert(msg);
+                }
+            }
+            );
+        }
+
+        function opentest(i) {
+            $(".test" + i).slideToggle("normal");            
+            $(".div" + i).slideToggle("normal");
+            
+        }
+    </script>
+</head>
+<body>
+    <form id="form1" runat="server" style="width:500px;" >
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>共享文件</span></a></li>
+            </ul>
+        </div>
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th style="text-align:left" colspan="3">
+                            <input id='selectALL' type='checkbox' onclick="selectAllCB()" runat="server" /><label for='selectALL'>任何人可见(everyone)</label>
+                            <input id="Button1" type="button" value="确 定" class="btnsubmit" onclick="ajaxSubmit()" />
+                            <input id="Button2" type="button" value="关 闭" class="btnsubmit" onclick="javascript:window.close()"  />
+
+                            
+                        </th>                        
+                    </tr>
+                    <tbody runat="server" id="tbody"></tbody>
+                    
+                </table>
+                
+            </div>
+        </div>        
+    </form>
+</body>
+</html>
+

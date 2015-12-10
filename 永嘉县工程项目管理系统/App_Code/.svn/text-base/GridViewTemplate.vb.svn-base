@@ -1,0 +1,52 @@
+Imports Microsoft.VisualBasic
+
+'模板列的构造函数
+Public Class GridViewTemplate
+    Implements System.Web.UI.ITemplate
+
+    Private templateType As String
+    Private columnName As String
+
+
+    Public Sub New(ByVal type As String, ByVal colname As String)
+        templateType = type
+        columnName = colname
+    End Sub
+
+    Sub InstantiateIn(ByVal container As Control) Implements ITemplate.InstantiateIn
+        Select Case (templateType)
+            Case "head"
+                Dim lc As New Literal
+                lc.Text = columnName
+                container.Controls.Add(lc)
+                Return
+            Case "textbox"
+                Dim label As New Label
+                Dim textBox As New TextBox
+
+                label.Visible = True
+                textBox.Visible = True
+
+                label.ID = "lb"
+                textBox.ID = "text"
+
+                label.Attributes("style") = ""
+                textBox.Attributes("style") = "display:none"
+                textBox.ControlStyle.Width = 100
+                container.Controls.Add(Label)
+                container.Controls.Add(textBox)
+                Return
+            Case "linkbutton"
+                Dim lb As New LinkButton
+                lb.Visible = False
+                lb.CommandName = "SingleClick"
+                lb.Text = "linkbutton"
+                container.Controls.Add(lb)
+            Case Else
+                Return
+        End Select
+    End Sub
+
+
+
+End Class

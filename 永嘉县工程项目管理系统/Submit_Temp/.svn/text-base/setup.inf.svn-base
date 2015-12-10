@@ -1,0 +1,35 @@
+;*** BEGIN **********************************************************
+;**                                                                **
+;** Automatically generated on: Mon Mar 23 13:52:06 2015           **
+;**                                                                **
+;** MakeCAB Version: 6.1.7600.16385                                 **
+;**                                                                **
+;*** BEGIN **********************************************************
+[disk list]
+1,Disk 1
+[cabinet list]
+1,1,工程信息.xsn
+[file list]
+1,1,auxdomschema3.xsd,1156
+1,1,auxdomschema4.xsd,31310
+1,1,auxdomschema5.xsd,6292
+1,1,auxdomschema6.xsd,1156
+1,1,auxdomschema7.xsd,31310
+1,1,auxdomschema8.xsd,18699
+1,1,GetData.xml,619
+1,1,GetData.xsd,1151
+1,1,GetData1.xsd,31310
+1,1,GetData2.xsd,465
+1,1,manifest.xsf,78322
+1,1,myschema.xsd,8720
+1,1,sampledata.xml,13625
+1,1,template.xml,4155
+1,1,view4.xsl,53854
+1,1,____.dll,77824
+1,1,____1.xml,2702
+1,1,______2.xml,5918
+;*** END ************************************************************
+;**                                                                **
+;** Automatically generated on: Mon Mar 23 13:52:06 2015           **
+;**                                                                **
+;*** END ************************************************************

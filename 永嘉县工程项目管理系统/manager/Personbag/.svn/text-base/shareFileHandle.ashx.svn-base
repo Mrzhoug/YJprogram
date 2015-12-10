@@ -1,0 +1,54 @@
+﻿<%@ WebHandler Language="VB" Class="shareFileHandle" %>
+
+Imports System
+Imports System.Web
+
+Public Class shareFileHandle : Implements IHttpHandler
+    
+    Public Sub ProcessRequest(ByVal context As HttpContext) Implements IHttpHandler.ProcessRequest
+        context.Response.ContentType = "text/plain"
+        Try
+            Dim Base As New Base
+            Dim folder As String = Base.SqlFilter(context.Server.UrlDecode(context.Request("folder")))
+            Dim sharefile As String = Base.SqlFilter(context.Server.UrlDecode(context.Request("sharefile")))
+            Dim filepath As String = folder & "\" & sharefile
+            Dim currentUserName As String = Base.SqlFilter(context.Server.UrlDecode(context.Request("username")))
+            Dim userID As String = Base.SqlFilter(context.Server.UrlDecode(context.Request("name")))
+        
+        
+        
+            If userID = "*" Then
+                Base.DB.Query("Delete ShareFile Where filepath ='" & filepath & "' and giveuserid='" & currentUserName & "'")
+                Base.DB.Query("Insert Into ShareFile(giveuserid,getuserid,filepath,sharetime) values ('" & currentUserName & "','*','" & filepath & "','" & Now & "')")
+            Else
+                Dim userIDs() As String
+                userIDs = userID.Split(",")
+            
+                Dim username As String = String.Empty
+            
+                For i As Integer = 0 To userIDs.Length - 2
+                    username = username & "|" & Base.GetUserName(userIDs(i), 1)
+                Next
+                If username <> "" Then username = username & "|"
+            
+                Base.DB.Query("Delete ShareFile Where filepath ='" & filepath & "' and giveuserid='" & currentUserName & "'")
+                Base.DB.Query("insert into sharefile(giveuserid,getuserid,filepath,sharetime) values ('" & currentUserName & "','" & username & "','" & filepath & "','" & Now & "')")
+            End If
+            context.Response.Write("设置成功")
+        Catch ex As Exception
+            context.Response.Write(ex.ToString)
+        End Try
+        
+        
+        
+        
+        
+    End Sub
+ 
+    Public ReadOnly Property IsReusable() As Boolean Implements IHttpHandler.IsReusable
+        Get
+            Return False
+        End Get
+    End Property
+
+End Class

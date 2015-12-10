@@ -1,0 +1,35 @@
+﻿
+Partial Class HomePage_DefinePart_NewTable
+    Inherits System.Web.UI.UserControl
+    Dim Base As New Base
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Cells(1).Text = "<center><a href='NewTable.aspx?KSDM=" & GridView1.DataKeys(i).Item(1) & "'>" & GridView1.Rows(i).Cells(1).Text & "</a></center>"
+        Next
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        Dim MKDM As Integer
+        Dim LCDM As Integer
+        MKDM = GridView1.DataKeys(e.NewSelectedIndex).Item(0)
+        Dim tb As New Data.DataTable
+        Dim Base As New Base
+        tb = Base.DB.Table("SELECT NoLCDM FROM GY_MKXX where (NoLCDM is not null and NoLCDM <> 0) and CanSee=1 and MKDM=" & MKDM, "gadsg")
+        If tb.Rows.Count = 0 Then
+            Base.Js.alert(Me.Page, "打开表单出错.请联系管理员")
+            Exit Sub
+        End If
+        LCDM = tb.Rows(0)(0)
+        tb = Nothing
+        Base.Dispose()
+        Response.Redirect("Forms/FunctionNOLc.aspx?LCDM=" & LCDM)
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+    End Sub
+End Class

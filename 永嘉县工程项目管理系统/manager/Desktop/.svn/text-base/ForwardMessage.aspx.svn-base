@@ -1,0 +1,137 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ForwardMessage.aspx.vb" Inherits="manager_Desktop_ForwardMessage" Theme="SkinFile"%>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>编写消息</title>
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+    <script language="javascript" type="text/javascript">
+    function test11()
+    {
+        var obj1 = document.getElementById("userlist");         //ID列表
+        var resultstr  = "";
+        resultstr = window.showModalDialog("../Dialog/UserDialog.aspx","用户选择","dialogWidth=300px;dialogHeight=450px");
+        var namelist = "";
+        var idlist = "";
+        var tmpid  = "," + obj1.value;
+        if (resultstr !=null) 
+        {
+            var tmp = resultstr.split(",");
+            for (var i=0 ;i<tmp.length;i++)
+            {
+                if (tmp[i]!="")
+                {
+                    var tmp1 = tmp[i].split("|");
+                    if ( tmpid.indexOf(',' + tmp1[0] + ',') <0)
+                    {
+                        namelist = namelist + tmp1[1] + ",";
+                        idlist = idlist + tmp1[0] + ",";    
+                    }
+                }
+            }      
+        }
+        var obj = document.getElementById("Text1");
+        obj.value += namelist;
+        
+        obj1.value += idlist;
+    }
+    
+    function test12()
+    {
+        var obj = document.getElementById("Text1");
+        obj.value = "";
+        var obj1 = document.getElementById("userlist");
+        obj1.value = "";
+    }
+    
+    </script>
+</head>
+<body>
+    <form id="form1" runat="server">
+    
+         <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td class="dmenu">
+        &nbsp;<asp:Button ID="Button1" runat="server" Text="确定发送" />
+        <input id="Button3" onclick="BackDesktop(1);window.close();" type="button" value="信息中心" />
+                    <input id="Button4" onclick="opener.window.parent.addTab('manager/Desktop/ListSendMessage.aspx','内部消息','shortmessage');window.close();" type="button" value="返回列表" />
+        <asp:CheckBox ID="CheckBox1" runat="server" Text="密送" />
+        </td></tr>
+    <tr><td style="height:1px;"></td></tr>
+    </table>
+    
+    <table border="0" width="100%" cellpadding="0" cellspacing="0">
+    <tr><td valign="top" class="dback">
+     <table width="570" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td align="right" style="width: 70px; " valign=top >
+                    收件部门：</td>
+                <td >
+                    <textarea ID="userlist" runat="server" style="overflow: hidden; width: 500px; ; height: expression(this.scrollHeight)"/>
+            </tr>
+         <tr>
+             <td align="right" style="width: 84px; height: 26px" valign="top">
+                    主题：</td>
+             <td style="height: 26px">
+                    <asp:TextBox ID="Title" runat="server" Width="100%"></asp:TextBox></td>
+         </tr>
+         <tr>
+             <td align="right" style="width: 84px; height: 32px" valign="top">
+             </td>
+             <td style="height: 32px">
+        <asp:Panel ID="Panel1" runat="server" GroupingText="表单附件" Height="56px" Width="100%">
+            <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" BackColor="White"
+                BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" DataKeyNames="FID"
+                Font-Size="11pt" ForeColor="Black" HorizontalAlign="Center" PageSize="15" SkinID="GridViewSkin1"
+                Width="98%">
+                <PagerSettings Visible="False" />
+                <FooterStyle BackColor="#CCCC99" />
+                <RowStyle BackColor="White" />
+                <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+                <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Center" />
+                <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" HorizontalAlign="Center"
+                    Wrap="False" />
+                <AlternatingRowStyle BackColor="White" />
+            </asp:GridView>
+            <asp:TextBox ID="Fids" runat="server" Width="302px" ReadOnly="True" Visible="False"></asp:TextBox>
+        </asp:Panel>
+                <asp:Panel ID="Panel2" runat="server" GroupingText="文件附件" Height="56px" Width="100%">
+            &nbsp;<asp:FileUpload ID="FileUpload1" runat="server" onpropertychange="test1();" style="height:20px; width:0px;opacity:0;filter:alpha(opacity=0); z-index: 100; left: 95px; position: absolute;"/><asp:Button ID="Button2" runat="server" Text="附件上传"/>
+            <script language="javascript" type="text/javascript">
+            var obj1 = document.getElementById("Button2");
+            function test1()
+            {
+                obj1.click();
+            }
+            </script>
+            <br />
+            <span id="filelist" runat="server"></span></asp:Panel>
+             </td>
+         </tr>
+            <tr>
+                <td align="right" style="width: 84px; height: 32px" valign="top">
+                    正文：</td>
+                <td style=" height: 32px">
+                    <asp:TextBox ID="Content" runat="server" Height="200px" Width="100%" TextMode="MultiLine"></asp:TextBox></td>
+            </tr>
+            <tr>
+                <td align="right" style="width: 84px; height: 22px;" valign="top">
+                </td>
+                <td align="center" style="height: 22px; width: 464px;">
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</td>
+            </tr>
+        </table>
+    
+    </td>
+    <td class="dback">&nbsp;</td>
+    <td width="200" class="dback" style=" height:100%" valign="top"><iframe frameborder="0" style=" border-style:solid; border-width:1px; border-color:#cecece;" src="../Dialog/UserListDialog.aspx?obj=userlist" width="200" height="100%"></iframe></td></tr>
+    </table>
+    <table cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td class="dmenu">
+        &nbsp;<asp:Button ID="Button5" runat="server" Text="确定发送" />
+        <input id="Button6" onclick="BackDesktop(1);window.close();" type="button" value="信息中心" />
+                    <input id="Button7" onclick="opener.window.parent.addTab('manager/Desktop/ListSendMessage.aspx','内部消息','shortmessage');window.close();" type="button" value="返回列表" />
+        <asp:CheckBox ID="CheckBox2" runat="server" Text="密送" />
+        </td></tr>
+    <tr><td style="height:1px;"></td></tr>
+    </table>
+    </form>
+</body>
+</html>

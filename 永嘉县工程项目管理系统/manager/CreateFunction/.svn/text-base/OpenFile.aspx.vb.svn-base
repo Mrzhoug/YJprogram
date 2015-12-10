@@ -1,0 +1,51 @@
+﻿Imports System.IO
+Partial Class manager_CreateFunction_OpenFile
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+
+    Sub PrintContent(ByVal FileName As String)
+        Dim stream As FileStream = New FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.Read)
+        Dim Type1 As String
+        Type1 = FileName.Substring(FileName.LastIndexOf("."))
+
+        Try
+            Dim bufSize As Integer = stream.Length
+            Dim buf(bufSize) As Byte
+            Dim bytesRead As Integer = stream.Read(buf, 0, bufSize)
+            Dim UTF8 As Encoding = Encoding.GetEncoding("GB2312")
+            Response.ContentEncoding = UTF8
+            Response.AddHeader("Content-Disposition", "attachment; filename=SunFun" & Type1)
+            Response.AddHeader("Content-Length", bufSize.ToString())
+            Response.OutputStream.Write(buf, 0, bytesRead)
+            Response.End()
+        Catch ex As Exception
+            Base.Js.alert(Me, "打开出错.")
+        End Try
+    End Sub
+
+    Protected Sub Page_Disposed(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Disposed
+        Base.Dispose()
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim FileName As String
+        Try
+            FileName = Request("FileName")
+        Catch ex As Exception
+            Base.Js.alert(Me, "非法参数!")
+            Exit Sub
+        End Try
+
+        If FileName.Length = 0 Then
+            Base.Js.alert(Me, "非法参数!")
+            Exit Sub
+        End If
+
+        Dim RootPath As String = Server.MapPath("../../") & "ApplicationTemplateLibrary\"
+        If IO.File.Exists(RootPath & FileName) = True Then     '关判断文件是否存在
+            PrintContent(RootPath & FileName)
+        Else
+            Base.Js.alert(Me, "文件不存在!")
+        End If
+    End Sub
+End Class

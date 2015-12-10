@@ -1,0 +1,78 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="SerialNo.aspx.vb" Inherits="manager_Config_SerialNo" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>序列生成管理</title>
+    <link href="../../images/Styles.css" type="text/css" />
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        <table  style="font-size:9pt; margin:0">
+            <tr>
+                <td style="width: 254px">
+                    序号列表:</td>
+                <td style="width: 14px">
+                </td>
+                <td style="width: 270px">
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 600px" valign="top">
+                    <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" BackColor="White" BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" DataKeyNames="KindID" DataSourceID="Conn" Font-Size="9pt" ForeColor="Black" Width="600px" SkinID="GridViewSkin1">
+                        <FooterStyle BackColor="#CCCC99" />
+                        <RowStyle BackColor="White" />
+                        <Columns>
+                            <asp:BoundField DataField="KindName" HeaderText="序列名称" SortExpression="KindName" />
+                            <asp:BoundField DataField="KindAbout" HeaderText="说明" SortExpression="KindAbout" />
+                            <asp:BoundField DataField="TopNo" HeaderText="前部" SortExpression="TopNo" />
+                            <asp:BoundField DataField="ButtonNo" HeaderText="后部" SortExpression="ButtonNo" />
+                            <asp:BoundField DataField="StartNO" HeaderText="起号" SortExpression="StartNO" />
+                            <asp:CheckBoxField DataField="DateFlag" HeaderText="日期" SortExpression="DateFlag" >
+                                <ItemStyle HorizontalAlign="Center" Width="30px" />
+                            </asp:CheckBoxField>
+                            <asp:TemplateField HeaderText="删除" ShowHeader="False">
+                                <ItemTemplate>
+                                    <asp:LinkButton ID="LinkButton1" runat="server" CausesValidation="False" CommandName="Delete" Text="删除" OnClientClick="return confirm('是否删除此序列,如果删除,此序列将不可用.');"></asp:LinkButton>
+                                </ItemTemplate>
+                                <ItemStyle HorizontalAlign="Center" Width="40px" />
+                            </asp:TemplateField>
+                        </Columns>
+                        <PagerStyle BackColor="White" ForeColor="Black" HorizontalAlign="Right" />
+                        <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+                        <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" />
+                        <AlternatingRowStyle BackColor="White" />
+                    </asp:GridView>
+                    <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+                        SelectCommand="SELECT [KindID], [KindName], [KindAbout], [TopNo], [ButtonNo], [StartNO], [DateFlag] FROM [Serial_Kind]">
+                    </asp:SqlDataSource>
+                </td>
+                <td style="width: 14px">
+                </td>
+                <td style="width: 270px" valign="top">
+                    &nbsp;序列名称：<asp:TextBox ID="TextBox1" runat="server"></asp:TextBox><br />
+                    &nbsp;序列说明：<asp:TextBox ID="TextBox2" runat="server"></asp:TextBox><br />
+                    &nbsp;序列前部：<asp:TextBox ID="TextBox3" runat="server"></asp:TextBox><br />
+                    &nbsp;序列后部：<asp:TextBox ID="TextBox4" runat="server"></asp:TextBox><br />
+                    &nbsp;序列开始：<asp:TextBox ID="TextBox5" runat="server"></asp:TextBox><br />
+                    &nbsp;日期选项：<asp:CheckBox ID="CheckBox1" runat="server" Text="添加六位日期" /><br />
+                    <br />
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+                    <asp:Button ID="Button1" runat="server" Text=" 添 加 " />
+                    &nbsp;
+                    <input id="Reset1" type="reset" value=" 重 置 " /></td>
+            </tr>
+            <tr>
+                <td style="width: 254px">
+                </td>
+                <td style="width: 14px">
+                </td>
+                <td style="width: 270px">
+                </td>
+            </tr>
+        </table>
+    
+    </div>
+    </form>
+</body>
+</html>

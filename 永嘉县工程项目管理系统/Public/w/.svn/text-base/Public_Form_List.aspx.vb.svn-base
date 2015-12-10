@@ -1,0 +1,280 @@
+﻿Imports System.Xml
+Imports System.IO
+Partial Class Public_Form_List
+    Inherits System.Web.UI.Page
+    Dim LCDM As Integer
+    Dim Base As New Base
+    Dim TempTable As New Data.DataTable
+    Dim MaxTitle As Integer = 1
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim SelectSQL As String
+    Dim MaxPage As String
+    Dim PublicForm As Boolean
+    Dim BaseUrl As String       '在读取XML文件内容时的基目录
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Dim Tb As New Data.DataTable
+        Try
+            LCDM = DropDownList1.SelectedItem.Value
+        Catch ex As Exception
+            LCDM = 0
+        End Try
+
+
+        '如果是对方传值过来
+        If LCDM = 0 Then
+            Try
+                LCDM = Request("lcdm")
+            Catch ex As Exception
+                LCDM = 0
+            End Try
+            If LCDM <> 0 Then
+                DropDownList1.Visible = False
+            Else
+                Tb = Base.DB.Table("SELECT top 1 GY_MKXX.MKDM, MKMC, NoLcDM FROM GY_MKXX,GY_LCDM WHERE (NOT (NoLcDM IS NULL)) and (GY_LCDM.PublicList = 1 or GY_LCDM.PublicForm = 1) and GY_LCDM.LCDM=GY_MKXX.NoLCDM", "d")
+                If Tb.Rows.Count = 0 Then
+                    Response.Write("暂时无共享列表")
+                    Response.End()
+                End If
+                LCDM = Tb.Rows(0)(2)
+            End If
+        End If
+
+        '检测是否则允许打开表单,列表是否允许显示
+        Tb = Base.DB.Table("Select PublicForm from GY_LCDM where LCDM=" & LCDM & " and PublicList=1", "dd")
+        If Tb.Rows.Count > 0 Then
+            Try
+                PublicForm = Tb.Rows(0)(0)
+            Catch ex As Exception
+                PublicForm = False
+            End Try
+        Else
+            Response.Write("非法访问")
+            Response.End()
+        End If
+        Base.Js.WriteScript(Me, "var lcdm=" & LCDM & ";")
+
+        Tb = Base.DB.Table("SELECT MKMC,XsnDir FROM GY_MKXX where NoLcDM =" & LCDM, "GY_MKXX")
+        If Tb.Rows.Count <= 0 Then
+            Response.Write("功能模板有问题!")
+            Response.End()
+        End If
+        Dim MKMC As String = Tb.Rows(0).Item(0).ToString.Trim
+
+        BaseUrl = Server.MapPath("../../") & "FormFolder/" & MKMC & "/"
+
+        SelectSQL = "SELECT XX_XMJC.FID,GY_XMXX.XMDM,XX_XMJC.State FROM GY_XMXX,XX_XMJC where XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" & LCDM & " and (GY_XMXX.XMJD is not null) "
+        If Page.IsPostBack = False Then
+            Try
+                Base.CreateGridviewTitle(GridView1, LCDM, False)
+                TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", False)
+                MaxPage = TempTable.Rows.Count
+            Catch ex As Exception
+                Response.Write("此功能的模板已经不存在,请刷新菜单!")
+                Response.End()
+            End Try
+            GridView1.DataBind()
+        Else
+            TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", False)
+            MaxPage = TempTable.Rows.Count
+        End If
+
+
+    End Sub
+
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i, j, FID As Integer
+        Dim FileName As String
+        Dim ShowTb As New Data.DataTable
+        ShowTb = Base.DB.Table("Select ShowName,NodeName from ShowList_LCDM where LCDM = " & LCDM & " order by ID", "ShowList_LCDM")
+
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Attributes.Add("onmouseover", "OnMouseOver(this)")
+            GridView1.Rows(i).Attributes.Add("onmouseout", "OnMouseOut(this)")
+            GridView1.Rows(i).Attributes.Add("id", "gridview1_" & GridView1.DataKeys(i).Item(0))
+            GridView1.Rows(i).Attributes.Add("onmouseup", "gpc(" & GridView1.DataKeys(i).Item(0) & ",this)")
+
+            FID = GridView1.DataKeys(i).Item(0)
+            FileName = BaseUrl & FID & ".xml"
+
+            If Base.XmlClass.GetXmlFile(FileName) Is Nothing Then
+                '表示找不到记录，则显示空记录
+                For j = 0 To ShowTb.Rows.Count - 1
+                    GridView1.Rows(i).Cells(j).Text = "空"
+                Next
+            Else
+                '再列自定义的列
+                For j = 0 To ShowTb.Rows.Count - 1
+                    Dim dd As System.Xml.XmlNode = Base.XmlClass.FindNode("//" & ShowTb.Rows(j).Item(1).ToString.Replace("<", "").Replace(">", ""))
+                    If dd Is Nothing Then
+                        GridView1.Rows(i).Cells(j).Text = "空"
+                    Else
+                        If dd.ChildNodes.Item(0) Is Nothing Then
+                            GridView1.Rows(i).Cells(j).Text = "空"
+                        Else
+                            If dd.ChildNodes.Item(0).Value Is Nothing Then
+                                If dd.HasChildNodes = True Then     '当是父节点.但是存在子节点时.则显示子节点的内容(或是超文本框)
+                                    Dim TempOut As String = dd.ChildNodes.Item(0).OuterXml.ToString.Trim
+                                    If TempOut.Length >= 100 Then
+                                        GridView1.Rows(i).Cells(j).Text = Server.HtmlEncode(TempOut.Substring(0, 98)) & "..."
+                                    Else
+                                        GridView1.Rows(i).Cells(j).Text = Server.HtmlEncode(TempOut)
+                                    End If
+                                Else
+                                    GridView1.Rows(i).Cells(j).Text = "空"
+                                End If
+                            Else
+                                If dd.ChildNodes.Item(0).Value.ToString.Trim.Length >= 100 Then
+                                    GridView1.Rows(i).Cells(j).Text = Server.HtmlEncode(dd.ChildNodes.Item(0).Value.ToString.Substring(0, 98)) & "..."
+                                Else
+                                    GridView1.Rows(i).Cells(j).Text = Server.HtmlEncode(dd.ChildNodes.Item(0).Value)
+                                End If
+                            End If
+                        End If
+                    End If
+                Next
+            End If
+        Next
+        GridView1.Columns(GridView1.Columns.Count - 1).Visible = False
+        PageBar.InnerHtml = Base.pub.WritePage(GridView1, MaxPage)
+    End Sub
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        SortGridview()
+    End Sub
+
+    Protected Sub GridView1_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs) Handles GridView1.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            If PublicForm = True Then
+                e.Row.Attributes.Add("OnDblClick", "window.location.href='Public_Form_Show.aspx?FID=" & GridView1.DataKeys(e.Row.RowIndex).Item(0) & "';")
+                e.Row.Attributes("style") = "Cursor:hand"
+            End If
+        End If
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        Dim ShowTb As New Data.DataTable
+        ShowTb = Base.DB.Table("Select ShowName,NodeName from ShowList_LCDM where LCDM = " & LCDM, "ShowList_LCDM")
+        MaxTitle = ShowTb.Rows.Count
+
+        Dim index As Integer = e.NewSelectedIndex
+        Dim Fid As String = GridView1.Rows(index).Cells(MaxTitle + 1).Text
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("SELECT LCMC FROM GY_LCDM where LCDM = " & LCDM, "GY_LCDM")
+        If tb Is Nothing Then
+            Base.Js.alert(Me, "参数错误或非法访问")
+            Response.End()
+        End If
+
+        '从模板信息表中,得到当前模板的模板名
+        tb = Base.DB.Table("select xsndir,MKMC,MKDM from GY_MKXX where NoLCDM = " & LCDM, "GY_MKXX")
+        Dim XsnDir As String = tb.Rows(0).Item(0).ToString.Trim
+        Dim XMMC As String = tb.Rows(0).Item(1).ToString.Trim
+        Dim MKDM As Integer = tb.Rows(0).Item(2)
+        Dim XmlFileName = Server.MapPath("../../") & "\模板库\" & XsnDir & "\template.xml"
+        Dim DFileName = Server.MapPath("../../") & "\流程文件夹\" & XMMC & "\" & Fid & ".xml"
+        '如果文件不存在，则生成
+        If File.Exists(DFileName) = False Then
+            File.Copy(XmlFileName, DFileName)
+        End If
+
+        tb = Base.DB.Table("select XMDM from XX_XMJC where fid = " & Fid, "XX_XMJC")
+        If tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "非法操作!")
+        End If
+
+
+        tb = Base.DB.Table("select XMDM from XX_XMJC where fid = " & Fid, "XX_XMJC")
+        If tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "非法操作!")
+        End If
+        Dim XMDM As String = tb.Rows(0).Item(0)
+
+        Dim WriteFlag As Boolean    '表单可写标志
+        '这里对表单进行处理，判断表单是只读，或是可写的，或是没有权限的。
+        Dim Qx As Integer = Base.GetUserHaveQX(UserID, MKDM)
+        '这里对表单进行处理，判断表单是只读，或是可写的，或是没有权限的。
+        If Qx <= 0 Then
+            Base.Js.alert(Me, "无权打开此表单，请联系管理员")
+            Exit Sub
+        End If
+        If Qx >= 2 Then
+            WriteFlag = True
+        Else
+            WriteFlag = False
+        End If
+
+        Dim Result As String = Base.AutoFillDate(DFileName, Fid, XMDM, Login_User, WriteFlag,0)
+        If Not Result Is Nothing Then               '对自动生成的值进行相应的填写
+            Base.Js.alert(Me, Result)
+            Exit Sub
+        End If
+        '新的打开方式，直接输出
+        Response.Redirect("../Forms/OpenInfoPath.aspx?FID=" & Fid)
+
+    End Sub
+
+    Protected Sub GridView1_Sorting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSortEventArgs) Handles GridView1.Sorting
+        '这里要做排序.但是得重新得到TempTable的值,所以不绑定
+        MaxPage = TempTable.Rows.Count
+        Dim Dv As New Data.DataView(TempTable)
+        Dim TempSort As String
+        TempSort = ViewState("sortDirection")
+        If TempSort = "" Then
+            Dv.Sort = e.SortExpression
+        Else
+            Dim ls As String()
+            ls = TempSort.Split(" ")
+            If ls(0) = e.SortExpression And ls.GetUpperBound(0) = 0 Then
+                Dv.Sort = e.SortExpression & " desc"
+            Else
+                Dv.Sort = e.SortExpression
+            End If
+        End If
+        ViewState("sortDirection") = Dv.Sort
+        GridView1.DataSource = Dv
+        GridView1.DataBind()
+    End Sub
+
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+        GridView1.DataBind()
+    End Sub
+
+    Sub SortGridview()
+        '这里要做排序.但是得重新得到TempTable的值,所以不绑定
+        MaxPage = TempTable.Rows.Count
+        Dim Dv As New Data.DataView(TempTable)
+        Dim TempSort As String
+        TempSort = ViewState("sortDirection")
+        If TempSort <> "" Then
+            Dv.Sort = TempSort
+            ViewState("sortDirection") = Dv.Sort
+        End If
+        GridView1.DataSource = Dv
+        GridView1.DataBind()
+    End Sub
+
+
+    Protected Sub DropDownList1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles DropDownList1.SelectedIndexChanged
+        GridView1.Columns.Clear()
+        Base.CreateGridviewTitle(GridView1, LCDM, False)
+        TempTable = Base.FillDataToGridview(GridView1, LCDM, TextBox1.Text.Trim, SelectSQL, "", False)
+        MaxPage = TempTable.Rows.Count
+        GridView1.DataBind()
+    End Sub
+End Class

@@ -1,0 +1,37 @@
+﻿
+Partial Class Index
+    Inherits System.Web.UI.Page
+    Dim LCDM As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Try
+            LCDM = Request("LCDM")
+        Catch ex As Exception
+            LCDM = 0
+        End Try
+        '表示登陆成功，进行记录登陆信息
+        '这里有一个问题。因为这里只做了记录，然后就转向其他页面。
+        '当是通过ＪＳ转过来的时候，正常，只记录一次。
+        '当前一个页面也是通过Response.Rediret 转过来的时候。出现记录二次的情况。
+        Dim Base As New Base
+        Base.System_User_Login_Log()
+
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.ADUserAuthentication").ToLower = "true" Then     '采用AD验证
+            Response.Redirect("Main.aspx")
+        End If
+
+        '数据库验证方式
+        If Base.CheckUserAuthentication = True Then     '表示已经登陆过的
+            If LCDM = 0 Then
+                Response.Redirect("Main.aspx")
+            Else
+                Response.Redirect("Manager/Forms/FunctionNoLC.aspx?LCDM=" & LCDM)
+            End If
+        Else
+            If LCDM = 0 Then
+                Response.Redirect("default.aspx")
+            Else
+                Response.Redirect("default.aspx?lcdm=" & LCDM)
+            End If
+        End If
+    End Sub
+End Class

@@ -1,0 +1,95 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Add_MK.aspx.vb" Inherits="manager_MKGL_Add_MK" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>添加模块</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+    <script type="text/javascript" language="javascript" src="../../Pub/jquery-1.8.0.js"></script>
+    <script type="text/javascript" language="javascript">
+        function confirmInfo() {
+            var moduleName = $("#TMK_name");
+            var txtURL = $("#URL")
+            if (moduleName.val() == "") {
+                alert("请输入模版名称！");
+                moduleName.focus();
+                return false;
+            }
+
+            if (txtURL.val() == "") {
+                alert("请选择或填写模版路径！");
+                txtURL.focus();
+                return false;
+            }
+        }
+        function resetInfo() {
+            $("#TMK_name").val("");
+            $("#URL").val("");
+            $('select#dl_group option:first').attr('selected', 'true')
+            return false;
+        }
+    </script>
+</head>
+<body>
+    <center>
+	<form id="Form1" method="post" runat="server" style="width:480px">
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>添加模块</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            模块名称：
+                        </th>
+                        <td width="65%" style="text-align:left">
+                            <asp:textbox id="TMK_name"  runat="server" Width="150px"></asp:textbox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            模块主页：
+                        </th>
+                        <td  style="text-align:left">
+				            <asp:textbox id="TMK_url" runat="server" Width="150px" ReadOnly="True" Enabled="False"></asp:textbox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th align="right">
+                            所属菜单组：
+                        </th>
+                        <td  style="text-align:left">
+				            <asp:dropdownlist id="dl_group" runat="server">
+                                <asp:ListItem Text="" Value="0"></asp:ListItem>
+                            </asp:dropdownlist>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align:center;">
+                           <asp:RadioButton ID="RadioButton1" runat="server" AutoPostBack="True" Checked="True" GroupName="kind" Text="功能" />
+                            <asp:RadioButton ID="RadioButton2" runat="server" AutoPostBack="True" GroupName="Kind" Text="应用模板库" />
+                            <asp:RadioButton ID="RadioButton3" runat="server" AutoPostBack="True" GroupName="Kind" Text="URL" />
+                            <br />
+                            <asp:TextBox ID="URL" runat="server" Width="85%"></asp:TextBox>
+                            <asp:listbox id="ListBox1" runat="server" AutoPostBack="True" Width="86%" Height="190px"></asp:listbox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" colspan="2">
+                            <asp:Button ID="cmd_add" runat="server" Text="添加" CssClass="btnsubmit" OnClientClick="return confirmInfo();" />
+                            <asp:Button ID="Button2" runat="server" Text="重置" CssClass="btnsubmit" OnClientClick="return resetInfo();" />                           
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+	</form>
+    </center>
+</body>
+</html>

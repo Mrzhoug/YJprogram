@@ -1,0 +1,376 @@
+﻿Imports System.Collections.Generic
+Imports System.IO
+
+Partial Class manager_FileManager_Default
+    Inherits System.Web.UI.Page
+
+
+
+    Dim UserInfo As New UserInfo
+    Dim FileManager As New FileManager
+
+    Public belongFolderID As Integer
+    Dim userID As Integer
+    Dim userName As String
+
+    Dim userPermission As New MPublicFolderPermissions
+    '是否为公共文件夹
+    Dim isPublicFolder As Boolean
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+
+        Try
+            belongFolderID = Convert.ToInt32(Request.QueryString("belongFolderID"))
+        Catch ex As Exception
+            belongFolderID = 0
+        End Try
+
+
+        If FileManager.GetFolderName(belongFolderID) = "" And belongFolderID <> 0 Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+
+        Dim fileID As Integer
+        Try
+            fileID = Request.QueryString("fileID")
+        Catch ex As Exception
+            fileID = 0
+        End Try
+
+        If Not fileID = 0 Then
+            Dim filePath As String = FileManager.GetFilePath(fileID)
+
+            If File.Exists(filePath) Then
+                PrintContent(filePath)
+            Else
+                DoJS.alert(Me, "文件路径错误!")
+            End If
+        End If
+
+        userName = UserInfo.GetWebUserName()
+        userID = UserInfo.GetUserID(userName)
+
+        '默认只有admin可以新建主目录下的公共文件夹
+        If userName = "admin" And belongFolderID = 0 Then
+            btn_addPublicFolder.Visible = True
+            btn_permissionsSetting.Visible = True
+        Else
+            btn_addPublicFolder.Visible = False
+            btn_permissionsSetting.Visible = False
+        End If
+
+        isPublicFolder = FileManager.IsPublicFolder(belongFolderID)
+
+        '如果为公共文件夹，那么获取用户在其中的权限
+        If belongFolderID <> 0 And isPublicFolder Then
+
+            userPermission = FileManager.GetUserPermission(userID, belongFolderID)
+            If userPermission.CanCreateFolder Then
+                btn_newFolder.Visible = True
+            Else
+                btn_newFolder.Visible = False
+            End If
+
+            If userPermission.CanUpload Then
+                btn_upload.Visible = True
+            Else
+                btn_upload.Visible = False
+            End If
+
+
+            If userPermission.CanSetPower Then
+                btn_permissionsSetting.Visible = True
+            Else
+                btn_permissionsSetting.Visible = False
+            End If
+
+
+        End If
+
+
+        If Not IsPostBack Then
+            bind()
+
+            Dim urlStr As String = String.Empty
+            urlStr += "<hr width='98%' /><b>&nbsp;&nbsp;&nbsp;当前路径:</b>[<a href='Default.aspx'>根</a>\"
+
+            Dim currentPath As String
+            currentPath = FileManager.GetFolderPath(belongFolderID, userName)
+            Dim basePath As String
+
+            If isPublicFolder Then
+                basePath = FileManager.GetPulicFolderPath(0)
+            Else
+                basePath = FileManager.GetFolderPath(0, userName)
+            End If
+
+
+
+
+            Dim tempstr As String
+            tempstr = currentPath.Replace(basePath, "")
+            Dim temp As String()
+            temp = tempstr.Split("\")
+
+            Dim tempPath As String = String.Empty
+            For i As Integer = 0 To temp.Length - 2
+                tempPath += temp(i) + "\"
+                '通过路径获取文件夹ID
+                Dim folderID As Integer = FileManager.GetFolderIDByFolderPath(basePath + tempPath)
+
+                If isPublicFolder Then
+                    urlStr += "<a href='Default.aspx?belongFolderID=" + folderID.ToString() + "'>" & temp(i) & "(公共)</a>\"
+                Else
+                    urlStr += "<a href='Default.aspx?belongFolderID=" + folderID.ToString() + "'>" & temp(i) & "</a>\"
+                End If
+
+
+            Next
+            urlStr += "]"
+            Dim thisBelongFolderID As String = FileManager.GetBelongFolderID(belongFolderID)
+            If Not belongFolderID = 0 Then
+                urlStr += "&nbsp;&nbsp;<a href='Default.aspx?belongFolderID=" + thisBelongFolderID.ToString() + "'>返回上一级目录</a><br/>"
+            End If
+            lb_path.Text = urlStr
+        End If
+
+    End Sub
+
+
+    Sub bind()
+
+        Dim list As New List(Of MShowData)
+        list = FileManager.GetShowData(belongFolderID, userID)
+
+
+        GridView1.DataSource = list
+        GridView1.DataBind()
+
+        PageBar.InnerHtml = DoJS.WriteGridViewFoot(GridView1, list.Count)
+
+
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+
+            Dim type As String
+            type = GridView1.DataKeys(i)("type")
+            GridView1.Rows(i).Cells(1).Text = i + 1
+
+            If type = "folder" Then
+                Dim folderID As Integer = GridView1.DataKeys(i)("ThisID")
+                Dim isSharedFolder As Boolean = Convert.ToBoolean(GridView1.DataKeys(i)("isSharedFolder"))
+                Dim _isPublicFolder As Boolean = Convert.ToBoolean(GridView1.DataKeys(i)("isPublicFolder"))
+
+                GridView1.Rows(i).Cells(3).Text = ""
+                GridView1.Rows(i).Cells(4).Text = "文件夹"
+
+
+                Dim folderPermission As New MPublicFolderPermissions
+                '针对一个文件的目录权限判断
+                folderPermission = FileManager.GetUserPermission(userID, folderID)
+
+                '设置文件图标
+                GridView1.Rows(i).Cells(2).Text = "<a href='Default.aspx?belongFolderID=" + folderID.ToString() + "'>" + GridView1.Rows(i).Cells(2).Text + "</a>"
+
+
+                If isSharedFolder Then
+                    GridView1.Rows(i).Cells(2).Text = "<img height='15'width='20' src='../../images/FileManage/SHARE.jpg'>&nbsp;" + GridView1.Rows(i).Cells(2).Text
+                Else
+                    GridView1.Rows(i).Cells(2).Text = "<img src='../../images/FileManage/FOLDER.GIF'>&nbsp;" + GridView1.Rows(i).Cells(2).Text
+                End If
+
+
+
+                If isPublicFolder Then
+                    If folderPermission.CanRename Then
+                        GridView1.Rows(i).Cells(6).Text = "<a href='#' onclick='javascript:renameFolder(" + folderID.ToString() + ")'>重命名</a>"
+                    Else
+                        GridView1.Rows(i).Cells(6).Text = "--"
+                    End If
+
+
+                    If folderPermission.CanDelete Then
+                        GridView1.Rows(i).Cells(7).Text = "<a href='#' onclick='javascript:deleteFolder(" + folderID.ToString() + ")'>删除</a>"
+                    Else
+                        GridView1.Rows(i).Cells(7).Text = "--"
+                    End If
+
+                    If folderPermission.CanMove Then
+                        GridView1.Rows(i).Cells(8).Text = "<a href='#' onclick='javascript:moveFolder(" + folderID.ToString() + ")'>移动</a>"
+                    Else
+                        GridView1.Rows(i).Cells(8).Text = "--"
+                    End If
+
+
+                    If folderPermission.CanCopy Then
+                        GridView1.Rows(i).Cells(9).Text = "<a href='#' onclick='javascript:copyFolder(" + folderID.ToString() + ")'>复制</a>"
+                    Else
+                        GridView1.Rows(i).Cells(9).Text = "--"
+                    End If
+
+
+                    GridView1.Rows(i).Cells(10).Text = "--"
+                End If
+
+
+                If userName <> "admin" Then
+                    If _isPublicFolder Then
+                        GridView1.Rows(i).Cells(2).Text += "(公共)"
+                    Else
+                        GridView1.Rows(i).Cells(6).Text = "<a href='#' onclick='javascript:renameFolder(" + folderID.ToString() + ")'>重命名</a>"
+                        GridView1.Rows(i).Cells(7).Text = "<a href='#' onclick='javascript:deleteFolder(" + folderID.ToString() + ")'>删除</a>"
+                        GridView1.Rows(i).Cells(8).Text = "<a href='#' onclick='javascript:moveFolder(" + folderID.ToString() + ")'>移动</a>"
+                        GridView1.Rows(i).Cells(9).Text = "<a href='#' onclick='javascript:copyFolder(" + folderID.ToString() + ")'>复制</a>"
+                        GridView1.Rows(i).Cells(10).Text = "<a href='#' onclick='javascript:sharedFolderSetting(" + folderID.ToString() + ")'>共享设置</a>"
+                    End If
+                Else
+                    If _isPublicFolder Then
+                        GridView1.Rows(i).Cells(2).Text += "(公共)"
+                        GridView1.Rows(i).Cells(6).Text = "<a href='#' onclick='javascript:renameFolder(" + folderID.ToString() + ")'>重命名</a>"
+                        GridView1.Rows(i).Cells(7).Text = "<a href='#' onclick='javascript:deleteFolder(" + folderID.ToString() + ")'>删除</a>"
+                        GridView1.Rows(i).Cells(8).Text = "<a href='#' onclick='javascript:moveFolder(" + folderID.ToString() + ")'>移动</a>"
+                        GridView1.Rows(i).Cells(9).Text = "<a href='#' onclick='javascript:copyFolder(" + folderID.ToString() + ")'>复制</a>"
+                        GridView1.Rows(i).Cells(10).Text = "<a href='#' onclick='javascript:sharedFolderSetting(" + folderID.ToString() + ")'>共享设置</a>"
+                    Else
+                        GridView1.Rows(i).Cells(6).Text = "<a href='#' onclick='javascript:renameFolder(" + folderID.ToString() + ")'>重命名</a>"
+                        GridView1.Rows(i).Cells(7).Text = "<a href='#' onclick='javascript:deleteFolder(" + folderID.ToString() + ")'>删除</a>"
+                        GridView1.Rows(i).Cells(8).Text = "<a href='#' onclick='javascript:moveFolder(" + folderID.ToString() + ")'>移动</a>"
+                        GridView1.Rows(i).Cells(9).Text = "<a href='#' onclick='javascript:copyFolder(" + folderID.ToString() + ")'>复制</a>"
+                        GridView1.Rows(i).Cells(10).Text = "<a href='#' onclick='javascript:sharedFolderSetting(" + folderID.ToString() + ")'>共享设置</a>"
+                    End If
+                End If
+
+             
+            Else
+                Dim fileID As Integer = GridView1.DataKeys(i)("ThisID")
+                Dim fileType As String = GridView1.Rows(i).Cells(4).Text
+                GridView1.Rows(i).Cells(2).Text = "<img src='../../images/FileManage/" + CheckFileType(fileType) + "'><a href='Default.aspx?fileID=" + fileID.ToString() + "'>" + GridView1.Rows(i).Cells(2).Text + "</a>"
+
+                '获取文件大小
+                Dim fileSize As Integer = GridView1.Rows(i).Cells(3).Text
+                Dim fileSizeKB As Double = fileSize / 1024
+                GridView1.Rows(i).Cells(3).Text = fileSizeKB.ToString("f2") + "K"
+
+
+                If isPublicFolder Then
+                    If userPermission.CanRename Then
+                        GridView1.Rows(i).Cells(6).Text = "<a href='#' onclick='javascript:renameFile(" + fileID.ToString() + ")'>重命名</a>"
+                    Else
+                        GridView1.Rows(i).Cells(6).Text = "--"
+                    End If
+
+
+                    If userPermission.CanDelete Then
+                        GridView1.Rows(i).Cells(7).Text = "<a href='#' onclick='javascript:deleteFile(" + fileID.ToString() + ")'>删除</a>"
+                    Else
+                        GridView1.Rows(i).Cells(7).Text = "--"
+                    End If
+
+                    If userPermission.CanMove Then
+                        GridView1.Rows(i).Cells(8).Text = "<a href='#' onclick='javascript:moveFile(" + fileID.ToString() + ")'>移动</a>"
+                    Else
+                        GridView1.Rows(i).Cells(8).Text = "--"
+                    End If
+
+                    If userPermission.CanCopy Then
+                        GridView1.Rows(i).Cells(9).Text = "<a href='#' onclick='javascript:copyFile(" + fileID.ToString() + ")'>复制</a>"
+                    Else
+                        GridView1.Rows(i).Cells(9).Text = "--"
+                    End If
+
+                    GridView1.Rows(i).Cells(10).Text = "--"
+                Else
+                    GridView1.Rows(i).Cells(6).Text = "<a href='#' onclick='javascript:renameFile(" + fileID.ToString() + ")'>重命名</a>"
+                    GridView1.Rows(i).Cells(7).Text = "<a href='#' onclick='javascript:deleteFile(" + fileID.ToString() + ")'>删除</a>"
+                    GridView1.Rows(i).Cells(8).Text = "<a href='#' onclick='javascript:moveFile(" + fileID.ToString() + ")'>移动</a>"
+                    GridView1.Rows(i).Cells(9).Text = "<a href='#' onclick='javascript:copyFile(" + fileID.ToString() + ")'>复制</a>"
+                End If
+
+            End If
+
+        Next
+
+    End Sub
+
+    Function CheckFileType(ByVal FileType As String) As String
+        Dim Result As String
+        FileType = FileType.ToLower
+        Select Case FileType
+            Case ".doc"
+                Result = "DOC.GIF"
+            Case ".txt"
+                Result = "TXT.GIF"
+            Case ".zip"
+                Result = "ZIP.GIF"
+            Case ".rar"
+                Result = "ZIP.GIF"
+            Case ".xls"
+                Result = "XLS.GIF"
+            Case ".pic"
+                Result = "PIC.GIF"
+            Case ".gif"
+                Result = "PIC.GIF"
+            Case ".bmp"
+                Result = "PIC.GIF"
+            Case ".jpg"
+                Result = "PIC.GIF"
+            Case ".ppt"
+                Result = "PPT.GIF"
+            Case ".pdf"
+                Result = "pdf.gif"
+            Case ".wav"
+                Result = "WAV.GIF"
+            Case ".mdb"
+                Result = "MDB.GIF"
+            Case ".mpg"
+                Result = "MPG.GIF"
+            Case Else
+                Result = "other.gif"
+        End Select
+        Return Result
+    End Function
+
+    Sub PrintContent(ByVal FileName As String)
+        Dim stream As FileStream = New FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.Read)
+        Dim Type1 As String
+        Type1 = FileName.Substring(FileName.LastIndexOf("."))
+
+        Dim DownFileName As String
+        Dim idx As Integer = FileName.LastIndexOf("\")
+        If idx > 0 Then
+            DownFileName = FileName.Substring(idx + 1)
+        Else
+            DownFileName = FileName
+        End If
+
+        Try
+            Dim bufSize As Integer = stream.Length
+            Dim buf(bufSize) As Byte
+            Dim bytesRead As Integer = stream.Read(buf, 0, bufSize)
+            Dim UTF8 As Encoding = Encoding.GetEncoding("GB2312")
+            Response.ContentEncoding = UTF8
+            Response.AddHeader("Content-Disposition", "attachment; filename=" & HttpUtility.UrlEncode(DownFileName, Encoding.UTF8))
+            Response.AddHeader("Content-Length", bufSize.ToString())
+            Response.OutputStream.Write(buf, 0, bytesRead)
+            Response.End()
+        Catch ex As Exception
+            DoJS.alert(Me, "打开出错.")
+        End Try
+    End Sub
+
+    Protected Sub btn_permissionsSetting_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btn_permissionsSetting.Click
+
+        If userName = "admin" Then
+            DoJS.openWindow(Me, "PermissionsSetting.aspx", "权限设置", "")
+        End If
+
+
+    End Sub
+End Class

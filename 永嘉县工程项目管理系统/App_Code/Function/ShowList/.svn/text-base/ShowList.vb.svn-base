@@ -1,0 +1,594 @@
+﻿Imports Microsoft.VisualBasic
+Imports System.Collections.Generic
+
+''' <summary>
+''' 列表通用类
+''' </summary>
+''' <remarks></remarks>
+Public Class ShowList
+
+
+
+    Public ShowListConfig As New ShowListConfig
+
+    ''' <summary>
+    ''' 获取显示列表
+    ''' </summary>
+    ''' <param name="LCDM">流程名称</param>
+    ''' <param name="pageIndex">页码</param>
+    ''' <param name="pageSize">页大小</param>
+    ''' <param name="totalCount">总数</param>
+    ''' <param name="orderBy">排序依据</param>
+    ''' <param name="desc">正序/倒叙</param>
+    ''' <param name="SqlQueryStr">关键字</param>
+    ''' <param name="AdvanceSearchStr">高级查询</param>
+    ''' <param name="ShowListType">显示列内容</param>
+    ''' <param name="TagID">标签</param>
+    ''' <returns>datatable</returns>
+    ''' <remarks></remarks>
+    Public Function GetShowListByPaging(ByVal LCDM As Integer, _
+                                        ByVal userInfo As MUserInfo, _
+                                        ByVal pageIndex As Integer, _
+                                        ByVal pageSize As Integer, _
+                                        ByRef totalCount As Integer, _
+                                        ByVal orderBy As String, _
+                                        ByVal desc As Boolean, _
+                                        ByVal sqlQueryStr As String, _
+                                        ByVal advanceSearchStr As String, _
+                                        ByVal showListType As ShowListType, _
+                                        ByVal tagID As Integer) As DataTable
+        '获取mkmc
+        Dim mkmc As String = Modules.GetMKMCByLCDM(LCDM)
+        Dim mkdm As Integer = Modules.GetMKDMByLCDM(LCDM)
+
+        Dim sqllibrary As New SQLLibrary
+
+        '获取library表名称
+        Dim tableName As String = sqllibrary.FormatTableName(mkmc)
+        '如果library库不存在，返回空
+        If Not sqllibrary.CheckLibraryExist(mkmc) Then
+            Return Nothing
+        End If
+
+
+        Dim sqlStr As String = String.Empty
+        sqlStr += ";with xmlnamespaces('http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28' as my)"
+
+        '获取显示列内容及表单ID
+        '生成获取语句
+        sqlStr += "select "
+        Dim ShowItems As New List(Of MShowListItem)
+        ShowItems = ShowListConfig.GetShowListColumns(LCDM)
+        For Each item As MShowListItem In ShowItems
+            Dim nodeName As String = item.NodeName.Replace("<", "").Replace(">", "")
+            sqlStr += " t.xmldoc.value('(//" + nodeName + ")[1]','varchar(max)') as " + item.ShowName + ","
+        Next
+        sqlStr += "formID, "
+        sqlStr += "topNum, "
+        sqlStr += "isLock "
+
+        sqlStr += "from("
+
+        sqlStr += "select ROW_NUMBER() over( order by topnum desc, "
+        If String.IsNullOrEmpty(orderBy) Then
+            sqlStr += " id desc"
+        Else
+            Dim orderByNodeName As String = ShowListConfig.GetShowNodeName(LCDM, orderBy)
+            sqlStr += "" + tableName + ".xmldoc.value('(//" + orderByNodeName + ")[1]','varchar(max)') "
+            If desc Then
+                sqlStr += " desc"
+            End If
+        End If
+        sqlStr += ") as rowNum,formID,topNum,isLock,xmlDoc from " + tableName + " where 1=1 "
+
+
+       
+
+
+
+        '增加查询过滤条件
+        If Not String.IsNullOrEmpty(sqlQueryStr) Then
+            'sqlStr += " and " + tableName + ".xmldoc.value('(.)[1]','varchar(max)') like '%" + sqlQueryStr + "%'"
+            'sqlStr += " and " + tableName + ".xmldoc.exist('.[contains(.,""" & sqlQueryStr & """)]') = 1"
+            sqlStr += " and XmlText like '%" + sqlQueryStr + "%'"
+        End If
+        Dim advancedSearchContext As String = String.Empty
+        If Not String.IsNullOrEmpty(advanceSearchStr) Then
+            advancedSearchContext = GetAdvancedSearchContext(tableName, mkdm, advanceSearchStr)
+            If Not String.IsNullOrEmpty(advancedSearchContext) Then
+                sqlStr += advancedSearchContext
+            End If
+        End If
+        
+        '增加列表条件过滤
+        Dim showListFilterStr As String = GetShowListTypeFilterStr(showListType, LCDM, userInfo)
+        sqlStr += " and formID in( " + showListFilterStr + " )"
+
+        sqlStr += ") as t "
+        sqlStr += "where rowNum between " + (pageSize * (pageIndex - 1) + 1).ToString() + " and " + (pageSize * pageIndex).ToString()
+
+
+        Console.WriteLine(sqlStr)
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlStr, Nothing).Tables(0)
+
+
+        totalCount = GetShowListCount(tableName, sqlQueryStr, showListFilterStr, advancedSearchContext, tagID)
+        'totalCount = 1000
+        Return dt
+    End Function
+
+    ''' <summary>
+    ''' 获取列表总数
+    ''' </summary>
+    ''' <param name="tableName">表名</param>
+    ''' <param name="sqlQueryStr">全局过滤条件</param>
+    ''' <param name="advanceSearchStr">高级查询条件</param>
+    ''' <param name="showListType">显示列类型</param>
+    ''' <param name="tagID">标签</param>
+    ''' <returns>记录数量</returns>
+    ''' <remarks></remarks>
+    Public Function GetShowListCount(ByVal tableName As String, _
+                                     ByVal sqlQueryStr As String, _
+                                     ByVal showListFilterStr As String, _
+                                     ByVal advancedSearchContext As String, _
+                                     ByVal tagID As Integer) As Integer
+
+        '获取分页总数据的内容
+        Dim sqlStr As String = String.Empty
+        sqlStr += ";with xmlnamespaces('http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28' as my)"
+        sqlStr += "select count(formID) from " + tableName + " where 1=1 "
+
+      
+
+        '增加查询过滤条件
+        If Not String.IsNullOrEmpty(sqlQueryStr) Then
+            'sqlStr += " and xmldoc.exist('.[contains(.,""" & sqlQueryStr & """)]') = 1"
+            sqlStr += " and XmlText like '%" + sqlQueryStr + "%'"
+        End If
+
+        If Not String.IsNullOrEmpty(advancedSearchContext) Then
+            sqlStr += advancedSearchContext
+        End If
+
+        '增加列表条件过滤
+        sqlStr += " and formID in( " + showListFilterStr + " )"
+
+
+        Dim count As Integer
+        Try
+            count = SqlHelper.ExecuteScalar(SqlHelper.ConnectionString, CommandType.Text, sqlStr, Nothing)
+
+        Catch ex As Exception
+            count = 0
+        End Try
+
+        Return count
+
+    End Function
+
+    ''' <summary>
+    ''' 生成列表内容
+    ''' </summary>
+    ''' <param name="gridView">gridview对象</param>
+    ''' <param name="LCDM">LCDM</param>
+    ''' <remarks></remarks>
+    Public Sub CreateGridView(ByVal gridView As GridView, ByVal LCDM As Integer)
+        Dim list As New List(Of MShowListItem)
+        list = ShowListConfig.GetShowListColumns(LCDM)
+
+        For Each item As MShowListItem In list
+            Dim column As New BoundField()
+            column.HeaderText = item.ShowName
+            column.DataField = item.ShowName
+            column.SortExpression = item.ShowName
+            gridView.Columns.Add(column)
+        Next
+    End Sub
+
+    ''' <summary>
+    ''' 获取对应显示类表的SQL过滤语句
+    ''' </summary>
+    ''' <param name="type">列表类型</param>
+    ''' <param name="lcdm">LCDM</param>
+    ''' <param name="userInfo">用户实体类</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function GetShowListTypeFilterStr(ByVal type As ShowListType, ByVal lcdm As Integer, ByVal userInfo As MUserInfo) As String
+
+        Dim Rights As New Rights
+        '获取是否有显示全部列表的权限
+        Dim canShowList As Boolean = Rights.CheckAllListRightsByLCDM(userInfo.UserID, lcdm)
+
+        Dim sqlstr As String = String.Empty
+        Select Case type
+            Case ShowListType.AllList
+                sqlstr += " SELECT XX_XMJC.FID FROM GY_XMXX, XX_XMJC where "
+                sqlstr += " XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM = " + lcdm.ToString() + " "
+                sqlstr += " And (GY_XMXX.XMJD Is Not null) And (state <> -100 Or state Is null) And state <> -17"
+            Case ShowListType.MyList
+                sqlstr += " SELECT XX_XMJC.FID FROM GY_XMXX, XX_XMJC where ("
+                sqlstr += " (XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" + lcdm.ToString() + " "
+                sqlstr += " and (GY_XMXX.XMJD is not null) and GY_XMXX.XMSM='" + userInfo.LoginName + "') "
+                sqlstr += " or "
+                sqlstr += " (XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null) and XX_XMJC.fid in (select FID from GY_XmXD where YGDM='" + userInfo.UserID.ToString() + "') )"
+                sqlstr += " ) "
+                sqlstr += " and (state<>-100 or state is null) and state<>-17 "
+
+            Case ShowListType.MyDraft
+                sqlstr += " SELECT XX_XMJC.FID FROM GY_XMXX,XX_XMJC where ( "
+                sqlstr += " (XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" + lcdm.ToString() + " and (GY_XMXX.XMJD is not null) and GY_XMXX.XMSM='" + userInfo.LoginName + "')   "
+                sqlstr += " or "
+                sqlstr += " (XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null) and XX_XMJC.FID in (select FID from GY_XmXD where YGDM=" + userInfo.UserID.ToString() + ") ) "
+                sqlstr += " ) "
+                sqlstr += " and state = -17"
+
+            Case ShowListType.RecevieList
+                sqlstr += " SELECT XX_XMJC.FID FROM GY_XMXX,XX_XMJC where "
+                sqlstr += " XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null) and XX_XMJC.fid in (select FID from GY_XmXD where YGDM=" + userInfo.UserID.ToString() + ")"
+                sqlstr += " and (state<>-100 or state is null) and state<>-17 "
+
+            Case ShowListType.SendList
+                sqlstr += " SELECT XX_XMJC.FID FROM GY_XMXX,XX_XMJC where "
+                sqlstr += " XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null) and XX_XMJC.fid in (select FID from GY_XmXD where FQR=" + userInfo.UserID.ToString() + ")"
+                sqlstr += " and (state<>-100 or state is null) and state<>-17 "
+
+            Case ShowListType.CheckRecevieList
+                sqlstr += " SELECT XX_XMJC.FID FROM GY_XMXX,XX_XMJC where "
+                sqlstr += " XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null) and XX_XMJC.fid in "
+                sqlstr += " (SELECT  FID FROM GY_XMSP, XX_XMJC where  XX_XMJC.XMDM= GY_XMSP.XMDM and  GY_XMSP.MKDM= XX_XMJC.MKDM and FQR='" + userInfo.LoginName + "') "
+                sqlstr += " and (state<>-100 or state is null) and state<>-17 "
+            Case ShowListType.CheckSendList
+                sqlstr += " SELECT XX_XMJC.FID FROM GY_XMXX,XX_XMJC where "
+                sqlstr += " XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null) and XX_XMJC.fid in "
+                sqlstr += " (SELECT  FID FROM GY_XMSP, XX_XMJC where  XX_XMJC.XMDM= GY_XMSP.XMDM and  GY_XMSP.MKDM= XX_XMJC.MKDM and YGDM=" + userInfo.UserID.ToString() + ") "
+                sqlstr += " and (state<>-100 or state is null) and state<>-17 "
+
+            Case ShowListType.DoneList
+                sqlstr += " SELECT XX_XMJC.FID FROM GY_XMXX,XX_XMJC where "
+                sqlstr += " (XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" + lcdm.ToString() + " "
+                sqlstr += " and (GY_XMXX.XMJD is not null) and  state=-1)"
+                If Not canShowList Then
+                    sqlstr += " and GY_XMXX.xmsm = '" + userInfo.LoginName + "'"
+                End If
+
+            Case ShowListType.DoingList
+                sqlstr += " SELECT XX_XMJC.FID FROM GY_XMXX,XX_XMJC where "
+                sqlstr += " (XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM = " + lcdm.ToString() + " "
+                sqlstr += " and (GY_XMXX.XMJD is not null) and ( state = 0 or state is null)  )"
+                If Not canShowList Then
+                    sqlstr += " and GY_XMXX.xmsm =  '" + userInfo.LoginName + "'"
+                End If
+
+            Case ShowListType.CancelList
+                sqlstr += " SELECT XX_XMJC.FID FROM GY_XMXX,XX_XMJC where "
+                sqlstr += " (XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" + lcdm.ToString() + " "
+                sqlstr += " and (GY_XMXX.XMJD is not null) and  state=-2)"
+                If Not canShowList Then
+                    sqlstr += " and GY_XMXX.xmsm = '" + userInfo.LoginName + "'"
+                End If
+        End Select
+        Return sqlstr
+    End Function
+
+    ''' <summary>
+    ''' 生成列表类型下拉框
+    ''' </summary>
+    ''' <param name="userID">用户ID</param>
+    ''' <param name="LCDM">LCDM</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetShowListTypeList(ByVal userID As Integer, ByVal LCDM As Integer) As List(Of ListItem)
+
+        Dim list As New List(Of ListItem)
+
+        Dim Rights As New Rights
+
+        Dim userRights As New MRights
+        userRights = Rights.GetUserRightsByLCDM(userID, LCDM)
+        If userRights.CanListForm Then
+            list.Add(New ListItem("全部列表", ShowListType.AllList))
+        End If
+
+        If userRights.CanRead Then
+            list.Add(New ListItem("我的列表", ShowListType.MyList))
+        End If
+
+        list.Add(New ListItem("我的草稿", ShowListType.MyDraft))
+
+        list.Add(New ListItem("已收列表", ShowListType.RecevieList))
+
+        list.Add(New ListItem("已发列表", ShowListType.SendList))
+
+        list.Add(New ListItem("审阅发起列表", ShowListType.CheckRecevieList))
+
+        list.Add(New ListItem("审阅处理列表", ShowListType.CheckSendList))
+
+        list.Add(New ListItem("已完成", ShowListType.DoneList))
+
+        list.Add(New ListItem("进行中", ShowListType.DoingList))
+
+        list.Add(New ListItem("已取消", ShowListType.CancelList))
+
+        Return list
+    End Function
+
+    ''' <summary>
+    ''' 获取高级搜素查询语句
+    ''' </summary>
+    ''' <param name="tableName">表名</param>
+    ''' <param name="mkdm">MKDM</param>
+    ''' <param name="advanceSearchStr">高级搜索条件</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetAdvancedSearchContext(ByVal tableName As String, ByVal mkdm As Integer, ByVal advanceSearchStr As String) As String
+        Dim sqlstr As String
+        sqlstr = "select * from AdvancedSearchSetting where mkdm = " + mkdm.ToString() + " order by orderby"
+
+        Dim dt As New DataTable
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+        '将高级搜索字符串通过“&”分割
+        Dim searchStrs() As String = advanceSearchStr.Split("&")
+
+        '返回的SQL语句
+        Dim returnSql As String = String.Empty
+
+        For i As Integer = 0 To dt.Rows.Count - 1
+            Dim condtionID As Integer = Convert.ToInt32(dt.Rows(i).Item("id"))
+            Dim condtionType As String = dt.Rows(i).Item("conditionType").ToString()
+            Dim searchType As String = dt.Rows(i).Item("searchType").ToString()
+            Dim searchNode As String = dt.Rows(i).Item("searchNode").ToString().Replace("<", "").Replace(">", "")
+
+            If condtionType = "conditionInterval" Then
+
+                Dim textFrom As String = String.Empty
+                Dim textTo As String = String.Empty
+
+                '获取区间数据
+                For j As Integer = 0 To searchStrs.Length - 1
+                    '区间开始
+                    If searchStrs(j).IndexOf("textboxIntervalFrom" + i.ToString()) <> -1 Then
+                        textFrom = searchStrs(j).Replace("textboxIntervalFrom" + i.ToString() + "=", "")
+                    End If
+
+                    '区间结束
+                    If searchStrs(j).IndexOf("textboxIntervalTo" + i.ToString()) <> -1 Then
+                        textTo = searchStrs(j).Replace("textboxIntervalTo" + i.ToString() + "=", "")
+                    End If
+                Next
+
+                If textFrom <> "" Or textTo <> "" Then
+
+                    Dim tempstr As String = String.Empty
+                    If textFrom <> "" And textTo <> "" Then
+                        tempstr += " .>=""" + textFrom + """ and .<=""" + textTo + """"
+                    Else
+                        If textFrom = "" Then
+                            tempstr += " <= """ + textTo + """"
+                        End If
+                        If textTo = "" Then
+                            tempstr += " .>=""" + textFrom + """"
+                        End If
+                    End If
+
+
+                    '数字型（value转换为float）（包含小数）
+                    If searchType = "typeNumber" Then
+                        'returnSql += "and " + tableName + ".xmldoc.value('(//" + searchNode + ")[1]','float') "
+                        returnSql += "and " + tableName + ".xmldoc.exist('//" + searchNode + "[" + tempstr.Replace("""", "") + "]') =1"
+                    Else
+                        returnSql += "and " + tableName + ".xmldoc.exist('//" + searchNode + "[" + tempstr + "]') =1"
+
+                    End If
+                  
+                End If
+            End If
+
+            If condtionType = "conditionEqual" Then
+                '搜索类型为下拉框搜索
+                If searchType = "typeDropDown" Then
+                    Dim tempdt As New DataTable
+                    Dim SourceNodeName As String = String.Empty
+                    Dim customSource As String = String.Empty
+
+                    '获取下拉框内容设置
+                    sqlstr = "select * from AdvancedSearchDropDownListSetting where searchsettingid=" & condtionID
+                    tempdt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+
+                    If tempdt.Rows.Count > 0 Then
+                        If IsDBNull(tempdt.Rows(0).Item("SourceNodeSelect")) Then
+                            customSource = tempdt.Rows(0).Item("CustomSoruceText")
+                        Else
+                            SourceNodeName = tempdt.Rows(0).Item("SourceNodeSelect")
+                        End If
+                    Else
+                        SourceNodeName = ""
+                    End If
+
+                    '搜索的内容
+                    Dim searchText As String = String.Empty
+
+                    If SourceNodeName <> String.Empty Then
+                        Dim tempstr() As String = SourceNodeName.Split(",")
+
+                        Dim optionID As String
+                        For j As Integer = 0 To tempstr.Length - 1
+                            optionID = "option" & i & "-" & j
+                            '获取搜索内容
+                            If searchStrs(j).IndexOf(optionID) <> -1 Then
+                                searchText = searchStrs(j).Replace(optionID + "=", "")
+                            End If
+                        Next
+                    Else
+                        Dim optionID As String
+                        optionID = "option" & i & "-0"
+                        '获取搜索内容
+                        For j As Integer = 0 To searchStrs.Length - 1
+                            If searchStrs(j).IndexOf(optionID) <> -1 Then
+                                searchText = searchStrs(j).Replace(optionID + "=", "")
+                            End If
+                        Next
+
+                        If Not String.IsNullOrEmpty(searchText) And searchText <> "全部" Then
+                            returnSql += "and " + tableName + ".xmldoc.exist('//" + searchNode + "[.=""" + searchText + """]') = 1 "
+                        End If
+                        
+                    End If
+
+                End If
+            End If
+
+
+            '相似搜索
+            If condtionType = "conditionLike" Then
+
+                Dim searchText As String = String.Empty
+                For j As Integer = 0 To searchStrs.Length - 1
+                    If searchStrs(j).IndexOf("textbox" + i.ToString()) <> -1 Then
+                        searchText = searchStrs(j).Replace("textbox" + i.ToString() + "=", "")
+                    End If
+                Next
+
+                If Not String.IsNullOrEmpty(searchText) Then
+                    returnSql += "and " + tableName + ".xmldoc.exist('//" + searchNode + "[contains(.,""" + searchText + """)]') = 1 "
+                End If
+
+                
+            End If
+        Next
+
+
+        Return returnSql
+    End Function
+
+
+    ''' <summary>
+    ''' 置顶
+    ''' </summary>
+    ''' <param name="fid">表单ID</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function SetTop(ByVal LCDM As Integer, ByVal formID As Integer) As Boolean
+        Dim mkmc As String = Modules.GetMKMCByLCDM(lcdm)
+
+        '获取library表名称
+        Dim sqllibrary As New SQLLibrary
+        Dim tableName As String = sqllibrary.FormatTableName(mkmc)
+        sqllibrary = Nothing
+
+        Dim sqlstr As String
+        sqlstr = "update " & tableName & " set TopNum=1 where formID=" & formID & ";update XX_XMJC set TopNum=1 where FID=" & formID
+
+        Dim result As Integer
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            result = -1
+        End Try
+
+        If result >= 0 Then
+            Return True
+        Else
+            Return False
+        End If
+
+    End Function
+
+    ''' <summary>
+    ''' 取消置顶
+    ''' </summary>
+    ''' <param name="formID">表单ID</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function CancelTop(ByVal LCDM As Integer, ByVal formID As Integer) As Boolean
+        Dim mkmc As String = Modules.GetMKMCByLCDM(LCDM)
+
+        '获取library表名称
+        Dim sqllibrary As New SQLLibrary
+        Dim tableName As String = sqllibrary.FormatTableName(mkmc)
+        sqllibrary = Nothing
+
+        Dim sqlstr As String
+        sqlstr = "update " & tableName & " set TopNum=null where formID=" & formID & ";update XX_XMJC set TopNum=null where FID=" & formID
+
+        Dim result As Integer
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            result = -1
+        End Try
+
+        If result >= 0 Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 锁定表单
+    ''' </summary>
+    ''' <param name="LCDM"></param>
+    ''' <param name="formID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function Lock(ByVal LCDM As Integer, ByVal formID As Integer) As Integer
+        Dim mkmc As String = Modules.GetMKMCByLCDM(LCDM)
+
+        '获取library表名称
+        Dim sqllibrary As New SQLLibrary
+        Dim tableName As String = sqllibrary.FormatTableName(mkmc)
+        sqllibrary = Nothing
+
+        Dim sqlstr As String
+        sqlstr = "update " & tableName & " set IsLock=1 where formID=" & formID & ";update XX_XMJC set Lock=1 where FID=" & formID
+
+        Dim result As Integer
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            result = -1
+        End Try
+
+        If result >= 0 Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 解锁表单
+    ''' </summary>
+    ''' <param name="LCDM"></param>
+    ''' <param name="formID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function Unlock(ByVal LCDM As Integer, ByVal formID As Integer) As Integer
+        Dim mkmc As String = Modules.GetMKMCByLCDM(LCDM)
+
+        '获取library表名称
+        Dim sqllibrary As New SQLLibrary
+        Dim tableName As String = sqllibrary.FormatTableName(mkmc)
+        sqllibrary = Nothing
+
+        Dim sqlstr As String
+        sqlstr = "update " & tableName & " set IsLock=null where formID=" & formID & ";update XX_XMJC set Lock=null where FID=" & formID
+
+        Dim result As Integer
+        Try
+            result = SqlHelper.ExecuteNonquery(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            result = -1
+        End Try
+
+        If result >= 0 Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+
+End Class

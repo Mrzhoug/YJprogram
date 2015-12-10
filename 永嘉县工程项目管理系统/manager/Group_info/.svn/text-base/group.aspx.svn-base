@@ -1,0 +1,70 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Group.aspx.vb" Inherits="manager_Group_info_Group" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>系统权限管理</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+    <script language="javascript" src="../../Pub/function.js" type="text/javascript"></script>
+    <script type="text/javascript" src="../../Pub/jquery-1.8.0.js"></script>
+    <script language="javascript" type="text/javascript">
+        function checkGroupName() {
+            var groupName = $("#TextBox2");
+            if (groupName.val() == "") {
+                alert("请输入新建组的名称！");
+                groupName.focus();
+                return false;
+            }
+        }
+    </script>
+</head>
+<body>
+	<form id="Form1" method="post" runat="server">
+        &nbsp;&nbsp;&nbsp;&nbsp;新建组名:
+        <asp:TextBox ID="TextBox2" runat="server" Width="210px"></asp:TextBox>
+        <asp:Button ID="Button1" runat="server" OnClick="Button1_Click" Text="新 建" CssClass="btnsubmit"  OnClientClick="return checkGroupName();" />
+        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="GROUP_ID,IsSysGroup,IsSpGroup" DataSourceID="Conn" Width="98%" CellPadding="4" ForeColor="Black" BackColor="White" BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" Font-Size="9pt" HorizontalAlign="Center" SkinID="GVSkin_ShowPage">
+            <Columns>
+                <asp:TemplateField HeaderText="序号">
+                    <ItemStyle HorizontalAlign="Center" Width="40px" />
+                </asp:TemplateField>
+                <asp:BoundField DataField="GROUP_NAME" HeaderText="组名称" SortExpression="GROUP_NAME">
+                    <ItemStyle HorizontalAlign="Left" />
+                </asp:BoundField>
+                <asp:TemplateField ShowHeader="False" HeaderText="编辑组内模块">
+                    <ItemStyle HorizontalAlign="Center" Width="80px" />
+                </asp:TemplateField>
+                <asp:TemplateField ShowHeader="False" HeaderText="编辑组内用户">
+                    <ItemStyle HorizontalAlign="Center" Width="80px" />
+                </asp:TemplateField>
+
+                <asp:TemplateField ShowHeader="False" HeaderText="编辑组按钮显示">
+                    <ItemStyle HorizontalAlign="Center" Width="80px" />
+                </asp:TemplateField>
+
+                <asp:CommandField ShowEditButton="True" EditText="编辑组名">
+                    <ItemStyle HorizontalAlign="Center" Width="70px" />
+                </asp:CommandField>
+                <asp:CommandField SelectText="审阅组" ShowSelectButton="True">
+                    <ItemStyle HorizontalAlign="Center" Width="50px" />
+                </asp:CommandField>
+                <asp:TemplateField ShowHeader="False">
+                    <ItemTemplate>
+                        <asp:LinkButton ID="LinkButton1" runat="server" CausesValidation="False" CommandName="Delete" OnClientClick="return confirm('你确定删除此行吗？');" 
+                            Text="删除"></asp:LinkButton>
+                    </ItemTemplate>
+                    <ItemStyle HorizontalAlign="Center" Width="50px" />
+                </asp:TemplateField>
+            </Columns>
+            <FooterStyle BackColor="#CCCC99" />
+            <RowStyle BackColor="White" Font-Size="9pt" />
+            <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+            <PagerStyle BackColor="#F7F7DE" ForeColor="Black" HorizontalAlign="Right" />
+            <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" />
+            <AlternatingRowStyle BackColor="White" />
+        </asp:GridView>
+        <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT [GROUP_ID], [GROUP_NAME], [NoLcDM] FROM [GY_GROUP] where (Group_Kind=0 or Group_Kind is null) ">
+        </asp:SqlDataSource>
+	</form>
+</body>
+</html>

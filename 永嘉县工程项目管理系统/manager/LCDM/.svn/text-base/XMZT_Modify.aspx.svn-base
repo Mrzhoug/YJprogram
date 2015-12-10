@@ -1,0 +1,144 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="XMZT_Modify.aspx.vb" Inherits="manager_LCDM_XMZT_Modify" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>项目状态功能维护</title>
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    <script language="JavaScript" type="text/javascript" >
+    <!--
+    function chk(chk,id){
+     var oEvent = document.all(id);
+     var chks = oEvent.getElementsByTagName("INPUT");
+     for(var i=0; i<chks.length; i++)
+        {
+          if(chks[i].type=="checkbox")
+      chks[i].checked=chk.checked;
+        }
+    }
+    -->
+</script>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        <table width="760" border="0">
+            <tr>
+                <td valign="top" width="500" align="right">
+                    &nbsp;<asp:Button ID="Button1" runat="server" Text="移除所选" />&nbsp;&nbsp;&nbsp;&nbsp;<asp:Button ID="Button3" runat="server" Text="关闭返回" />&nbsp;&nbsp;&nbsp;&nbsp;
+                    <asp:Button ID="Button2" runat="server" Text="添加所选" /></td>
+                <td style="width: 20px">
+                </td>
+                <td valign="top">
+                    关键字：<asp:TextBox ID="TextBox1" runat="server"></asp:TextBox><asp:Button ID="Button4"
+                        runat="server" Text="搜索" /></td>
+            </tr>
+            <tr>
+                <td valign="top" width="500">
+                    <asp:GridView ID="GridView1" runat="server" BackColor="White" BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" DataSourceID="Conn1" ForeColor="Black" Width="500px" AutoGenerateColumns="False" AllowPaging="True" PageSize="15" DataKeyNames="XMZT,MKDM,ZTMC,MKMC" OnRowUpdating="GridView1_RowUpdating" SkinID="GridViewSkin1">
+                        <FooterStyle BackColor="#CCCC99" />
+                        <RowStyle BackColor="White" />
+                        <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+                        <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Center" />
+                        <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" />
+                        <AlternatingRowStyle BackColor="White" />
+                        <Columns>
+                            <asp:TemplateField>
+                                <HeaderTemplate>
+                                    <asp:CheckBox ID="CheckBox6" runat="server" onclick="chk(this,'GridView2')" />
+                                </HeaderTemplate>
+                                <ItemStyle HorizontalAlign="Center" Width="25px" />
+                                <HeaderStyle HorizontalAlign="Center" Width="25px" />
+                                <ItemTemplate>
+                                    <asp:CheckBox ID="CheckBox5" runat="server" />
+                                </ItemTemplate>
+                            </asp:TemplateField>
+                            <asp:BoundField DataField="showname" HeaderText="显示名称" >
+                            </asp:BoundField>
+                            <asp:TemplateField HeaderText="模块名称" SortExpression="MKMC">
+                                <EditItemTemplate>
+                                    <asp:Label ID="Label1" runat="server" Text='<%# Bind("MKMC") %>'></asp:Label>
+                                </EditItemTemplate>
+                                <ItemTemplate>
+                                    <asp:Label ID="Label1" runat="server" Text='<%# Bind("MKMC") %>'></asp:Label>
+                                </ItemTemplate>
+                            </asp:TemplateField>
+                            <asp:TemplateField HeaderText="审批" SortExpression="SPBZ">
+                                <EditItemTemplate>
+                                    <asp:CheckBox ID="CheckBox1" runat="server" Checked='<%# Bind("SPBZ") %>' />
+                                </EditItemTemplate>
+                                <ItemTemplate>
+                                    <asp:CheckBox ID="CheckBox1" runat="server" Checked='<%# Bind("SPBZ") %>' Enabled="False" />
+                                </ItemTemplate>
+                                <ItemStyle HorizontalAlign="Center" />
+                            </asp:TemplateField>
+                            <asp:TemplateField HeaderText="时间" SortExpression="TimeBZ">
+                                <EditItemTemplate>
+                                    <asp:CheckBox ID="CheckBox2" runat="server" Checked='<%# Bind("TimeBZ") %>' />
+                                </EditItemTemplate>
+                                <ItemTemplate>
+                                    <asp:CheckBox ID="CheckBox2" runat="server" Checked='<%# Bind("TimeBZ") %>' Enabled="False" />
+                                </ItemTemplate>
+                                <ItemStyle HorizontalAlign="Center" />
+                            </asp:TemplateField>
+                            <asp:BoundField DataField="RuleTime" HeaderText="输入规则时间" SortExpression="RuleTime" >
+                            </asp:BoundField>
+                            <asp:TemplateField HeaderText="无流程" SortExpression="Outlc">
+                                <EditItemTemplate>
+                                    <asp:CheckBox ID="CheckBox3" runat="server" Checked='<%# Bind("Outlc") %>' />
+                                </EditItemTemplate>
+                                <ItemTemplate>
+                                    <asp:CheckBox ID="CheckBox3" runat="server" Checked='<%# Bind("Outlc") %>' Enabled="False" />
+                                </ItemTemplate>
+                                <ItemStyle HorizontalAlign="Center" />
+                            </asp:TemplateField>
+                            <asp:CommandField ShowEditButton="True" >
+                                <ItemStyle HorizontalAlign="Center" Width="80px" />
+                            </asp:CommandField>
+                        </Columns>
+                    </asp:GridView>
+                    <asp:SqlDataSource ID="Conn1" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+                        SelectCommand="SELECT GY_XMZT.XMZT,GY_ZTMX.MKDM,GY_XMZT.ZTMC, GY_MKXX.MKMC, GY_ZTMX.SPBZ,GY_ZTMX.Outlc, GY_ZTMX.TimeBZ,GY_ZTMX.RuleTime,ShowName FROM GY_ZTMX , GY_XMZT,GY_MKXX where GY_ZTMX.XMZT = GY_XMZT.XMZT AND GY_ZTMX.MKDM = GY_MKXX.MKDM and GY_ZTMX.XMZT =  @XMZT">
+                        <SelectParameters>
+                            <asp:Parameter DefaultValue="-1" Name="XMZT" />
+                        </SelectParameters>
+                    </asp:SqlDataSource>
+                </td>
+                <td style="width: 20px;">
+                &nbsp;
+                </td>
+                <td  valign="top">
+                    <asp:GridView ID="GridView2" runat="server" AutoGenerateColumns="False" BackColor="White" SkinID="GridViewSkin1"
+                        BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" DataSourceID="Conn2"
+                        ForeColor="Black" HorizontalAlign="Center" Width="100%" AllowPaging="True" PageSize="15" DataKeyNames="MKDM">
+                        <FooterStyle BackColor="#CCCC99" />
+                        <Columns>
+                            <asp:TemplateField>
+                                <HeaderTemplate>
+                                    <asp:CheckBox ID="CheckBox4" runat="server" onclick="chk(this,'GridView2')" />
+                                </HeaderTemplate>
+                                <ItemStyle Width="25px" />
+                                <HeaderStyle Width="25px" />
+                                <ItemTemplate>
+                                    <asp:CheckBox ID="CheckBox3" runat="server" />
+                                </ItemTemplate>
+                            </asp:TemplateField>
+                            <asp:BoundField DataField="MKMC" HeaderText="表单名称" SortExpression="MKMC">
+                            </asp:BoundField>
+                        </Columns>
+                        <RowStyle BackColor="White" HorizontalAlign="Center" Width="25px" />
+                        <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+                        <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Right" />
+                        <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" />
+                        <AlternatingRowStyle BackColor="White" />
+                    </asp:GridView>
+                    <asp:SqlDataSource ID="Conn2" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+                        SelectCommand="SELECT GY_MKXX.MKDM,GY_MKXX.MKMC FROM GY_MKXX where MKDM not in(select MKDM from GY_ZTMX where XMZT = -1 ) and (NoLcDM >0) and XDLJ like '%.xml%'">
+                    </asp:SqlDataSource>
+                </td>
+            </tr>
+        </table>
+    
+    </div>
+    </form>
+</body>
+</html>

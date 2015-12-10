@@ -1,0 +1,2 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="CreatBarCode.aspx.cs" Inherits="Manage_PrintBarCode_CreatBarCode" %>
+

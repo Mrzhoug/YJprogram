@@ -1,0 +1,118 @@
+﻿Imports Microsoft.VisualBasic
+
+''' <summary>
+''' 权限管理通用类
+''' </summary>
+''' <remarks></remarks>
+Public Class Rights
+
+    ''' <summary>
+    ''' 用来检测无流程中,表单列表功能,是否有权限访问.
+    ''' </summary>
+    ''' <param name="UserID"></param>
+    ''' <param name="LCDM"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function CheckAllListRightsByLCDM(ByVal UserID As Integer, ByVal LCDM As Integer) As Boolean
+        Dim mkdm As Integer = Modules.GetMKDMByLCDM(LCDM)
+        Return CheckAllListRightsByMKDM(UserID, mkdm)
+    End Function
+
+    ''' <summary>
+    ''' 用来检测无流程中,表单列表功能,是否有权限访问.
+    ''' </summary>
+    ''' <param name="UserID"></param>
+    ''' <param name="MKDM"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function CheckAllListRightsByMKDM(ByVal UserID As Integer, ByVal MKDM As Integer) As Boolean
+        Dim sqlstr As String
+        sqlstr = "Select CanListForm From GY_Ygqx,Gy_Group_Info,Gy_Group where Gy_Group_Info.Group_Id = Gy_Ygqx.Group_Id And Gy_Ygqx.Group_Id = Gy_Group.Group_ID and (Group_Kind is null or Group_Kind=0) and YGDM=" & UserID & " and MKDM =" & MKDM & " and CanListForm=1"
+
+        Dim dt As New DataTable
+
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("Rights-CheckAllListRightsByMKDM", ex.Message)
+            Return False
+        End Try
+
+        If dt.Rows.Count = 0 Then
+            Return False
+        Else
+            Return True
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 通过LCDM获取用户所有权限
+    ''' </summary>
+    ''' <param name="UserID">用户ID</param>
+    ''' <param name="LCDM"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function GetUserRightsByLCDM(ByVal UserID As Integer, ByVal LCDM As Integer) As MRights
+        Dim mkdm As Integer = Modules.GetMKDMByLCDM(LCDM)
+        Return GetUserRightsByMKDM(UserID, mkdm)
+    End Function
+
+
+    ''' <summary>
+    ''' 通过MKDM获取所有用户权限
+    ''' </summary>
+    ''' <param name="UserID">用户ID</param>
+    ''' <param name="MKDM">MKDM</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function GetUserRightsByMKDM(ByVal UserID As Integer, ByVal MKDM As Integer) As MRights
+
+        Dim userRights As New MRights
+        userRights.UserID = UserID
+        userRights.MKDM = MKDM
+
+
+        Dim sqlstr As String
+        sqlstr = "Select CanRead From GY_Ygqx,Gy_Group_Info,Gy_Group where Gy_Group_Info.Group_Id = Gy_Ygqx.Group_Id And Gy_Ygqx.Group_Id = Gy_Group.Group_ID and (Group_Kind is null or Group_Kind=0) and YGDM=" & UserID & " and MKDM =" & MKDM
+
+        Dim QxSum As Integer = 0
+
+        Dim dt As DataTable
+        Dim tempSqlStr As String
+
+        '读权限
+        tempSqlStr = sqlstr & " and CanRead=1"
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, tempSqlStr, Nothing).Tables(0)
+        If dt.Rows.Count > 0 Then
+            userRights.CanRead = True
+        End If
+        '写权限
+        tempSqlStr = sqlstr & " and CanWrite=1"
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, tempSqlStr, Nothing).Tables(0)
+        If dt.Rows.Count > 0 Then
+            userRights.CanWrite = True
+        End If
+        '修改权限
+        tempSqlStr = sqlstr & " and CanModify=1"
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, tempSqlStr, Nothing).Tables(0)
+        If dt.Rows.Count > 0 Then
+            userRights.CanModify = True
+        End If
+        '删除权限
+        tempSqlStr = sqlstr & " and CanDelete=1"
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, tempSqlStr, Nothing).Tables(0)
+        If dt.Rows.Count > 0 Then
+            userRights.CanDelete = True
+        End If
+        '列表权限
+        tempSqlStr = sqlstr & " and CanListForm=1"
+        dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, tempSqlStr, Nothing).Tables(0)
+        If dt.Rows.Count > 0 Then
+            userRights.CanListForm = True
+        End If
+
+        Return userRights
+    End Function
+
+
+End Class

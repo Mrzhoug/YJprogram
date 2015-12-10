@@ -1,0 +1,124 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ProjectMap.aspx.vb" Inherits="manager_XJXM_ProjectMap" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>项目导航图</title>
+     <link rel="stylesheet" type="text/css" href="../../images/Ext.UI/resources/css/ext-all.css" />
+    <link rel="stylesheet" type="text/css" href="../../images/Ext.UI/Ext.Define.css" />    
+    <script type="text/javascript" src="../../images/Ext.UI/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="../../images/Ext.UI/ext-all.js"></script>
+    <link href="../../images/MenuStyle.css" rel="stylesheet" type="text/css" />
+     <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+    <style type="text/css">
+    a:link {
+	color:#000000;
+	text-decoration: none;
+}   /* 暂停使用 未访问的链接  */
+
+a:visited {
+	color:#000000;
+	text-decoration: none;
+}   /* 已访问的链接  */
+
+a:active {
+	color:#000000;
+	text-decoration: none;
+}   /* 激活链接 */
+
+a:hover {
+	color:#000000;
+	text-decoration: underline;
+}   /* 鼠标在链接上  */
+    </style>
+   <script language="javascript" type="text/javascript">
+	/*
+ * Ext JS Library 2.0.2
+ * Copyright(c) 2006-2008, Ext JS, LLC.
+ * licensing@extjs.com
+ * 
+ * http://extjs.com/license
+ */
+
+//Ext.onReady(function(){
+
+//	var tb = new Ext.Toolbar();
+//    tb.render('toolbar');
+
+//    // They can also be referenced by id in or components
+//    tb.add("-",
+//    {
+//    	icon: '../../images/Ext.UI/icons/fam/application_view_list.png', 
+//    	iconCls: 'blist',
+//        text: '查看审批信息&nbsp;',
+//        handler:onItemClick 
+//    },"-",
+//    {
+//    	icon: '../../images/Ext.UI/icons/fam/cross.gif', 
+//    	iconCls: 'blist',
+//        text: '删除项目&nbsp;',
+//        handler: onItemClick
+//    },"-",
+//    {
+//    	icon: '../../images/Ext.UI/icons/fam/application_go.png', 
+//    	iconCls: 'blist',
+//        text: '项目重发&nbsp;',
+//        handler: onItemClick
+//    },"-",
+//    {
+//    	icon: '../../images/Ext.UI/icons/fam/table_refresh.png', 
+//    	iconCls: 'blist',
+//        text: '分发项目&nbsp;',
+//        handler: onItemClick
+//    },"-"
+//    );
+     
+     function onItemClick(item){
+        switch (item.text)
+        {
+            case '查看审批信息&nbsp;':document.getElementById("Button1").click(); break; 
+            case '删除项目&nbsp;':document.getElementById("Button2").click();break; 
+            case '项目重发&nbsp;':document.getElementById("Button3").click(); break;
+            case '分发项目&nbsp;':document.getElementById("Button4").click(); break;
+        }
+    }
+//});
+
+</script>
+</head>
+   
+<body>   
+    <div id="toolbar"></div>
+        <form id="form1" runat="server">
+        <center>
+           <br />
+        <asp:GridView ID="GridView1" runat="server" BackColor="White" BorderColor="#DEDFDE" BorderStyle="None" 
+                BorderWidth="1px" CellPadding="4"  ForeColor="Black" Width="95%" AutoGenerateColumns="False" DataKeyNames="项目代码" SkinID="GridViewSkin1" CaptionAlign="Bottom" HorizontalAlign="Center" Font-Bold="False" Font-Size="Larger" Font-Strikeout="False" Font-Underline="False" UseAccessibleHeader="False">
+                <FooterStyle BackColor="#C0C000" />
+                <RowStyle BackColor="White" HorizontalAlign="Center" Height="23px" />
+                <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" />
+                <PagerStyle BackColor="#E0E0E0" Font-Bold="False" Font-Overline="False" ForeColor="Black"
+                    HorizontalAlign="Center" />
+                <HeaderStyle BackColor="#EBECEE" Font-Bold="True" ForeColor="Black" Wrap="False" Font-Size="Larger" HorizontalAlign ="Center" Height="25px"/>
+                <AlternatingRowStyle BackColor="WhiteSmoke" BorderColor="White" />
+                <PagerSettings Mode="NumericFirstLast" Visible="False" />
+            <EmptyDataRowStyle BackColor="White" />
+            <EditRowStyle BackColor="White" BorderColor="White" />
+            </asp:GridView> 
+            <hr width="95%"/>
+           <div id="ShowXMXX" runat="server" ></div>
+            <br />
+        <div id="out" runat="server"></div></center>
+        <span runat="server" id="AutoRunScript">
+        </span>
+        <table  style="visibility:hidden"><tr><td>
+            <asp:Button ID="Button1" runat="server" Text="Button" />
+            <asp:Button ID="Button2" runat="server" Text="Button" />
+             <asp:Button ID="Button3" runat="server" Text="Button" />
+              <asp:Button ID="Button4" runat="server" Text="Button" />
+            </td></tr></table>
+    </form>
+</body>
+</html>

@@ -1,0 +1,15 @@
+﻿
+Partial Class HomePage_UseAbout
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("select Fun_Content from EP_HomePagePublicFun where Fun_id=1", "dd")
+        If tb.Rows.Count > 0 Then
+            content.InnerHtml = tb.Rows(0).Item(0)
+        Else
+            content.InnerHtml = "暂无内容"
+        End If
+    End Sub
+End Class

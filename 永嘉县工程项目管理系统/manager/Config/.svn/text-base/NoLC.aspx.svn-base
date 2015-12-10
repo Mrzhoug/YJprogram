@@ -1,0 +1,332 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="NoLC.aspx.vb" Inherits="manager_Config_NoLC" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>系统配置</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+    <script type="text/javascript">
+        function goAdvancedSearchSetting(mkdm) {
+            window.open("../AdvancedSearch/AdvancedSearchSetting.aspx?mkdm=" + mkdm, "设置高级搜索", "height=500, width=550, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes")
+        }
+    </script>
+</head>
+<body>
+    <center>
+    <form id="form1" runat="server" style="width:500px;">
+
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>个人配置</span></a></li>
+            </ul>
+        </div>
+        <font color="red">注意：当前设置只对当前用户有效!!(不包括公共功能)</font>
+        <br />
+        <br />
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="Ul3">
+                <li class="topmenu"><a class="top_link" id="A3" href="javascript:void(0);">
+                <span>公共功能 </span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">                    
+                    <tr>
+                        <td colspan="2" style="text-align:center">
+                            <span id="formmanage" runat="server">表单管理</span>
+                            <span id="DefaultRow" runat="server">自定义显示列</span>                        
+                        </td>
+                    </tr>
+                    <tr>
+                        <th align="right">
+                            菜单新建连接：
+                        </th>
+                        <td width="75%" style="text-align:left">
+                            <asp:CheckBox ID="CheckBox9" runat="server" Text="显示" />
+                            &nbsp;&nbsp;
+                            <asp:Button ID="Button3" runat="server" Text="确定配置" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                     <tr>
+                        <th align="right">
+                            右侧窗口打开：
+                        </th>
+                        <td width="75%" style="text-align:left">
+                            <asp:CheckBox ID="CheckBox18" runat="server" Text="启用" />
+                            &nbsp;&nbsp;
+                            <asp:Button ID="Button9" runat="server" Text="确定配置" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            窗体大小：
+                        </th>
+                        <td  style="text-align:left">
+                            长：<asp:TextBox ID="TextBox2" runat="server" Width="72px"></asp:TextBox>
+                            宽：<asp:TextBox ID="TextBox3" runat="server" Width="72px"></asp:TextBox>
+                            &nbsp;&nbsp;
+                            <asp:Button ID="Button5" runat="server" Text="确定配置" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            高级搜索：
+                        </th>
+                        <td  style="text-align:left">                            
+                            &nbsp;<asp:Button ID="Button8" runat="server" Text="进入配置" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <br />
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="Ul4">
+                <li class="topmenu"><a class="top_link" id="A4" href="javascript:void(0);">
+                <span>表单标签管理</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">                    
+                    <tr>                        
+                        <th align="right">
+                            标签名：
+                        </th>
+                        <td width="75%" style="text-align:left">
+                            <asp:TextBox ID="TextBox1" runat="server"></asp:TextBox>
+                            <asp:Button ID="Button1" runat="server" Text="添 加" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:center" colspan="2">
+                            <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="CID"
+                                DataSourceID="conn" Width="300px" CssClass="cooltable" >
+                                <Columns>
+                                    <asp:BoundField DataField="value" HeaderText="标签名称" SortExpression="value" />
+                                    <asp:CommandField ShowEditButton="True" HeaderText="修改标签" >
+                                        <ItemStyle Width="70px" />
+                                    </asp:CommandField>
+                                    <asp:TemplateField HeaderText="删除" ShowHeader="False">
+                                        <ItemTemplate>
+                                            <asp:LinkButton ID="LinkButton1" runat="server" CausesValidation="False" CommandName="Select"
+                                                Text="删除" OnClientClick="return confirm('已经设置过的表单将会找不到该标签，你确定删除此标签吗？')"></asp:LinkButton>
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center" Width="35px" />
+                                    </asp:TemplateField>
+                                </Columns>
+                                <RowStyle CssClass="cooltableRowStyle" />
+                                <AlternatingRowStyle CssClass="cooltableAlternatingRowStyle" />
+                                <RowStyle HorizontalAlign="Center" />
+                            </asp:GridView>
+                            <asp:SqlDataSource ID="conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+                                SelectCommand="SELECT [CID], [UserID], [Config], [value], [LCDM] FROM [Xconfig] WHERE (Config = '表单标签' and [LCDM] = @LCDM)">
+                                <SelectParameters>
+                                    <asp:Parameter DefaultValue="-1" Name="LCDM" Type="Decimal" />
+                                </SelectParameters>
+                            </asp:SqlDataSource>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <br />
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="Ul1">
+                <li class="topmenu"><a class="top_link" id="A1" href="javascript:void(0);">
+                <span>表单菜单配置</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">                    
+                    <tr>                        
+                        <td width="100%" style="text-align:center">
+                            <asp:CheckBox ID="CheckBox1" runat="server" Text="保存表单" />&nbsp;
+                            <asp:CheckBox ID="CheckBox16" runat="server" Text="保存草稿" />&nbsp;
+                            <asp:CheckBox ID="CheckBox2" runat="server" Text="申请审阅" />&nbsp;
+                            <asp:CheckBox ID="CheckBox3" runat="server" Text="审阅意见" />&nbsp;
+                            <asp:CheckBox ID="CheckBox4" runat="server" Text="分发表单" />
+                            <br />
+                            <asp:CheckBox ID="CheckBox5" runat="server" Text="查看回复" />&nbsp;
+                            <asp:CheckBox ID="CheckBox6" runat="server" Text="打印表单" />&nbsp;
+                            <asp:CheckBox ID="CheckBox7" runat="server" Text="设置状态" />&nbsp;
+                            <asp:CheckBox ID="CheckBox8" runat="server" Text="附件管理" />&nbsp;
+
+                            <br />
+                            <asp:Button ID="Button2" runat="server" Text="确定配置" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <br />
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul class="topnavchildbar">
+                <li class="topmenu"  ><a class="top_link" id="A2" href="javascript:void(0);">
+                <span>列表按钮配置</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">                    
+                    <tr>                        
+                        <td width="100%" style="text-align:center">
+                            <table>
+                                <tr>
+                                    <td><asp:CheckBox ID="CheckBox10" runat="server" Text="置顶按钮" /></td>
+                                    <td><asp:CheckBox ID="CheckBox11" runat="server" Text="分发按钮" /></td>
+                                    <td><asp:CheckBox ID="CheckBox12" runat="server" Text="锁定按钮" /></td>                                    
+                                </tr>
+                                <tr>
+                                    <td><asp:CheckBox ID="CheckBox13" runat="server" Text="表单操作下拉菜单" /></td>
+                                    <td><asp:CheckBox ID="CheckBox14" runat="server" Text="列表过滤下拉菜单" /></td>
+                                    <td><asp:CheckBox ID="CheckBox15" runat="server" Text="标签下拉框" /></td>
+                                    <td><asp:CheckBox ID="CheckBox17" runat="server" Text="高级搜索" /></td>
+                                </tr>
+                                <tr style="text-align:center">
+                                    <td colspan="4"><asp:Button ID="Button4" runat="server" Text="确定配置" CssClass="btnsubmit" /></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <br />
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul class="topnavchildbar">
+                <li class="topmenu"  ><a class="top_link" id="A7" href="javascript:void(0);">
+                <span>显示列功能按钮配置</span></a></li>
+            </ul>
+        </div>
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">                    
+                    <tr>                        
+                        <td width="100%" style="text-align:center">
+                            <table>
+                                <tr>
+                                    <td><asp:CheckBox ID="cb_showListMenu1" runat="server" Text="新建表单" /></td>
+                                    <td><asp:CheckBox ID="cb_showListMenu2" runat="server" Text="表单列表" /></td>
+                                    <td><asp:CheckBox ID="cb_showListMenu3" runat="server" Text="报表模式" /></td>                                    
+                                </tr>
+                                <tr>
+                                    <td><asp:CheckBox ID="cb_showListMenu4" runat="server" Text="管理标签" /></td>
+                                    <td><asp:CheckBox ID="cb_showListMenu5" runat="server" Text="个人配置" /></td>
+                                    <td><asp:CheckBox ID="cb_showListMenu6" runat="server" Text="全局配置" /></td>
+                                    <td><asp:CheckBox ID="cb_showListMenu7" runat="server" Text="导入数据" /></td>
+                                </tr>
+                                <tr style="text-align:center">
+                                    <td colspan="4"><asp:Button ID="Button10" runat="server" Text="确定配置" CssClass="btnsubmit" /></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <br />
+
+        
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="Ul5">
+                <li class="topmenu"><a class="top_link" id="A5" href="javascript:void(0);">
+                <span>打开方式</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">                    
+                    <tr>                        
+                        <td width="100%" style="text-align:center">
+                            <table>
+                                <tr>
+                                    <td>
+                                        &nbsp;<asp:RadioButton ID="RadioButton2" runat="server" Text="以报表方式打开" GroupName="open1" Font-Size="9pt" />
+                                        (无需安装Infopath，只能显示，不能提交，通常用来显示报表)<br />
+                                        &nbsp;<asp:RadioButton ID="RadioButton4" runat="server" Text="以Web方式打开" GroupName="open1" Font-Size="9pt" />
+                                        (无需安装Infopath，但只能使用部分功能)<br />
+                                        &nbsp;<asp:RadioButton ID="RadioButton3" runat="server" Text="用Infopath打开" GroupName="open1" Font-Size="9pt" />
+                                        (需将此站点加为信任站点,安装ActiveX[sunfun.ocx]控件) &nbsp;&nbsp;
+                                    </td>
+
+                                </tr>
+                                 
+                                <tr style="text-align:center">
+                                    <td>
+                                        <asp:Button ID="Button6" runat="server" Text="确定配置" CssClass="btnsubmit" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <br />
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="Ul6">
+                <li class="topmenu"><a class="top_link" id="A6" href="javascript:void(0);">
+                <span>打开选项</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">                    
+                    <tr>                        
+                        <td width="100%" style="text-align:center">
+                            <table>
+                                <tr>
+                                    <td>
+                                        &nbsp;<asp:RadioButton ID="option1" runat="server" Text="显示列表" GroupName="group2" Font-Size="9pt" />
+                                        (当点击左边功能菜单时,直接显示表单列表)<br />
+                                        &nbsp;<asp:RadioButton ID="option2" runat="server" GroupName="group2" Text="自动新建" Font-Size="9pt" />
+                                        (当点击左边功能菜单时,自动新建表单)<br />
+                                        &nbsp;<asp:RadioButton ID="option3" runat="server" GroupName="group2" Text="自动打开" Font-Size="9pt" />
+                                        (当点击左边功能菜单时,自动打开第一张表单) &nbsp;&nbsp;                                        
+                                    </td>
+                                </tr>                                 
+                                <tr style="text-align:center">
+                                    <td>
+                                        <asp:Button ID="Button7" runat="server" Text="确定配置" CssClass="btnsubmit" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+    </center>
+</body>
+</html>
+

@@ -1,0 +1,184 @@
+﻿
+Partial Class manager_ProcessManager_processRuleSetting
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim dt As New DataTable
+    Dim sqlstr As String
+    Dim conditionID As Integer
+    Dim ruleID As Integer
+    Dim maxOrder As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Try
+            conditionID = Convert.ToInt32(Request("conditionID"))
+        Catch ex As Exception
+            conditionID = 0
+        End Try
+
+        Try
+            ruleID = Convert.ToInt32(Request("ruleID"))
+        Catch ex As Exception
+            ruleID = 0
+        End Try
+
+        If conditionID = 0 Then
+            Response.Write("非法参数")
+            Response.End()
+        End If
+
+
+        If Not IsPostBack Then
+            Dim mkdm As Integer
+            sqlstr = "select process.id,process.processName,process.processForm,processStatus.statusName from process,processStatus,processCondition where process.id = ProcessStatus.processID and ProcessStatus.id = processCondition.statusID and processcondition.id = " & conditionID
+            dt = Base.DB.Table(sqlstr, "dd")
+
+            If dt.Rows.Count <> 0 Then
+                mkdm = dt.Rows(0).Item("processForm").ToString()
+
+                txtProFormName.Text = Base.GetMKMCByMKDM(mkdm)
+                txtProName.Text = dt.Rows(0).Item("processName").ToString()
+                txtProStatusName.Text = dt.Rows(0).Item("statusName").ToString()
+                ResetFormNode(DDLNodeName, mkdm)
+            Else
+                Response.Write("非法参数")
+                Response.End()
+            End If
+
+
+
+
+
+        End If
+
+
+
+        bind()
+
+
+
+
+
+    End Sub
+
+
+    Sub bind()
+        '获取最大序号
+        dt = Base.DB.Table("select max([order]) from processRule where conditionID =" & conditionID, "dd")
+        If dt.Rows.Count <> 0 Then
+            If IsDBNull(dt.Rows(0).Item(0)) Then
+                maxOrder = 0
+            Else
+                maxOrder = dt.Rows(0).Item(0)
+            End If
+        End If
+
+
+
+
+        If Not IsPostBack Then
+            Dim i As Integer
+            DDLOrder.Items.Clear()
+            Dim item As New ListItem
+            item.Value = 0
+            item.Text = "默认"
+            DDLOrder.Items.Add(item)
+            For i = 1 To maxOrder
+                Dim _item As New ListItem
+                _item.Value = i
+                _item.Text = i
+                DDLOrder.Items.Add(_item)            'DDLOrder
+            Next
+
+            If ruleID <> 0 Then
+
+
+
+                sqlstr = "select * from processRule where id = " & ruleID
+                dt = Base.DB.Table(sqlstr, "dd")
+                If dt.Rows.Count > 0 Then
+                    DDLNodeName.Items.FindByText(dt.Rows(0).Item("nodeName").ToString()).Selected = True
+                    DDLOrder.Items.FindByValue(dt.Rows(0).Item("order").ToString()).Selected = True
+                    DDLSymbol.Items.FindByValue(dt.Rows(0).Item("symbol").ToString()).Selected = True
+                    TBCondition.Text = dt.Rows(0).Item("ruleContent").ToString()
+                Else
+                    Response.Write("非法参数")
+                    Response.End()
+                End If
+            End If
+        End If
+    End Sub
+
+
+    Sub ResetFormNode(ByVal nodeName As DropDownList, ByVal MKDM As String)
+        Dim FormName As String
+        Dim Row As DataRow = Base.DB.Row("select XsnDir,MKMC,MKDM from [GY_MKXX] where MKDM = " & MKDM, "dd")
+        If Row Is Nothing Then
+            NodeName.Items.Clear()
+            Exit Sub
+        Else
+            FormName = Row.Item("XsnDir").ToString.Trim
+            Dim filename As String = Server.MapPath("../../") & "TemplateLibrary\" & FormName & "\template.xml"
+            If IO.File.Exists(filename) = False Then
+                Base.Js.showalert(Me, "模板存问题,请刷新模板!")
+                Exit Sub
+            End If
+            Dim node As System.Xml.XmlNode = Base.XmlClass.GetXmlFile(filename)
+            Dim ListNodeName As String()
+            Dim tempstr As String()
+            Try
+                tempstr = Base.XmlClass.GetNodeNameList(node.ChildNodes(0))
+                ReDim ListNodeName(tempstr.Length - 1)
+                Dim i As Integer = 0
+                For i = 0 To tempstr.Length - 1
+                    'ListNodeName(i) = tempstr(i).Replace("<", "").Replace(">", "")
+                    Dim item As New ListItem
+                    item.Text = tempstr(i).Replace("<", "").Replace(">", "")
+
+                    item.Value = tempstr(i).Replace("<", "").Replace(">", "")
+                    nodeName.Items.Add(item)
+                Next
+            Catch ex As Exception
+                Base.Js.alert(Me, "模板存在问题,请不要最外的重复节添加节点.请修改模板重,重新上传并重新建功能.")
+                Exit Sub
+            End Try
+            'NodeName.DataSource = ListNodeName
+            'NodeName.DataBind()
+        End If
+    End Sub
+
+    Protected Sub btnConfirm_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnConfirm.Click
+        Dim order As Integer
+        If DDLOrder.SelectedValue = 0 Then
+            order = maxOrder + 1
+        Else
+            order = DDLOrder.SelectedItem.Value
+        End If
+
+        Dim nodeName As String
+        nodeName = DDLNodeName.SelectedItem.Text
+
+        Dim symbol As String
+        symbol = DDLSymbol.SelectedItem.Value
+
+        Dim ruleContent As String
+        ruleContent = TBCondition.Text
+
+
+        If ruleID = 0 Then
+            sqlstr = "insert into processRule (conditionID,nodeName,symbol,ruleContent,[order]) values(" & conditionID & ",'" & nodeName & "','" & symbol & "','" & ruleContent & "'," & order & ") "
+            Base.DB.Query(sqlstr)
+            bind()
+
+            Response.Write("<script>window.opener.location.href=window.opener.location.href</script>")
+            Base.Js.alert(Me, "添加成功")
+        Else
+            sqlstr = "update processRule set nodeName='" & nodeName & "',symbol='" & symbol & "',ruleContent='" & ruleContent & "',[order]=" & order & " where id = " & ruleID
+            Base.DB.Query(sqlstr)
+            bind()
+
+            Response.Write("<script>window.opener.location.href=window.opener.location.href</script>")
+            Base.Js.alert(Me, "修改成功")
+        End If
+
+    End Sub
+End Class

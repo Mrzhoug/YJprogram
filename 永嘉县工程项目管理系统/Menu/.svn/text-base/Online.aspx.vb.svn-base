@@ -1,0 +1,87 @@
+﻿
+Partial Class Menu_Online
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Response.Buffer = False
+        Response.BufferOutput = False
+        Response.Expires = 0
+
+        Dim Topstr As String = Base.pub.GetWebConfig("SunfunSoft.Xman.Session.TopStr").ToString
+
+        Login_User = Base.GetWebUserNameWithoutUpdate
+        UserID = Base.GetUserID(Login_User)
+
+        Dim Tb As New DataTable
+        Dim SessionID As String = Session.SessionID
+
+        '--对分发进行限时回收
+        Base.DB.Query("Delete GY_XMXD WHERE (DATEDIFF(d, GETDATE(), RcTime) < 0) ")
+
+        Dim outTime As String
+
+        outTime = Base.pub.GetWebConfig("SunfunSoft.Xman.autoTimeOut").ToString
+
+        If outTime = "" Then
+            outTime = "30"
+        End If
+
+        Tb = Base.DB.Table("SELECT * FROM Online_User WHERE DATEDIFF(n,Date1,getdate())>" & outTime & " and userid = " & UserID & " and SessionID='" & SessionID & "'", "dd")
+        If Tb.Rows.Count > 0 Then
+            Response.Write("登出||")
+            Response.End()
+        End If
+        '--删除五分钟钟未活动人员
+        Base.DB.Query("DELETE FROM Online_User WHERE DATEDIFF(n,Date1,getdate())>" & outTime & "")
+
+        Tb = Base.DB.Table("Select CID from Online_User where UserID='" & UserID & "'", "dd")
+        If Tb.Rows.Count > 0 Then
+            'Base.DB.Query("update Online_User set Date1=getdate() where SessionID='" & SessionID & "'")
+        Else
+            Dim YZM As String = Base.EnCrypt.MD5(SessionID)
+            Dim Cookies1 As New System.Web.HttpCookie(Topstr & "_SessionID")
+            Cookies1.Expires = FormatDateTime(DateAdd(DateInterval.Minute, 35, Date.Now))
+            Cookies1.Value = SessionID
+            Response.Cookies.Set(Cookies1)
+            Dim Cookies2 As New System.Web.HttpCookie(Topstr & "_cnxmanyzm")
+            Cookies2.Expires = FormatDateTime(DateAdd(DateInterval.Minute, 35, Date.Now))
+            Cookies2.Value = YZM
+            Response.Cookies.Set(Cookies2)
+            Base.DB.Query("Insert into Online_User(SessionID,UserID,YZM,Date1) values ('" & SessionID & "'," & UserID & ",'" & YZM & "',getdate())")
+        End If
+
+        '得到当前在线人数
+        Dim OnlineCount As String
+        OnlineCount = Base.DB.ExeScalar("SELECT Count(Cid) FROM Online_User")
+        '得到当前未查看记录数量
+
+        Dim MsgCount As String
+        MsgCount = Base.DB.ExeScalar("SELECT Count(CID) FROM SendMessage where (ToID=" & UserID & ") and Lookflag = 0")
+
+        Dim MsgCount1 As String = Base.DB.ExeScalar("SELECT Count(CID) FROM SendMessage where (ToID=" & UserID & ")")
+
+        '先得到公告数量
+        Dim ggcount As Integer = Base.DB.ExeScalar("Select Count(CID) From Sendmessage where toid=0 and msgkind=4 ")
+
+        '再得到当前用户查看过的公告数量
+        Dim ggckcount As Integer = Base.DB.ExeScalar("select Count(s.CID) From SendMessage AS s ,PublicMessageLookLog AS p  where s.Cid = p.MessageId AND p.UserID = " & UserID)
+
+        If ggcount < ggckcount Then             '表示原来公告的查看记录还存在.导致公告数小于查看数.
+            MsgCount = MsgCount
+        Else
+            MsgCount = MsgCount + ggcount - ggckcount
+        End If
+
+        Try
+            Base.DB.Close()
+        Catch ex As Exception
+        End Try
+        Base.Dispose()
+        Response.Expires = 0
+        Response.Write(OnlineCount & "|" & MsgCount & "|" & (MsgCount1 + ggcount))
+        Response.End()
+
+    End Sub
+End Class

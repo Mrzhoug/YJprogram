@@ -1,0 +1,124 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ButtonBar.aspx.vb" Inherits="Menu_ButtonBar" %>
+
+<html>
+<head id="Head1" runat="server">
+    <title>导航栏</title>
+    <link rel="stylesheet" type="text/css" href="../images/Ext.UI/resources/css/ext-all.css" />
+    <link rel="stylesheet" type="text/css" href="../images/Ext.UI/Ext.Define.css" />    
+    <script type="text/javascript" src="../images/Ext.UI/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="../images/Ext.UI/ext-all.js"></script>
+    <script type="text/javascript" src="../images/Ext.UI/TabCloseMenu.js"></script>
+    <script type="text/javascript" src="../Pub/function.js"></script>
+</head>
+<body>
+   <div id="container">
+    <div id="toolbar"></div>
+</div>
+    
+<script language="javascript" type="text/javascript">
+	/*
+ * Ext JS Library 2.0.2
+ * Copyright(c) 2006-2008, Ext JS, LLC.
+ * licensing@extjs.com
+ * 
+ * http://extjs.com/license
+ */
+
+
+    Ext.onReady(function () {
+
+<%=str %>
+
+//	var tb = new Ext.Toolbar();
+//    tb.render('toolbar');
+
+//    // They can also be referenced by id in or components
+//    tb.add("-",
+//    {
+//    	icon: '../images/Ext.UI/icons/fam/add.gif', 
+//    	iconCls: 'blist',
+//        text: '新建表单&nbsp;',
+//        handler: onItemClick
+//    },"-",
+//    {
+//    	icon: '../images/Ext.UI/icons/fam/application_view_list.png', 
+//    	iconCls: 'blist',
+//        text: '表单列表&nbsp;',
+//        handler: onItemClick
+//    },"-",
+//    {
+//    	icon: '../images/Ext.UI/icons/fam/report.png', 
+//    	iconCls: 'blist',
+//        text: '报表模式&nbsp;',
+//        handler: onItemClick
+//    },"-",
+//    {
+//    	icon: '../images/Ext.UI/icons/fam/plugin.gif', 
+//    	iconCls: 'blist',
+//        text: '管理标签&nbsp;',
+//        handler: onItemClick
+//    },"-",
+//    {
+//    	icon: '../images/Ext.UI/icons/fam/cog.png', 
+//    	iconCls: 'blist',
+//        text: '个人配置&nbsp;',
+//        handler: onItemClick
+//    },"-",
+//    {
+//    	icon: '../images/Ext.UI/icons/fam/cog.png', 
+//    	iconCls: 'blist',
+//        text: '全局配置&nbsp;',
+//        handler: onItemClick
+//    },"-",
+//    {
+//    	icon: '../images/Ext.UI/icons/fam/application_view_list.png', 
+//    	iconCls: 'blist',
+//        text: '导入数据&nbsp;',
+//        handler: onItemClick
+//    }
+//     );
+     
+//    var store = new Ext.data.SimpleStore({
+//        fields: ['abbr', 'state']
+//    });
+//    var combo = new Ext.form.ComboBox({
+//        store: store,
+//        displayField:'state',
+//        typeAhead: true,
+//        mode: 'local',
+//        triggerAction: 'all',
+//        emptyText:'Select a state...',
+//        selectOnFocus:true,
+//        width:135
+//    });
+//    tb.addField(combo);
+
+     function onItemClick(item){
+     var gourl;
+        switch (item.text)
+        {
+            case '新建表单&nbsp;': CreateXMXM_NOLC(lcdm);                                   break; 
+            case '表单列表&nbsp;': gourl='../Manager/XJXM/ShowList.aspx?LCDM=';              break; 
+            case '我的表单&nbsp;': gourl='../Manager/XJXM/MyFormList.aspx?back=-1&LCDM=';    break; 
+            //case '功能导航&nbsp;': gourl='../Manager/XJXM/FunctionNavigation.aspx?LCDM=';    break; 
+            case '报表模式&nbsp;': window.open('../Manager/Forms/ReportsList.aspx?LCDM=' + lcdm ,'报表模式','height=600, width=800, top=50, left=50, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes'); break;
+            case '管理标签&nbsp;': window.open('../Manager/Forms/TagManage.aspx?LCDM=' + lcdm ,'管理标签','height=400, width=500, top=50, left=50, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes'); break;
+            case '导入数据&nbsp;': window.open('../public/importexcel.aspx?LCDM=' + lcdm ,'导入数据','height=200, width=520, top=50, left=50, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=yes'); break;
+            case '个人配置&nbsp;': window.open('../Manager/Forms/FormListConfig.aspx?LCDM=' + lcdm ,'个人配置','height=700, width=600, top=50, left=50, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=yes'); break;
+            case '全局配置&nbsp;': window.open('../Manager/Forms/FormListAllConfig.aspx?LCDM=' + lcdm ,'全局配置','height=700, width=600, top=50, left=50, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=yes'); break;
+        }
+        if (item.text!='新建表单&nbsp;' && item.text!='报表模式&nbsp;' && item.text!='管理标签&nbsp;'  && item.text!='导入数据&nbsp;'  && item.text!='个人配置&nbsp;' && item.text!='全局配置&nbsp;' ) { parent.main1.location= gourl + lcdm ;}
+    }
+});
+<% if Advanced=0 then %>
+
+
+parent.main1.location= '../Manager/XJXM/ShowList.aspx?LCDM=' + lcdm ;
+<% end if %>
+
+
+</script>
+<span runat="server" id="AutoRunScript"></span>
+
+</body>
+</html>

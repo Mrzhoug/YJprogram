@@ -1,0 +1,30 @@
+﻿
+Partial Class manager_HomePageManage_PlatformsAbout
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Fid As Integer = 2
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim Sql As String
+        Sql = "Update HomePagePublicFun set Fun_Content='" & Content.Text & "',update1=getdate() where fid=" & Fid
+        Base.DB.Query(Sql)
+        If Base.DB.ErrorMessage Is Nothing Then
+            Base.Js.alert(Me, "修改成功!", "UseAbout.aspx")
+        Else
+            Base.Js.alert(Me, "修改失败,请联系管理员!")
+        End If
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking()
+
+        If Page.IsPostBack = False Then
+            Dim tb As New Data.DataTable
+            tb = Base.DB.Table("select Fun_Content from HomePagePublicFun where fid=" & Fid, "dd")
+            If tb.Rows.Count > 0 Then
+                If IsDBNull(tb.Rows(0).Item(0)) = False Then
+                    Content.Text = tb.Rows(0).Item(0)
+                End If
+            End If
+        End If
+    End Sub
+End Class

@@ -1,0 +1,207 @@
+﻿
+Partial Class manager_ProcessManager_processConditionList
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim dt As New DataTable
+    Dim statusID As Integer
+    Dim maxOrder As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Try
+            statusID = Convert.ToInt32(Request("statusID"))
+        Catch ex As Exception
+            statusID = 0
+        End Try
+
+        If statusID = 0 Then
+            Base.Js.showalert(Me, "非法参数")
+        End If
+
+        If Not IsPostBack Then
+            'dt = Base.DB.Table("select processName,processForm,statusName,processID,processStatusOrder from processList, processStatuslist where processStatuslist.processid = processList.id and processStatuslist.id = " & statusID, "dd")
+            'If dt.Rows.Count = 0 Then
+            '    Base.Js.showalert(Me, "非法参数")
+            '    Exit Sub
+            'End If
+            bind()
+        End If
+
+    End Sub
+
+
+    Private Sub bind()
+        Dim sqlstr As String
+        sqlstr = "select * from processCondition,processStatus where(processStatus.ID = processCondition.statusID) and  processStatus.ID = " & statusID & " order by processCondition.[order]"
+        dt = Base.DB.Table(sqlstr, "dd")
+        GridView1.DataSource = dt
+        GridView1.DataBind()
+
+        '获取最大序号
+        sqlstr = "select max([Order]) from processCondition where statusID =" & statusID
+        dt = Base.DB.Table(sqlstr, "dd")
+        If dt.Rows.Count <> 0 Then
+            If IsDBNull(dt.Rows(0).Item(0)) Then
+                maxOrder = 0
+            Else
+                maxOrder = dt.Rows(0).Item(0)
+            End If
+        End If
+    End Sub
+
+    Protected Sub MoveUp_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles MoveUp.Click
+        Dim SelectIndex As Integer = GridView1.SelectedIndex
+        Dim selectInexOrder As Integer
+        Try
+            selectInexOrder = GridView1.DataKeys(SelectIndex).Values("order")
+        Catch ex As Exception
+            Base.Js.showalert(Me, "上移功能错误")
+            Exit Sub
+        End Try
+
+        Dim MoveItemOrder As Integer
+        MoveItemOrder = GridView1.DataKeys(SelectIndex).Values("order")
+
+        Dim dt1 As New DataTable '需要上移的功能模块
+        dt1 = Base.DB.Table("select ID from processCondition where [order] =  " & MoveItemOrder & " and statusID=" & statusID, "dd")
+        Dim dt2 As New DataTable
+        dt2 = Base.DB.Table("select ID from processCondition where [order] =  " & MoveItemOrder - 1 & " and statusID=" & statusID, "dd")
+
+        Dim i As Integer
+        For i = 0 To dt1.Rows.Count - 1
+            Base.DB.Query("update processCondition set [order] = " & MoveItemOrder - 1 & " where id=" & dt1.Rows(i).Item(0))
+        Next
+        For i = 0 To dt2.Rows.Count - 1
+            Base.DB.Query("update processCondition set [order] = " & MoveItemOrder & " where id=" & dt2.Rows(i).Item(0))
+        Next
+
+        GridView1.SelectedIndex -= 1
+        If GridView1.SelectedIndex = 0 Then MoveUp.Enabled = False
+        If GridView1.SelectedIndex < GridView1.Rows.Count - 1 Then MoveDown.Enabled = True
+        bind()
+    End Sub
+
+    Protected Sub MoveDown_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles MoveDown.Click
+        Dim SelectIndex As Integer = GridView1.SelectedIndex
+        Dim selectInexOrder As Integer
+        Try
+            selectInexOrder = GridView1.DataKeys(SelectIndex).Values("order")
+        Catch ex As Exception
+            Base.Js.showalert(Me, "下移功能错误")
+            Exit Sub
+        End Try
+
+        Dim MoveItemOrder As Integer
+        MoveItemOrder = GridView1.DataKeys(SelectIndex).Values("order")
+
+        Dim dt1 As New DataTable '需要下移的功能模块
+        dt1 = Base.DB.Table("select ID from processCondition where [order] =  " & MoveItemOrder & " and statusID=" & statusID, "dd")
+        Dim dt2 As New DataTable
+        dt2 = Base.DB.Table("select ID from processCondition where [order] =  " & MoveItemOrder + 1 & " and statusID=" & statusID, "dd")
+
+        Dim i As Integer
+        For i = 0 To dt1.Rows.Count - 1
+            Base.DB.Query("update processCondition set [order] = " & MoveItemOrder + 1 & " where id=" & dt1.Rows(i).Item(0))
+        Next
+        For i = 0 To dt2.Rows.Count - 1
+            Base.DB.Query("update processCondition set [order] = " & MoveItemOrder & " where id=" & dt2.Rows(i).Item(0))
+        Next
+
+        GridView1.SelectedIndex += 1
+        If GridView1.SelectedIndex = GridView1.Rows.Count - 1 Then MoveDown.Enabled = False
+        If GridView1.SelectedIndex > 0 Then MoveUp.Enabled = True
+        bind()
+    End Sub
+
+    Protected Sub BtnDel_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles BtnDel.Click
+        Dim i As Integer
+        Dim ck As CheckBox
+        Dim id As Integer
+        Dim delItemOrder As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                delItemOrder = GridView1.DataKeys(i).Values("order")
+                id = GridView1.DataKeys(i).Values("id")
+                Base.DB.Query("delete from processCondition where id = " & id)
+            End If
+        Next
+        dt = Base.DB.Table("select * from processCondition  where statusID = " & statusID, "dd")
+
+        For i = 0 To dt.Rows.Count - 1
+            Dim sqlstr As String
+            sqlstr = "update processCondition set [order] = " & i + 1 & " where id = " & dt.Rows(i).Item("id")
+            Base.DB.Query(sqlstr)
+        Next
+
+        bind()
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+
+        For i = 0 To GridView1.Rows.Count - 1
+            Dim nextStatus As String = GridView1.Rows(i).Cells(2).Text
+
+            Dim statusName As String = String.Empty
+            If nextStatus.Trim() = "" Or nextStatus = "&nbsp;" Or nextStatus = "0" Then
+                statusName = "默认"
+            Else
+                Dim sqlstr As String = "select statusName from processStatus where id=" & nextStatus
+                dt = Base.DB.Table(sqlstr, "dd")
+                If dt.Rows.Count > 0 Then
+                    statusName = dt.Rows(0).Item(0)
+                Else
+                    statusName = "无"
+                End If
+            End If
+            GridView1.Rows(i).Cells(2).Text = statusName
+
+
+            Dim sendcontent As String
+            sendcontent = GridView1.Rows(i).Cells(4).Text
+
+            If sendcontent.Length > 20 Then
+                sendcontent = sendcontent.Substring(0, 20) & "..."
+            End If
+
+            GridView1.Rows(i).Cells(4).Text = sendcontent
+
+            GridView1.Rows(i).Cells(7).Text = " <a href='javascript:void(0)' onclick='goEidtRule(" & GridView1.DataKeys(i).Values("id") & ")'>编辑规则</a>"
+            GridView1.Rows(i).Cells(8).Text = " <a href='javascript:void(0)' onclick='goEidt(" & statusID & "," & GridView1.DataKeys(i).Values("id") & ")'>编辑条件</a>"
+
+
+        Next
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        GridView1.SelectedIndex = e.NewSelectedIndex
+        bind()
+
+        If GridView1.DataKeys(e.NewSelectedIndex).Values("order") > 1 Then
+            MoveUp.Enabled = True
+        Else
+            MoveUp.Enabled = False
+        End If
+
+        If GridView1.DataKeys(e.NewSelectedIndex).Values("order") < maxOrder Then
+            MoveDown.Enabled = True
+        Else
+            MoveDown.Enabled = False
+        End If
+
+    End Sub
+
+    Protected Sub GridView1_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs) Handles GridView1.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow And GridView1.EditIndex = -1 Then
+            '鼠标效果
+            e.Row.Attributes("style") = "Cursor:hand"
+            e.Row.Cells(1).Attributes.Add("Onclick", "javascript:__doPostBack('Gridview1','Select$" & e.Row.RowIndex & "')")
+            e.Row.Cells(2).Attributes.Add("Onclick", "javascript:__doPostBack('Gridview1','Select$" & e.Row.RowIndex & "')")
+        End If
+    End Sub
+
+    Protected Sub btnAdd_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnAdd.Click
+        Response.Write("<script>window.open('processConditionSetting.aspx?statusID=" & statusID & "','新建流程条件','height=500, width=550, top=130, left=200, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no') </script>")
+    End Sub
+End Class

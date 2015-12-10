@@ -1,0 +1,98 @@
+﻿Imports Microsoft.VisualBasic
+''' <summary>
+''' ZTree树实体类
+''' </summary>
+''' <remarks></remarks>
+Public Class MZTreeNodeJson
+
+    Private _id As String
+    Public Property id() As String
+        Get
+            Return _id
+        End Get
+        Set(ByVal value As String)
+            _id = value
+        End Set
+    End Property
+
+
+    Private _isParent As String
+    Public Property isParent() As String
+        Get
+            Return _isParent
+        End Get
+        Set(ByVal value As String)
+            _isParent = value
+        End Set
+    End Property
+
+
+
+    Private _name As String
+    Public Property name() As String
+        Get
+            Return _name
+        End Get
+        Set(ByVal value As String)
+            _name = value
+        End Set
+    End Property
+
+
+    Private _pID As String
+    Public Property pID() As String
+        Get
+            Return _pid
+        End Get
+        Set(ByVal value As String)
+            _pid = value
+        End Set
+    End Property
+
+
+    Private _icon As String
+    Public Property icon() As String
+        Get
+            Return _icon
+        End Get
+        Set(ByVal value As String)
+            _icon = value
+        End Set
+    End Property
+
+
+
+    Private _drag As Boolean
+    Public Property drag() As Boolean
+        Get
+            Return _drag
+        End Get
+        Set(ByVal value As Boolean)
+            _drag = value
+        End Set
+    End Property
+
+
+    Private _drop As Boolean
+    Public Property drop() As Boolean
+        Get
+            Return _drop
+        End Get
+        Set(ByVal value As Boolean)
+            _drop = value
+        End Set
+    End Property
+
+
+    Private _open As Boolean
+    Public Property open() As Boolean
+        Get
+            Return _open
+        End Get
+        Set(ByVal value As Boolean)
+            _open = value
+        End Set
+    End Property
+
+
+End Class

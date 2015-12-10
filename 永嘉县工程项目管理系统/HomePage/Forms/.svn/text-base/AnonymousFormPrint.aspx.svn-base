@@ -1,0 +1,30 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="AnonymousFormPrint.aspx.vb" Inherits="Homepage_Forms_AnonymousFormPrint" EnableSessionState="True" %>
+
+<html>
+<head id="Head1" runat="server">
+    <title>Web方式打开表单</title>
+    <link rel="stylesheet" type="text/css" href="../../images/Ext.UI/resources/css/ext-all.css" />
+    <script type="text/javascript" src="../../images/Ext.UI/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="../../images/Ext.UI/ext-all.js"></script>
+    <script type="text/javascript" src="../../images/Ext.UI/TabCloseMenu.js"></script>
+    <script type="text/javascript" src="../../pub/function.js"></script>
+    
+    <style type="text/css">
+        TD { FONT-SIZE: 8.5pt; LINE-HEIGHT: 180%; FONT-FAMILY: "verdana", "Helvetica", "sans-serif" }
+	    A:link { FONT-SIZE: 8.5pt; COLOR: #000000; FONT-FAMILY: "verdana", "Helvetica", "sans-serif"; TEXT-DECORATION: none }
+	    A:hover { FONT-SIZE: 8.5pt; COLOR: #b84e07; FONT-FAMILY: "verdana", "Helvetica", "sans-serif"; TEXT-DECORATION: underline }
+	    A:visited { FONT-SIZE: 8.5pt; COLOR: #000000; FONT-FAMILY: "verdana", "Helvetica", "sans-serif"; TEXT-DECORATION: none }
+	</style>
+    <link rel="stylesheet" type="text/css" media="all" href="../../Manager/Forms/js/calendar-win2k-cold-1.css"	title="win2k-cold-1" />
+    <script type="text/javascript" src="../../Manager/Forms/js/calendar.js"></script>
+	<script type="text/javascript" src="../../Manager/Forms/js/calendar-en.js"></script>
+	<script type="text/javascript" src="../../Manager/Forms/js/calendar-setup.js"></script>
+	<script type="text/javascript" src="../../Manager/Forms/js/infojet.js"></script>
+</head>
+
+<body onload="InfoJet_Init();" style="margin:0; text-align:left">
+    <form name="xmlForm" action="../../submit.aspx" method="post" id="form1">
+        <asp:Label id="xDocContent" runat="server">xDocContent</asp:Label>
+    </form>
+</body>
+</html>

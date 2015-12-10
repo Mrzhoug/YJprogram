@@ -1,0 +1,59 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="DesktopConfig.aspx.vb" Inherits="manager_Desktop_DesktopConfig" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>桌面配置</title>
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        <table width="500" cellspacing="1"  cellpadding="4" style="background-color:#dcdcdc; text-align:center;">
+            <tr>
+                <td align="center" style="height: 18px">
+                    信息中心</td>
+            </tr>
+            <tr style="background-color:White;">
+                <td align="center" style="height: 112px">
+                    <table width="100%">
+                        <tr><td align="center">
+                            <asp:RadioButton ID="RadioButton1" runat="server" Text="通用型" AutoPostBack="True" GroupName="style" />
+                            <br />
+                            <img height="64" src="../../images/desktop/DesktopStyle1.gif" width="105" /></td>
+                        <td align="center">
+                            <asp:RadioButton ID="RadioButton2" runat="server" Text="审批型" AutoPostBack="True" GroupName="style" />
+                            <br />
+                            <img height="64" src="../../images/desktop/DesktopStyle2.gif" width="105" />    
+                        </td>
+                            <td align="center">
+                                <asp:RadioButton ID="RadioButton3" runat="server" Text="列表型" AutoPostBack="True" GroupName="style" /><br />
+                                <img height="64" src="../../images/desktop/DesktopStyle0.gif" width="105" /></td>
+                            <td align="center">
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+            <br />
+        <%--<table width="500" cellspacing="1" cellpadding="4" style="background-color:#dcdcdc; ">            
+            <tr>
+                <td colspan="2" align="center">
+                    桌面快捷方式</td>
+            </tr>
+            <tr style="background-color:White;">
+                <td colspan="2" align="center">
+                    <table width="100%">
+                        <tr>
+                            <td align="center" colspan="2">
+                               <a href="LoginList.aspx">登陆日志</a></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>--%>
+    
+    </div>
+    </form>
+</body>
+</html>

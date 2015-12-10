@@ -1,0 +1,248 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ShowFunSetting.aspx.vb" Inherits="manager_Group_info_ShowFunSetting" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>编辑组内模块</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+    <script language="Javascript" type="text/javascript">
+    //全选，一个页面可以存在多个全选
+    function chk_Row(chk,id)
+    {
+        var chkid = chk.id.replace("7","");
+        var oEvent = document.all(id);
+        var chks = oEvent.getElementsByTagName("INPUT");
+        
+        for(var i=0; i<chks.length; i++)
+        {
+         //只有标志CheckBox的,才是选择列的.
+            var u=chks[i].id;
+            if (chks[i].id.indexOf(chkid) > -1 && chks[i].type=="checkbox" && chks[i].id.indexOf("CheckBox1") <=-1 )
+            { 
+                chks[i].checked=chk.checked;
+            } 
+        }
+    }
+    </script>
+</head>
+<body>
+<center>
+    <form id="form1" runat="server" style="width:800px">
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>权限管理</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td colspan=3 style="text-align:center"> 
+                            <span id="TGroup_name" runat="server" style="font-size:15pt; font-weight:bold;"></span>
+                        </td>                    
+                    </tr>
+
+                    <tr>
+                        <th align="left" style="text-align:center; width:55%;">
+                            已添加功能列表
+                        </th>
+                        <td style="width:10%">&nbsp;</td>               
+
+                        <th align="left" style="text-align:center; width:35%;">
+                            系统所有功能列表</th>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            全选:
+                            <input type="checkbox" id="read1" onclick="chk(this,'GridView1','2');" />读
+                            <input type="checkbox" id="write1" onclick="chk(this,'GridView1','3');" />写
+                            <input type="checkbox" id="modify1" onclick="chk(this,'GridView1','4');" />改
+                            <input type="checkbox" id="detete1" onclick="chk(this,'GridView1','5');" />删
+                            <input type="checkbox" id="showlist1" onclick="chk(this,'GridView1','6');" />列表
+                            <asp:Button id="Button3" runat="server" Text="应用权限" CssClass="btnsubmit"></asp:Button>
+                        </td>
+                        <td>&nbsp;</td>
+                        <td  style="text-align:left; vertical-align:middle;">                                
+                            关键字：
+                            <asp:TextBox id="TextBox1" runat="server" Width="128px"></asp:TextBox>
+                            <asp:Button id="Button1" onclick="Button1_Click" runat="server" Text="查询" CssClass="btnsubmit"></asp:Button>
+                        </td>
+                    </tr>
+
+
+                    <tr style=" height:340px;">
+                        <td style="vertical-align:top; text-align:center; ">
+                            <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" 
+                                DataSourceID="Conn1"  AllowPaging="True" 
+                                DataKeyNames="Cid,Group_ID" Width="98%" Font-Size="9pt" 
+                                CssClass="cooltable" EnableModelValidation="True">
+                                <FooterStyle BackColor="#CCCC99" />
+                                <Columns>
+                                    <asp:TemplateField HeaderText="选择">
+                                        <HeaderTemplate>
+                                            <asp:CheckBox ID="SelectAll" runat="server" 
+                                                onclick="chk(this,'GridView1','1')"/>
+                                        </HeaderTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox13" runat="server"  />
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" Width="20px" />
+                                        <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" Width="20px" />
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="功能名" SortExpression="DLMC">
+                                        <EditItemTemplate>
+                                            <asp:Label ID="Label1" runat="server" Text='<%# Bind("MKMC") %>'></asp:Label>
+                                        </EditItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center" VerticalAlign="Middle" Width="580px" />
+                                        <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle" Width="580px" />
+                                        <ItemTemplate>
+                                            <asp:Label ID="Label2" runat="server" Text='<%# Bind("MKMC") %>'></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="读">
+                                        <EditItemTemplate>
+                                            <asp:CheckBox ID="CheckBox14" runat="server" Checked='<%# Bind("CanRead") %>' />
+                                        </EditItemTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox2" runat="server" Checked='<%# Bind("CanRead") %>' />
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center" />
+                                        <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle"/>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="写">
+                                        <EditItemTemplate>
+                                            <asp:CheckBox ID="CheckBox15" runat="server" 
+                                                Checked='<%# Bind("CanWrite") %>' />
+                                        </EditItemTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox16" runat="server" 
+                                                Checked='<%# Bind("CanWrite") %>' />
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center" />
+                                        <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle"/>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="改">
+                                        <EditItemTemplate>
+                                            <asp:CheckBox ID="CheckBox17" runat="server" 
+                                                Checked='<%# Bind("CanModify") %>' />
+                                        </EditItemTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox4" runat="server" 
+                                                Checked='<%# Bind("CanModify") %>' />
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center" />
+                                        <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle"/>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="删">
+                                        <EditItemTemplate>
+                                            <asp:CheckBox ID="CheckBox18" runat="server" 
+                                                Checked='<%# Bind("CanDelete") %>' />
+                                        </EditItemTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox5" runat="server" 
+                                                Checked='<%# Bind("CanDelete") %>' />
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center" />
+                                        <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle"/>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="列表">
+                                        <EditItemTemplate>
+                                            <asp:CheckBox ID="CheckBox19" runat="server" 
+                                                Checked='<%# Bind("CanListForm") %>' />
+                                        </EditItemTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox6" runat="server" 
+                                                Checked='<%# Bind("CanListForm") %>' />
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center" />
+                                        <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle"/>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="全">
+                                        <EditItemTemplate>
+                                            <asp:CheckBox ID="CheckBox20" runat="server" Checked='<%# Bind("CanAll") %>' />
+                                        </EditItemTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox7" runat="server" Checked='<%# Bind("CanAll") %>' 
+                                                onclick="chk_Row(this,'GridView1','2');" />
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center" />
+                                        <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle"/>
+                                    </asp:TemplateField>
+                                </Columns>
+
+                                <RowStyle CssClass="cooltableRowStyle" />
+                                <AlternatingRowStyle CssClass="cooltableAlternatingRowStyle" />
+                                <RowStyle HorizontalAlign="Center" />                                
+                            </asp:GridView>
+                        </td>
+
+                        <td>
+                            <asp:Button id="btn_add" onclick="btn_add_Click" runat="server" Text="<<添加" CssClass="btnsubmit" ></asp:Button> 
+                            <br />
+                            <br />
+                            <asp:Button id="btn_del" onclick="btn_del_Click" runat="server" Text="移除>>" CssClass="btnsubmit" ></asp:Button>
+                        </td>
+                                      
+                        <td style="vertical-align:top; text-align:center;">
+                            <asp:GridView id="GridView2" runat="server" Width="98%" Font-Size="9pt" 
+                                DataKeyNames="MKDM,MKMC" AllowPaging="True" DataSourceID="Conn2" 
+                                 AutoGenerateColumns="False" CssClass="cooltable" 
+                                EnableModelValidation="True">
+                                <FooterStyle BackColor="#CCCC99"></FooterStyle>
+                                <Columns>
+                                    <asp:TemplateField HeaderText="选择">
+                                        <HeaderTemplate>
+                                            <asp:CheckBox ID="CheckBox3" runat="server" onclick="chk(this,'GridView2')" />
+                                        </HeaderTemplate>
+                                        <HeaderStyle HorizontalAlign="Center" Width="20px" />
+                                        <ItemStyle Width="20px" HorizontalAlign="Center" VerticalAlign="Middle"></ItemStyle>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox1" runat="server"  />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:BoundField DataField="MKMC" HeaderText="模块名称">
+                                        <ItemStyle HorizontalAlign="Left" VerticalAlign="Middle"></ItemStyle>
+                                    </asp:BoundField>
+                                    <asp:BoundField DataField="XsnDir" Visible="False" HeaderText="模板名称">
+                                        <ItemStyle HorizontalAlign="Left" VerticalAlign="Middle"></ItemStyle>
+                                    </asp:BoundField>
+                                    <asp:CommandField ShowSelectButton="True" Visible="False" />
+                                </Columns>
+                                <RowStyle CssClass="cooltableRowStyle" />
+                                <SelectedRowStyle CssClass="cooltableSelectedRowStyle"/>
+                                <AlternatingRowStyle CssClass="cooltableAlternatingRowStyle" />
+                                <RowStyle HorizontalAlign="Center" />                                
+                            </asp:GridView> 
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+          
+        <asp:SqlDataSource ID="Conn1" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT Cid,Group_ID, GY_GROUP_INFO.MKDM, ShowFunName, MKMC,CanRead,CanWrite,CanModify,CanDelete,CanAll,CanListForm FROM GY_MKXX,GY_GROUP_INFO where GY_MKXX.MKDM = GY_GROUP_INFO.MKDM and Group_Id=@GroupID  order by OrderBy" DeleteCommand="DELETE FROM GY_YGQX WHERE (GROUP_ID = @group_id) AND (YGDM = @YGDM)">
+            <SelectParameters>
+                <asp:Parameter DefaultValue="0" Name="groupid" />
+            </SelectParameters>
+            <DeleteParameters>
+                <asp:Parameter Name="group_id" />
+                <asp:Parameter Name="YGDM" />
+            </DeleteParameters>
+        </asp:SqlDataSource>
+
+        <asp:SqlDataSource ID="Conn2" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT [MKDM], [MKMC], [XsnDir] FROM [GY_MKXX] where MKDM not in (select MKDM from Gy_Group_Info where Group_Id = @GroupID)">
+            <SelectParameters>
+                <asp:Parameter DefaultValue="0" Name="GroupID" />
+            </SelectParameters>
+        </asp:SqlDataSource>
+    </form>
+</center>
+</body>
+</html>
+

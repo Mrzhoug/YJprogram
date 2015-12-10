@@ -1,0 +1,188 @@
+﻿Imports Microsoft.VisualBasic
+
+Public Class FormInfo
+
+    ''' <summary>
+    ''' 获取模块名称
+    ''' </summary>
+    ''' <param name="fid">表单号</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function GetModuleName(ByVal fid As Integer) As String
+        Dim mkmc As String = String.Empty
+
+        Dim sqlstr As String
+        sqlstr = "select MKMC from XX_XMJC,GY_MKXX where XX_XMJC.MKDM=GY_MKXX.MKDM and FID=" + fid.ToString()
+
+        Dim dt As New DataTable
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FormInfo---GetModuleName 获取模块名称 失败", ex.ToString())
+        End Try
+
+        If dt.Rows.Count > 0 Then
+            mkmc = dt.Rows(0).Item(0).ToString()
+        End If
+
+        Return mkmc
+
+    End Function
+
+
+    ''' <summary>
+    ''' 通过FID获取表单路径
+    ''' </summary>
+    ''' <param name="FID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function GetFormXMLPath(ByVal FID As Integer) As String
+
+        Dim mkmc As String = String.Empty
+        Dim formPath As String = String.Empty
+        mkmc = GetModuleName(FID)
+        formPath = AppDomain.CurrentDomain.BaseDirectory + "FormFolder\" + mkmc + "\" + FID.ToString() + ".xml"
+        Return formPath
+    End Function
+
+    ''' <summary>
+    ''' 获取FID对应的模版路径
+    ''' </summary>
+    ''' <param name="FID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function GetTemplatePath(ByVal FID As Integer) As String
+        Dim mkmc As String = String.Empty
+        Dim templatePath As String = String.Empty
+        mkmc = GetModuleName(FID)
+        templatePath = AppDomain.CurrentDomain.BaseDirectory + "TemplateLibrary\" + mkmc + "\template.xml"
+        Return templatePath
+    End Function
+
+
+    ''' <summary>
+    ''' 获取用户详细信息路径
+    ''' </summary>
+    ''' <param name="userID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function GetUserDetailPath(ByVal userID As Integer) As String
+        Dim formPath As String
+        formPath = AppDomain.CurrentDomain.BaseDirectory + "FormFolder\XMAN-YGDM\" + userID.ToString() + ".xml"
+        If IO.File.Exists(formPath) Then
+            Return formPath
+        Else
+            Return String.Empty
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 获取所有有效表单
+    ''' </summary>
+    ''' <param name="LCDM"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function GetEffectiveFormInfo(ByVal LCDM As Integer) As DataTable
+        
+        Dim mkmc As String = Modules.GetMKMCByLCDM(LCDM)
+
+        Dim sqlstr As String
+        sqlstr = "SELECT XX_XMJC.FID,XX_XMJC.MKDM FROM GY_MKXX,XX_XMJC,GY_XMXX where  XX_XMJC.XMDM = GY_XMXX.XMDM  and (GY_XMXX.XMJD is not null) and XX_XMJC.MKDM = GY_MKXX.MKDM And GY_MKXX.MKMC='" & mkmc.Replace("'", "''") & "' and GY_XMXX.XMJD != '已删除' order by Fid desc"
+
+        Dim dt As New DataTable
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FormInfo - GetEffectiveFormInfo(lcdm)", ex.ToString())
+            Return Nothing
+        End Try
+        Return dt
+    End Function
+
+    ''' <summary>
+    ''' 获取所有有效表单
+    ''' </summary>
+    ''' <param name="MKMC"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function GetEffectiveFormInfo(ByVal MKMC As String) As DataTable
+        Dim sqlstr As String
+        sqlstr = "SELECT XX_XMJC.FID,XX_XMJC.MKDM FROM GY_MKXX,XX_XMJC,GY_XMXX where  XX_XMJC.XMDM = GY_XMXX.XMDM  and (GY_XMXX.XMJD is not null) and XX_XMJC.MKDM = GY_MKXX.MKDM And GY_MKXX.MKMC='" & MKMC.Replace("'", "''") & "' and GY_XMXX.XMJD != '已删除' order by Fid desc"
+
+        Dim dt As New DataTable
+        Try
+            dt = SqlHelper.ExecuteDataSet(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing).Tables(0)
+        Catch ex As Exception
+            DoLog.LogErrorToFile("FormInfo - GetEffectiveFormInfo(mkmc)", ex.ToString())
+            Return Nothing
+        End Try
+
+        Return dt
+    End Function
+
+    ''' <summary>
+    ''' 获取最新表单ID
+    ''' </summary>
+    ''' <param name="LCDM"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function GetNewestFormID(ByVal LCDM As Integer) As Integer
+
+        Dim fid As Integer
+        Dim mkmc As String = Modules.GetMKMCByLCDM(LCDM)
+
+        Dim sqlstr As String
+        sqlstr = "select top 1 xx_xmjc.fid  from  GY_MKXX,XX_XMJC,GY_XMXX where  XX_XMJC.XMDM = GY_XMXX.XMDM  and (GY_XMXX.XMJD is not null) and XX_XMJC.MKDM = GY_MKXX.MKDM And GY_MKXX.MKMC='" & mkmc.Replace("'", "''") & "' and GY_XMXX.XMJD != '已删除' order by Fid desc "
+        Try
+            fid = Convert.ToInt32(SqlHelper.ExecuteScalar(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing))
+        Catch ex As Exception
+            fid = 0
+            DoLog.LogErrorToFile("Modules - GetNewestFormID", ex.ToString())
+        End Try
+        Return fid
+    End Function
+
+    ''' <summary>
+    ''' 提交表单
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function SubmitForm(ByVal fid As Integer) As Boolean
+        '先决条件，开启了SQLXML库
+        If DoWebConfig.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower() = "true" Then
+            If DoWebConfig.GetWebConfig("SunfunSoft.Xman.FormLibrary.Synchronization").ToLower() = "true" Then
+                '如果开启了后台同步服务，那么直接递交到后台
+                Return GlobalServiceHandler.DoSubmitForm(fid)
+            Else
+                '如果没有开启，那么直接调用
+                Return SynchronizationService.Submit(fid)
+            End If
+        Else
+            Return GlobalServiceHandler.DoSubmitForm(fid)
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 删除表单
+    ''' </summary>
+    ''' <param name="fid"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function DelForm(ByVal fid As Integer) As Boolean
+        '先决条件，开启了SQLXML库
+        If DoWebConfig.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower() = "true" Then
+            If DoWebConfig.GetWebConfig("SunfunSoft.Xman.FormLibrary.Synchronization").ToLower() = "true" Then
+                '如果开启了后台同步服务，那么直接递交到后台
+                Return GlobalServiceHandler.DoDelForm(fid)
+            Else
+                '如果没有开启，那么直接调用
+                Return SynchronizationService.Delete(fid)
+            End If
+        Else
+            Return GlobalServiceHandler.DoSubmitForm(fid)
+        End If
+    End Function
+
+
+
+End Class

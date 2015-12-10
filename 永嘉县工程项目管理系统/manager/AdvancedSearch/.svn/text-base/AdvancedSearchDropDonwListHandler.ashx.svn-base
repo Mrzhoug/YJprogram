@@ -1,0 +1,167 @@
+﻿<%@ WebHandler Language="VB" Class="AdvancedSearchDropDonwListHandler" %>
+
+Imports System
+Imports System.Web
+Imports System.Xml
+
+Public Class AdvancedSearchDropDonwListHandler : Implements IHttpHandler
+    
+    Dim Base As New Base
+    
+    Public Sub ProcessRequest(ByVal context As HttpContext) Implements IHttpHandler.ProcessRequest
+        context.Response.ContentType = "text/plain"
+        Dim mkdm As Integer
+        Dim conditionID As Integer
+        Try
+            mkdm = Convert.ToInt32(context.Request("mkdm"))
+            conditionID = Convert.ToInt32(context.Request("conditionID"))
+        Catch ex As Exception
+            mkdm = 0
+            conditionID = 0
+        End Try
+                
+        If mkdm = 0 Or conditionID = 0 Then
+            context.Response.Write("非法参数")
+            Return
+        End If
+        
+       
+        
+        Dim dt As New DataTable
+        
+        Dim sqlstr As String
+        sqlstr = "select * from AdvancedSearchSetting where mkdm = " & mkdm & " and searchType='typeDropDown' and ID=" & conditionID & " order by orderby"
+        dt = Base.DB.Table(sqlstr, "dd")
+        
+        'option条件的顺序号
+        Dim orderNum As Integer
+        If dt.Rows.Count > 0 Then
+            Try
+                orderNum = Convert.ToInt32(dt.Rows(0).Item("orderby"))
+            Catch ex As Exception
+                orderNum = -1
+            End Try
+        Else
+            context.Response.Write("非法参数(SQL)")
+            Return
+        End If
+        
+        If orderNum < 0 Then
+            context.Response.Write("非法参数(orderNum)")
+            Return
+        End If
+        
+        '数据源表单的MKDM
+        Dim sourceMKDM As Integer
+        '获取数据源节点名
+        Dim sourceNodeName As String
+        '获取数据源选择节点
+        Dim sourceNodeSelect As String
+        '获取数据源节点的父节点名称
+        Dim sourceNodeParentName As String
+        
+        '数据源表单的名称
+        Dim sourceMKMC As String
+        '分割选择节点
+        Dim temp() As String
+        Dim tempfather() As String
+        Dim tempQueryString As New ArrayList
+        
+        
+        sqlstr = "select * from AdvancedSearchDropDownListSetting where searchsettingid = " & conditionID & " "
+        dt = Base.DB.Table(sqlstr, "ddd")
+        If dt.Rows.Count > 0 Then
+            sourceMKDM = Convert.ToInt32(dt.Rows(0).Item("sourceFormID"))
+            sourceNodeName = dt.Rows(0).Item("sourceNodeName")
+            sourceNodeSelect = dt.Rows(0).Item("sourceNodeSelect")
+            sourceNodeParentName = dt.Rows(0).Item("sourceNodeParentName")
+        Else
+            context.Response.Write("未设置下拉框内容")
+            Return
+        End If
+        temp = sourceNodeSelect.Split(",")
+        tempfather = sourceNodeParentName.Split(",")
+        
+        If temp.Length <> tempfather.Length Then
+            context.Response.Write("条件设置错误")
+        End If
+       
+        '获取所有的queryString值 
+        For i As Integer = 0 To temp.Length - 1
+            Dim str As String
+            Dim optionID As String
+            optionID = "option" & orderNum - 1 & "-" & i
+            Try
+                str = context.Request(optionID)
+            Catch ex As Exception
+                str = ""
+            End Try
+            If str <> "" Then
+                tempQueryString.Add(str)
+            End If
+        Next
+
+        
+        
+        
+        sourceMKMC = Base.GetMKMCByMKDM(sourceMKDM)
+        sqlstr = "select top 1 * from gy_xmxx where xmmc='" & sourceMKMC & "' and xmjd is not null and xmjd <> '已删除' order by xmdm desc"
+        dt = Base.DB.Table(sqlstr, "dd")
+        '表单路径
+        Dim path As String = context.Server.MapPath("../../") & "FormFolder\" & sourceMKMC & "\"
+        If dt.Rows.Count > 0 Then
+            path = path & dt.Rows(0).Item("xmdm").ToString & ".xml"
+        End If
+        
+        
+        Dim xmlDoc As New XmlDocument
+        Dim namespaces As XmlNamespaceManager
+        Dim tempnodelist As XmlNodeList
+        xmlDoc.Load(path)
+        namespaces = Base.GetXmlNamespaceManager(xmlDoc)
+
+        Dim xpath As String
+        
+        
+        Dim x As Integer = 0
+        xpath = "//" & tempfather(0) & "[" & temp(0) & "='" & tempQueryString(0) & "']"
+        
+        For i As Integer = 1 To tempQueryString.Count - 1
+            
+            xpath = xpath & "/" & tempfather(i) & "[" & temp(i) & "='" & tempQueryString(i) & "']"
+            x = x + 1
+        Next
+
+        
+        
+        xpath = xpath & "/" & tempfather(x + 1) & "/" & temp(x + 1)
+        
+
+        tempnodelist = xmlDoc.DocumentElement.SelectNodes(xpath, namespaces) '得到XPATH中要求的字段
+        
+        
+        Dim returnstr As String = String.Empty
+        For i As Integer = 0 To tempnodelist.Count - 1
+            returnstr = returnstr & tempnodelist(i).InnerText
+            If i <> tempnodelist.Count - 1 Then
+                returnstr = returnstr & ","
+            End If
+        Next
+        
+        context.Response.Write(returnstr)
+        'If sourcedt.Rows.Count > 0 Then
+        '    path = path & sourcedt.Rows(0).Item("xmdm").ToString & ".xml"
+        'End If
+        
+        
+        
+        
+    End Sub
+ 
+    Public ReadOnly Property IsReusable() As Boolean Implements IHttpHandler.IsReusable
+        Get
+            Return False
+        End Get
+    End Property
+
+End Class

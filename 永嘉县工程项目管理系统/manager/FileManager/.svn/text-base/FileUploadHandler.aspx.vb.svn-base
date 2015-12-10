@@ -1,0 +1,41 @@
+﻿
+Partial Class manager_FileManager_FileUploadHandler
+    Inherits System.Web.UI.Page
+
+    Dim UserInfo As New UserInfo
+
+    Dim FileManager As New FileManager
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Response.ContentType = "text/plain"
+        Response.Charset = "utf-8"
+
+
+        Dim file As HttpPostedFile = Request.Files("Filedata")
+
+
+
+        Dim belongFolderID As Integer
+        Try
+            belongFolderID = Convert.ToInt32(Request("belongFolderID"))
+        Catch ex As Exception
+
+        End Try
+
+
+        Dim username As String
+        username = UserInfo.GetWebUserName
+        Dim userid As Integer
+        userid = UserInfo.GetUserID(username)
+
+
+        If FileManager.UploadFile(file, userid, belongFolderID) Then
+            Response.Write("1")
+        Else
+            Response.Write("0")
+        End If
+
+
+    End Sub
+End Class

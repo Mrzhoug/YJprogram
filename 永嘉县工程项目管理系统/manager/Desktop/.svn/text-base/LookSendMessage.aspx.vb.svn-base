@@ -1,0 +1,325 @@
+﻿
+Partial Class manager_Desktop_LookSendMessage
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim Sid As Integer
+
+    Dim FromID As Integer
+    Dim FromKSDM As Integer
+    Dim UserKSDM As Integer
+    Dim ToID As Integer
+    Dim ToKSDM As Integer
+    Dim MsgKind As Integer
+    Dim UPID As Integer
+
+    Dim BaseUrl As String       '在读取XML文件内容时的基目录
+    Dim LCDM As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+        UserKSDM = Base.GetKSDM(UserID)
+
+        Try
+            Sid = Request("SID")
+        Catch ex As Exception
+            Response.Write("参数错误!")
+            Response.End()
+        End Try
+        Dim i As Integer
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("select * from sendmessage where cid =" & Sid.ToString(), "SendMessage")
+        If Tb.Rows.Count > 0 Then
+
+            FormID.InnerText = Base.GetUserName(Tb.Rows(0).Item("fromid"), 3)
+
+            If IsDBNull(Tb.Rows(0).Item("msgkind")) Then
+                MsgKind = 0
+            Else
+                MsgKind = Tb.Rows(0).Item("msgkind")
+            End If
+
+            If Not IsDBNull(Tb.Rows(0).Item("upID")) Then
+                UPID = Tb.Rows(0).Item("upID")
+            End If
+
+            If IsDBNull(Tb.Rows(0).Item("toKsdm")) Then
+                If Not IsDBNull(Tb.Rows(0).Item("ToID")) Then
+                    textRece.InnerText = "收 件 人："
+                    rece.InnerText = Base.GetUserName(Tb.Rows(0).Item("ToID").ToString(), 3)
+                End If
+            Else
+
+                textRece.InnerText = "收件部门："
+                rece.InnerText = Base.GetKSMC(Tb.Rows(0)("toksdm"))
+            End If
+            Date1.InnerText = Tb.Rows(0).Item("sendDate").ToString
+            Titles.InnerText = Tb.Rows(0).Item("title").ToString
+            Content.Text = Tb.Rows(0).Item("content").ToString.Replace(Chr(13), "<br>")
+            'rece.InnerText = Tb.Rows(0)("ToIdList").ToString
+        Else
+            Response.Write("记录不存在!")
+            Response.End()
+        End If
+
+        If MsgKind = 1 Then Panel1.Visible = True
+
+        Try         '做已读标志
+            Base.DB.Query("update SendMessage set lookflag=1 where cid =" & Sid)
+        Catch ex As Exception
+        End Try
+
+        'Tb = Base.DB.Table("select GY_YGDM.YGXM,SendMessage.Title,SendMessage.Content,SendMessage.SendDate from SendMessage,GY_YGDM Where SendMessage.ToID = GY_YGDM.YGDM and Cid = " & Sid, "SendMessage")
+        'If Tb.Rows.Count > 0 Then
+
+        'End If
+
+        If ToKSDM = 0 Then
+            Panel1.Visible = False
+        End If
+
+
+        If Page.IsPostBack = False Then
+            Dim FID As String = ""
+            Dim TmpFid As Integer
+            Tb = Base.DB.Table("SELECT FID FROM Gy_XmXd where msgid=" & Sid, "dd")
+
+            If Tb.Rows.Count > 0 Then
+                For i = 0 To Tb.Rows.Count - 1
+                    FID = FID & Tb.Rows(i)(0).ToString() & ","
+                Next
+            Else
+                TmpFid = -1
+            End If
+
+            If FID.Trim.Length > 0 Then
+                If FID.IndexOf(",") > 0 Then
+                    FID = FID & "-1"                '如果是  10,10,这样子的话,则变成10,10,-1
+                End If
+                Fids.Text = FID.Trim
+
+                If FID.Split(",").Length > 0 Then
+                    Try
+                        TmpFid = FID.Split(",")(0)
+                    Catch ex As Exception
+                        TmpFid = -1
+                    End Try
+                End If
+            Else
+                Panel4.Visible = False
+            End If
+
+            Dim MKMC As String
+            Tb = Base.DB.Table("SELECT MK.MKMC, MK.XDLJ, MK.List_QX_LCDM, MK.NoLcDM, MK.MKDM, GI.ShowFunName FROM  GY_MKXX AS MK INNER JOIN GY_GROUP_INFO AS GI ON MK.MKDM = GI.MKDM INNER JOIN XX_XMJC AS XX ON MK.MKDM = XX.MKDM INNER JOIN GY_GROUP ON GI.GROUP_ID = GY_GROUP.GROUP_ID where GY_Group.Group_Kind=1 and FID=" & TmpFid, "dd")
+            If Tb.Rows.Count > 0 Then
+                BaseUrl = Server.MapPath("../../") & "FormFolder/" & Tb.Rows(0)("MKMC").ToString.Trim & "/"
+                If Tb.Rows(0)("ShowFunName").ToString.Trim.Length = 0 Then
+                    MKMC = Tb.Rows(0)("MKMC").ToString.Trim
+                Else
+                    MKMC = Tb.Rows(0)("ShowFunName").ToString.Trim
+                End If
+                LCDM = Tb.Rows(0)("NoLcDm").ToString.Trim     '得到流程代码  
+                Button1.Attributes.Add("onclick", "javascript:opener.parent.window.parent.addTab('Menu/NavPage.aspx?LCDM=" & LCDM & "','" & MKMC & "','Menu_NOLC_" & Tb.Rows(0)("MKDM") & "');window.close(); return false;")
+            Else
+                LCDM = -1
+            End If
+
+            '显示表单附件
+            Try
+                Base.CreateGridviewTitle(GridView1, LCDM, False)
+                Base.FillDataToGridview(GridView1, LCDM, "", "SELECT XX_XMJC.FID,GY_XMXX.XMDM,XX_XMJC.State FROM GY_XMXX,XX_XMJC where XX_XMJC.FID in (" & FID.Trim & ") and XX_XMJC.XMDM = GY_XMXX.XMDM and (GY_XMXX.XMJD is not null)", "", False)
+            Catch ex As Exception
+                Response.Write("此功能的模板已经不存在,请刷新菜单!")
+                Response.End()
+            End Try
+            GridView1.DataBind()
+
+            '显示文件附件
+            Dim TmpFolder As String = Server.MapPath("../../") & "\PersonalFolders\MessageAttachment\" & Sid & "\"
+            filelist.InnerHtml = Base.ShowFileAttachment_Open(TmpFolder, Sid)
+        End If
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+        Dim Hf_Title As String = "[回复]" & Titles.InnerText.Trim
+        If Hf_Title.Trim.Length > 500 Then Hf_Title = Hf_Title.Substring(0, 500)
+
+        If ReContent.Text.Trim.Length = 0 Then
+            ReContent.Text = "<空>"
+        End If
+        If ReContent.Text.Trim.Length > 5000 Then
+            Base.Js.alert(Me, "短消息内容不能大于5000个字符")
+            Exit Sub
+        End If
+        Dim i, j As Integer
+        Dim YGDM, FID As Integer
+
+        '先进行回复
+        Dim MsgId As Integer
+        MsgId = Base.DB.ExeScalar("insert into SendMessage(Title,FromID,FromKSDM,Content,ToKSDM,SendDate,LookFlag,upid,msgkind) values('" & Base.SqlFilter(Hf_Title) & "'," & UserID & "," & Base.GetKSDM(UserID) & ",'" & Server.HtmlEncode(Base.SqlFilter(ReContent.Text)) & "'," & FromKSDM & ",getdate(),0," & UPID & "," & MsgKind & ");Select CId from SendMessage where Cid = @@IDENTITY")
+        If CheckBox1.Checked = True Then
+            ''插分发/修订表
+            Dim tmpfids As String() = Fids.Text.Split(",")
+            For j = 0 To tmpfids.Length - 1
+                If tmpfids(j).ToString <> "" Then
+                    FID = Convert.ToInt32(tmpfids(j).ToString)
+                    If FID <> -1 Then
+                        Select Case MsgKind
+                            Case 1          '表示是分发/修订
+                                Base.DB.ExeScalar("INSERT INTO [Gy_XmXd]([Fid],[YGDM] ,[XdText] ,[FQR],[FQKS],[XdBZ],msgid) VALUES (" & FID & "," & YGDM & ",'" & Server.HtmlEncode(Base.SqlFilter(Content.Text)) & "'," & UserID & "," & Base.GetKSDM(UserID) & ",0," & MsgId & ")")
+                            Case 2          '表示是审阅
+                        End Select
+                    End If
+                End If
+            Next
+        End If
+
+        '抄送
+
+        Dim IdList As String = userlist.Value
+        Dim tmp As String() = IdList.Split(",")
+        For i = 0 To tmp.Length - 1
+            Try
+                YGDM = Convert.ToInt32(tmp(i).ToString)
+                MsgId = Base.DB.ExeScalar("insert into SendMessage(Title,FromID,Content,TOID,SendDate,LookFlag,upid,msgkind) values('" & Base.SqlFilter(Hf_Title) & "'," & UserID & ",'" & Server.HtmlEncode(Base.SqlFilter(ReContent.Text)) & "'," & YGDM & ",getdate(),0," & UPID & "," & MsgKind & ");Select CId from SendMessage where Cid = @@IDENTITY")
+                If CheckBox1.Checked = True Then
+                    ''插分发/修订表
+                    Dim tmpfids As String() = Fids.Text.Split(",")
+                    For j = 0 To tmpfids.Length - 1
+                        If tmpfids(j).ToString <> "" Then
+                            FID = Convert.ToInt32(tmpfids(j).ToString)
+                            If FID <> -1 Then
+                                Select Case MsgKind
+                                    Case 1          '表示是分发/修订
+                                        Base.DB.ExeScalar("INSERT INTO [Gy_XmXd]([Fid],[YGDM] ,[XdText] ,[FQR],[XdBZ],msgid) VALUES (" & FID & "," & YGDM & ",'" & Server.HtmlEncode(Base.SqlFilter(Content.Text)) & "'," & UserID & ",0," & MsgId & ")")
+                                    Case 2          '表示是审阅
+                                End Select
+                            End If
+                        End If
+                    Next
+                End If
+            Catch ex As Exception
+            End Try
+        Next
+
+        '写入附件文件
+
+        Dim AttFolder As String = Server.MapPath("../../") & "\PersonalFolders\MessageAttachment\"
+        Base.IO.CreateDir(AttFolder & "\" & MsgId & "\")
+
+        Dim Tb As New Data.DataTable
+        Dim tmpfile As String
+        Tb = Base.DB.Table("SELECT filepath FROM MessageAttachment where msgid=" & Sid, "d")
+        For j = 0 To Tb.Rows.Count - 1
+            tmpfile = Tb.Rows(j)("filepath").ToString
+            IO.File.Copy(AttFolder & "\" & Sid & "\" & "\" & tmpfile, AttFolder & "\" & MsgId & "\" & tmpfile)
+            Base.DB.Query("insert into MessageAttachment(msgid,filepath) values(" & MsgId & ",'" & Base.SqlFilter(tmpfile) & "')")
+        Next
+        Titles.InnerText = ""
+
+
+        '写发送信息
+        MsgId = Base.DB.ExeScalar("insert into SendMessage(Title,FromID,FromKSDM,Content,TOKSDM,SendDate,LookFlag,upid,msgkind) values('" & Base.SqlFilter(Hf_Title) & "'," & UserID & "," & Base.GetKSDM(UserID) & ",'" & Server.HtmlEncode(Base.SqlFilter(ReContent.Text)) & "',0,getdate(),0," & UPID & "," & MsgKind & ");Select CId from SendMessage where Cid = @@IDENTITY")
+        If CheckBox1.Checked = True Then
+            ''插分发/修订表
+            Dim tmpfids As String() = Fids.Text.Split(",")
+            For j = 0 To tmpfids.Length - 1
+                If tmpfids(j).ToString <> "" Then
+                    FID = Convert.ToInt32(tmpfids(j).ToString)
+                    If FID <> -1 Then
+                        Select Case MsgKind
+                            Case 1          '表示是分发/修订
+                                Base.DB.ExeScalar("INSERT INTO [Gy_XmXd]([Fid],[YGDM] ,[XdText] ,[FQR],[FQKS],[XdBZ],msgid) VALUES (" & FID & ",0 ,'" & Server.HtmlEncode(Base.SqlFilter(Content.Text)) & "'," & UserID & "," & Base.GetKSDM(UserID) & ",0," & MsgId & ")")
+                            Case 2          '表示是审阅
+                        End Select
+                    End If
+                End If
+            Next
+        End If
+        Base.IO.CreateDir(AttFolder & "\" & MsgId & "\")
+        Tb = Base.DB.Table("SELECT filepath FROM MessageAttachment where msgid=" & Sid, "d")
+        For j = 0 To Tb.Rows.Count - 1
+            tmpfile = Tb.Rows(j)("filepath").ToString
+            IO.File.Copy(AttFolder & "\" & Sid & "\" & "\" & tmpfile, AttFolder & "\" & MsgId & "\" & tmpfile)
+            Base.DB.Query("insert into MessageAttachment(msgid,filepath) values(" & MsgId & ",'" & Base.SqlFilter(tmpfile) & "')")
+        Next
+
+
+
+        Base.Js.WriteScript(Me, "opener.window.parent.MessageBox('操作成功','短消息已经发送成功');var url = opener.window.location.href;opener.window.location.href=url;window.close();")
+
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i, j, FID As Integer
+        Dim FileName As String
+        Dim ShowTb As New Data.DataTable
+        ShowTb = Base.DB.Table("Select ShowName,NodeName from ShowList_LCDM where LCDM = " & LCDM & " order by ID", "ShowList_LCDM")
+
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Attributes.Add("onmouseover", "OnMouseOver(this)")
+            GridView1.Rows(i).Attributes.Add("onmouseout", "OnMouseOut(this)")
+            GridView1.Rows(i).Attributes.Add("OnDblClick", "DbClickEvent('" & GridView1.DataKeys(i).Item(0) & "')")
+
+            FID = GridView1.DataKeys(i).Item(0)
+            FileName = BaseUrl & FID & ".xml"
+
+            If Base.XmlClass.GetXmlFile(FileName) Is Nothing Then
+                '表示找不到记录，则显示空记录
+                For j = 0 To ShowTb.Rows.Count - 1
+                    GridView1.Rows(i).Cells(j).Text = "空"
+                Next
+            Else
+                '再列自定义的列
+                For j = 0 To ShowTb.Rows.Count - 1
+                    Dim dd As System.Xml.XmlNode = Base.XmlClass.FindNode("//" & ShowTb.Rows(j).Item(1).ToString.Replace("<", "").Replace(">", ""))
+                    If dd Is Nothing Then
+                        GridView1.Rows(i).Cells(j).Text = "空"
+                    Else
+                        If dd.ChildNodes.Item(0) Is Nothing Then
+                            GridView1.Rows(i).Cells(j).Text = "空"
+                        Else
+                            If dd.ChildNodes.Item(0).Value Is Nothing Then
+                                If dd.HasChildNodes = True Then     '当是父节点.但是存在子节点时.则显示子节点的内容(或是超文本框)
+                                    Dim TempOut As String = dd.ChildNodes.Item(0).OuterXml.ToString.Trim
+                                    If TempOut.Length >= 100 Then
+                                        GridView1.Rows(i).Cells(j).Text = Server.HtmlEncode(TempOut.Substring(0, 98)) & "..."
+                                    Else
+                                        GridView1.Rows(i).Cells(j).Text = Server.HtmlEncode(TempOut)
+                                    End If
+                                Else
+                                    GridView1.Rows(i).Cells(j).Text = "空"
+                                End If
+                            Else
+                                If dd.ChildNodes.Item(0).Value.ToString.Trim.Length >= 100 Then
+                                    GridView1.Rows(i).Cells(j).Text = Server.HtmlEncode(dd.ChildNodes.Item(0).Value.ToString.Substring(0, 98)) & "..."
+                                Else
+                                    GridView1.Rows(i).Cells(j).Text = Server.HtmlEncode(dd.ChildNodes.Item(0).Value)
+                                End If
+                            End If
+                        End If
+                    End If
+                Next
+            End If
+        Next
+        GridView1.Columns(GridView1.Columns.Count - 1).Visible = False
+    End Sub
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+        Dim TempFolder As String
+        Dim file As Array
+        Dim i As Integer
+        TempFolder = Server.MapPath("../../" & "PersonalFolders/" & Login_User & "/临时附件文件夹")
+        file = IO.Directory.GetFileSystemEntries(TempFolder)   '清空临时附件文件
+        For i = 0 To file.Length - 1
+            Try
+                IO.File.Delete(file(i))
+            Catch ex As Exception
+            End Try
+        Next
+        Response.Redirect("ForwardMessage.aspx?SID=" & Sid & "&Kind=" & MsgKind)
+    End Sub
+End Class

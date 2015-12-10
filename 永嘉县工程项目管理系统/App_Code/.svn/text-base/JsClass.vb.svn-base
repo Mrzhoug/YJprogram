@@ -1,0 +1,640 @@
+Imports System
+Imports System.Web.UI
+Imports System.Text
+Imports System.Web.UI.WebControls
+Imports System.Web.Security
+
+
+
+Public Class JsClass
+    Public Sub Jsclass()
+        '
+        ' TODO: 在此处添加构造函数逻辑
+        '
+    End Sub
+#Region "JS函数集，返回"
+
+    Public Sub WriteScript(ByVal mypage As Page, ByVal msg As String)
+        Dim ShowMessage As String
+        ShowMessage = "<script language=javascript>" + msg + "</script>"
+        If Not mypage.ClientScript.IsStartupScriptRegistered("ShowMessage") Then
+            mypage.ClientScript.RegisterStartupScript(mypage.GetType, "ShowMessage", ShowMessage)
+        End If
+    End Sub
+
+    Public Sub showalert(ByVal mypage As Page, ByVal msg As String)
+        Dim ShowMessage As String
+        ShowMessage = "<script language=javascript>" + "alert('" + msg + "');"
+        ShowMessage += "</script>"
+        If Not mypage.ClientScript.IsStartupScriptRegistered("ShowMessage") Then
+            mypage.ClientScript.RegisterStartupScript(mypage.GetType, "ShowMessage", ShowMessage)
+        End If
+    End Sub
+    '返回
+    Public Sub GoBack(ByVal mypage As Page)
+        Dim ShowMessage As String
+        ShowMessage = "<script language=javascript>" + "history.go(-1);"
+        ShowMessage += "</script>"
+        If (Not mypage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            mypage.ClientScript.RegisterStartupScript(mypage.GetType, "back", ShowMessage)
+        End If
+    End Sub
+
+    '//===警告返回
+    Public Sub alert(ByVal mypage As Page, ByVal msg As String)
+        Dim ShowMessage As String
+        ShowMessage = "<script language=javascript>" + "alert('" + msg + "');"
+        ShowMessage += "</script>"
+        If (Not mypage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            mypage.ClientScript.RegisterStartupScript(mypage.GetType, "back", ShowMessage)
+        End If
+    End Sub
+
+    '//=========警告跳转到某页
+    Public Sub alert(ByVal mypage As Page, ByVal msg As String, ByVal repage As String)
+        Dim ShowMessage As String
+        ShowMessage = "<script language=javascript>" + "alert('" + msg + "');location.href='" + repage + "';"
+        ShowMessage += "</script>"
+        If (Not mypage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            mypage.ClientScript.RegisterStartupScript(mypage.GetType, "repage", ShowMessage)
+        End If
+    End Sub
+
+    '//=========警告后某个框架跳转到某页
+    Public Sub alert(ByVal mypage As Page, ByVal msg As String, ByVal repage As String, ByVal window As String)
+        Dim ShowMessage As String
+        ShowMessage = "<script language=javascript>" + "alert('" + msg + "');" + window + ".location.href='" + repage + "';"
+        ShowMessage += "</script>"
+        If (Not mypage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            mypage.ClientScript.RegisterStartupScript(mypage.GetType, "windowrepage", ShowMessage)
+        End If
+    End Sub
+
+    '//=========显示错误信息
+    Public Sub err(ByVal mypage As Page, ByVal msg As String)
+        Dim ShowMessage As String
+        ShowMessage = "<script language=javascript>location.href=err.aspx?err='" + msg + "';"
+        ShowMessage += "</script>"
+        If (Not mypage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+
+            mypage.ClientScript.RegisterStartupScript(mypage.GetType, "windowrepage", ShowMessage)
+        End If
+    End Sub
+
+    '//==============警告后关闭页面
+    Public Sub closestr(ByVal mypage As Page, ByVal msg As String)
+        Dim ShowMessage As String
+        ShowMessage = "<script language=javascript>" + "alert('" + msg + "');window.close();"
+        ShowMessage += "</script>"
+        If (Not mypage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            mypage.ClientScript.RegisterStartupScript(mypage.GetType, "close", ShowMessage)
+        End If
+    End Sub
+
+    '//==============警告后关闭刷新页面
+    Public Sub reloadstr(ByVal mypage As Page, ByVal msg As String)
+        Dim ShowMessage As String
+        ShowMessage = "<script language=javascript>" + "alert('" + msg + "');window.close();window.opener.location.reload();"
+        ShowMessage += "</script>"
+        If (Not mypage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            mypage.ClientScript.RegisterStartupScript(mypage.GetType, "windowrepage", ShowMessage)
+        End If
+    End Sub
+
+    '//==============关闭刷新页面
+    Public Sub reload(ByVal mypage As Page)
+        Dim ShowMessage As String
+        ShowMessage = "<script language=javascript>window.close();window.opener.location.reload();"
+        ShowMessage += "</script>"
+        If (Not mypage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            mypage.ClientScript.RegisterStartupScript(mypage.GetType, "windowrepage", ShowMessage)
+        End If
+    End Sub
+
+
+    '//==============关闭跳转页面
+    Public Sub CloseGoTo(ByVal mypage As Page, ByVal href As String)
+        Dim ShowMessage As String
+        ShowMessage = "<script language=javascript>window.opener.location.href='" + href + "';window.close();"
+        ShowMessage += "</script>"
+        If (Not mypage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            mypage.ClientScript.RegisterStartupScript(mypage.GetType, "windowrepage", ShowMessage)
+        End If
+    End Sub
+
+    '//==============警告后关闭跳转页面
+    Public Sub CloseGoTo(ByVal mypage As Page, ByVal msg As String, ByVal href As String)
+        Dim ShowMessage As String
+        ShowMessage = "<script language=javascript>" + "alert('" + msg + "');window.opener.location.href='" + href + "';window.close();"
+        ShowMessage += "</script>"
+        If (Not mypage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            mypage.ClientScript.RegisterStartupScript(mypage.GetType, "windowrepage", ShowMessage)
+        End If
+    End Sub
+
+    '//==============警告后关闭刷新页面
+    Public Sub reloadstr(ByVal mypage As Page, ByVal msg As String, ByVal top As String)
+        Dim ShowMessage As String
+        ShowMessage = "<script language=javascript>" + "alert('" + msg + "');" + top + ".location.reload();"
+        ShowMessage += "</script>"
+        If (Not mypage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            mypage.ClientScript.RegisterStartupScript(mypage.GetType, "reload", ShowMessage)
+        End If
+    End Sub
+
+    '//==============页面转向
+    Public Sub relocation(ByVal mypage As Page, ByVal top As String)
+        Dim ShowMessage As String
+        ShowMessage = "<script language=javascript>" + top + ".location.reload();"
+        ShowMessage += "</script>"
+        If (Not mypage.ClientScript.IsStartupScriptRegistered("ShowMessage")) Then
+            mypage.ClientScript.RegisterStartupScript(mypage.GetType, "relocation", ShowMessage)
+        End If
+    End Sub
+
+    '//=====框架自由大小
+    Public Sub showall(ByVal mypage As Page)
+        Dim script As String
+        script = "<script language=javascript>"
+        script = script + "function openmember(id)"
+        script = script + "{window.open('/newweb/jgml/member.asp?memberid='+id,'','width=525,height=480 scrollbars=1');}"
+        script = script + "function winopen(url){"
+        script = script + "window.open(url,'','width=520,height=500 scrollbars=1');}"
+        script = script + "function parentIframeHeight(){"
+        script = script + "if(top!=self && self.name!=''){"
+        script = script + "var e;"
+        script = script + "/*@cc_on @*/ /*@if (@_jscript_version>=3) e = window.parent.document.all(self.name); @else @*/"
+        script = script + "if(window.navigator.appName=='Netscape' && parseInt(window.navigator.appVersion)>5)"
+        script = script + "e = window.parent.document.getElementById(self.name);"
+        script = script + "else e = eval('window.parent.'+ self.name);"
+        script = script + "/*@end @*/"
+        script = script + "var n = (document.body.style.overflow ==  'hidden') ? 0 : 16;"
+        script = script + "e.height = parseInt(document.body.scrollHeight + n, 10); }}"
+        script = script + "window.attachEvent('onload', parentIframeHeight);"
+        script = script + "</script>"
+
+        If (Not mypage.ClientScript.IsStartupScriptRegistered("script")) Then
+            mypage.ClientScript.RegisterStartupScript(mypage.GetType, "script", script)
+        End If
+    End Sub
+
+    Public Sub OpenWindow(ByVal mypage As Page, ByVal url As String, ByVal name As String, ByVal parameter As String)
+        Dim str As String
+        str = "<script language=javascript>" + "window.open('" & url & "','" & name & "','" & parameter & "')"
+        str += "</script>"
+        If Not mypage.ClientScript.IsStartupScriptRegistered("str") Then
+            mypage.ClientScript.RegisterStartupScript(mypage.GetType, "back", str)
+        End If
+    End Sub
+
+    Public Sub showModalDialog(ByVal mypage As Page, ByVal url As String, ByVal parameter As String)
+        Dim str As String
+        str = "<script language=javascript>" + "window.showModalDialog('" & url & "','','" & parameter & "')"
+        str += "</script>"
+        If Not mypage.ClientScript.IsStartupScriptRegistered("str") Then
+            mypage.ClientScript.RegisterStartupScript(mypage.GetType, "back", str)
+        End If
+    End Sub
+#End Region
+
+#Region "杂项函数集合"
+    '//字符替换
+    Public Function formatchar(ByVal str As String) As String
+        str = str.Replace("&", "&amp;")
+        str = str.Replace("<", "&lt;")
+        str = str.Replace(">", "&gt;")
+        str = str.Replace(" ", "&nbsp;")
+        str = str.Replace("'", "''")
+        str = str.Replace("\r", "<br>")
+        str = str.Replace("\n", "</br>")
+        Return str
+    End Function
+
+    '//获取安全字符
+    Public Function GetSafeStr(ByVal str As String) As String
+
+        str = str.Replace("'", "")
+        str = str.Replace(";", "")
+        Return str
+    End Function
+
+    '//获取安全字符
+    Public Function GetSafeStr(ByVal str As String, ByVal i As Integer) As String
+        Try
+            Integer.Parse(str)
+        Catch
+            Return ""
+        End Try
+        Return str
+    End Function
+
+    '//字符反替换
+    Public Function rechar(ByVal str As String) As String
+        str = str.Replace("&amp;", "&")
+        str = str.Replace("&lt;", "<")
+        str = str.Replace("&gt;", ">")
+        str = str.Replace("&nbsp;", " ")
+        str = str.Replace("''", "'")
+        str = str.Replace("<br>", "\r")
+        str = str.Replace("</br>", "\n")
+        Return str
+    End Function
+
+
+    '//反空格
+    Public Function respace(ByVal str As String) As String
+
+        str = str.Replace("&amp;", "&")
+        str = str.Replace("&lt;", "<")
+        str = str.Replace("&gt;", ">")
+        str = str.Replace("&nbsp;", " ")
+        str = str.Replace("''", "'")
+        Return str
+    End Function
+
+    '//格式化成短日期
+    Public Function formatdatetime(ByVal datetime As String) As String
+        Dim ret As String
+
+        If (datetime = "") Then
+            ret = "不详"
+        Else
+            Try
+                ret = Convert.ToDateTime(datetime).ToShortDateString()
+            Catch
+                ret = "不详"
+            End Try
+        End If
+        Return ret
+    End Function
+
+    '//截取左字符串
+    Public Function left(ByVal str As String, ByVal length As Integer) As String
+        If (str.Length > length) Then
+            Return str.Substring(0, length)
+        Else
+            Return str
+        End If
+    End Function
+
+    '//截取右字符串
+    Public Function right(ByVal str As String, ByVal length As Integer) As String
+        If str.Length > length Then
+            Return str.Substring(str.Length - length, length)
+        Else
+            Return str
+        End If
+    End Function
+
+
+    '//检查权限
+    Public Function chkright(ByVal right As String, ByVal userright As String) As Boolean
+        If (userright.IndexOf("," + right + ",") >= 0) Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+    '//格式化分页网址，去除PAGE=
+    Public Function formaturl(ByVal url As String) As String
+        Dim ret As String
+        If (url.LastIndexOf("&page=") > 0) Then
+            ret = url.Substring(0, url.LastIndexOf("&page="))
+        ElseIf (url.LastIndexOf("?page=") > 0) Then
+            ret = url.Substring(0, url.LastIndexOf("?page="))
+        Else
+            ret = url
+        End If
+        Return ret
+    End Function
+
+    '//返回判断权限URL
+    Public Function GetRightUrl(ByVal url As String) As String
+        Dim ret As String
+        ret = right(url, url.Length - url.LastIndexOf("/") - 1)
+        If (ret.IndexOf("?") > 0) Then ret = left(ret, ret.IndexOf("?"))
+
+        Return ret.ToLower()
+    End Function
+
+    '//获取上传图片的名称
+    Public Function getpicname() As String
+        Dim picname As String
+        picname = DateTime.Now.ToString("yyyyMMddHHmmssfff")
+        picname = picname.Replace("-", "")
+        picname = picname.Replace(":", "")
+        picname = picname.Replace(" ", "")
+        Return picname
+    End Function
+
+    '//split
+    Public Function Split(ByVal words As String, ByVal delimStr As String) As String()
+        Dim delimiter As Char()
+        delimiter = delimStr.ToCharArray()
+        Split = words.Split(delimiter)
+        Return Split
+    End Function
+
+    '//下拉选择
+    Public Sub DropBind(ByVal selected As String, ByVal drop As DropDownList)
+        Dim i As Integer
+        For i = 0 To i < drop.Items.Count - 1
+            If (drop.Items(i).Value = selected) Then drop.Items(i).Selected = True
+        Next
+    End Sub
+
+    '//返回是/否
+    Public Function SetFlag(ByVal flag As String) As String
+
+        If (flag = "0") Then
+            Return "否"
+        Else
+            Return "<font color=""#ff0000"">是</font>"
+        End If
+    End Function
+
+    '		//返回有效期
+    Public Function GetTermDate(ByVal date1 As String, ByVal days As String) As String
+        Dim d As DateTime
+        d = DateTime.Parse(date1)
+        Dim da As Double
+        da = Double.Parse(days)
+        d = d.AddDays(da)
+        Return d.ToShortDateString()
+    End Function
+
+    '//返回年龄
+    Public Function GetAge(ByVal date1 As String) As String
+        Dim d As DateTime
+        Try
+            d = DateTime.Parse(date1)
+        Catch
+            Return ""
+        End Try
+        Dim age As Integer
+        age = DateTime.Now.Year - d.Year
+        Return age.ToString()
+    End Function
+
+
+#End Region
+
+#Region "数据类型判断及转换"
+    '//转换为整型
+    Public Function ToIntType(ByVal sInput As String) As Integer
+        Dim num As Integer
+
+        If (sInput = Nothing Or sInput = "") Then
+            num = 0
+        Else
+            Try
+                If (Convert.ToInt32(sInput) >= 0) Then
+                    num = Convert.ToInt32(sInput)
+                Else
+                    num = 0
+                End If
+            Catch
+                num = 0
+            End Try
+        End If
+        Return num
+    End Function
+
+    '//是否为数字
+    Public Function IsInt(ByVal sInput As String) As Boolean
+        If (sInput = Nothing Or sInput = "") Then
+            Return False
+        Else
+            Try
+                If (Convert.ToInt32(sInput) >= 0) Then
+                    Return True
+                Else
+                    Return False
+                End If
+            Catch
+                Return False
+            End Try
+        End If
+    End Function
+
+    '//是否为Decimal型
+    Public Function IsDecimal(ByVal sInput As String) As Boolean
+
+        If (sInput = Nothing Or sInput = "") Then
+            Return False
+        Else
+            Try
+
+                Convert.ToDecimal(sInput)
+
+            Catch
+
+                Return False
+            End Try
+        End If
+        Return True
+    End Function
+
+    '//转换为Decimal型
+    Public Function ToDecimalType(ByVal sInput As String) As Decimal
+        Dim num As Decimal
+        If (sInput = Nothing Or sInput = "") Then
+            num = 0
+        Else
+            Try
+                num = System.Convert.ToDecimal(sInput)
+            Catch
+                num = 0
+            End Try
+        End If
+        Return num
+    End Function
+
+
+#End Region
+
+#Region "数据加密码"
+
+    '//数据加密码
+    'Private Function AllTransform(ByVal str As String) As String
+    '    Dim j As Integer
+    '    Dim sb As New StringBuilder
+    '    Dim a As Char
+    '    Dim i
+    '    For i = 0 To str.Length - 1
+    '        a = str.Substring(i, 1)
+    '        j = Asc(a)
+    '        If (j > 255) Then
+    '					j =  ((a>>8)+(( a & 0x0ff)<< 8))
+    '            Else
+    '					j = ((a>>8)+((a&0x0ff)<<8)
+    '           End If
+    '          sb.Append(Chr(j))
+    '     Next
+    '    Return sb.ToString()
+    'End Function
+
+    Private Function Transform(ByVal str As String) As String
+        Dim i As Integer
+        Dim a As Char
+        Dim sb = New StringBuilder
+        For i = 0 To str.Length - 1
+            a = str.Substring(i, 1)
+            Select Case (i Mod 6)
+                Case 0
+                    sb.Append(Chr(Asc(a) + 1))
+                Case 1
+                    sb.Append(Chr(Asc(a) + 5))
+                Case 2
+                    sb.Append(Chr(Asc(a) + 7))
+                Case 3
+                    sb.Append(Chr(Asc(a) + 2))
+                Case 4
+                    sb.Append(Chr(Asc(a) + 4))
+                Case 5
+                    sb.Append(Chr(Asc(a) + 9))
+            End Select
+        Next
+        Return sb.ToString()
+    End Function
+
+    Private Function DeTransform(ByVal str As String) As String
+        Dim i As Integer
+        Dim a As Char
+        Dim sb = New StringBuilder
+        For i = 0 To str.Length - 1
+            a = str.Substring(i, 1)
+            Select Case (i Mod 6)
+                Case 0
+                    sb.Append(Chr(Asc(a) - 1))
+                Case 1
+                    sb.Append(Chr(Asc(a) - 5))
+                Case 2
+                    sb.Append(Chr(Asc(a) - 7))
+                Case 3
+                    sb.Append(Chr(Asc(a) - 2))
+                Case 4
+                    sb.Append(Chr(Asc(a) - 4))
+                Case 5
+                    sb.Append(Chr(Asc(a) - 9))
+            End Select
+        Next
+        Return sb.ToString()
+    End Function
+
+    Public Function EncryptPassword(ByVal PasswordString As String, ByVal PasswordFormat As String) As String
+
+        If (PasswordFormat = "SHA1") Then
+            Return FormsAuthentication.HashPasswordForStoringInConfigFile(PasswordString, "SHA1").ToLower()
+        ElseIf (PasswordFormat = "MD5") Then
+            Return FormsAuthentication.HashPasswordForStoringInConfigFile(PasswordString, "MD5").ToLower()
+        Else
+            Return ""
+        End If
+    End Function
+
+    Public Function MD5(ByVal PasswordString As String) As String
+        Return FormsAuthentication.HashPasswordForStoringInConfigFile(PasswordString, "MD5").ToLower()
+    End Function
+    '//加密结束
+#End Region
+
+#Region "检测输入有效性"
+    '//===============================检测======
+    '//检测内核
+    Private Function chk(ByVal str As String, ByVal chkstr As String) As Boolean
+        Dim arr As Char()
+        str = str.ToLower()
+        arr = str.ToCharArray()
+        Dim i As Integer
+        For i = 0 To arr.Length - 1
+            If (chkstr.IndexOf(arr(i)) < 0) Then Return False
+        Next
+        Return True
+    End Function
+
+    '//检测用户名
+    Public Function chkusername(ByVal username As String) As Boolean
+        Dim chkstr As String
+        chkstr = "abcdefghijklmnopqrstuvwxyz0123456789_"
+        If (Me.chk(username, chkstr)) Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+    '//检测密码
+    Public Function chkuserpwd(ByVal userpwd As String) As Boolean
+        Dim chkstr As String
+        chkstr = "abcdefghijklmnopqrstuvwxyz0123456789_~!@#$%^&*()_+"
+        If (Me.chk(userpwd, chkstr)) Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+    '//检测数字
+    Public Function chknum(ByVal num As String) As Boolean
+        Dim chkstr As String
+        chkstr = "0123456789"
+        If (Me.chk(num, chkstr)) Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+    '//检测电子邮件
+    Public Function chkemail(ByVal email As String) As Boolean
+        Dim chkstr As String
+        Dim flag As Boolean
+        chkstr = "abcdefghijklmnopqrstuvwxyz0123456789_.@-"
+        flag = True
+        If (Me.chk(email, chkstr) And Me.chk(".@", email)) Then
+            flag = True
+        Else
+            Return False
+            If (email.LastIndexOf(".") > email.LastIndexOf("@")) Then
+                flag = True
+            Else
+                Return False
+            End If
+        End If
+        Return flag
+    End Function
+
+    '//检测电话
+    Public Function chkphone(ByVal phone As String) As Boolean
+        Dim chkstr As String
+        chkstr = "0123456789+-()"
+        If (Me.chk(phone, chkstr)) Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+    '//检测身份证
+    Public Function chkcard(ByVal card As String) As Boolean
+        Dim chkstr As String
+        chkstr = "0123456789X"
+        If (Me.chk(card, chkstr)) Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+    '//=========================================
+#End Region
+
+End Class
+
+
+
+
+
+
+

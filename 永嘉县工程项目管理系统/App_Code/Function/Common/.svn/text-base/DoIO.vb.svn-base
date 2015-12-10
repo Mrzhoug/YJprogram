@@ -1,0 +1,35 @@
+﻿Imports Microsoft.VisualBasic
+Imports System.IO
+
+Public Class DoIO
+
+    ''' <summary>
+    ''' 拷贝整个目录
+    ''' </summary>
+    ''' <param name="srcPath"></param>
+    ''' <param name="aimPath"></param>
+    ''' <remarks></remarks>
+    Public Shared Sub CopyDir(ByVal srcPath As String, ByVal aimPath As String)
+
+        '检查目标目录是否以目录分割字符结束如果不是则添加之
+        If aimPath(aimPath.Length - 1) <> Path.DirectorySeparatorChar Then aimPath += Path.DirectorySeparatorChar
+        '// 判断目标目录是否存在如果不存在则新建之
+        If Directory.Exists(aimPath) = False Then Directory.CreateDirectory(aimPath)
+        '得到源目录的文件列表，该里面是包含文件以及目录路径的一个数组
+        '如果你指向copy目标文件下面的文件而不包含目录请使用下面的方法
+        'string[] fileList = Directory.GetFiles(srcPath);
+        Dim filelist As String() = Directory.GetFileSystemEntries(srcPath)
+        '遍历所有的文件和目录
+        Dim i As Integer
+        For i = 0 To filelist.GetUpperBound(0)
+            If Directory.Exists(filelist(i)) = True Then
+                CopyDir(filelist(i), aimPath + Path.GetFileName(filelist(i)))
+            Else
+                File.Copy(filelist(i), aimPath + Path.GetFileName(filelist(i)), True)
+            End If
+        Next
+        Return
+    End Sub
+
+
+End Class

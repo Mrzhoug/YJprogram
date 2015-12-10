@@ -1,0 +1,119 @@
+﻿Imports Microsoft.VisualBasic
+
+Public Class MPublicFolderPermissions
+
+
+    Private _id As Integer
+    Public Property ID() As Integer
+        Get
+            Return _id
+        End Get
+        Set(ByVal value As Integer)
+            _id = value
+        End Set
+    End Property
+
+
+
+    Private _folderID As Integer
+    Public Property FolderID() As Integer
+        Get
+            Return _folderID
+        End Get
+        Set(ByVal value As Integer)
+            _folderID = value
+        End Set
+    End Property
+
+
+    Private _userID As Integer
+    Public Property UserID() As Integer
+        Get
+            Return _userID
+        End Get
+        Set(ByVal value As Integer)
+            _userID = value
+        End Set
+    End Property
+
+
+
+    Private _canCreateFolder As Boolean
+    Public Property CanCreateFolder() As Boolean
+        Get
+            Return _canCreateFolder
+        End Get
+        Set(ByVal value As Boolean)
+            _canCreateFolder = value
+        End Set
+    End Property
+
+
+    Private _canUpload As Boolean
+    Public Property CanUpload() As Boolean
+        Get
+            Return _canUpload
+        End Get
+        Set(ByVal value As Boolean)
+            _canUpload = value
+        End Set
+    End Property
+
+
+    Private _canDelete As Boolean
+    Public Property CanDelete() As Boolean
+        Get
+            Return _canDelete
+        End Get
+        Set(ByVal value As Boolean)
+            _canDelete = value
+        End Set
+    End Property
+
+
+
+    Private _canMove As Boolean
+    Public Property CanMove() As Boolean
+        Get
+            Return _canMove
+        End Get
+        Set(ByVal value As Boolean)
+            _canMove = value
+        End Set
+    End Property
+
+
+    Private _canRename As Boolean
+    Public Property CanRename() As Boolean
+        Get
+            Return _canRename
+        End Get
+        Set(ByVal value As Boolean)
+            _canRename = value
+        End Set
+    End Property
+
+
+    Private _canCopy As Boolean
+    Public Property CanCopy() As Boolean
+        Get
+            Return _canCopy
+        End Get
+        Set(ByVal value As Boolean)
+            _canCopy = value
+        End Set
+    End Property
+
+
+    Private _canSetPower As Boolean
+    Public Property CanSetPower() As Boolean
+        Get
+            Return _canSetPower
+        End Get
+        Set(ByVal value As Boolean)
+            _canSetPower = value
+        End Set
+    End Property
+
+
+End Class

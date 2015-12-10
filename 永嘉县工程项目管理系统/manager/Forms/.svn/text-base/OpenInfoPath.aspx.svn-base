@@ -1,0 +1,57 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="OpenInfoPath.aspx.vb" Inherits="manager_Forms_OpenInfoPath" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>打开表单</title>
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <span id="writeobject">
+        </span>
+    </form>
+</body>
+</html>
+
+<script language="javascript" type="text/javascript" >
+
+initXMLHttp();
+//生成文件，并执行。
+var xman ;
+var result;
+var WriteObject = document.getElementById("writeobject");
+try
+{
+    xman = new ActiveXObject("sunfun.xman")
+}
+catch(e)
+{
+    WriteObject.innerHTML = "<object  id=\"Xman\" class=\"CLSID:EAFA9174-B955-4DC3-B450-031001466185\" codebase=\"../../SunFun.CAB#version=1,0,0,0\"></object>";
+    xman = document.getElementById("Xman");
+}
+
+try
+{
+    content = GetStreamFile(tempfilename);          
+    result = xman.SaveTextFile("",content,"UTF-8",true);       
+}
+catch(e)
+{
+    //表示IE禁用了控件,导致控件无法运作
+}
+
+    try
+    {//开始执行
+        xman.StartFile();
+        window.close(-1)
+    }
+    catch(e)
+    {
+        window.location.href = "../../Controls.aspx";
+    }
+
+
+
+</script>

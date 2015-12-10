@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns3="http://schemas.microsoft.com/office/infopath/2003/myXSD" xmlns:tr="http://schemas.microsoft.com/office/infopath/2003/sample/TravelRequest" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:ns2="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-30T00:40:51" xmlns:ns1="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-07-20T06:01:42" xmlns:ns4="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-08-12T00:41:12" xmlns:ns5="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-08-14T01:23:01" xmlns:dfs="http://schemas.microsoft.com/office/infopath/2003/dataFormSolution" xmlns:tns="http://tempuri.org/" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:ns6="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:my="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28" xmlns:xdEnvironment="http://schemas.microsoft.com/office/infopath/2006/xslt/environment" xmlns:xdUser="http://schemas.microsoft.com/office/infopath/2006/xslt/User" xmlns:xsf2="http://schemas.microsoft.com/office/infopath/2006/solutionDefinition/extensions" xmlns:xd="http://schemas.microsoft.com/office/infopath/2003" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:xdExtension="http://schemas.microsoft.com/office/infopath/2003/xslt/extension" xmlns:xdXDocument="http://schemas.microsoft.com/office/infopath/2003/xslt/xDocument" xmlns:xdSolution="http://schemas.microsoft.com/office/infopath/2003/xslt/solution" xmlns:xdFormatting="http://schemas.microsoft.com/office/infopath/2003/xslt/formatting" xmlns:xdImage="http://schemas.microsoft.com/office/infopath/2003/xslt/xImage" xmlns:xdUtil="http://schemas.microsoft.com/office/infopath/2003/xslt/Util" xmlns:xdMath="http://schemas.microsoft.com/office/infopath/2003/xslt/Math" xmlns:xdDate="http://schemas.microsoft.com/office/infopath/2003/xslt/Date" xmlns:sig="http://www.w3.org/2000/09/xmldsig#" xmlns:xdSignatureProperties="http://schemas.microsoft.com/office/infopath/2003/SignatureProperties" xmlns:ipApp="http://schemas.microsoft.com/office/infopath/2006/XPathExtension/ipApp">
+	<xsl:output method="html" indent="no"/>
+	<xsl:template match="my:Xman">
+		<html xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+			<head>
+				<meta content="text/html" http-equiv="Content-Type"></meta>
+				<style controlStyle="controlStyle">@media screen 			{ 			BODY{margin-left:21px;background-position:21px 0px;} 			} 		BODY{color:windowtext;background-color:window;layout-grid:none;} 		.xdListItem {display:inline-block;width:100%;vertical-align:text-top;} 		.xdListBox,.xdComboBox{margin:1px;} 		.xdInlinePicture{margin:1px; BEHAVIOR: url(#default#urn::xdPicture) } 		.xdLinkedPicture{margin:1px; BEHAVIOR: url(#default#urn::xdPicture) url(#default#urn::controls/Binder) } 		.xdSection{border:1pt solid #FFFFFF;margin:6px 0px 6px 0px;padding:1px 1px 1px 5px;} 		.xdRepeatingSection{border:1pt solid #FFFFFF;margin:6px 0px 6px 0px;padding:1px 1px 1px 5px;} 		.xdMultiSelectList{margin:1px;display:inline-block; border:1pt solid #dcdcdc; padding:1px 1px 1px 5px; text-indent:0; color:windowtext; background-color:window; overflow:auto; behavior: url(#default#DataBindingUI) url(#default#urn::controls/Binder) url(#default#MultiSelectHelper) url(#default#ScrollableRegion);} 		.xdMultiSelectListItem{display:block;white-space:nowrap}		.xdMultiSelectFillIn{display:inline-block;white-space:nowrap;text-overflow:ellipsis;;padding:1px;margin:1px;border: 1pt solid #dcdcdc;overflow:hidden;text-align:left;}		.xdBehavior_Formatting {BEHAVIOR: url(#default#urn::controls/Binder) url(#default#Formatting);} 	 .xdBehavior_FormattingNoBUI{BEHAVIOR: url(#default#CalPopup) url(#default#urn::controls/Binder) url(#default#Formatting);} 	.xdExpressionBox{margin: 1px;padding:1px;word-wrap: break-word;text-overflow: ellipsis;overflow-x:hidden;}.xdBehavior_GhostedText,.xdBehavior_GhostedTextNoBUI{BEHAVIOR: url(#default#urn::controls/Binder) url(#default#TextField) url(#default#GhostedText);}	.xdBehavior_GTFormatting{BEHAVIOR: url(#default#urn::controls/Binder) url(#default#Formatting) url(#default#GhostedText);}	.xdBehavior_GTFormattingNoBUI{BEHAVIOR: url(#default#CalPopup) url(#default#urn::controls/Binder) url(#default#Formatting) url(#default#GhostedText);}	.xdBehavior_Boolean{BEHAVIOR: url(#default#urn::controls/Binder) url(#default#BooleanHelper);}	.xdBehavior_Select{BEHAVIOR: url(#default#urn::controls/Binder) url(#default#SelectHelper);}	.xdBehavior_ComboBox{BEHAVIOR: url(#default#ComboBox)} 	.xdBehavior_ComboBoxTextField{BEHAVIOR: url(#default#ComboBoxTextField);} 	.xdRepeatingTable{BORDER-TOP-STYLE: none; BORDER-RIGHT-STYLE: none; BORDER-LEFT-STYLE: none; BORDER-BOTTOM-STYLE: none; BORDER-COLLAPSE: collapse; WORD-WRAP: break-word;}.xdScrollableRegion{BEHAVIOR: url(#default#ScrollableRegion);} 		.xdLayoutRegion{display:inline-block;} 		.xdMaster{BEHAVIOR: url(#default#MasterHelper);} 		.xdActiveX{margin:1px; BEHAVIOR: url(#default#ActiveX);} 		.xdFileAttachment{display:inline-block;margin:1px;BEHAVIOR:url(#default#urn::xdFileAttachment);} 		.xdPageBreak{display: none;}BODY{margin-right:21px;} 		.xdTextBoxRTL{display:inline-block;white-space:nowrap;text-overflow:ellipsis;;padding:1px;margin:1px;border: 1pt solid #dcdcdc;color:windowtext;background-color:window;overflow:hidden;text-align:right;word-wrap:normal;} 		.xdRichTextBoxRTL{display:inline-block;;padding:1px;margin:1px;border: 1pt solid #dcdcdc;color:windowtext;background-color:window;overflow-x:hidden;word-wrap:break-word;text-overflow:ellipsis;text-align:right;font-weight:normal;font-style:normal;text-decoration:none;vertical-align:baseline;} 		.xdDTTextRTL{height:100%;width:100%;margin-left:22px;overflow:hidden;padding:0px;white-space:nowrap;} 		.xdDTButtonRTL{margin-right:-21px;height:18px;width:20px;behavior: url(#default#DTPicker);} 		.xdMultiSelectFillinRTL{display:inline-block;white-space:nowrap;text-overflow:ellipsis;;padding:1px;margin:1px;border: 1pt solid #dcdcdc;overflow:hidden;text-align:right;}.xdTextBox{display:inline-block;white-space:nowrap;text-overflow:ellipsis;;padding:1px;margin:1px;border: 1pt solid #dcdcdc;color:windowtext;background-color:window;overflow:hidden;text-align:left;word-wrap:normal;} 		.xdRichTextBox{display:inline-block;;padding:1px;margin:1px;border: 1pt solid #dcdcdc;color:windowtext;background-color:window;overflow-x:hidden;word-wrap:break-word;text-overflow:ellipsis;text-align:left;font-weight:normal;font-style:normal;text-decoration:none;vertical-align:baseline;} 		.xdDTPicker{;display:inline;margin:1px;margin-bottom: 2px;border: 1pt solid #dcdcdc;color:windowtext;background-color:window;overflow:hidden;text-indent:0} 		.xdDTText{height:100%;width:100%;margin-right:22px;overflow:hidden;padding:0px;white-space:nowrap;} 		.xdDTButton{margin-left:-21px;height:18px;width:20px;behavior: url(#default#DTPicker);} 		.xdRepeatingTable TD {VERTICAL-ALIGN: top;}</style>
+				<style tableEditor="TableStyleRulesID">TABLE.xdLayout TD {
+	BORDER-BOTTOM: medium none; BORDER-LEFT: medium none; BORDER-TOP: medium none; BORDER-RIGHT: medium none
+}
+TABLE.msoUcTable TD {
+	BORDER-BOTTOM: 1pt solid; BORDER-LEFT: 1pt solid; BORDER-TOP: 1pt solid; BORDER-RIGHT: 1pt solid
+}
+TABLE {
+	BEHAVIOR: url (#default#urn::tables/NDTable)
+}
+</style>
+				<style languageStyle="languageStyle">BODY {
+	FONT-FAMILY: SimSun; FONT-SIZE: 10pt
+}
+TABLE {
+	FONT-FAMILY: SimSun; FONT-SIZE: 10pt
+}
+SELECT {
+	FONT-FAMILY: SimSun; FONT-SIZE: 10pt
+}
+.optionalPlaceholder {
+	FONT-STYLE: normal; PADDING-LEFT: 20px; FONT-FAMILY: SimSun; COLOR: #333333; FONT-SIZE: 9pt; FONT-WEIGHT: normal; TEXT-DECORATION: none; BEHAVIOR: url(#default#xOptional)
+}
+.langFont {
+	FONT-FAMILY: SimSun
+}
+.defaultInDocUI {
+	FONT-FAMILY: SimSun; FONT-SIZE: 9pt
+}
+.optionalPlaceholder {
+	PADDING-RIGHT: 20px
+}
+</style>
+				<style themeStyle="urn:office.microsoft.com:themeBlackWhite">BODY {
+	BACKGROUND-COLOR: white; COLOR: black
+}
+TABLE {
+	BORDER-BOTTOM: medium none; BORDER-LEFT: medium none; BORDER-COLLAPSE: collapse; BORDER-TOP: medium none; BORDER-RIGHT: medium none
+}
+TD {
+	BORDER-BOTTOM-COLOR: #000000; BORDER-TOP-COLOR: #000000; BORDER-RIGHT-COLOR: #000000; BORDER-LEFT-COLOR: #000000
+}
+TH {
+	BORDER-BOTTOM-COLOR: #000000; BACKGROUND-COLOR: #ffffff; BORDER-TOP-COLOR: #000000; COLOR: black; BORDER-RIGHT-COLOR: #000000; BORDER-LEFT-COLOR: #000000
+}
+.xdTableHeader {
+	BACKGROUND-COLOR: #ffffff; COLOR: black
+}
+P {
+	MARGIN-TOP: 0px
+}
+H1 {
+	MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px; COLOR: #000000
+}
+H2 {
+	MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px; COLOR: #000000
+}
+H3 {
+	MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px; COLOR: #000000
+}
+H4 {
+	MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px; COLOR: #000000
+}
+H5 {
+	MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px; COLOR: #000000
+}
+H6 {
+	MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px; COLOR: #ffffff
+}
+.primaryVeryDark {
+	BACKGROUND-COLOR: #000000; COLOR: #ffffff
+}
+.primaryDark {
+	BACKGROUND-COLOR: #000000; COLOR: white
+}
+.primaryMedium {
+	BACKGROUND-COLOR: #ffffff; COLOR: black
+}
+.primaryLight {
+	BACKGROUND-COLOR: #ffffff; COLOR: black
+}
+.accentDark {
+	BACKGROUND-COLOR: #000000; COLOR: white
+}
+.accentLight {
+	BACKGROUND-COLOR: #ffffff; COLOR: black
+}
+</style>
+			</head>
+			<body style="BACKGROUND-COLOR: #ffffff; COLOR: #000000">
+				<span>
+					<xsl:attribute name="style">
+						<xsl:if test="my:RootNode/my:其他/my:点击按钮 != &quot;项目预算&quot;">msos-xCollection-项目信息_93-editing:disabled;</xsl:if>
+					</xsl:attribute>
+					<div style="FONT-WEIGHT: normal" align="center"><xsl:apply-templates select="my:RootNode" mode="_1"/>
+					</div>
+					<div style="FONT-WEIGHT: normal"> </div>
+				</span>
+			</body>
+		</html>
+	</xsl:template>
+	<xsl:template match="my:RootNode" mode="_1">
+		<div style="PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-LEFT: 0px; WIDTH: 807px; PADDING-RIGHT: 0px; FONT-WEIGHT: normal; PADDING-TOP: 0px" class="xdRepeatingSection xdRepeating" title="" align="left" xd:CtrlId="CTRL125" xd:xctname="RepeatingSection" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+			<xsl:attribute name="style">PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-LEFT: 0px; WIDTH: 807px; PADDING-RIGHT: 0px; FONT-WEIGHT: normal; PADDING-TOP: 0px;<xsl:if test="my:申请信息/my:申请类型 != &quot;长期&quot;">msos-xCollection-派车情况表_1434-editing:disabled;</xsl:if>
+			</xsl:attribute>
+			<div style="FONT-WEIGHT: normal" align="left">
+				<table style="BORDER-BOTTOM-STYLE: none; BORDER-LEFT-STYLE: none; WIDTH: 804px; BORDER-COLLAPSE: collapse; WORD-WRAP: break-word; BORDER-TOP-STYLE: none; TABLE-LAYOUT: fixed; BORDER-RIGHT-STYLE: none; FONT-WEIGHT: normal" class="xdFormLayout xdLayout" border="1">
+					<colgroup style="FONT-WEIGHT: normal">
+						<col style="WIDTH: 296px; FONT-WEIGHT: normal"></col>
+						<col style="WIDTH: 239px; FONT-WEIGHT: normal"></col>
+						<col style="WIDTH: 269px; FONT-WEIGHT: normal"></col>
+					</colgroup>
+					<tbody style="FONT-WEIGHT: normal" vAlign="top">
+						<tr style="MIN-HEIGHT: 49px; FONT-WEIGHT: normal" class="primaryVeryDark">
+							<td style="BORDER-BOTTOM: #000000 1pt solid; TEXT-ALIGN: left; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 2px; BACKGROUND-COLOR: #ffffff; PADDING-LEFT: 2px; PADDING-RIGHT: 2px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt; PADDING-TOP: 2px">
+								<h5 style="FONT-WEIGHT: normal" align="center">
+									<strong/> </h5>
+							</td>
+							<td style="BORDER-BOTTOM: #000000 1pt solid; TEXT-ALIGN: left; BORDER-LEFT: #000000 1pt; PADDING-BOTTOM: 2px; BACKGROUND-COLOR: #ffffff; PADDING-LEFT: 2px; PADDING-RIGHT: 2px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt; PADDING-TOP: 2px">
+								<h2 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="center">
+									<span>
+										<span>
+											<strong>分包合同</strong>
+										</span>
+									</span>
+								</h2>
+							</td>
+							<td style="BORDER-BOTTOM: #000000 1pt solid; TEXT-ALIGN: left; BORDER-LEFT: #000000 1pt; PADDING-BOTTOM: 0px; BACKGROUND-COLOR: #ffffff; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: bottom; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+								<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="center">
+									<span>
+										<span>
+											<strong/>
+										</span>
+									</span> </h5>
+							</td>
+						</tr>
+						<tr style="FONT-WEIGHT: normal" class="primarylight">
+							<td colSpan="3" style="BORDER-BOTTOM: #000000 1pt; TEXT-ALIGN: left; BORDER-LEFT: #000000 1pt; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: top; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt; PADDING-TOP: 0px">
+								<font color="#ff0000">
+									<div style="FONT-WEIGHT: normal" align="center">
+										<table style="BORDER-BOTTOM: medium none; BORDER-LEFT: medium none; WIDTH: 802px; BORDER-COLLAPSE: collapse; WORD-WRAP: break-word; TABLE-LAYOUT: fixed; BORDER-TOP: medium none; FONT-WEIGHT: normal; BORDER-RIGHT: medium none" class="xdLayout" border="1" borderColor="buttontext">
+											<colgroup style="FONT-WEIGHT: normal">
+												<col style="WIDTH: 131px; FONT-WEIGHT: normal"></col>
+												<col style="WIDTH: 165px; FONT-WEIGHT: normal"></col>
+												<col style="WIDTH: 123px; FONT-WEIGHT: normal"></col>
+												<col style="WIDTH: 115px; FONT-WEIGHT: normal"></col>
+												<col style="WIDTH: 132px; FONT-WEIGHT: normal"></col>
+												<col style="WIDTH: 136px; FONT-WEIGHT: normal"></col>
+											</colgroup>
+											<tbody style="FONT-WEIGHT: normal" vAlign="top">
+												<tr style="MIN-HEIGHT: 23px; FONT-WEIGHT: normal">
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left">
+															<strong>项目名称: </strong>
+														</h5>
+													</td>
+													<td colSpan="3" style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left"><span class="xdExpressionBox xdDataBindingUI" title="" xd:CtrlId="CTRL989" xd:xctname="ExpressionBox" tabIndex="-1" xd:disableEditing="yes" style="PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-LEFT: 0px; WIDTH: 100%; PADDING-RIGHT: 0px; FONT-WEIGHT: bold; PADDING-TOP: 0px">
+																<xsl:value-of select="my:内容/my:项目名称"/>
+															</span>
+														</h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left">
+															<strong>项目编号: </strong>
+														</h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left"><span class="xdExpressionBox xdDataBindingUI" title="" xd:CtrlId="CTRL990" xd:xctname="ExpressionBox" tabIndex="-1" xd:disableEditing="yes" style="PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-LEFT: 0px; WIDTH: 100%; PADDING-RIGHT: 0px; FONT-WEIGHT: bold; PADDING-TOP: 0px">
+																<xsl:value-of select="my:内容/my:项目编号"/>
+															</span>
+														</h5>
+													</td>
+												</tr>
+												<tr style="MIN-HEIGHT: 23px; FONT-WEIGHT: normal">
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left">
+															<strong>建设地点: </strong>
+														</h5>
+													</td>
+													<td colSpan="3" style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left"><span hideFocus="1" class="xdTextBox" title="" xd:CtrlId="CTRL972" xd:xctname="PlainText" tabIndex="0" xd:binding="my:内容/my:建设地点" style="BORDER-BOTTOM: #dcdcdc 1pt; BORDER-LEFT: #dcdcdc 1pt; WIDTH: 100%; BORDER-TOP: #dcdcdc 1pt; FONT-WEIGHT: bold; BORDER-RIGHT: #dcdcdc 1pt">
+																<xsl:value-of select="my:内容/my:建设地点"/>
+															</span>
+														</h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left">
+															<strong>合同编号: </strong>
+														</h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left"><span hideFocus="1" class="xdTextBox" title="" xd:CtrlId="CTRL991" xd:xctname="PlainText" tabIndex="0" xd:binding="my:内容/my:合同编号" style="WIDTH: 100%; FONT-WEIGHT: bold">
+																<xsl:value-of select="my:内容/my:合同编号"/>
+															</span>
+														</h5>
+													</td>
+												</tr>
+												<tr style="MIN-HEIGHT: 23px; FONT-WEIGHT: normal">
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left">
+															<strong>工程规模描述: </strong>
+														</h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left"><span hideFocus="1" class="xdTextBox" title="" xd:CtrlId="CTRL992" xd:xctname="PlainText" tabIndex="0" xd:binding="my:内容/my:工程规模描述" style="WIDTH: 100%; FONT-WEIGHT: bold">
+																<xsl:value-of select="my:内容/my:工程规模描述"/>
+															</span>
+														</h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left">
+															<strong>建设周期: </strong>
+														</h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left"><span hideFocus="1" class="xdTextBox" title="" xd:CtrlId="CTRL993" xd:xctname="PlainText" tabIndex="0" xd:binding="my:内容/my:建设周期" style="WIDTH: 100%; FONT-WEIGHT: bold">
+																<xsl:value-of select="my:内容/my:建设周期"/>
+															</span>
+														</h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left">
+															<strong>合同金额: </strong>
+														</h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left"><span hideFocus="1" class="xdTextBox" title="" xd:CtrlId="CTRL994" xd:xctname="PlainText" tabIndex="0" xd:binding="my:内容/my:合同金额" style="WIDTH: 100%; FONT-WEIGHT: bold">
+																<xsl:value-of select="my:内容/my:合同金额"/>
+															</span>
+														</h5>
+													</td>
+												</tr>
+												<tr style="MIN-HEIGHT: 23px; FONT-WEIGHT: normal">
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left">
+															<strong>施工单位: </strong>
+														</h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left"><span class="xdComboBox xdBehavior_ComboBox" xd:xctname="combobox" style="WIDTH: 100%;LAYOUT-GRID:none;">
+																<xsl:if test="function-available('ipApp:GetMajorVersion') and ipApp:GetMajorVersion() &gt;= 12">
+																	<select tabIndex="-1" disabled="true" style="WIDTH: 100%; FONT-WEIGHT: bold;VISIBILITY:hidden;WIDTH:100%;"/>
+																	<span xd:xctname="PlainText" hideFocus="1" class="xdTextBox xdBehavior_ComboBoxTextField" title="" xd:CtrlId="CTRL1006" tabIndex="0" xd:binding="my:内容/my:施工单位">
+																		<xsl:attribute name="style">WIDTH: 100%; FONT-WEIGHT: bold;POSITION:absolute;WIDTH:0px;WORD-WRAP:normal</xsl:attribute>
+																		<xsl:choose>
+																			<xsl:when test="my:内容/my:施工单位=&quot;&quot;">选择或键入...</xsl:when>
+																			<xsl:otherwise>
+																				<xsl:value-of select="my:内容/my:施工单位"/>
+																			</xsl:otherwise>
+																		</xsl:choose>
+																	</span>
+																</xsl:if>
+																<select class="xdComboBox xdBehavior_Select" title="" size="1" xd:CtrlId="CTRL1006" xd:xctname="dropdown" xd:binding="my:内容/my:施工单位" xd:boundProp="value">
+																	<xsl:choose>
+																		<xsl:when test="function-available('ipApp:GetMajorVersion') and ipApp:GetMajorVersion() &gt;= 12">
+																			<xsl:attribute name="tabIndex">-1</xsl:attribute>
+																		</xsl:when>
+																		<xsl:otherwise>
+																			<xsl:attribute name="tabIndex">0</xsl:attribute>
+																		</xsl:otherwise>
+																	</xsl:choose>
+																	<xsl:attribute name="style">WIDTH: 100%; FONT-WEIGHT: bold<xsl:choose>
+																			<xsl:when test="function-available('ipApp:GetMajorVersion') and ipApp:GetMajorVersion() &gt;= 12">;POSITION:absolute;WIDTH:0px;</xsl:when>
+																			<xsl:otherwise>;WIDTH: 100%;</xsl:otherwise>
+																		</xsl:choose>
+																	</xsl:attribute>
+																	<xsl:attribute name="value"><xsl:value-of select="my:内容/my:施工单位"/></xsl:attribute>
+																	<option value=""><xsl:if test="my:内容/my:施工单位=&quot;&quot;"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>选择或键入...</option>
+																</select>
+															</span>
+														</h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left">
+															<strong>负责人: </strong>
+														</h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left"><span hideFocus="1" class="xdTextBox" title="" xd:CtrlId="CTRL1007" xd:xctname="PlainText" tabIndex="0" xd:binding="my:内容/my:施工单位负责人" style="WIDTH: 100%; FONT-WEIGHT: bold">
+																<xsl:value-of select="my:内容/my:施工单位负责人"/>
+															</span>
+														</h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left">
+															<strong>联系电话: </strong>
+														</h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left"><span hideFocus="1" class="xdTextBox" title="" xd:CtrlId="CTRL1008" xd:xctname="PlainText" tabIndex="0" xd:binding="my:内容/my:负责人联系电话" style="WIDTH: 100%; FONT-WEIGHT: bold">
+																<xsl:value-of select="my:内容/my:负责人联系电话"/>
+															</span>
+														</h5>
+													</td>
+												</tr>
+												<tr style="MIN-HEIGHT: 23px; FONT-WEIGHT: normal">
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left">
+															<strong>合同签订时间: </strong>
+														</h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<div style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left">
+															<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left">
+																<div style="MARGIN: 0px; WIDTH: 100%; FONT-WEIGHT: bold" class="xdDTPicker" title="" noWrap="1" xd:CtrlId="CTRL997" xd:xctname="DTPicker"><span hideFocus="1" class="xdDTText xdBehavior_FormattingNoBUI" contentEditable="true" xd:xctname="DTPicker_DTText" tabIndex="0" xd:binding="my:内容/my:合同签订时间" xd:datafmt="&quot;datetime&quot;,&quot;locale:2052;dateFormat:yyyy-MM-dd;timeFormat:none;&quot;" xd:innerCtrl="_DTText" xd:boundProp="xd:num">
+																		<xsl:attribute name="xd:num">
+																			<xsl:value-of select="my:内容/my:合同签订时间"/>
+																		</xsl:attribute>
+																		<xsl:choose>
+																			<xsl:when test="function-available('xdFormatting:formatString')">
+																				<xsl:value-of select="xdFormatting:formatString(my:内容/my:合同签订时间,&quot;datetime&quot;,&quot;locale:2052;dateFormat:yyyy-MM-dd;timeFormat:none;&quot;)"/>
+																			</xsl:when>
+																			<xsl:otherwise>
+																				<xsl:value-of select="my:内容/my:合同签订时间"/>
+																			</xsl:otherwise>
+																		</xsl:choose>
+																	</span>
+																	<button class="xdDTButton" xd:xctname="DTPicker_DTButton" xd:innerCtrl="_DTButton" tabIndex="-1">
+																		<img src="res://infopath.exe/calendar.gif" Linked="true"/>
+																	</button>
+																</div>
+															</h5>
+														</div>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left">
+															<strong>合同附件：</strong>
+														</h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left"><input style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; MARGIN: 1px; WIDTH: 40px; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: bold; BORDER-RIGHT: #000000 1pt solid" class="langFont" title="" value="上传" type="button" xd:CtrlId="CTRL999" xd:xctname="Button"/><input style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; MARGIN: 1px; WIDTH: 40px; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: bold; BORDER-RIGHT: #000000 1pt solid" class="langFont" title="" value="查看" type="button" xd:CtrlId="CTRL1000" xd:xctname="Button"/>
+														</h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left">
+															<strong/> </h5>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left">
+															<strong/> </h5>
+													</td>
+												</tr>
+												<tr style="MIN-HEIGHT: 23px; FONT-WEIGHT: normal">
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left">
+															<strong>施工内容: </strong>
+														</h5>
+													</td>
+													<td colSpan="5" style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: normal; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<h5 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="left"><span hideFocus="1" class="xdTextBox" title="" xd:CtrlId="CTRL998" xd:xctname="PlainText" tabIndex="0" xd:binding="my:内容/my:施工内容" xd:datafmt="&quot;string&quot;,&quot;plainMultiline&quot;" style="OVERFLOW-X: visible; OVERFLOW-Y: visible; WIDTH: 100%; WORD-WRAP: break-word; WHITE-SPACE: normal; HEIGHT: 100px; FONT-WEIGHT: bold">
+																<xsl:choose>
+																	<xsl:when test="function-available('xdFormatting:formatString')">
+																		<xsl:value-of select="xdFormatting:formatString(my:内容/my:施工内容,&quot;string&quot;,&quot;plainMultiline&quot;)" disable-output-escaping="yes"/>
+																	</xsl:when>
+																	<xsl:otherwise>
+																		<xsl:value-of select="my:内容/my:施工内容" disable-output-escaping="yes"/>
+																	</xsl:otherwise>
+																</xsl:choose>
+															</span>
+															<strong> </strong>
+														</h5>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+									<h5 style="FONT-WEIGHT: normal" align="center"><input style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; MARGIN-TOP: 10px; WIDTH: 80px; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: bold; BORDER-RIGHT: #000000 1pt solid" class="langFont" title="" value="确认保存" type="button" xd:CtrlId="btn_save" xd:xctname="Button"/>
+										<strong> </strong><input style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; MARGIN-TOP: 10px; WIDTH: 80px; BORDER-TOP: #000000 1pt solid; FONT-WEIGHT: bold; BORDER-RIGHT: #000000 1pt solid" class="langFont" title="" value="创建任务" type="button" xd:CtrlId="btn_SetUpRw" xd:xctname="Button"/>
+									</h5>
+								</font>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</xsl:template>
+</xsl:stylesheet>

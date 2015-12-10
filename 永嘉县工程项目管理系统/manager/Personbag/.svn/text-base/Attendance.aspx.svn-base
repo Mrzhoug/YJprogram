@@ -1,0 +1,38 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Attendance.aspx.vb" Inherits="manager_Personbag_Attendance" Theme="SkinFile" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>无标题页</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        <center><asp:Panel ID="Panel1" runat="server" GroupingText="今日未签人员" Width="98%" HorizontalAlign="Left">
+            <asp:Label ID="Label1" runat="server"></asp:Label></asp:Panel></center><br />
+        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="AID,YGDM" SkinID="GridViewSkin1" 
+            DataSourceID="Conn" HorizontalAlign="Center" Width="98%" BackColor="White" BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" PageSize="15" AllowSorting="True" Font-Size="11pt" ForeColor="Black" >
+            <Columns>
+                <asp:TemplateField HeaderText="序号">
+                    <ItemStyle HorizontalAlign="Center" Width="35px" />
+                </asp:TemplateField>
+                <asp:BoundField DataField="YGXM" HeaderText="姓名" SortExpression="YGXM" >
+                    <ItemStyle HorizontalAlign="Center" />
+                </asp:BoundField>
+                <asp:BoundField DataField="Att_Time" HeaderText="考勤时间" SortExpression="Att_Time"  >
+                    <ItemStyle HorizontalAlign="Center" />
+                </asp:BoundField>
+                <asp:BoundField DataField="Att_IP" HeaderText="考勤IP" SortExpression="Att_IP"  >
+                    <ItemStyle HorizontalAlign="Center" />
+                </asp:BoundField>
+            </Columns>
+        </asp:GridView>
+        <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT  * FROM User_Attendance,GY_YGDM where  User_Attendance.UserID=GY_YGDM.YGDM and datediff(d,att_time,getdate()) = 0 order by att_time desc">
+        </asp:SqlDataSource>
+    
+    </div>
+    </form>
+</body>
+</html>

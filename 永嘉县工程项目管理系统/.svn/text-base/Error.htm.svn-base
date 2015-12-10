@@ -1,0 +1,20 @@
+
+<html>
+<head>
+    <title>访问出错</title>
+</head>
+<body>
+    <form id="form1">
+    <div>
+            <b>一、系统得不到IIS用户,请联系管理员!</b><br>
+            <b><font color=red>解决办法</font></b>:将在IIS中,将站点设为集成windows登陆方式即可!
+            Internet 信息服务->选中你的站点->右键属性->目录安全性->编辑->将[匿名访问]的钩去掉,并钩选[集成windows身份验证]->确定->确定
+        <br />
+        <br />
+           
+            <b>二、系统不允许此用户进入本系统!</b><br>
+            <b><font color=red>解决办法</font></b>:通知管理员.在本系统中添加用户即可!
+    </div>
+    </form>
+</body>
+</html>

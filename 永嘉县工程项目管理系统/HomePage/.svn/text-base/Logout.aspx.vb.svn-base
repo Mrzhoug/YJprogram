@@ -1,0 +1,12 @@
+﻿
+Partial Class HomePage_Logout
+    Inherits System.Web.UI.Page
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Session("LoginName") = ""
+        Session("PassWord") = ""
+        Response.Cookies("LoginName").Expires = Now
+        Response.Cookies("PassWord").Expires = Now
+        Response.Redirect("Default.aspx")
+    End Sub
+End Class

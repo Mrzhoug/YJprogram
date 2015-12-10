@@ -1,0 +1,85 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Register.aspx.vb" Inherits="manager_YGDM_Register" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>用户注册</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+    <script type="text/javascript" src="../../Pub/jquery-1.8.0.js"></script>
+    <script language="javascript" type="text/javascript">    
+        function confirmInfo() {
+            var userRealName = $("#Xm");
+            var loginName = $("#LoginName")
+            if (userRealName.val() == "") {
+                alert("请写入用户姓名！");
+                userRealName.focus();
+                return false;
+            }
+
+            if (loginName.val() == "") {
+                alert("请写入登录名！");
+                loginName.focus();
+                return false;
+            }
+        }
+        function resetInfo() {
+            $("#Xm").val("");
+            $("#LoginName").val("");
+            $('select#DropDownList1 option:first').attr('selected', 'true')
+            return false;
+        }
+    </script>
+</head>
+<body>
+    <center>
+    <form id="form1" runat="server" style="width:350px">
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>用户注册</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            用户名称：
+                        </th>
+                        <td width="75%">
+                    <asp:TextBox ID="Xm" runat="server"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            登录名称：
+                        </th>
+                        <td>                       
+                    <asp:TextBox ID="LoginName" runat="server"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th align="right">
+                            所属部门：
+                        </th>
+                        <td>
+                            <asp:DropDownList ID="DropDownList1" runat="server">
+                                <asp:ListItem Value="0">默认</asp:ListItem>
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" colspan="2">
+                            <asp:Button ID="Button1" runat="server" Text="确定" CssClass="btnsubmit" OnClientClick="return confirmInfo();" />&nbsp;
+                            <asp:Button ID="Button2" runat="server" Text="重置" CssClass="btnsubmit" OnClientClick="return resetInfo();" />        
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+    </center>
+</body>
+</html>
+

@@ -1,0 +1,918 @@
+.cbToolbar{height:26px;width:100%;padding:0px;border-bottom:1px solid;margin-bottom:4px;
+}
+.tbButton, .tbButtonDown, .tbButtonRaise{cursor:hand;height:24px;padding:4px 2px 0px 2px;text-decoration:none;border:none;}
+.cbToolbar IMG, .cbSubmenu IMG{border:none;height:16px;width:16px;margin-right:3px;}
+.cbToolbar TD{vertical-align:middle;}
+.tbDivider{border-color:#6A8CCB;}
+
+
+.dlgBody, .noteBody, .bdyOptions, .bdySpell, .bdyRules, .bdyFontEdit, .bdyDatePkr
+{
+	background-color:#C3DAF9;
+}
+.mainBody
+{
+	background-color:#2557AD;
+}
+.msgViewer
+{
+	background-color:white;
+}
+.msgViewerCont, .msgViewerGroupCont
+{
+	background-color:white;
+}
+.msgHeader
+{
+	background-color:transparent;
+}
+.previewHdr
+{
+	background-color:transparent;
+}
+.recipWell
+{
+	border-bottom-color:#A5ACB2;
+	background-color:white;
+}
+.recipBox
+{
+	background-color:white;
+}
+.ipFlat, .recipBox, .MSGBODY, .txtBody, .attachList
+{
+	border-color:#A5ACB2;
+}
+.cbToolbar
+{
+	background-image:url(tool-bkgd.gif);
+	border-bottom-color:#2557AD;
+	background-color:#A2C2EE; 
+}
+
+.tbButton, .tbButtonDown, .tbButtonRaise
+{
+	color:black;
+}
+.tbButtonDown 
+{
+	background-color:#FFD695;
+}
+.tbButtonDown:hover
+{
+	color:white;
+	background-color:#FF9D03;
+}
+.tbButtonRaise
+{
+	background-color:#FFD695;
+}
+.cbSubmenuItem
+{
+	color:black;
+	border-color:#ECF4FC;
+}
+.fbButton
+{
+	border-color:#ECF4FC;
+}
+.cbSubmenu
+{
+	background-color:#ECF4FC;
+	border-color:white;
+	color:black;
+}
+.viewBody
+{
+	background-color:white;
+}
+.tblMsgBody
+{
+	background-color:white;
+	border-color:#3B67A3 #6B94CB #6B94CB #3B67A3;
+}
+.txtBody
+{
+	background-color:white;
+}
+.FORMATBAR
+{
+	background-color:#A2C2EE;
+}
+.rnStatusBar
+{
+	background-color:infobackground;
+	color:infotext;
+}
+.rnProgressBar
+{
+	background-color:#DEEBFC;
+	color:black;
+}
+.rnSecBar
+{
+	background-color:transparent;
+}
+.grpLEFT
+{
+	border-left-color:white;
+}
+.grpRIGHT
+{
+	border-right-color:white;
+}
+.grpTop
+{
+	border-top-color:white;
+}
+.grpBottom
+{
+	border-bottom-color:white;
+}
+.bdyView
+{
+	background-color:#C3DAF9;
+}
+.tabselected
+{
+	background-color:#C3DAF9;
+	border-color:white;
+	border-right-color:#6B94CB;
+}
+.tabsunselected
+{
+	background-color:#B6CFF2;
+	border-color:#6B94CB;
+	border-bottom-color:white;
+	border-top-color:white;
+}
+.tabsnone
+{
+	border-bottom-color:white;
+}
+.tabBkgd
+{
+	background-color:#9ABEEE;
+}
+.tabdiv
+{
+	border-color:white #6B94CB #6B94CB white;
+	background-color:#C3DAF9;
+}
+.apptTdDatePicker
+{
+	border-top-color:#6A8CCB;
+	border-bottom-color:#6A8CCB;
+}
+.fldrTitleBar
+{
+	background-color:#2557AD;
+}
+.vwHdrTD, .vwHdr
+{
+	border-color:white #6B94CB #6B94CB white;
+}
+.vwHdrSrtd
+{
+	background-color:#6791C9; 
+	color:white;
+	border-color:#3B67A3 white white #3B67A3;
+}
+.vwHdrTR, .vwHdr, .tblHdr
+{
+	background-color:#D6E7FB; 
+}
+.vwHdrBrdr1
+{
+	background-color:#ABC6EB;
+}
+.vwHdrBrdr2
+{
+	background-color:#6B94CB;
+}
+.vwHdrBrdr3
+{
+	background-color:#3B67A3;
+}
+.tbButtonRaise,.tbButton A:hover, .tbButton:hover
+{
+	background-color:#FFD695;
+	font-size:14px;
+}
+.cbSubmenuItem A:hover, .cbSubmenuItem:hover
+{
+	background-color:#FFD695;
+}
+.attachList
+{
+	background-color:white;
+}
+.divRcpResRIn
+{
+	color: black;
+}
+.divRcpResROut
+{
+	color:black;
+}
+.divRcpResCIn
+{
+	color: black;
+}
+.divRcpResCOut
+{
+	color:black;
+}
+.divRcpUnresRIn
+{
+	color:red;
+}
+.divRcpUnresROut
+{
+	COLOR:red;
+}
+.divRcpUnresCIn
+{
+	color:red;
+}
+.divRcpUnresCOut
+{
+	color:red;
+}
+.divRcpResC
+{
+	color:black;
+}
+.divRcpUnresC
+{
+	color:red;
+}
+.divContextMenu
+{
+	background-color:#ECF4FC;
+}
+.divContextMenuItem
+{
+    padding-top:3px;
+    padding-bottom:3px;
+    padding-left:10px;
+    padding-right:10px;
+    cursor:default;
+    width:100%;
+}
+.divCtxtMenu
+{
+	background-color:#ECF4FC;
+	border-color:white #3B67A3 #6B94CB white;
+}
+.purpleFlg
+{
+	background-color:#A5587C;
+}
+.orangeFlg
+{
+	background-color:#FF8C5A;
+}
+.greenFlg
+{
+	background-color:#8BB467;
+}
+.yellowFlg
+{
+	background-color:#FFC160;
+}
+.blueFlg
+{
+	background-color:#5C83B4;
+}
+.redFlg
+{
+	background-color:#CF5D60;
+}
+.completeFlg
+{
+	background-color:#FFFFFF;
+}
+.noFlg
+{
+	background-color:#EEEEEE;
+}
+.previewBody
+{
+	background-color:white;
+	border-color:#405580;
+}
+.vwTbl
+{
+	background-color:#2557AD;
+}
+.vwSortCol
+{
+	background-color:#F5F5F6;
+}
+.vwPrvwTD
+{
+	background-color:#E5F0FE;
+}
+.vwFldrTtl
+{
+	color:#FFFFFF;
+}
+.vwName
+{
+	color:#FFFFFF;
+}
+.vwItemSep
+{
+	border-bottom-color:#DDDDDD;
+}
+.fldDisabled
+{
+   background-color:transparent;
+}
+.THeader
+{
+	background-color:#2557AD;
+	color:#FFFFFF;
+}
+.rulesTableContainer
+{
+	BACKGROUND-COLOR:#FFFFFF;
+	BORDER-LEFT-color:#6B94CB;
+	BORDER-RIGHT-color:#6B94CB;
+}
+.rulesHeader
+{
+	BACKGROUND-COLOR:#D6E7FB;
+	BORDER-COLOR:white #6B94CB #6B94CB white;
+}
+.ruleNotSupported
+{
+	COLOR:graytext;
+}
+.ruleBroken
+{
+	COLOR:red;
+}
+.DLCertMissing
+{
+	COLOR:gray;
+}
+.selRow
+{
+	color:white;
+	background-color:#316AC5;
+}
+.unselRow
+{
+	color:black;
+	background-color:transparent;
+}
+.shdwRow
+{
+	background-color:#D6E7FB;
+	color:black;
+}
+.fldset
+{
+	color:#0046D5;
+}
+.ctxmnuBar
+{
+	background-color:#8CB5E7;
+	color:#ECF4FC;
+}
+.ctxmnuMnu
+{
+	background-color:#FEDB90;
+	color:black;
+}
+.srchBody
+{
+	background-color:#C3DAF9;
+}
+.trSelItem
+{
+	color:white;
+	background-color:#316AC5;
+	text-decoration:none;
+}
+.trUnselItem
+{
+	color:black;
+	background-color:transparent;
+	text-decoration:none;
+}
+.nbLabel
+{
+	background-color:#6A8CCB;
+	background-image:url(../../images/nb-bkgd.gif);
+}
+.nbLabel
+{
+	border-color:#002D96;
+}
+.nbTglTD
+{
+	border-color:#739AD5;
+	background-image:url(../../images/tool-bkgd.gif);
+	background-color:#A2C2EE;
+}
+.nbTglQLTD
+{
+	border-color:#739AD5;
+	background-image:url(../../images/nb-ql-tgl.gif);
+	background-color:#A2C2EE;
+}
+.treeFolder, .nbTreeProgress
+{
+	border-color:#97B9E8;
+}
+.nbHref
+{
+	color:black;
+}
+.nbHref:hover, .nbTglHref:hover, .aQL:hover, .aFU:hover
+{
+	background-color:#FEDB90;
+	background-image:url(../../images/nb-sel-bkgd.gif);
+}
+.nbTableMain
+{
+	background-color:#2557AD;
+}
+.nbDropMenu
+{
+	background-color:#ECF4FC;
+	border-color:white #3B67A3 #6B94CB white;
+}
+.treeFolder, .nbTreeProgress
+{
+	background-color:white;
+	color:black;
+}
+.notification
+{
+	background-color:#C3DAF9;
+}
+.fldName
+{
+	color:black;
+}
+.fldUrdCt
+{
+	color:blue;
+}
+.fldCntCt
+{
+	color:green;
+}
+.dlgTree
+{
+	background-color:white;
+	border-color:#3B67A3 white white #3B67A3;
+}
+.galBody
+{
+	background-color:#C3DAF9;
+}
+.rowselected
+{
+	background-color:#316AC5;
+	color:white;
+}
+.rowunselected
+{
+	background-color:transparent;
+	color:black;
+}
+.gallistheading
+{
+	background-color:#D6E7FB;
+}
+.galInputArea
+{
+	background-color:#C3DAF9;
+}
+.divgaltable
+{
+	background-color:white;
+	border-color:black;
+}
+.galButtons
+{
+	background-color:#C3DAF9;
+}
+.gallBody
+{
+	background-color:#C3DAF9;
+}
+.gallClsTable
+{
+	background-color:#C3DAF9;
+}
+.gallClsTextField
+{
+	background-color:#C3DAF9;
+}
+.enBody
+{
+	background-color:#C3DAF9;
+}
+.enClsTable
+{
+	background-color:#C3DAF9;
+}
+.rmndrBODY
+{
+	background-color:#C3DAF9;
+}
+.rmndrWarning
+{
+	background-color: palegoldenrod;
+}
+.rmndrICell
+{
+	background-color:#C3DAF9;
+}
+.rmndrCol1hd
+{
+	border-right-color:black;
+	border-left-color:black;
+}
+.rmndrRowSel
+{
+	background-Color:#316AC5;
+	color:white;
+}
+.crdHeader
+{
+	background-color:#D6E7FB;
+	color:black;
+}
+.groupHdr
+{
+	background-color:#D6E7FB;
+	color:black;
+	border-color:white #6B94CB #6B94CB white;
+}
+.ctxtMenu
+{
+	background-color:#ECF4FC;
+	color:#316AC5;
+	border-color:white;
+}
+/* CTRL_CALENDAR.CSS */
+.cpMainTable
+{
+	border-color:black;
+	background-color:white;
+}
+.cpDayLettersCell
+{
+	border-bottom-color:#316AC5;
+}
+.cpTopRow
+{
+	background-color:#D6E7FB;
+	color:black;
+}
+.cpTodaysDateCell
+{
+	border-color:red;
+	color:red;
+}
+.cpActiveDateCell,.cpInactiveDateCell
+{
+	xborder-color:white;
+}
+.cpActiveDateCell
+{
+	color:black;
+}
+.cpInactiveDateCell
+{
+	color:lightgrey;
+}
+.cpSelectedDateCell
+{
+	background-color:#D6E7FB;
+	color:black;
+}
+.cpWeekNumberCell
+{
+	border-right-color:#316AC5;
+}
+.cpKeyNavCell1
+{
+	border-color:black;
+	color:black;
+}
+/* CTRL_CALENDARVIEW.CSS */
+ .divMins
+{
+	border-color:green;
+}
+.dailyViewCell
+{
+	background-color: #FFE3A5;
+	color: black;
+}
+.calDateHeadingCell,.dailyAllDayCell
+{
+	background-color:#D6E7FB;
+}
+.dailyAllDayCell
+{
+	background-color:#2557AD;
+}
+.dailyAllDayAppointment,.dailySelectedAllDayAppointment
+{
+	background-color:#D6E7FB;
+	border-color:black;
+}
+.dailySelectedAllDayAppointment
+{
+	background-color:#316AC5;
+	color:black;
+}
+.calDateHeadingText1,.calDateHeadingText2,.calDateHeadingText3,.calDateHeadingText4,.calDateHeadingText5,.calDateHeadingText6,.calDateHeadingText7
+{
+	background-color:#D6E7FB;
+}
+.dailyContainer1,.dailyContainer2,.dailyContainer3,.dailyContainer4,.dailyContainer5,.dailyContainer6,.dailyContainer7
+{
+	border-color:black;
+}
+.dailyAllDayContainer
+{
+	background-color:#2557AD;
+}
+.dailyBackgroundTable
+{
+	background-color:#FFE3A5;
+	border-color:#AAAAAA;
+}
+.dailyHoursCell
+{
+	border-color:#AAAAAA;
+	background-color:#D6E7FB;
+}
+.dailyMinsCell
+{
+	border-color:#AAAAAA;
+	background-color:#D6E7FB;
+}
+.dailyAppt
+{
+	background-color:white;
+	border-color:black;
+}
+.dailyApptCell
+{
+	border-color:#AAAAAA;
+	border-bottom-color:#AAAAAA;
+}
+.dailyCellWorking
+{
+	background-color:#FFF3BD;
+}
+.dailyCellEven
+{
+	border-bottom-color:#AAAAAA;
+}
+.colorBusy
+{
+	background-color:#0000FF;
+}
+.colorFree
+{
+	background-color:lightgrey;
+}
+.colorTentative
+{
+	background-color:#99CCFF;
+}
+.colorOOF
+{
+	background-color:#660066;
+}
+.dailyRow
+{
+	background-color:#ECF4FC;
+}
+.weeklyMainTable
+{
+	background-color:white;
+	border-color:black;
+}
+.weeklyDateCell, .weeklyWeekendDateCell
+{
+	border-color:black;
+}
+.weeklySelectedAppointment
+{
+	background-color:#316AC5;
+	color:black;
+}
+.weeklySelectedAlldayAppointment
+{
+	background-color:#316AC5;
+	color:black;
+}
+.weeklyAlldayAppointment
+{
+	border-color:black;
+	background-color:white;
+	color:black;
+}
+.weeklyDateHeader, .weeklySelectedDateHeader
+{
+	border-color:#CCDBF0;
+	background-color:#B6CBE8;
+	color:black;
+}
+.weeklySelectedDateHeader
+{
+	background-color:#316AC5;
+	color:white;
+}
+.monthlyDateHeader, .monthlySelectedDateHeader
+{
+	background-color:#B6CBE8;
+	color:black;
+	border-color:#CCDBF0;
+}
+.monthlyNextPrevDateHeader
+{
+	background-color:white;
+	color:black;
+}
+.monthlySelectedDateHeader
+{
+	background-color:#316AC5;
+	color:white;
+}
+.monthlyDateBody, .monthlyNextPrevDateBody
+{
+	background-color:white;
+}
+.monthlyNextPrevDateBody
+{
+	background-color:#e0e0e0;
+}
+.monthlyDateCell, .monthlyWeekendDateCell
+{
+	border-color:#CCDBF0;
+	width:100%;
+	height:33%;
+}
+.monthlyWeekendDateCell
+{
+	background-color:cyan;
+}
+.monthlyDayHeader
+{
+	background-color:#ECF4FC;
+}
+.monthlyDayTitlesCell
+{
+	background-color:#B6CBE8;
+	border-color:black;
+}
+.monthlySelectedAppointment
+{
+	background-color:#316AC5;
+	color:black;
+}
+.monthlySelectedAlldayAppointment
+{
+	background-color:#316AC5;
+	color:black;
+}
+.monthlyAlldayAppointment
+{
+	border-color:BLACK;
+	background-color:white;
+}
+/ * CTRL_FREEBUSY.CSS */
+.fb_behavior
+{
+	background-color:transparent;
+}
+.fb_splitter_behavior
+{
+	background-color:transparent;
+}
+.fbtime
+{
+	background-color:#ACC4E4;
+}
+.tdUsrBkgd
+{
+	background-color:#ACC4E4;
+}
+.fb_span_div
+{
+	background-color:transparent;
+}
+.fb_color_div
+{
+	background-color:lightyellow; 
+}
+.fbtable
+{
+	background-color:transparent;
+}
+.fbbodyLTR, .fbbodyRTL
+{
+	background-color:transparent;
+	border-color:white;
+}
+.row
+{
+	border-bottom-color:lightgrey;
+}
+.recipBg, .dvAllAttend
+{
+	background-color:#9BB7DD;
+}
+.tr
+{
+	border-color:gray;
+	background-color:transparent;
+}
+.recip
+{
+	background-color:white; 
+}
+.busy, .busyClr
+{
+	background-color:darkblue;
+}
+.tent,.tentClr
+{
+	background-color:lightblue;
+}
+.oof, .oofClr
+{
+	background-color:purple;
+}
+.unknownClr
+{
+	background-color:c0c0c0;
+}
+.colAM
+{
+	background-color:#FFE3A5;
+}
+.colPM
+{
+	background-color:#FFF3BD;
+}
+.hrdivbottom
+{
+	background-color:white; 
+}
+.tblSigWarning
+{
+	border-top-color:#F8F17A; 
+	border-bottom-color:#F8F17A;
+}
+.tblSigInvalid
+{
+	border-top-color:red; 
+	border-bottom-color:red;
+}
+.btnSig
+{
+	border-color:#C3DAF9;
+}
+.btnSigPreview
+{
+	border-color:white;
+}
+.btnEnc
+{
+	border-color:#C3DAF9;
+}
+.btnEncPreview
+{
+	border-color:white;
+}
+.btnSigHover
+{
+	border-color:white #3B67A3 #3B67A3 white;
+}
+.btnSigDown
+{
+	border-color:#3B67A3 white white #3B67A3;
+}
+.sigInfoInput
+{
+	background-color:transparent;
+}
+.sigInfoTable
+{
+	background-color:transparent;
+}

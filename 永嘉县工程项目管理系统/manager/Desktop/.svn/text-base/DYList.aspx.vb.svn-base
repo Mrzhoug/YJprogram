@@ -1,0 +1,119 @@
+﻿
+Partial Class manager_Desktop_DYList
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Conn.SelectParameters("UserID").DefaultValue = UserID
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        If TextBox1.Text.Length > 0 Then
+            Dim Sql As String = TextBox1.Text.Trim
+            Conn.SelectCommand = "SELECT Order_Form_Log.CID, Order_Form_Log.UserID, GY_LCDM.LCMC,GY_MKXX.MKMC,Order_Form_Log.LCDM, GY_YGDM.YGXM, Order_Form_Log.XMDM,  Order_Form_Log.MKDM, Order_Form_Log.OpDate,DLMC,Order_Form_Log.msgid FROM Order_Form_Log, GY_LCDM,GY_MKXX,GY_YGDM where GY_YGDM.YGDM = Order_Form_Log.OpUserID and  GY_LCDM.LCDM = Order_Form_Log.LCDM  and GY_MKXX.MKDM = Order_Form_Log.MKDM and Order_Form_Log.UserID = @UserID and (GY_LCDM.LCMC like '%" & Sql & "%' or GY_MKXX.MKMC like '%" & Sql & "%' or GY_YGDM.YGXM like '%" & Sql & "%' ) order by Order_Form_Log.LookFlag"
+            Conn.SelectParameters("UserID").DefaultValue = UserID
+            GridView1.DataBind()
+        Else
+            Conn.SelectCommand = "SELECT Order_Form_Log.CID, Order_Form_Log.UserID, GY_LCDM.LCMC,GY_MKXX.MKMC,Order_Form_Log.LCDM, GY_YGDM.YGXM, Order_Form_Log.XMDM,  Order_Form_Log.MKDM, Order_Form_Log.OpDate,DLMC,Order_Form_Log.msgid FROM Order_Form_Log, GY_LCDM,GY_MKXX,GY_YGDM where GY_YGDM.YGDM = Order_Form_Log.OpUserID and  GY_LCDM.LCDM = Order_Form_Log.LCDM  and GY_MKXX.MKDM = Order_Form_Log.MKDM and Order_Form_Log.UserID = @UserID order by Order_Form_Log.LookFlag"
+            Conn.SelectParameters("UserID").DefaultValue = UserID
+            GridView1.DataBind()
+        End If
+    End Sub
+
+    Protected Sub GridView1_RowDeleting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs) Handles GridView1.RowDeleting
+        'Dim Cid As Integer = GridView1.DataKeys(e.RowIndex).Item(0)
+        'Dim msgid As Integer = GridView1.DataKeys(e.RowIndex).Item(4)
+        'Try
+        '    Conn.DeleteCommand = "delete Order_Form_Log where Cid = " & Cid
+        '    Conn.Delete()
+        '    Base.DB.Query("Delete SendMessage where cid=" & msgid)
+        'Catch ex As Exception
+        '    Conn.DeleteCommand = "delete Order_Form_Log where Cid = -1"
+        '    Conn.Delete()
+        '    Base.Js.WriteScript(Me, "window.parent.MessageBox('操作失败','删除失败，可能此订阅有问题');")
+        'End Try
+        'Base.Js.WriteScript(Me, "window.parent.MessageBox('操作成功','成功删除订阅信息');")
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        Dim Cid As Integer      'ID
+        Dim XMDM, MKDM, FID As Integer
+        Dim dt As DataTable
+        For i = 0 To GridView1.Rows.Count - 1
+            CType(GridView1.Rows(i).Cells(5).Controls(0), LinkButton).Attributes.Add("onclick", "return confirm('你确定要删除吗？')")
+            GridView1.Rows(i).Cells(1).Text = GridView1.Rows(i).Cells(1).Text & "(" & GridView1.DataKeys(i).Item(1) & ")"
+
+            dt = Base.GetShowFieldDate_NoLc(GridView1.DataKeys(i)(2), GridView1.DataKeys(i)(3), 5)
+            If dt Is Nothing Then
+                GridView1.Rows(i).Cells(4).Text = "记录不存在"
+            Else
+                Dim Str As String
+                Str = "<table border='1' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:98%;border-collapse:collapse;'>"
+                Str += "<tr><td width=60 align=center>" & dt.Columns(0).ColumnName.Trim & "</td><td>" & dt.Rows(0).Item(0) & "</td></tr></table>"
+                Str += "<table border='1' id='showrow" & i & "' style='color:Black;background-color:White;border-color:#DEDFDE;border-width:1px;border-style:None;font-size:9pt;width:98%;border-collapse:collapse;display:none;'>"
+                Str += "<tr><td width=60 align=center>" & dt.Columns(1).ColumnName.Trim & "</td><td>" & dt.Rows(0).Item(1) & "</td></tr>"
+                Str += "<tr><td width=60 align=center>" & dt.Columns(2).ColumnName.Trim & "</td><td>" & dt.Rows(0).Item(2) & "</td></tr>"
+                Str += "<tr><td width=60 align=center>" & dt.Columns(3).ColumnName.Trim & "</td><td>" & dt.Rows(0).Item(3) & "</td></tr>"
+                Str += "<tr><td width=60 align=center>" & dt.Columns(4).ColumnName.Trim & "</td><td>" & dt.Rows(0).Item(4) & "</td></tr>"
+                Str += "</table>"
+                GridView1.Rows(i).Cells(4).Attributes.Add("onclick", "javascript:show('showrow" & i & "');")
+                GridView1.Rows(i).Cells(4).Text = Str
+            End If
+
+            '对查看进行处理
+            Cid = GridView1.DataKeys(i).Item(0)
+            Try
+                Base.DB.Query("update Order_Form_Log  set LookFlag = 1 where Cid = " & Cid)
+            Catch ex As Exception
+            End Try
+            '显示出表单. 
+            '先得到项目代码,模块代码        
+            Dim Tb As New Data.DataTable
+            Tb = Base.DB.Table("select XMDM,MKDM From Order_Form_Log where Cid = " & Cid, "Order_Form_Log")
+
+            If Tb.Rows.Count > 0 Then
+                XMDM = Tb.Rows(0).Item(0)
+                MKDM = Tb.Rows(0).Item(1)
+                '最后得到进程表单ID
+                Tb = Base.DB.Table("select Fid from XX_XMJC where MKDM =" & MKDM & "  and XMDM = " & XMDM, "XX_XMJC")
+                If Tb.Rows.Count = 0 Then
+                    GridView1.Rows(i).Cells(5).Text = "无效"
+                Else
+                    FID = Tb.Rows(0).Item(0)
+                    GridView1.Rows(i).Cells(5).Text = "<a href='javascript:void(0)' onclick='DbClickEvent(" & FID & ");'>查看</a>"
+                End If
+            Else
+                GridView1.Rows(i).Cells(5).Text = "无效"
+            End If
+
+        Next
+    End Sub
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button3.Click
+        Dim ck As CheckBox
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                Try
+                    Dim Cid As Integer = GridView1.DataKeys(i).Item(0)
+                    Base.DB.Query("delete Order_Form_Log where Cid = " & Cid)
+                    Dim msgid As Integer = GridView1.DataKeys(i).Item(4).ToString
+                    Base.DB.Query("Delete SendMessage where cid=" & msgid)
+                Catch ex As Exception
+                End Try
+            End If
+        Next
+        GridView1.DataBind()
+    End Sub
+End Class

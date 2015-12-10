@@ -1,0 +1,162 @@
+﻿Imports System.Xml
+Partial Class HomePage_ModifyContent
+    Inherits System.Web.UI.Page
+    Dim UsName As String
+    Dim UserID As Integer
+    Dim Base As New Base
+    Dim BaseDir As String = Server.MapPath("../") & "FormFolder\XMAN-YGDM"
+    Dim XsnDir As String = "XMAN-YGDM"
+    Dim DfileName As String
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        If Base.HomePageUserCheck = False Then
+            Base.Js.alert(Me, "登陆超时，请重新登陆")
+            Exit Sub
+        End If
+        If Session("LoginName") = "" Then
+            Response.Write("非法调用")
+            Response.End()
+        End If
+        UsName = Base.SqlFilter(Session("LoginName"))
+        UserID = Base.GetUserID(UsName)
+
+        If Page.IsPostBack = False Then
+            Dim tb As New DataTable
+            tb = Base.DB.Table("select DLMC,Email,Mobile From GY_YGDM where DLMC= '" & UsName & "'", "dd")
+            If tb.Rows.Count = 0 Then
+                Response.Write("非法调用")
+                Response.End()
+            Else
+                UserName.Text = tb.Rows(0)("DLMC")
+                Email.Text = tb.Rows(0)("Email").ToString
+                Tel.Text = tb.Rows(0)("Mobile").ToString
+            End If
+        End If
+
+
+        '当详细文件不存在时，进行复制
+        Base.pub.CreateDir(BaseDir)
+        Dim uri As String = Server.MapPath("../") & "TemplateLibrary\" & XsnDir & ".xsn"
+        If IO.File.Exists(uri) = False Then
+            Response.Write("用户无详细信息")
+            Response.End()
+        End If
+        Dim PublicUrl As String = Request("publicurl")
+        Dim Form As InfoJetSoft.Service.InfoJetForm = Nothing
+        DfileName = BaseDir & "\" & UserID & ".xml"
+        Dim templatefile As String = Server.MapPath("../") & "TemplateLibrary\" & XsnDir & "\template.xml"
+
+        If IO.File.Exists(DfileName) = False Then
+            If IO.File.Exists(templatefile) = False Then
+                Response.Write("详细信息未设置")
+                Response.End()
+            Else
+                Try
+                    IO.File.Copy(templatefile, DfileName, True)
+                Catch ex As Exception
+                    Response.Write("读取失败,请与管理员联系")
+                    Response.End()
+                End Try
+            End If
+        End If
+
+    End Sub
+
+    Protected Sub modi_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles modi.Click
+
+        If Base.HomePageUserCheck = False Then
+            Base.Js.alert(Me, "登陆超时，请重新登陆")
+            Exit Sub
+        End If
+
+
+        If Email.Text.Trim.Length > 0 And Email.Text.IndexOf("@") > 0 And Email.Text.IndexOf(".") > 0 Then
+        Else
+            Base.Js.alert(Me, "请正确输入ＥＭＡＩＬ邮箱！")
+            Exit Sub
+        End If
+
+        If Tel.Text.Trim.Length = 0 Then
+            Base.Js.alert(Me, "联系电话不能为空！")
+            Exit Sub
+        End If
+
+
+        Base.XmlClass.GetXmlFile(DfileName)
+        Dim RootNodeName As String = Base.XmlClass.GetRootNodeName
+        Dim TempNode As System.Xml.XmlNode = Base.XmlClass.GetRootNode.Item(0)
+        Dim Search_Fid As String = Base.XmlClass.GetFormID
+
+
+        '更新员工代码
+        Dim Xpath As String = "//" & RootNodeName & "/" & Search_Fid.Replace("表单号", "标题") & "/" & Search_Fid
+        Dim TitleNode As System.Xml.XmlNode = Base.XmlClass.FindNode(Xpath)
+        TitleNode.InnerText = UserID
+        TitleNode = Base.XmlClass.FindNode("//my:姓名")
+        If Not TitleNode Is Nothing Then TitleNode.InnerText = UsName
+        TitleNode = Base.XmlClass.FindNode("//my:用户名")
+        If Not TitleNode Is Nothing Then TitleNode.InnerText = UsName
+        TitleNode = Base.XmlClass.FindNode("//my:移动电话")
+        If Not TitleNode Is Nothing Then TitleNode.InnerText = Tel.Text.Trim
+        TitleNode = Base.XmlClass.FindNode("//my:Email")
+        If Not TitleNode Is Nothing Then TitleNode.InnerText = Email.Text.Trim
+
+        Base.XmlClass.Save()
+
+        '检测库是否存在
+        Dim KuFile As String = BaseDir & ".库.xml"
+        Dim templatefile As String = Server.MapPath("../") & "TemplateLibrary\" & XsnDir & "\template.xml"
+        If IO.File.Exists(KuFile) = False Then
+            If IO.File.Exists(templatefile) = False Then
+                Response.Write("详细信息未设置")
+                Response.End()
+            Else
+                Try
+                    IO.File.Copy(templatefile, KuFile, True)
+                Catch ex As Exception
+                    Response.Write("读取失败,请与管理员联系")
+                    Response.End()
+                End Try
+            End If
+        End If
+
+  
+        Base.XmlClass.GetXmlFile(KuFile)
+
+        Dim Node2 As XmlNode = Base.XmlClass.FindNode("//" & RootNodeName & "/" & Search_Fid.Replace("表单号", "标题") & "[" & Search_Fid & "='" & UserID & "']")
+        If Node2 Is Nothing Then
+            '6.添加用户操作记录,添加新表单
+            '这里对模板库中的空记录进行处理。防止在引用库时，出现空记录导致SUM不能用。
+            Dim NodeNull As XmlNode = Base.XmlClass.FindNode("//" & RootNodeName & "/" & Search_Fid.Replace("表单号", "标题") & "[" & Search_Fid & "='']")
+            If NodeNull Is Nothing Then
+                Try
+                    Base.XmlClass.AddNode(TempNode)
+                Catch ex As Exception
+                    Response.Write("入库失败,请重新修改！")
+                End Try
+            Else
+                Try
+                    Base.XmlClass.UpdateNode("//" & RootNodeName & "/" & Search_Fid.Replace("表单号", "标题") & "[" & Search_Fid & "='']", TempNode)
+                Catch ex As Exception
+                    Response.Write("入库失败,请重新修改！")
+                End Try
+            End If
+        Else
+            '6.添加用户操作记录,修改表单
+            Try
+                Base.XmlClass.UpdateNode("//" & RootNodeName & "/" & Search_Fid.Replace("表单号", "标题") & "[" & Search_Fid & "='" & UserID & "']", TempNode)
+            Catch ex As Exception
+                Response.Write("入库失败,请重新修改！")
+            End Try
+        End If
+
+        Dim sql As String = "update GY_YGDM set [Email]='" & Base.SqlFilter(Email.Text) & "',[Mobile]='" & Base.SqlFilter(Tel.Text.Trim) & "' where YGDM =" & UserID
+        Base.DB.Query(sql)
+        If Base.DB.ErrorMessage.ToString.Length <= 0 Then
+            Base.Js.alert(Me, "修改成功!")
+        Else
+            Base.Js.alert(Me, "修改失败，请联系管理员！")
+        End If
+
+    End Sub
+End Class

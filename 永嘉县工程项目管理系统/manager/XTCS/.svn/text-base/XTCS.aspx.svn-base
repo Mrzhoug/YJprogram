@@ -1,0 +1,68 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="XTCS.aspx.vb" Inherits="manager_XTCS_XTCS" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>系统参数管理</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+</head>
+<body>
+    <form id="Form1" method="post" runat="server">
+        &nbsp;&nbsp;
+        参数名：
+        <asp:TextBox ID="TextBox1" runat="server" Width="170px"></asp:TextBox>
+        &nbsp;&nbsp;
+        参数值：
+        <asp:TextBox ID="TextBox2" runat="server" Width="192px"></asp:TextBox>
+        <br />
+        &nbsp;&nbsp;
+        备&nbsp;&nbsp;&nbsp;注：
+        <asp:TextBox ID="TextBox3" runat="server" Width="400px" ToolTip="请输入所要添加的参数的信息"></asp:TextBox>
+        <asp:Button ID="Button1" runat="server" BorderStyle="Outset"  Text="添 加" CssClass="btnsubmit" />
+        <br />
+        &nbsp;&nbsp;
+        关键字：
+        <asp:TextBox ID="TextBox4" runat="server" Width="400px" BorderStyle="Inset"></asp:TextBox>
+        <asp:Button ID="Button2" runat="server" Text="查 询" CssClass="btnsubmit" />
+        <br /><br />
+        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" BackColor="White" SkinID="GridViewSkin1"
+            BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" DataKeyNames="CSXH"
+            DataSourceID="SqlDataSource1" Width="98%" AllowPaging="True" HorizontalAlign="Center" ForeColor="Black">
+            <FooterStyle BackColor="#CCCC99" />
+            <Columns>
+                <asp:BoundField DataField="CSM" HeaderText="参数名" SortExpression="CSM" >
+                    <ItemStyle HorizontalAlign="Center" />
+                    <HeaderStyle Width="60px" />
+                </asp:BoundField>
+                <asp:BoundField DataField="CSZ" HeaderText="参数值" SortExpression="CSZ" >
+                    <ItemStyle HorizontalAlign="Center" />
+                    <HeaderStyle Width="60px" />
+                </asp:BoundField>
+                    <asp:BoundField DataField="BZ" HeaderText="备注" SortExpression="BZ" >
+                    <ItemStyle HorizontalAlign="Center" />
+                    <HeaderStyle Width="145px" />
+                </asp:BoundField>
+                <asp:CommandField ShowEditButton="True" HeaderText="操作" >
+                    <ItemStyle HorizontalAlign="Center" Width="60px" />
+                </asp:CommandField>
+                <asp:TemplateField HeaderText="删除" ShowHeader="False">
+                    <ItemStyle HorizontalAlign="Center" Width="30px" />
+                    <ItemTemplate>
+                        <asp:LinkButton ID="LinkButton1" runat="server" CausesValidation="False" CommandName="Delete" OnClientClick="return confirm('你确定删除此参数记录吗?');"
+                            Text="删除"></asp:LinkButton>
+                    </ItemTemplate>
+                </asp:TemplateField>
+            </Columns>
+            <RowStyle BackColor="White" />
+            <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+            <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Right" Height="8px" VerticalAlign="Top" />
+            <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" />
+            <EditRowStyle Width="80px" />
+            <AlternatingRowStyle Wrap="True" BackColor="White" />
+        </asp:GridView>
+        <br />
+        <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT [CSXH], [CSM], [CSZ], [BZ] FROM [GY_XTCS]">
+        </asp:SqlDataSource>
+    </form>
+</body>
+</html>

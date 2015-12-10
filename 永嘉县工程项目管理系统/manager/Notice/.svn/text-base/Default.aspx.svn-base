@@ -1,0 +1,67 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Default.aspx.vb" Inherits="manager_Notice_Default" Theme="SkinFile" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>提醒管理</title>
+        <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+        <script type="text/javascript">
+        function goEidt(fid)
+        {
+            window.open("newNotice.aspx?id=" + fid ,"编辑流程","height=500, width=650, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes")        
+        }
+        function confirmDel()
+        {        
+            if (confirm('你确定删除此记录吗?') ==true)
+            {
+                return true;
+            }
+            else
+            {            
+                return false;
+            }        
+        }
+    </script>
+</head>
+<body>
+    <form id="form1" runat="server">
+        
+        &nbsp;&nbsp;&nbsp;
+        关键词：
+        <asp:TextBox ID="TextBox1" runat="server" Width="228px"></asp:TextBox>&nbsp;
+        <asp:Button ID="Button1" runat="server" Text="搜 索" CssClass="btnsubmit" />&nbsp;
+        <asp:Button ID="BtnDel" runat="server" Text="删 除" CssClass="btnsubmit" OnClientClick="confirmDel()" />&nbsp;
+        <input id="btxj" type="button" value="添加提醒"  onclick="window.open('newNotice.aspx','消息提醒','height=500, width=650, top=150, left=150, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=yes')" runat="server" class="btnsubmit" /></span>&nbsp;
+        
+        <asp:GridView id="GridView1" runat="server" Width="98%" PageSize="15" DataKeyNames="ID" SkinID="GridViewSkin1" AutoGenerateColumns="False" AllowPaging="True">
+            <Columns>
+                <asp:TemplateField ShowHeader="False">
+                    <ItemStyle HorizontalAlign="Center" Width="25px" />
+                    <ItemTemplate>
+                        <asp:CheckBox ID="CheckBox1" runat="server" />
+                    </ItemTemplate>
+                    <HeaderTemplate>
+                        <asp:CheckBox ID="CheckBox1" runat="server"  onclick="SelectCheckboxAll(this,'GridView1')" />
+                    </HeaderTemplate>
+                </asp:TemplateField>
+                <asp:BoundField DataField="formID" HeaderText="提醒表单" SortExpression="processForm" ></asp:BoundField>
+                <asp:BoundField DataField="nodeName" HeaderText="节点名" ></asp:BoundField>
+                <asp:BoundField DataField="symbol" HeaderText="条件符号" />
+                <asp:BoundField DataField="condition" HeaderText="条件内容" />
+                <asp:BoundField DataField="msgcontent" HeaderText="发送信息内容" />
+                <asp:BoundField DataField="toUserList" HeaderText="发送至" />
+                <asp:BoundField DataField="enabled" HeaderText="启用" SortExpression="enabled"></asp:BoundField>
+                <asp:BoundField HeaderText="编辑" />
+            </Columns>
+            
+            <PagerSettings Visible="False"  />
+        </asp:GridView>    
+        <table align="center" bgcolor="#ebecee" height="26" valign="middle" width="98%">
+            <tr>
+                <td id="PageBar" runat="server" align="center" style="height: 22px">
+                </td>
+            </tr>
+        </table>
+    
+    </form>
+</body>
+</html>

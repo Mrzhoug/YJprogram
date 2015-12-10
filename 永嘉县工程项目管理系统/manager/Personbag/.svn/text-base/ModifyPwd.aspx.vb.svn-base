@@ -1,0 +1,65 @@
+﻿
+Partial Class manager_Personbag_ModifyPwd
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserId As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        If Base.Tester(Login_User) = True Then
+            'Response.Write("<br><center>你当前使用的账号是测试用户,不能使用此功能.请联系管理员!</center>")
+            'Response.End()
+        End If
+
+
+        Dim Path_Info As String
+        Dim index As Integer
+        Path_Info = System.Web.HttpContext.Current.Request.ServerVariables("Path_Info").ToLower
+        If Path_Info.Length >= 0 Then
+            Path_Info = Path_Info.Substring(1)
+            index = Path_Info.IndexOf("/")
+            If index > 0 Then
+                Path_Info = Path_Info.Substring(0, index)
+                If Path_Info = "guest" Then
+                    '表示是进入了演示程序.不能修改密码
+                    Button1.Enabled = False
+                    'text.InnerHtml = "<font color=red>当前为演示版本,密码修改功能禁用</font>"
+                Else
+                    '表示是正常的.
+                    Button1.Enabled = True
+                End If
+            End If
+        End If
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        If Password1.Text.Trim.Length = 0 Then
+            Exit Sub
+        End If
+
+        Dim Result As String = String.Empty
+
+        If Login_User.Trim.ToLower = "administrator" Or Login_User.Trim.ToLower = "sunfun" Then
+            Base.Js.alert(Me, "非法访问！", "../Desktop/MyDesktop.aspx")
+        End If
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.ADUserAuthentication").ToLower = "true" Then
+            Try
+                Dim NetCmd As New netcommand.net
+                Result = NetCmd.modipass(Login_User, Password1.Text.Trim)
+            Catch ex As Exception
+                Base.Js.alert(Me, "修改密码功能暂时不可用，请联系管理员！", "../Desktop/MyDesktop.aspx")
+            End Try
+            If Result.IndexOf("命令成功完成") < 0 Then
+                Base.Js.alert(Me, "密码修改出错，请稍候再试或联系管理员！", "../Desktop/MyDesktop.aspx")
+            Else
+                Base.Js.alert(Me, "密码修改成功！", "../Desktop/MyDesktop.aspx")
+            End If
+        Else                '数据库验证方式下的更改密码
+            Base.DB.Query("update  GY_YGDM set DLPWD='" & Base.SqlFilter(Base.EnCrypt.MD5(Password1.Text)) & "' where YGDM=" & UserId)
+            Base.Js.alert(Me, "密码修改成功！")
+        End If
+    End Sub
+End Class

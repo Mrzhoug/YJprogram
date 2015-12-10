@@ -1,0 +1,58 @@
+﻿Imports HelpSoft
+Partial Class ProgressBar
+    Inherits System.Web.UI.Page
+    Private _percentage As Double = 0
+
+
+    Public ReadOnly Property Percentage() As Double
+        Get
+            Return _percentage
+        End Get
+    End Property
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        btn_ok.Enabled = False
+        Dim upload As UploadContext = UploadContextFactory.GetUploadContext(Request("UploadID"))
+        If (upload.Status <> uploadStatus.HasError) Then
+            txt_progressinfo.Text = upload.FormatStatus
+            txt_filename.Text = upload.CurrentFile
+            If (upload.TotalLength > 1) Then
+                _percentage = Convert.ToInt32((upload.Readedlength * 100.0 / upload.TotalLength))
+            End If
+                
+            If (upload.Status = uploadStatus.Initializing) Then
+                Response.AppendHeader("Refresh", "3")
+            Else
+                If (upload.Status = uploadStatus.Complete) Then
+                    txt_filename.Text = upload.FileNames.Length.ToString() + " file(s) uploaded successfully!"
+                    txt_speed.Text = upload.FormatRatio
+                    txt_leftTime.Text = "上传完成."
+
+                    btn_ok.Attributes.Add("onclick", "javascript:if(window.dialogArguments==undefined)window.opener=self;window.close();return false;")
+                    btn_ok.Enabled = True
+                Else
+                    txt_speed.Text = upload.FormatRatio
+                    txt_leftTime.Text = upload.FormatLeftTime
+                    Response.AppendHeader("Refresh", "3")
+                End If
+            End If
+            If (upload.Status = uploadStatus.Complete) Then
+                btn_cancle.Attributes.Add("onclick", "javascript:if(window.dialogArguments==undefined)window.opener=self;window.close();return false;")
+            Else
+                btn_cancle.Attributes.Add("onclick", "javascript:var win=null;if(window.dialogArguments==undefined){win=window.opener;}else{win=dialogArguments;}win.document.location.href=win.document.location.href;return true;")
+            End If
+        Else
+            If (Not IsClientScriptBlockRegistered("closeScript")) Then RegisterClientScriptBlock("closeScript", "<script>window.opener=self;window.close();</script>")
+        End If
+    End Sub
+
+    Protected Sub btn_cancle_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btn_cancle.Click
+        Dim upload As UploadContext = UploadContextFactory.GetUploadContext(Request("UploadID"))
+        upload.Abort = True
+        btn_cancle.Enabled = False
+    End Sub
+
+    Protected Sub btn_ok_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btn_ok.Click
+
+    End Sub
+End Class

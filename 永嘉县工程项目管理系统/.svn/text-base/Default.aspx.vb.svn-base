@@ -1,0 +1,153 @@
+﻿
+Partial Class _Default
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim LCDM As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim LogoStr As String = ""
+        Try
+            LogoStr = Base.pub.GetWebConfig("SunfunSoft.Xman.Title").ToString()
+        Catch ex As Exception
+            LogoStr = "后台管理"
+        End Try
+
+        Me.Title = LogoStr
+    End Sub
+
+    'Protected Sub BtnLogin_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles BtnLogin.Click
+    '    Dim UserName, PassWord, Str As String
+    '    UserName = Base.SqlFilter(textUserName.Text.Trim()).ToLower
+    '    PassWord = Base.SqlFilter(textPassword.Text.Trim())
+    '    If UserName <> "" And PassWord <> "" Then
+    '        '先得到验证码的配置参数
+    '        Dim ImageCodeConfig As Integer
+    '        Try
+    '            ImageCodeConfig = Base.pub.GetWebConfig("SunfunSoft.Xman.CheckImageCode")
+    '        Catch ex As Exception
+    '            ImageCodeConfig = -1
+    '        End Try
+
+    '        'If ImageCodeConfig >= 1 Then          '在WebConfig里控制是否进行验证码验证,1.中文 2英文
+    '        '    If Session("ImageCode") <> ImageCode.Value.Trim Then
+    '        '        Base.Js.alert(Me, "验证码错误")
+    '        '        Exit Sub
+    '        '    End If
+    '        'End If
+    '        If Base.pub.GetWebConfig("SunfunSoft.Xman.ADUserAuthentication").ToLower = "true" Then     '采用AD验证
+    '            Str = "&lt;script language=javascript&gt;"
+    '            Str = Str & "var  xh = new  ActiveXObject(""Msxml2.XMLHTTP.3.0"");"
+    '            Str = Str & "xh.open(""post"",""Menu/Logo.aspx"",false,""" & UserName & """,""" & PassWord & """);"
+    '            Str = Str & "xh.send();"
+    '            Str = Str & "if (xh.status==200)"
+    '            Str = Str & "{location.href=""index.aspx"";}"
+    '            Str = Str & "else"
+    '            Str = Str & "{location.href=""default.aspx"";}"
+    '            Str = Str & "&lt;/script&gt;"
+    '            Response.Write(Server.HtmlDecode(Str))
+    '        Else                '数据验证
+    '            If Base.CheckUserAuthentication(UserName, Base.EnCrypt.MD5(PassWord)) = True Then
+    '                '进行IP绑定验证
+    '                Dim LoginIP As String = Base.GetIP
+    '                Dim BindIP As String = ""
+    '                Dim BaseDir As String = Server.MapPath("./") & "FormFolder\XMAN-YGDM"
+    '                Dim DfileName As String = BaseDir & "\" & Base.GetUserID(UserName) & ".xml"
+    '                If IO.File.Exists(DfileName) = True And LoginIP <> "127.0.0.1" Then
+    '                    Dim RootNode As System.Xml.XmlNode
+    '                    RootNode = Base.XmlClass.GetXmlFile(DfileName)
+    '                    Dim RootNodeName As String = Base.XmlClass.GetRootNodeName
+    '                    Dim Search_Fid As String = Base.XmlClass.GetFormID
+    '                    Dim IPNode As System.Xml.XmlNode = Base.XmlClass.FindNode("//my:绑定IP")
+    '                    If Not IPNode Is Nothing Then
+    '                        BindIP = IPNode.InnerText
+    '                        If BindIP.Trim.Length > 0 Then
+    '                            If BindIP <> LoginIP Then
+    '                                Base.Js.alert(Me, "限制IP登陆,请检查是否在规定的机子上登陆系统")
+    '                                Exit Sub
+    '                            End If
+    '                        End If
+    '                    End If
+    '                End If
+
+
+    '                If LCDM <> 0 Then
+    '                    Response.Redirect("Index.aspx?LCDM=" & LCDM)
+    '                Else
+    '                    Response.Redirect("Index.aspx")
+    '                End If
+    '            Else
+    '                Base.Js.alert(Me, "用户名或密码错误,请检查!")
+    '            End If
+    '        End If
+    '    End If
+    '    Base.Dispose()
+    'End Sub
+
+    Protected Sub ImageBtnLogin_Click(ByVal sender As Object, ByVal e As System.Web.UI.ImageClickEventArgs) Handles ImageBtnLogin.Click
+        Dim UserName, PassWord, Str As String
+        UserName = Base.SqlFilter(textUserName.Text.Trim()).ToLower
+        PassWord = Base.SqlFilter(textPassword.Text.Trim())
+        If UserName <> "" And PassWord <> "" Then
+            '先得到验证码的配置参数
+            Dim ImageCodeConfig As Integer
+            Try
+                ImageCodeConfig = Base.pub.GetWebConfig("SunfunSoft.Xman.CheckImageCode")
+            Catch ex As Exception
+                ImageCodeConfig = -1
+            End Try
+
+            'If ImageCodeConfig >= 1 Then          '在WebConfig里控制是否进行验证码验证,1.中文 2英文
+            '    If Session("ImageCode") <> ImageCode.Value.Trim Then
+            '        Base.Js.alert(Me, "验证码错误")
+            '        Exit Sub
+            '    End If
+            'End If
+            If Base.pub.GetWebConfig("SunfunSoft.Xman.ADUserAuthentication").ToLower = "true" Then     '采用AD验证
+                Str = "&lt;script language=javascript&gt;"
+                Str = Str & "var  xh = new  ActiveXObject(""Msxml2.XMLHTTP.3.0"");"
+                Str = Str & "xh.open(""post"",""Menu/Logo.aspx"",false,""" & UserName & """,""" & PassWord & """);"
+                Str = Str & "xh.send();"
+                Str = Str & "if (xh.status==200)"
+                Str = Str & "{location.href=""index.aspx"";}"
+                Str = Str & "else"
+                Str = Str & "{location.href=""default.aspx"";}"
+                Str = Str & "&lt;/script&gt;"
+                Response.Write(Server.HtmlDecode(Str))
+            Else                '数据验证
+                If Base.CheckUserAuthentication(UserName, Base.EnCrypt.MD5(PassWord)) = True Then
+                    '进行IP绑定验证
+                    Dim LoginIP As String = Base.GetIP
+                    Dim BindIP As String = ""
+                    Dim BaseDir As String = Server.MapPath("./") & "FormFolder\XMAN-YGDM"
+                    Dim DfileName As String = BaseDir & "\" & Base.GetUserID(UserName) & ".xml"
+                    If IO.File.Exists(DfileName) = True And LoginIP <> "127.0.0.1" Then
+                        Dim RootNode As System.Xml.XmlNode
+                        RootNode = Base.XmlClass.GetXmlFile(DfileName)
+                        Dim RootNodeName As String = Base.XmlClass.GetRootNodeName
+                        Dim Search_Fid As String = Base.XmlClass.GetFormID
+                        Dim IPNode As System.Xml.XmlNode = Base.XmlClass.FindNode("//my:绑定IP")
+                        If Not IPNode Is Nothing Then
+                            BindIP = IPNode.InnerText
+                            If BindIP.Trim.Length > 0 Then
+                                If BindIP <> LoginIP Then
+                                    Base.Js.alert(Me, "限制IP登陆,请检查是否在规定的机子上登陆系统")
+                                    Exit Sub
+                                End If
+                            End If
+                        End If
+                    End If
+
+
+                    If LCDM <> 0 Then
+                        Response.Redirect("Index.aspx?LCDM=" & LCDM)
+                    Else
+                        Response.Redirect("Index.aspx")
+                    End If
+                Else
+                    Base.Js.alert(Me, "用户名或密码错误,请检查!")
+                End If
+            End If
+        End If
+        Base.Dispose()
+    End Sub
+End Class

@@ -1,0 +1,2650 @@
+
+Imports System.Web
+Imports System.Web.Services
+Imports System.Web.Services.Protocols
+Imports System.Xml
+
+<WebService(Namespace:="http://tempuri.org/")> _
+<WebServiceBinding(ConformsTo:=WsiProfiles.BasicProfile1_1)> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+Public Class Service
+    Inherits System.Web.Services.WebService
+
+    Dim MKDM As Integer     '将库名转模块ID
+    Dim RootPath As String = Server.MapPath("./FormFolder")
+    Dim FileName As String = String.Empty
+    Dim xmlDoc As New XmlDocument
+    Dim Base As New Base
+    Dim xmlDoc1 As New XmlDocument
+
+    Dim thisYZM As String = "sunfun88324268"
+
+    ''' <summary>
+    ''' 当内部程序调用时.可能根目录不是同一个地方.所以得设置
+    ''' </summary>
+    ''' <param name="Path"></param>
+    ''' <remarks></remarks>
+    Sub SetRootPath(ByVal Path As String)
+        RootPath = Path
+    End Sub
+
+
+
+    ''' <summary>
+    ''' 返回当前用户指定日期第一个登陆时间
+    ''' </summary>
+    ''' <param name="UserName"></param>
+    ''' <param name="TmpDate"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Function FirstLoginLog(ByVal UserName As String, ByVal TmpDate As String) As XmlDocument
+        Dim date1 As Date
+        If TmpDate.ToLower = "getdate()" Then
+            date1 = Now
+        Else
+            Try
+                date1 = CDate(TmpDate)
+            Catch ex As Exception
+                Return Base.RetError("<Result/>", "日期不合法")
+            End Try
+        End If
+        Dim row As DataRow
+        row = Base.DB.Row("Select LoginName,LoginTime From User_Login_Log WHERE LoginName='" & Base.SqlFilter(UserName) & "' and (DATEDIFF(day, '" & date1 & "', LoginTime) = 0)", "dd")
+        If row Is Nothing Then
+            Return Base.RetError("<Result/>", "<UserName>" & UserName & "</UserName><LoginTime></LoginTime>")
+        Else
+            Return Base.RetError("<Result/>", "<UserName>" & UserName & "</UserName><LoginTime>" & row.Item("LoginTime") & "</LoginTime>")
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 添加表单接口
+    ''' </summary>
+    ''' <param name="formName">表单模块名称</param>
+    ''' <param name="content">表单内容</param>
+    ''' <param name="username">用户账号</param>
+    ''' <param name="password">用户密码</param>
+    ''' <param name="yzm">验证码</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Function AddNewInfos(ByVal formName As String, ByVal content As String, ByVal username As String, ByVal password As String, ByVal yzm As String) As XmlDocument
+
+        If yzm <> thisYZM Then
+            Return Base.RetError("<Result/>", "验证码错误")
+        End If
+
+
+        If Not Base.CheckUserInfo(username, password) Then
+            Return Base.RetError("<Result/>", "用户验证失败")
+        End If
+
+
+        Dim lcdm As Integer
+        lcdm = Base.GetLCDMByMKDM(Base.GetMKDM(formName))
+
+        Dim i As Integer
+        Dim contentxml As New XmlClass
+        Dim formxml As New XmlClass
+        Try
+            contentxml.xmlDoc.LoadXml(content)
+        Catch ex As Exception
+            Return Base.RetError("<Result/>", "content参数错误")
+        End Try
+
+        '判断是否存在此流程，并得到项目名称
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("SELECT LCMC FROM GY_LCDM where LCDM = " & lcdm, "GY_LCDM")
+        If tb.Rows.Count = 0 Then
+            Return Base.RetError("<Result/>", "formName")
+        End If
+        Dim XMMC As String = tb.Rows(0).Item(0)         '因为是无流程,流程名称与项目名称一样
+        Dim DfileName As String = Base.AutoAddProject_HasNoLC(lcdm, username, "~")
+        If DfileName = Nothing Then
+            Return Base.RetError("<Result/>", "新建表单出错")
+        End If
+
+        formxml.xmlDoc.Load(DfileName)
+        For i = 0 To contentxml.xmlDoc.ChildNodes(0).ChildNodes.Count - 1
+            Dim nodeName As String
+
+            Dim a As System.Xml.XmlNodeList
+
+            nodeName = contentxml.xmlDoc.ChildNodes(0).ChildNodes(i).Name
+            nodeName = "my:" & nodeName
+            Try
+                If formxml.xmlDoc.GetElementsByTagName(nodeName).Count = 1 Then
+                    formxml.xmlDoc.GetElementsByTagName(nodeName).Item(0).InnerXml = contentxml.xmlDoc.ChildNodes(0).ChildNodes(i).InnerXml
+                Else
+                    Return Base.RetError("<Result/>", nodeName & "未找到")
+                End If
+            Catch ex As Exception
+            End Try
+        Next
+
+        formxml.xmlDoc.Save(DfileName)
+
+        Dim fidPath As String
+        Dim formFolderPath As String
+        Dim fid As String
+        Dim OpDir As String = Server.MapPath("~") & "FormFolder/"
+        Dim xmdm As String
+        fidPath = DfileName
+        fid = fidPath.Split("\")(fidPath.Split("\").Length - 1).Replace(".xml", "")
+        '表单入库操作        
+        formFolderPath = fidPath.Replace("Submit_Temp\CreateTemp", "FormFolder\" & XMMC)
+        Try
+            System.IO.File.Copy(fidPath, formFolderPath)
+
+
+            tb = Base.DB.Table("select * from xx_xmjc where fid=" & fid, "dd")
+            If tb.Rows.Count > 0 Then
+                xmdm = tb.Rows(0).Item("XMDM")
+            Else
+                Return Base.RetError("<Result/>", "获取XMDM失败！")
+            End If
+
+
+            If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLMapping").ToLower <> "true" And Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.Synchronization").ToLower <> "true" Then
+                Base.XmlDataToDB(fid, OpDir)      '数据入库,进行查询之用
+            End If
+            Try
+                '改变表单状态，用以显示
+                Base.DB.Query("update gy_xmxx set xmjd = '已完成' where xmdm = " & xmdm)
+                Base.DB.Query("update xx_xmjc set state = '0' where xmdm = " & xmdm)
+            Catch ex As Exception
+
+            End Try
+            'Base.SynSubmit(fid, "提交")
+            FormInfo.SubmitForm(fid)
+        Catch ex As Exception
+            Return Base.RetError("<Result/>", "表单同步失败！")
+        End Try
+        Return Base.RetError("<Result/>", "提交成功！")
+    End Function
+
+    ''' <summary>
+    ''' 对已读未读状态进行更改
+    ''' </summary>
+    ''' <param name="msgID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    ''' 
+    <WebMethod()> _
+    Function SetRead(ByVal msgID As String, ByVal userLoginName As String) As XmlDocument
+        Dim userID As Integer
+        If msgID.Trim.Length = 0 Then
+            Return Base.RetError("<Result/>", "请输入MSGID")
+        End If
+        Try
+            msgID = Convert.ToInt32(msgID)
+        Catch ex As Exception
+            msgID = 0
+        End Try
+
+        Try
+            userID = Base.GetUserID(userLoginName)
+        Catch ex As Exception
+            userID = -1
+        End Try
+        If msgID <> 0 Then
+            Base.DB.Query("update SendMessage set LookFlag=1 where cid = " & msgID)
+            Base.DB.Query("Update Order_Form_Log set LookFlag=1 WHERE msgid=" & msgID)
+
+            If userID <> -1 Then
+                Dim dt As New DataTable
+                '获取具有相同发送时间的信息
+                dt = Base.DB.Table("select cid,toid from sendmessage where senddate = (select senddate from sendmessage where cid = " & msgID & " ) and isgroup = 1 and toksdm is null", "dd")
+                If dt.Rows.Count > 1 Then '如果等于1了 说明不是任意人处理
+                    Dim i As Integer
+                    For i = 0 To dt.Rows.Count - 1
+                        If dt.Rows(i)(1).ToString() <> userID.ToString() Then
+                            Base.DB.Query("update SendMessage set LookFlag=1,bz = '已由" & Base.GetUserName(userID, 2) & "处理' where cid = " & dt.Rows(i)(0).ToString())
+                            Base.DB.Query("Update Order_Form_Log set LookFlag=1 WHERE msgid=" & dt.Rows(i)(0).ToString())
+                        End If
+                    Next
+                Else
+                    Base.DB.Query("update sendMessage set toksdm = null, toID =" & userID & " where cid = " & msgID)
+                    Base.DB.Query("update  GY_XMXD set gy_xmxd.ygdm = " & userID & ",ksdm = null WHERE cid in (select gy_xmxd.cid from SendMessage,GY_XMXD,gy_xmxx,xx_xmjc  where  gy_xmxd.fid = gy_xmxx.xmdm and msgid= sendmessage.cid and gy_xmxd.fid = xx_xmjc.fid and sendMessage.cid = " & msgID & ") ")
+                End If
+            End If
+            Return Base.RetError("<Result/>", "设置成功")
+        Else
+            Return Base.RetError("<Result/>", "非法参数")
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 根据库名得到流程代码
+    ''' </summary>
+    ''' <param name="KuName"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Function Ku2LCDM(ByVal KuName As String) As XmlDocument
+        Dim Row As Data.DataRow
+        Try
+            Row = Base.DB.Row("select NoLcDM From  GY_MKXX where MKMC='" & Base.SqlFilter(KuName) & "'", "dddd")
+        Catch ex As Exception
+            Row = Nothing
+        End Try
+        If Row Is Nothing Then
+            Return Base.RetError("<Result/>", "-1")
+        Else
+            Return Base.RetError("<Result/>", Row.Item("NoLcDM").ToString)
+        End If
+    End Function
+
+
+    ''' <summary>
+    ''' 将XPATH语句转成SQL的SELECT语句。用于调试之用
+    ''' </summary>
+    ''' <param name="Name"></param>
+    ''' <param name="Xpath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function Xpath2Select(ByVal Name As String, ByVal Xpath As String) As XmlDocument
+        If Xpath = "null" Or Xpath = "sum(null)" Or Xpath = "count(null)" Then
+            Return Base.RetError("<Result/>", "")
+        End If
+        Dim TempStr As String = String.Empty
+
+        Dim TempXpath As String = Xpath.Replace("sum(", "#")
+        Dim temp As String()
+        temp = TempXpath.Split("#")
+        Dim Math As String = Nothing
+        Dim j As Integer
+        Dim idx As Int16
+        Dim TmpMath As String
+        For j = 1 To temp.Length - 1
+            temp(j) = "sum(" & temp(j)
+            temp(j) = "sum(" & temp(j)
+            idx = temp(j).LastIndexOf(")")
+            If idx > 0 Then
+                TmpMath = temp(j).Substring(idx + 1)
+                temp(j) = temp(j).Substring(0, idx + 1)
+            Else
+                TmpMath = Nothing
+            End If
+            Dim TempSql As String = Base.ReplaceXpath2Select(temp(j), Name)
+            TempStr = TempStr & "<select>" & Base.Rp_Xml_Value(TempSql) & "</select>"
+        Next
+        Return Base.RetError("<Result/>", TempStr.ToString)
+    End Function
+
+    ''' <summary>
+    ''' 得到指定表单的流程历史
+    ''' </summary>
+    ''' <param name="fid"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function getProcessHistory(ByVal fid As String) As XmlDocument
+        Dim dt As New DataTable
+        Dim i As Integer
+        Dim sqlstr, tempStr As String
+        tempStr = String.Empty
+        sqlstr = "select * from processHistory where fid = " & fid & " and isover = 'false'"
+        dt = Base.DB.Table(sqlstr, "dd")
+        xmlDoc.LoadXml("<list/>")
+        For i = 0 To dt.Rows.Count - 1
+            tempStr = tempStr + "<history>"
+
+            tempStr = tempStr + "<fid>" & dt.Rows(i).Item("fid") & "</fid>"
+            tempStr = tempStr + "<currentProcess>" & dt.Rows(i).Item("currentProcess") & "</currentProcess>"
+            tempStr = tempStr + "<nextProcess>" & dt.Rows(i).Item("nextProcess") & "</nextProcess>"
+            tempStr = tempStr + "<fromUserName>" & dt.Rows(i).Item("fromUserName") & "</fromUserName>"
+            tempStr = tempStr + "<toUserName>" & dt.Rows(i).Item("toUserName") & "</toUserName>"
+            tempStr = tempStr + "<sendMessageContent>" & dt.Rows(i).Item("sendMessageContent") & "</sendMessageContent>"
+            tempStr = tempStr + "<attentionNodeValue>" & dt.Rows(i).Item("attentionNodeValue") & "</attentionNodeValue>"
+            tempStr = tempStr + "<sendTime>" & dt.Rows(i).Item("sendTime") & "</sendTime>"
+            tempStr = tempStr + "<remark>" & dt.Rows(i).Item("remark") & "</remark>"
+
+            tempStr = tempStr + "</history>"
+        Next
+
+        xmlDoc.DocumentElement.InnerXml = tempStr
+        Return xmlDoc
+
+    End Function
+
+    ''' <summary>
+    ''' 得到科室列表
+    ''' </summary>
+    ''' <param name="KsKind"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+        Public Function Get_KS_List(ByVal KsKind As String) As XmlDocument
+        Dim tb As New Data.DataTable
+        Dim i As Integer
+        Dim CompanyName As String = String.Empty
+        Dim TempStr As String = String.Empty
+        tb = Base.DB.Table("SELECT KSMC FROM GY_KSDM where ks_about='" & Base.SqlFilter(KsKind) & "'", "dgsag")
+        xmlDoc.LoadXml("<List/>")
+        For i = 0 To tb.Rows.Count - 1
+            TempStr = TempStr & "<ksmc>" & tb.Rows(i).Item("KSMC") & "</ksmc>"
+        Next
+        xmlDoc.DocumentElement.InnerXml = TempStr
+        Return xmlDoc
+    End Function
+
+    ''' <summary>
+    ''' 返回用户信息
+    ''' </summary>
+    ''' <param name="Xpath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function GetUserInfo(ByVal Xpath As String) As XmlDocument
+        Dim KuFile As String = Server.MapPath("./") & "FormFolder\XMAN-YGDM.库.xml"
+        If IO.File.Exists(KuFile) = False Then
+            Return Base.RetError("<Result/>", "")
+        End If
+
+        Try
+            xmlDoc.Load(KuFile)
+        Catch ex As Exception
+            Return Base.RetError("<Error/>", "XML结构错误")
+        End Try
+
+        If Xpath.Trim.Length = 0 Then
+            Return Base.RetError("<Error/>", "Xpath语句不能为空")
+        Else
+            Dim TempNodeList As XmlNodeList
+            Dim namespaces As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc)
+            Dim i As Integer
+            Dim TempStr As New StringBuilder
+            Try
+                TempNodeList = xmlDoc.DocumentElement.SelectNodes(Xpath, namespaces)
+                For i = 0 To TempNodeList.Count - 1
+                    TempStr.Append(TempNodeList.Item(i).OuterXml)
+                Next
+                xmlDoc.DocumentElement.InnerXml = TempStr.ToString
+                TempStr = Nothing
+                Return xmlDoc
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "Xpath语法错：" & ex.Message)
+            End Try
+        End If
+    End Function
+
+
+    ''' <summary>
+    ''' 获取新建文件模版
+    ''' </summary>
+    ''' <param name="formName"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Function AddNewForm_GetFormTemplate(ByVal formName As String, ByVal yzm As String) As XmlDocument
+        If yzm <> thisYZM Then
+            Return Base.RetError("<Result/>", "验证码错误")
+        End If
+
+        Dim LCDM As Integer
+        LCDM = Base.GetLCDMByMKDM(Base.GetMKDM(formName))
+
+        If LCDM = -1 Then
+            Return Base.RetError("<错误/>", "不存在该表单")
+        End If
+
+        Dim templatePath As String
+        templatePath = AppDomain.CurrentDomain.BaseDirectory + "TemplateLibrary/" + formName + "/template.xml"
+
+
+        If Not System.IO.File.Exists(templatePath) Then
+            Return Base.RetError("<错误/>", "不存在该表单模版")
+        End If
+
+        Try
+            Dim xml As New XmlClass
+            xml.xmlDoc.Load(templatePath)
+            Dim xmlNode As XmlNode = xml.xmlDoc.DocumentElement
+            '获取标题节点
+            Dim firstNode As XmlNode = xmlNode.SelectSingleNode("//my:标题", xml.GetNameSpaceManager())
+            '移除标题节点
+            xmlNode.FirstChild.RemoveChild(firstNode)
+
+            Dim returnXml As New XmlDocument
+            returnXml.LoadXml(xmlNode.InnerXml)
+            Return returnXml
+        Catch ex As Exception
+            DoLog.LogErrorToFile("GetFormTemplate", ex.ToString())
+            Return Base.RetError("<错误/>", "处理模版失败")
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' 新建信息
+    ''' </summary>
+    ''' <param name="formName"></param>
+    ''' <param name="content"></param>
+    ''' <param name="username"></param>
+    ''' <param name="yzm"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Function AddNewForm_Add(ByVal formName As String, ByVal content As String, ByVal username As String, ByVal yzm As String) As XmlDocument
+
+        If yzm <> yzm Then
+            Return Base.RetError("<Result/>", "验证码错误")
+        End If
+
+
+        Dim lcdm As Integer
+        lcdm = Base.GetLCDMByMKDM(Base.GetMKDM(formName))
+
+        Dim i As Integer
+        Dim contentxml As New XmlClass
+        Dim formxml As New XmlClass
+        Try
+            contentxml.xmlDoc.LoadXml(content)
+        Catch ex As Exception
+            Return Base.RetError("<Result/>", "content参数错误")
+        End Try
+
+        '判断是否存在此流程，并得到项目名称
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("SELECT LCMC FROM GY_LCDM where LCDM = " & lcdm, "GY_LCDM")
+        If tb.Rows.Count = 0 Then
+            Return Base.RetError("<Result/>", "formName")
+        End If
+        Dim XMMC As String = tb.Rows(0).Item(0)         '因为是无流程,流程名称与项目名称一样
+        Dim DfileName As String = Base.AutoAddProject_HasNoLC(lcdm, username, "~")
+        If DfileName = Nothing Then
+            Return Base.RetError("<Result/>", "新建表单出错")
+        End If
+
+        formxml.xmlDoc.Load(DfileName)
+        For i = 0 To contentxml.xmlDoc.ChildNodes(0).ChildNodes.Count - 1
+            Dim nodeName As String
+
+            Dim a As System.Xml.XmlNodeList
+
+            nodeName = contentxml.xmlDoc.ChildNodes(0).ChildNodes(i).Name
+            nodeName = nodeName
+            Try
+                If formxml.xmlDoc.GetElementsByTagName(nodeName).Count = 1 Then
+                    formxml.xmlDoc.GetElementsByTagName(nodeName).Item(0).InnerXml = contentxml.xmlDoc.ChildNodes(0).ChildNodes(i).InnerXml
+                Else
+                    Return Base.RetError("<Result/>", nodeName & "未找到")
+                End If
+            Catch ex As Exception
+            End Try
+        Next
+
+        formxml.xmlDoc.Save(DfileName)
+
+        Dim fidPath As String
+        Dim formFolderPath As String
+        Dim fid As String
+        Dim OpDir As String = Server.MapPath("~") & "FormFolder/"
+        Dim xmdm As String
+        fidPath = DfileName
+        fid = fidPath.Split("\")(fidPath.Split("\").Length - 1).Replace(".xml", "")
+        '表单入库操作        
+        formFolderPath = fidPath.Replace("Submit_Temp\CreateTemp", "FormFolder\" & XMMC)
+        Try
+            System.IO.File.Copy(fidPath, formFolderPath)
+
+
+            tb = Base.DB.Table("select * from xx_xmjc where fid=" & fid, "dd")
+            If tb.Rows.Count > 0 Then
+                xmdm = tb.Rows(0).Item("XMDM")
+            Else
+                Return Base.RetError("<Result/>", "获取XMDM失败！")
+            End If
+
+
+            If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLMapping").ToLower <> "true" And Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.Synchronization").ToLower <> "true" Then
+                Base.XmlDataToDB(fid, OpDir)      '数据入库,进行查询之用
+            End If
+            Try
+                '改变表单状态，用以显示
+                Base.DB.Query("update gy_xmxx set xmjd = '已完成' where xmdm = " & xmdm)
+                Base.DB.Query("update xx_xmjc set state = '0' where xmdm = " & xmdm)
+            Catch ex As Exception
+
+            End Try
+            FormInfo.SubmitForm(fid)
+            'Base.SynSubmit(fid, "提交")
+        Catch ex As Exception
+            Return Base.RetError("<Result/>", "表单同步失败！")
+        End Try
+        Return Base.RetError("<Result/>", "提交成功！")
+
+    End Function
+
+    ''' <summary>
+    ''' 反写
+    ''' </summary>
+    ''' <param name="formID">表单号</param>
+    ''' <param name="content">反写内容</param>
+    ''' <param name="yzm">验证码</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Function FX_ChangeContent(ByVal formID As Integer, ByVal content As String, ByVal yzm As String) As XmlDocument
+        If yzm <> thisYZM Then
+            Return Base.RetError("<Result/>", "验证码错误")
+        End If
+
+        Dim templatePath As String
+        templatePath = FormInfo.GetTemplatePath(formID)
+
+        Dim templateXML As New XmlClass
+        templateXML.GetXmlFile(templatePath)
+
+        Dim formPath As String = FormInfo.GetFormXMLPath(formID)
+        Dim formXML As New XmlClass
+        formXML.GetXmlFile(formPath)
+
+        Dim contentXML As New XmlClass
+        contentXML.GetXmlText(content)
+        '验证表单结构
+        Dim i As Integer
+        For i = 0 To contentXML.xmlDoc.ChildNodes(0).ChildNodes.Count - 1
+            Dim nodeName As String
+            nodeName = contentXML.xmlDoc.ChildNodes(0).ChildNodes(i).Name
+            nodeName = "my:" + nodeName
+            Try
+                If formXML.xmlDoc.GetElementsByTagName(nodeName).Count > 0 Then
+                    formXML.xmlDoc.GetElementsByTagName(nodeName).Item(0).InnerXml = contentXML.xmlDoc.ChildNodes(0).ChildNodes(i).InnerXml
+                Else
+                    Return Base.RetError("<Result/>", nodeName & "未找到")
+                End If
+            Catch ex As Exception
+
+            End Try
+        Next
+
+        formXML.Save()
+        GlobalServiceHandler.DoSubmitForm(formID)
+       
+        Return Base.RetError("<Result/>", "提交成功！")
+    End Function
+
+    ''' <summary>
+    ''' 重载+1
+    ''' </summary>
+    ''' <param name="formID">表单号</param>
+    ''' <param name="content">反写内容</param>
+    ''' <param name="condition">反写条件字段</param>
+    ''' <param name="Bywriting">被反写字段</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Function FX_ChangeContent2(ByVal formID As String, ByVal condition As String, ByVal Bywriting As String, ByVal content As String, ByVal yzm As String) As XmlDocument
+        'content = "<物品组>"
+        'content += "<物品列表>"
+        'content += "<序号>1</序号>"
+        'content += "<采购定价>555</采购定价>"
+        'content += "</物品列表>"
+        'content += "<物品列表>"
+        'content += "<序号>2</序号>"
+        'content += "<采购定价>4</采购定价>"
+        'content += "</物品列表>"
+        'content += "</物品组>"
+        If yzm <> thisYZM Then
+            Return Base.RetError("<Result/>", "验证码错误")
+        End If
+        If formID = "" Then
+            Return Base.RetError("<Result/>", "表单号不能为空！")
+        End If
+        If content = "" Then
+            Return Base.RetError("<Result/>", "内容不能为空！")
+        End If
+
+        If condition = "" Then
+            Return Base.RetError("<Result/>", "反写条件字段不能为空！")
+        End If
+        If Bywriting = "" Then
+            Return Base.RetError("<Result/>", "被反写字段不能为空！")
+        End If
+        Dim templatePath As String
+        templatePath = FormInfo.GetTemplatePath(formID)
+
+        Dim templateXML As New XmlClass
+        templateXML.GetXmlFile(templatePath)
+
+        Dim formPath As String = FormInfo.GetFormXMLPath(formID)
+        Dim formXML As New XmlClass
+        formXML.GetXmlFile(formPath)
+
+        Dim contentXML As New XmlClass
+
+        contentXML.GetXmlText(content)
+
+        '验证表单结构
+        Dim i As Integer
+        Dim j As Integer
+        Dim str As String
+        Dim id As Integer
+        Dim blog As Boolean
+        Dim nodeName As String = "my:" & condition
+        Bywriting = "my:" & Bywriting
+        For i = 0 To contentXML.xmlDoc.ChildNodes(0).ChildNodes.Count - 1
+            id = contentXML.xmlDoc.ChildNodes(0).ChildNodes(i).SelectSingleNode(condition).InnerXml
+            str = contentXML.xmlDoc.ChildNodes(0).ChildNodes(i).ChildNodes(1).InnerXml
+            For j = 0 To formXML.xmlDoc.GetElementsByTagName(nodeName).Count - 1
+                If (formXML.xmlDoc.GetElementsByTagName(nodeName).Item(j).InnerXml = id) Then
+                    formXML.xmlDoc.GetElementsByTagName(Bywriting).Item(j).InnerXml = str
+                    blog = True
+                    Exit For
+                End If
+            Next
+        Next
+        formXML.Save()
+        GlobalServiceHandler.DoSubmitForm(formID)
+        Return Base.RetError("<Result/>", "提交成功！")
+    End Function
+
+    ''' <summary>
+    ''' 返回表单节点权限
+    ''' </summary>
+    ''' <param name="FormID"></param>
+    ''' <param name="UserName"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Function GetNodePerm(ByVal FormID As String, ByVal UserName As String) As XmlDocument
+        Dim FID As Int64
+        Try
+            FID = Convert.ToInt32(FormID)
+        Catch ex As Exception
+            Return Base.RetError("<Error/>", "格式出错")
+        End Try
+        Dim tb As New DataTable
+        tb = Base.DB.Table("SELECT MKDM FROM XX_XMJC where state<>-100 and FID=" & FID, "dgasg")
+        If tb.Rows.Count <= 0 Then
+            Return Base.RetError("<Error/>", "表单不存在")
+        End If
+        Dim MKDM As Integer = tb.Rows(0)(0)
+        tb = Base.DB.Table("SELECT distinct NodePermList.NodeName FROM GY_YGDM, GY_YGQX,NodePermList where GY_YGDM.YGDM = GY_YGQX.YGDM and NodePermList.Group_ID=GY_YGQX.Group_ID and NodePermList.MKDM=" & MKDM, "dd")
+        Dim i As Int16
+        Dim Tmp As New StringBuilder
+        For i = 0 To tb.Rows.Count - 1
+            Tmp.Append("<节点名称>" & tb.Rows(i).Item(0).ToString() & "</节点名称>")
+        Next
+        Return Base.RetError("<Result/>", Tmp.ToString())
+    End Function
+
+    ''' <summary>
+    ''' 根据模块代码.来查询模块名称.用来实现一个模板多个功能时的区分.
+    ''' </summary>
+    ''' <param name="XMDM"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function GetFunctionName(ByVal XMDM As String) As XmlDocument
+        Dim TempXMDM As Integer
+        Try
+            TempXMDM = XMDM
+        Catch ex As Exception
+            Return Base.RetError("<结果/>", "空")
+        End Try
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("SELECT MKMC From GY_XMXX ,GY_MKXX where GY_MKXX.NOLCDM=GY_XMXX.LCDM and XMDM=" & TempXMDM, "dd")
+        If Tb.Rows.Count > 0 Then
+            Return Base.RetError("<结果/>", Tb.Rows(0)(0).ToString.Trim)
+        Else
+            Return Base.RetError("<结果/>", "空")
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 获得项目名称
+    ''' </summary>
+    ''' <param name="XMDM"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function GetProjectName(ByVal XMDM As String) As XmlDocument
+        Dim TempXMDM As Integer
+        Try
+            TempXMDM = XMDM
+        Catch ex As Exception
+            Return Base.RetError("<结果/>", "空")
+        End Try
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("SELECT XMMC From GY_XMXX where XMDM=" & TempXMDM, "dd")
+        If Tb.Rows.Count > 0 Then
+            Return Base.RetError("<结果/>", Tb.Rows(0)(0).ToString.Trim)
+        Else
+            Return Base.RetError("<结果/>", "空")
+        End If
+    End Function
+
+
+    <WebMethod()> _
+    Function Annex2FileName(ByVal Base64String As String) As XmlDocument
+        If Base64String.Trim.Length = 0 Then
+            Return Base.RetError("<Error/>", "Xpath不能为空")
+        End If
+
+        Dim FileTempName() As Byte    '临时的文件名字节位
+        Dim BodyData() As Byte      '用来存储转换后的内容
+
+        BodyData = System.Convert.FromBase64String(Base64String)
+        '头24个位置为INFOPATH添加上去的内容.
+        '查找文件名的位置
+        Dim Zcount As Int16 = 0
+        Dim BodyIndex As Integer = 0
+        Dim j As Integer
+        For j = 0 To BodyData.Length - 1
+            If j >= 24 Then
+                If BodyData.GetValue(j) = 0 Then
+                    Zcount += 1
+                Else
+                    Zcount = 0
+                End If
+                If Zcount = 3 Then
+                    BodyIndex = j
+                    Exit For
+                End If
+            End If
+        Next
+
+        '得到文件名.
+        Dim FileTempName1 As New IO.MemoryStream()
+        FileTempName1.Write(BodyData, 24, BodyIndex - 24)
+        FileTempName = FileTempName1.ToArray
+        Dim ReturnFileName As String = Encoding.Unicode.GetString(FileTempName)
+        Return Base.RetError("<FileName/>", ReturnFileName.Substring(0, ReturnFileName.Length - 1))
+
+        ''得到文件的内容
+        'Dim stream As New IO.MemoryStream()
+        'stream.Write(BodyData, BodyIndex + 1, BodyData.Length - BodyIndex - 1)
+        'BodyData = stream.ToArray()
+        'Dim bytes As Byte() = stream.GetBuffer()
+        'Dim base64 As String = Convert.ToBase64String(bytes)
+        ''Response.Write(base64)
+
+        'stream.Close()
+
+        'Encoding.Unicode.GetString(FileTempName)
+        'Dim fs As System.IO.FileStream = New System.IO.FileStream("d:\" & Encoding.Unicode.GetString(FileTempName), System.IO.FileMode.Create)
+        'Dim bw As System.IO.BinaryWriter = New System.IO.BinaryWriter(fs)
+
+        'bw.Write(BodyData)
+        'bw.Close()
+        'fs.Close()
+
+
+    End Function
+
+
+    ''' <summary>
+    ''' 得到表单的附件（列表）
+    ''' </summary>
+    ''' <param name="Name"></param>
+    ''' <param name="Xpath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Function GetAnnex(ByVal Name As String, ByVal Xpath As String) As XmlDocument
+        '对XML文件库进行处理
+        Dim Result As String = CheckFileName(Name)
+        If Not Result Is Nothing Then
+            Return Base.RetError("<Error/>", Result)
+        End If
+        Dim SaveBase As String = Server.MapPath("./") & "\FormFolder\" & Name & "\Annex\"
+        Dim TempFileName As String = String.Empty
+        Try
+            xmlDoc.Load(FileName)
+        Catch ex As Exception
+            Return Base.RetError("<Error/>", "XML结构错误")
+        End Try
+
+        If Xpath.Trim.Length = 0 Then
+            Return Base.RetError("<Error/>", "Xpath不能为空")
+        Else
+            Dim TempNodeList As XmlNodeList
+            Dim namespaces As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc)
+            Dim i As Integer
+            Dim TempStr As New StringBuilder
+            Try
+                TempNodeList = xmlDoc.DocumentElement.SelectNodes(Xpath, namespaces)
+                Dim TempNode As XmlNode
+
+                For i = 0 To TempNodeList.Count - 1
+                    TempFileName = SaveBase & TempNodeList.Item(i).InnerText
+                    If IO.File.Exists(TempFileName) = True Then
+                        TempStr.Append("<附件内容>" & Base.pub.Text_File_Read(TempFileName) & "</附件内容>")
+                    End If
+                Next
+                xmlDoc.LoadXml("<附件/>")
+                xmlDoc.DocumentElement.InnerXml = TempStr.ToString
+                TempStr = Nothing
+                Return xmlDoc
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "Xpath语法错：" & ex.Message)
+            End Try
+        End If
+    End Function
+
+
+    ''' <summary>
+    ''' 返回表单的附件列表
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function GetFormAnnexList(ByVal FormID As Integer) As XmlDocument
+        Dim tb As New Data.DataTable
+        '根据ＦＩＤ得到相关的信息        
+        tb = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir,GY_MKXX.MKDM,XX_XMJC.XMDM,[View] FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & FormID & ")", "XX_XMJC")
+        If tb.Rows.Count = 0 Then
+            Return Base.RetError("<错误/>", "非法访问")
+        End If
+
+        Dim MKMC As String = tb.Rows(0).Item(1)
+
+        Dim RootPath As String = HttpContext.Current.Request.MapPath("./") & "FormFolder\" & MKMC & "\Annex\" & FormID & "\"
+        If IO.Directory.Exists(RootPath) = False Then
+            Return Base.RetError("<附件/>", "空")
+        End If
+        Dim Values As New ArrayList
+        Dim MyFiles As String()
+        MyFiles = IO.Directory.GetFiles(RootPath)          '//得到该目录下所有文件
+        Values.AddRange(MyFiles)
+        Dim OutStr As String = ""
+        Dim i As Integer
+        If Values.Count = 0 Then
+            Return Base.RetError("<附件/>", "空")
+        Else
+            For i = 0 To Values.Count - 1
+                Dim FileInfo As New System.IO.FileInfo(Values(i))
+                OutStr += "<文件><文件名称>" & FileInfo.Name & "</文件名称><超链>http://" & HttpContext.Current.Request.ServerVariables("Server_Name") & "/Manager/Forms/FormAnnex.aspx?FID=" & FormID & "&amp;FileName=%5c" & Server.UrlEncode(FileInfo.Name) & "</超链></文件>"
+            Next
+            'HttpContext.Current.Response.Write(OutStr)
+            'HttpContext.Current.Response.End()
+            Return Base.RetError("<附件/>", OutStr)
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 获取表单附件列表
+    ''' </summary>
+    ''' <param name="formID">表单号</param>
+    ''' <param name="annexType">附件类别</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function GetFromAnnexListNew(ByVal formID As Integer, ByVal annexType As String) As XmlDocument
+        Dim dt As New DataTable
+        Dim sqlstr As String
+
+        dt = Base.DB.Table("SELECT XX_XMJC.FID,Gy_MKXX.MKMC,GY_MKXX.XsnDir,GY_MKXX.MKDM,XX_XMJC.XMDM,[View] FROM XX_XMJC, GY_MKXX WHERE XX_XMJC.MKDM = GY_MKXX.MKDM AND (XX_XMJC.Fid = " & formID & ")", "XX_XMJC")
+        If dt.Rows.Count = 0 Then
+            Return Base.RetError("<错误/>", "非法访问")
+        End If
+
+        Dim MKMC As String = dt.Rows(0).Item(1)
+
+        sqlstr = "select * from annexupload where fid=" & formID & " "
+        If annexType <> "" Then
+            sqlstr += " and remarks='" & annexType & "'"
+        End If
+        sqlstr += " and (isdel is null or isdel = 'false')"
+
+        dt = Base.DB.Table(sqlstr, "dd")
+        'dt = Base.DB.Table("select * from annexupload where fid=" & formID & " and remarks=" & annexType & " and (isdel is null or isdel = 'false')", "dd")
+        If dt.Rows.Count = 0 Then
+            Return Base.RetError("<附件/>", "空")
+        Else
+            Dim i As Integer
+            Dim outStr As String = String.Empty
+            For i = 0 To dt.Rows.Count - 1
+                Dim FileInfo As New System.IO.FileInfo(HttpContext.Current.Request.MapPath("./") & dt.Rows(i).Item("path"))
+                outStr += "<文件>"
+                outStr += " <附件ID>" & dt.Rows(i).Item("cid") & "</附件ID>"
+                outStr += " <文件名称>" & dt.Rows(i).Item("filename") & "</文件名称>"
+                outStr += "<文件类型>" & dt.Rows(i).Item("filetype") & "</文件类型>"
+                outStr += " <超链>http://" & HttpContext.Current.Request.ServerVariables("Http_Host") & HttpContext.Current.Request.ServerVariables("url").ToLower().Replace("service.asmx", "") & dt.Rows(i).Item("path") & "</超链>"
+                If Not IsDBNull(dt.Rows(i).Item("filesize")) Then
+                    Try
+                        outStr += " <文件大小>" & Math.Round(Convert.ToInt64(dt.Rows(i).Item("filesize")) / 1024, 2) & "K</文件大小>"
+                    Catch ex As Exception
+                        outStr += " <文件大小>???K</文件大小>"
+                    End Try
+                Else
+                    outStr += " <文件大小>???K</文件大小>"
+                End If
+                outStr += " <上传人>" & Base.GetUserName(dt.Rows(i).Item("userid"), 3) & "</上传人>"
+                outStr += " <上传时间>" & dt.Rows(i).Item("uploadtime") & "</上传时间>"
+                outStr += " <备注>" & dt.Rows(i).Item("remarks") & "</备注>"
+                outStr += "</文件>"
+            Next
+
+            Return Base.RetError("<附件/>", outStr)
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 返回全新的标题（合法）
+    ''' </summary>
+    ''' <param name="OpUser"></param>
+    ''' <param name="XMDM"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function GetFormTitle(ByVal OpUser As String, ByVal XMDM As Integer) As XmlDocument
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.CreateServiceTitle").ToLower <> "true" Then
+            Return Base.RetError("<错误/>", "你无权访问!")
+        End If
+
+        Dim Login_User As String = Base.SqlFilter(OpUser.Trim)
+        Dim UserID As Integer = Base.GetUserID(Login_User)
+        Dim LCDM As Integer
+
+        '判断是否存在此流程，并得到项目名称
+        Dim tb As New Data.DataTable
+        Try
+            tb = Base.DB.Table("SELECT LCDM FROM GY_XMXX where xmdm = " & XMDM, "GY_LCDM")
+            If tb.Rows.Count = 0 Or UserID = 0 Or UserID = -1 Then
+                Return Base.RetError("<错误/>", "非法访问")
+            End If
+        Catch ex As Exception
+            Return Base.RetError("<错误/>", "非法访问1")
+        End Try
+
+        'Dim XMMC As String = tb.Rows(0).Item(0)         '因为是无流程,流程名称与项目名称一样
+        LCDM = tb.Rows(0).Item(0)
+
+
+        Dim DfileName As String = Base.AutoAddProject_HasNoLC(LCDM, Login_User, ".")
+        If DfileName = Nothing Then
+            Return Base.RetError("<错误/>", "表单出错,请更新模板")
+        End If
+        Try
+            xmlDoc.Load(DfileName)
+        Catch ex As Exception
+            Return Base.RetError("<Error/>", "XML结构错误")
+        End Try
+
+        '先查询过滤的库,得到结果,存在临时数组中.
+        Dim TempNode As XmlNode
+        Dim namespaces As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc)
+        TempNode = xmlDoc.SelectSingleNode("//my:标题", namespaces)
+        xmlDoc.DocumentElement.InnerXml = TempNode.OuterXml
+        Return xmlDoc
+    End Function
+
+    ''' <summary>
+    ''' 返回表单的状态列表
+    ''' </summary>
+    ''' <param name="MKDM"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function GetFormStateList(ByVal MKDM As Integer) As XmlDocument
+        Dim Tb As New DataTable
+        Dim RetStr As String = ""
+        Tb = Base.DB.Table("SELECT NoLCDM FROM GY_MKXX where MKDM=" & MKDM, "dd")
+        If Tb.Rows.Count > 0 Then
+            Dim LCDM As Integer
+            If IsDBNull(Tb.Rows(0)("NoLCDM")) = True Then
+            Else
+                LCDM = Tb.Rows(0)("NoLCDM")
+                Tb = Base.DB.Table("Select cid,value from Xconfig where config='表单标签' and lcdm=" & LCDM, "dd")
+                Dim i As Integer
+                For i = 0 To Tb.Rows.Count - 1
+                    RetStr += "<状态>" & Tb.Rows(i).Item(1) & "</状态>"
+                Next
+            End If
+        Else
+            RetStr = "表单库不存在"
+        End If
+        Return Base.RetError("<表单状态/>", RetStr)
+    End Function
+
+
+
+    ''' <summary>
+    ''' 返回表单状态
+    ''' </summary>
+    ''' <param name="FID"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function GetFormState(ByVal FID As Integer) As XmlDocument
+        Dim Tb As New DataTable
+        Dim State As Integer
+        Dim Retstr As String = ""
+        Tb = Base.DB.Table("Select state from XX_XMJC where state<>-100 and FID=" & FID, "DD")
+        If Tb.Rows.Count > 0 Then
+            Try
+                State = Tb.Rows(0)("state").ToString
+            Catch ex As Exception
+                State = 0
+            End Try
+            If State = 0 Then Retstr = "进行中"
+            If State = -1 Then Retstr = "已完成"
+            If State = -2 Then Retstr = "已取消"
+            If Retstr = "" Then
+                Tb = Base.DB.Table("Select cid,value from Xconfig where config='表单标签' and cid=" & State, "dd")
+                If Tb.Rows.Count > 0 Then
+                    Retstr = Tb.Rows(0)("value").ToString
+                Else
+                    Retstr = "进行中"
+                End If
+            End If
+        Else
+            Retstr = "表单不存在或已删除"
+        End If
+        Return Base.RetError("<表单状态/>", Retstr)
+    End Function
+
+    ''' <summary>
+    ''' 得到流程状态
+    ''' </summary>
+    ''' <param name="XMDM">状态代码</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function GetProjectStatus(ByVal XMDM As Integer) As XmlDocument
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("SELECT XMJD FROM GY_XMXX where XMDM=" & XMDM, "dd")
+        If Tb.Rows.Count = 0 Then           '表示流程不存在
+            Return Base.RetError("<错误/>", "流程不存在!")
+        End If
+        Tb = Base.DB.Table("SELECT top 1 GY_XMZT.ZTMC FROM XX_XMJC,GY_XMZT where XX_XMJC.XMZT = GY_XMZT.XMZT and (XX_XMJC.WCBZ=0 or XX_XMJC.WCBZ is null) and XX_XMJC.XMDM=" & XMDM & " ORDER BY GY_XMZT.OrderBy, GY_XMZT.XMZT", "XX_XMJC")
+        If Tb.Rows.Count > 0 Then
+            Return Base.RetError("<流程状态/>", Tb.Rows(0)(0).ToString.Trim)
+        Else
+            Return Base.RetError("<流程状态/>", "已完成")
+        End If
+    End Function
+
+
+    ''' <summary>
+    ''' 生成序列号
+    ''' </summary>
+    ''' <param name="KindName">序列名称</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function GetSerialNumber(ByVal KindName As String) As XmlDocument
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("SELECT top 1 KindID,TopNo,ButtonNo,StartNO,DateFlag FROM Serial_Kind where KindName='" & Base.SqlFilter(KindName) & "' order by KindId desc", "ddd")
+        If Tb.Rows.Count = 0 Then
+            Return Base.RetError("<编号/>", "###")
+        End If
+        Dim Kind As Integer = Tb.Rows(0).Item(0)
+        Dim TopNo As String = Tb.Rows(0).Item(1)
+        Dim ButtonNo As String = Tb.Rows(0).Item(2)
+        Dim StartNo As String = Tb.Rows(0).Item(3)
+        Dim DateFlag As Boolean
+        Try
+            DateFlag = Tb.Rows(0).Item(4)
+        Catch ex As Exception
+            DateFlag = False
+        End Try
+        Dim SerialNO As String = String.Empty
+        If TopNo.Trim.Length > 0 Then
+            SerialNO += TopNo.Trim
+        End If
+        If DateFlag = True Then
+            SerialNO += Format(Now, "yyMMdd")
+        End If
+        Dim CenterNO As String = String.Empty
+        Tb = Base.DB.Table("SELECT Max(CenterNo) FROM Serial_Number where KindID = " & Kind, "gggd")
+        If Tb.Rows.Count = 0 Then
+            CenterNO = StartNo
+        Else
+            If IsDBNull(Tb.Rows(0)(0)) = True Then
+                CenterNO = StartNo
+            Else
+                CenterNO = Int(Tb.Rows(0)(0)) + 1
+            End If
+        End If
+        Base.DB.Query("INSERT INTO [Serial_Number]([CenterNO],[KindID])VALUES(" & CenterNO & "," & Kind & ")")
+        SerialNO += CenterNO
+        If ButtonNo.Trim.Length > 0 Then
+            SerialNO += ButtonNo.Trim
+        End If
+        Return Base.RetError("<编号/>", SerialNO)
+    End Function
+
+    ''' <summary>
+    ''' 常用的得到库数据的方法(两种)
+    ''' </summary>
+    ''' <param name="Name">表单库名</param>
+    ''' <param name="Xpath">查询的XPATH语句</param>
+    ''' <returns></returns>
+    ''' <remarks>测试Xpath语句: /my:myFields/my:group1[my:标题/my:group2/my:group3/my:专家姓名='222']
+    ''' 这里要注意几点的问题是,前面的节点是表示返回节点的位置.</remarks>
+    <WebMethod()> _
+    Public Function GetData(ByVal Name As String, ByVal Xpath As String) As XmlDocument
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+
+            Dim sqlLibrary As New SQLLibrary
+            Return sqlLibrary.Query(Name, Xpath)
+            'TmpResult = Base.GetXML_MKDM(Name, xmlDoc)
+            'If Not TmpResult Is Nothing Then
+            '    Return Base.RetError("<Error/>", TmpResult)
+            'End If
+        Else
+            '对XML文件库进行处理
+            Dim Result As String = CheckFileName(Name)
+            If Not Result Is Nothing Then
+                Return Base.RetError("<Error/>", Result)
+            End If
+            Try
+                xmlDoc.Load(FileName)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "XML结构错误")
+            End Try
+        End If
+        If Xpath.Trim.Length = 0 Then
+            Return xmlDoc
+        Else
+            Dim TempNodeList As XmlNodeList
+            Dim namespaces As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc)
+            Dim i As Integer
+            Dim TempStr As New StringBuilder
+            Try
+                TempNodeList = xmlDoc.DocumentElement.SelectNodes(Xpath, namespaces)
+                For i = 0 To TempNodeList.Count - 1
+                    TempStr.Append(TempNodeList.Item(i).OuterXml)
+                Next
+                xmlDoc.DocumentElement.InnerXml = TempStr.ToString
+                TempStr = Nothing
+                Return xmlDoc
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "Xpath语法错：" & ex.Message)
+            End Try
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 常用的得到库数据的方法(两种)
+    ''' </summary>
+    ''' <param name="Name">表单库名</param>
+    ''' <param name="Xpath">查询的XPATH语句</param>
+    ''' <returns></returns>
+    ''' <remarks>测试Xpath语句: /my:myFields/my:group1[my:标题/my:group2/my:group3/my:专家姓名='222']
+    ''' 这里要注意几点的问题是,前面的节点是表示返回节点的位置.</remarks>
+    <WebMethod()> _
+    Public Function GetLastData(ByVal Name As String, ByVal Xpath As String) As XmlDocument
+
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+            Dim sqlLibrary As New SQLLibrary
+            Return sqlLibrary.QueryLastData(Name, Xpath)
+           
+        Else
+            '对XML文件库进行处理
+            Dim Result As String = CheckFileName(Name)
+            If Not Result Is Nothing Then
+                Return Base.RetError("<Error/>", Result)
+            End If
+            Try
+                xmlDoc.Load(FileName)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "XML结构错误")
+            End Try
+        End If
+        If Xpath.Trim.Length = 0 Then
+            Return Base.RetError("<Error/>", "Xpath不能为空")
+        Else
+            Dim TempNodeList As XmlNodeList
+            Dim namespaces As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc)
+            Dim TempStr As New StringBuilder
+            Try
+                TempNodeList = xmlDoc.DocumentElement.SelectNodes(Xpath, namespaces)
+                If TempNodeList.Count - 1 >= 0 Then
+                    TempStr.Append(TempNodeList.Item(TempNodeList.Count - 1).OuterXml)
+                End If
+                xmlDoc.DocumentElement.InnerXml = TempStr.ToString
+                TempStr = Nothing
+                Return xmlDoc
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "Xpath语法错：" & ex.Message)
+            End Try
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 对某一个字段进行SUM操作
+    ''' </summary>
+    ''' <param name="Name"></param>
+    ''' <param name="Xpath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function GetSum(ByVal Name As String, ByVal Xpath As String) As XmlDocument
+        '主要是得到Xpath中,要求的格式的求合
+        '格式 sum(//节点)
+
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLMapping").ToLower = "true" Then
+            Dim sqlLibrary As New SQLLibrary
+            Return sqlLibrary.QuerySum(Name, Xpath)
+
+            'Return GetSum_Mapping(Name, Xpath)          '调用二维映射程序
+        End If
+
+        Dim nav As XPath.XPathNavigator
+        Dim names As XmlNamespaceManager
+        Dim TmpResult As String
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+            TmpResult = Base.GetXML_MKDM(Name, xmlDoc)
+            If Not TmpResult Is Nothing Then
+                Return Base.RetError("<Error/>", TmpResult)
+            End If
+        Else
+            Dim Result As String = CheckFileName(Name)
+            If Not Result Is Nothing Then
+                Return Base.RetError("<Error/>", Result)
+            End If
+            Try
+                xmlDoc.Load(FileName)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "XML结构错误：" & ex.Message)
+            End Try
+        End If
+        If Xpath.Trim.Length = 0 Then
+            Return Base.RetError("<Error/>", "未输入要求合的节点.请确认!!")
+        End If
+
+        nav = xmlDoc.CreateNavigator()
+        names = Base.GetXmlNamespaceManager(xmlDoc)
+        Dim Temp As String = nav.Evaluate("sum(" & Xpath & ")", names)
+        '返回结果
+        xmlDoc.LoadXml("<Result/>")
+
+        Return xmlDoc
+
+    End Function
+
+    <WebMethod()> _
+    Public Function GetDataOneToMore(ByVal keyName1 As String, ByVal mkmc1 As String, ByVal xpath1 As String, ByVal keyName2 As String, ByVal mkmc2 As String, ByVal xpath2 As String) As XmlDocument
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLMapping").ToLower = "true" Then
+            Dim sqlLibrary As New SQLLibrary
+            Return sqlLibrary.QueryDateOneToMore(keyName1, mkmc1, xpath1, keyName2, mkmc2, xpath2)
+        Else
+            xmlDoc.LoadXml("<Result/>")
+            xmlDoc.DocumentElement.InnerText = "未使用SQLXML映射"
+        End If
+    End Function
+
+
+
+    ''' <summary>
+    ''' 常用的得到库数据的方法(用于大库查询效率问题的解决)
+    ''' </summary>
+    ''' <param name="Name">表单库名</param>
+    ''' <param name="Xpath">查询的XPATH语句</param>
+    ''' <returns></returns>
+    ''' <remarks>测试Xpath语句: /my:myFields/my:group1[my:标题/my:group2/my:group3/my:专家姓名='222']
+    ''' 这里要注意几点的问题是,前面的节点是表示返回节点的位置.</remarks>
+    <WebMethod()> _
+       Public Function GetDataBySql(ByVal Name As String, ByVal Xpath As String) As XmlDocument
+        Dim sqlstr As String
+        sqlstr = Base.Xpath2Select(Xpath, Name) '转换XPATH到SQL用于查询数据库，得到表单ID
+        Dim dt As New DataTable
+        Try
+            dt = Base.DB.Table(sqlstr, "fids")
+        Catch ex As Exception
+            '查询出错说明库或者XPATH转换出错
+            Return Base.RetError("<Error/>", "SQL语句出错")
+        End Try
+
+        Dim TempStr As New StringBuilder
+        If dt.Rows.Count = 0 Then
+            Return Base.RetError("<Error/>", "没有相关数据")
+        Else
+            Dim Path As String = Server.MapPath("./") & "FormFolder\" & Name & "\" '表单的根目录
+            Dim i, j As Integer
+            Dim tempnodelist As XmlNodeList
+            Dim namespaces As XmlNamespaceManager
+            TempStr.Append("<result>")
+            For i = 0 To dt.Rows.Count - 1
+                Dim FilePath = Path & dt.Rows(i).Item(0).ToString & ".xml" '一个表单
+                If System.IO.File.Exists(FilePath) Then
+                    Try
+                        xmlDoc.Load(FilePath)
+                        namespaces = Base.GetXmlNamespaceManager(xmlDoc)
+                        tempnodelist = xmlDoc.DocumentElement.SelectNodes(Xpath, namespaces) '得到XPATH中要求的字段
+                        For j = 0 To tempnodelist.Count - 1
+                            TempStr.Append(tempnodelist.Item(j).OuterXml)
+                        Next
+                    Catch ex As Exception
+                        Return Base.RetError("<Error/>", "载入XML文件失败")
+                    End Try
+                Else
+                    '表单找不到暂时不处理
+                    'TempStr.Append(Base.RetError("<Error/>", "表单" & dt.Rows(i).Item(0).ToString & ".xml文件不存在").OuterXml)
+                End If
+            Next
+            TempStr.Append("</result>")
+        End If
+        xmlDoc.LoadXml(TempStr.ToString)
+        Return xmlDoc
+    End Function
+
+
+    ''' <summary>
+    ''' 数据库联合查询
+    ''' </summary>
+    ''' <param name="keyName">2个库的相同字段</param>
+    ''' <param name="name1">库1名称</param>
+    ''' <param name="condition1">库1条件</param>
+    ''' <param name="searchResultNodes1">库1需要筛选的字段</param>
+    ''' <param name="name2">库2名称</param>
+    ''' <param name="condition2">库2条件</param>
+    ''' <param name="searchResultNodes2">库2需要筛选的字段</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function GetDateUionBySQL(ByVal keyName As String, ByVal name1 As String, ByVal condition1 As String, ByVal searchResultNodes1 As String, ByVal name2 As String, ByVal condition2 As String, ByVal searchResultNodes2 As String) As XmlDocument
+
+
+        Try
+            Base.DB.Query("select top 1 Aid From " & name1 & "_Mapping")
+            Base.DB.Query("select top 1 Aid From " & name1 & "_MapExt")
+            Base.DB.Query("select top 1 Aid From " & name2 & "_Mapping")
+            Base.DB.Query("select top 1 Aid From " & name2 & "_MapExt")
+        Catch ex As Exception
+            Return Base.RetError("<Result/>", "库未影射")
+        End Try
+
+
+        Dim dt As New DataTable
+        Try
+            dt = convertUionSQLStr(keyName, name1, searchResultNodes1, condition1, name2, searchResultNodes2, condition2)
+        Catch ex As Exception
+            Return Base.RetError("<Result/>", "SQL语句错误，请检查字段是否已经映射")
+        End Try
+
+        Dim i, j As Integer
+        Dim selNode As String = searchResultNodes1 & "," & searchResultNodes2
+        Dim selNodes() As String = selNode.Split(",")
+        Dim XsltStr As New StringBuilder
+
+        XsltStr.Append("<Results>" & vbCrLf)
+        For i = 0 To dt.Rows.Count - 1
+            XsltStr.Append("  <Result>" & vbCrLf)
+            For j = 0 To selNodes.Length - 1
+                XsltStr.Append("    <" & selNodes(j).Replace(":", "") & ">" & vbCrLf)
+                XsltStr.Append("        " & dt.Rows(i).Item(j) & "" & vbCrLf)
+                XsltStr.Append("    </" & selNodes(j).Replace(":", "") & ">" & vbCrLf)
+            Next
+            XsltStr.Append("  </Result>" & vbCrLf)
+        Next
+        XsltStr.Append("</Results>" & vbCrLf)
+        xmlDoc.LoadXml(XsltStr.ToString)
+        Return xmlDoc
+
+    End Function
+
+    Function convertUionSQLStr(ByVal commanCondtion As String, ByVal name1 As String, ByVal selNodes1 As String, ByVal condition1 As String, ByVal name2 As String, ByVal selNodes2 As String, ByVal condition2 As String) As DataTable
+        Dim sqlstr As String
+
+        name1 = Trim(name1) & "_MapExt"
+        name2 = Trim(name2) & "_MapExt"
+        Dim i As Integer = 0
+        selNodes1 = Trim(selNodes1).Replace(":", "")
+        Dim nodes1() As String
+        nodes1 = selNodes1.Split(",")
+        'selNodes1 = selNodes1.Replace(",", "," & name1 & ".")
+
+        selNodes2 = Trim(selNodes2).Replace(":", "")
+        Dim nodes2() As String
+        nodes2 = selNodes2.Split(",")
+        'selNodes2 = selNodes2.Replace(",", "," & name2 & ".")
+
+
+        Dim returnDt1 As New DataTable
+        Dim returnDt2 As New DataTable
+        For i = 0 To nodes1.Length - 1
+            Dim dc As New DataColumn
+            dc.ColumnName = nodes1(i)
+            dc.DefaultValue = nodes1(i)
+            returnDt1.Columns.Add(dc)
+        Next
+
+        For i = 0 To nodes2.Length - 1
+            Dim dc As New DataColumn
+            dc.ColumnName = nodes2(i)
+            dc.DefaultValue = nodes2(i)
+            returnDt2.Columns.Add(dc)
+        Next
+
+
+        Dim commanStr1 As String
+        commanStr1 = "select fid from " & name1 & " where 1=1 "
+        Dim commans() As String = commanCondtion.Replace(":", "").Split(",")
+
+        For i = 0 To commans.Length - 1
+            commanStr1 = commanStr1 & " and " & commans(i) & " in ( "
+            Dim tempstr As String
+            tempstr = "select " & commans(i) & " from " & name2 & " where " & condition2.Replace(":", "")
+            commanStr1 = commanStr1 & tempstr & " ) "
+        Next
+        commanStr1 = commanStr1 & " and " & condition1.Replace(":", "") & " and fid not in(select xmdm from gy_xmxx where xmjd='已删除')"
+
+
+
+
+        Dim commanStr2 As String
+        commanStr2 = "select fid from " & name2 & " where 1=1 "
+
+        For i = 0 To commans.Length - 1
+            commanStr2 = commanStr2 & " and " & commans(i) & " in ( "
+            Dim tempstr As String
+            tempstr = "select " & commans(i) & " from " & name1 & " where " & condition1.Replace(":", "")
+            commanStr2 = commanStr2 & tempstr & " ) "
+        Next
+        commanStr2 = commanStr2 & " and " & condition2.Replace(":", "") & " and fid not in(select xmdm from gy_xmxx where xmjd='已删除')"
+
+
+
+        Dim dt1 As New DataTable
+        Dim dt2 As New DataTable
+
+        Dim dr1 As DataRow = returnDt1.NewRow
+        Dim dr2 As DataRow = returnDt2.NewRow
+        dt1 = Base.DB.Table(commanStr1, "dd") '获取所有符合条件的FID
+        dt2 = Base.DB.Table(commanStr2, "dd")
+
+        If dt1.Rows.Count <> dt2.Rows.Count Then
+            returnDt1.Merge(returnDt2)
+            Return returnDt1
+        End If
+
+        For i = 0 To dt1.Rows.Count - 1
+            sqlstr = "select " & selNodes1 & " from " & name1 & " where fid = " & dt1.Rows(i).Item(0)
+            dr1 = Base.DB.Row(sqlstr, "returnDt1")
+            returnDt1.Rows.Add(dr1.ItemArray)
+        Next
+
+
+        For i = 0 To dt1.Rows.Count - 1
+            sqlstr = "select " & selNodes2 & " from " & name2 & " where fid = " & dt2.Rows(i).Item(0)
+            dr2 = Base.DB.Row(sqlstr, "returnDt2")
+            returnDt2.Rows.Add(dr2.ItemArray)
+        Next
+
+
+        returnDt1.Merge(returnDt2)
+
+        Return returnDt1
+    End Function
+
+
+    ''' <summary>
+    ''' 得到映射的内容
+    ''' </summary>
+    ''' <param name="Name">表单库名</param>
+    ''' <param name="Xpath">查询的XPATH语句</param>
+    ''' <returns></returns>
+    ''' <remarks>测试Xpath语句: /my:myFields/my:group1[my:标题/my:group2/my:group3/my:专家姓名='222']
+    ''' 这里要注意几点的问题是,前面的节点是表示返回节点的位置.</remarks>
+    <WebMethod()> _
+    Public Function GetData_Mapping(ByVal Name As String, ByVal Xpath As String) As XmlDocument
+        Dim TempStr As New StringBuilder
+        MKDM = Base.GetMKDM(Name)
+        If MKDM = -1 Then           '检测模块功能是否存在
+            Return Base.RetError("<Error/>", "非法访问")
+        End If
+
+        If Xpath.Trim.Length = 0 Then
+            Return Base.RetError("<Result/>", "0")
+        End If
+
+        Try
+            Base.DB.Query("select top 1 Aid From " & Name & "_Mapping")
+            Base.DB.Query("select top 1 Aid From " & Name & "_MapExt")
+        Catch ex As Exception
+            Return Base.RetError("<Result/>", "#")
+        End Try
+
+        Dim Tb As New DataTable
+        Xpath = Xpath.ToLower.Replace("fid", "a.fid")
+        Dim XsltSql As String = "Select Top 1 * From " & Name & "_Mapping as a," & Name & "_MapExt as b where a.FID=b.FID and (" & Xpath & ")"
+        Try
+            Tb = Base.DB.Table(XsltSql, "XSLT")
+        Catch ex As Exception
+            Return Base.RetError("<Result/>", "空")
+        End Try
+
+        Dim XsltStr As New StringBuilder
+        Dim Cols As String = String.Empty
+        Dim i As Integer
+
+        '生成Xslt
+        XsltStr.Append("<?xml version=""1.0"" encoding=""UTF-8""?>" & vbCrLf)
+        XsltStr.Append("<xsl:stylesheet version='1.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" & vbCrLf)
+        XsltStr.Append("<xsl:template match='/'>" & vbCrLf)
+        XsltStr.Append("  <Result>" & vbCrLf)
+        XsltStr.Append("   <xsl:for-each select='//row'>" & vbCrLf)
+        XsltStr.Append("   <记录>" & vbCrLf)
+        XsltStr.Append("    <FID><xsl:value-of select='@FID'/></FID>" & vbCrLf)
+        For i = 0 To Tb.Columns.Count - 1
+            Dim ColName As String = Tb.Columns(i).ColumnName
+            If ColName <> "AID" And ColName <> "FID" And ColName <> "AID1" And ColName <> "FID1" Then
+                XsltStr.Append("    <" & ColName & "><xsl:value-of select='@" & ColName & "'/></" & ColName & ">" & vbCrLf)
+                Cols += ColName & ","
+            End If
+        Next
+        XsltStr.Append("   </记录>" & vbCrLf)
+        XsltStr.Append("   </xsl:for-each>" & vbCrLf)
+        XsltStr.Append("  </Result>" & vbCrLf)
+        XsltStr.Append(" </xsl:template>" & vbCrLf)
+        XsltStr.Append("</xsl:stylesheet>")
+
+        ''''由于二张表都存在AID,FID,生成XML时,不能区分.所以只能先得到所有的列名.
+        Dim XmlSql As String = "Select " & Cols & "a.FID From " & Name & "_Mapping as a," & Name & "_MapExt as b where a.FID=b.FID and (" & Xpath & ") FOR XML RAW"
+        Try
+            Tb = Base.DB.Table(XmlSql, "select")
+        Catch ex As Exception
+            Return Base.RetError("<Result/>", "空")
+        End Try
+
+        If Tb.Rows.Count = 0 Then
+            Return Base.RetError("<Result/>", "空")
+        Else
+            If Tb.Rows.Count - 1 > 1200 Then
+                Return Base.RetError("<Result/>", "返回结果过大")
+            End If
+            TempStr.Append("<记录>")
+            For i = 0 To Tb.Rows.Count - 1
+                TempStr.Append(Tb.Rows(i).Item(0))
+            Next
+            TempStr.Append("</记录>")
+            '开始进行转换,将属性转换成子节点
+            Dim TmpXSL As String = Server.MapPath("./Submit_Temp/") & System.DateTime.Now.ToString("yyyyMMddHHmmssfff") & ".xsl"
+            Dim xslt As New Xsl.XslTransform()
+            Dim ResultXml As New XmlDocument
+            Dim fs As New IO.StringWriter()
+            Try
+                Base.pub.Text_File_SaveAs(TmpXSL, XsltStr.ToString, Encoding.UTF8)
+                xslt.Load(TmpXSL)
+                ResultXml.LoadXml(TempStr.ToString)
+                xslt.Transform(ResultXml, Nothing, fs, Nothing)
+                ResultXml.LoadXml(fs.ToString)
+            Catch ex As Exception
+                Return Base.RetError("<Result/>", "处理出错.请联系管理员")
+            End Try
+            Try     '删除临时样式文件.
+                IO.File.Delete(TmpXSL)
+            Catch ex As Exception
+            End Try
+            Return ResultXml
+        End If
+
+    End Function
+
+
+
+    ''' <summary>
+    ''' 得到映射的统计结果
+    ''' </summary>
+    ''' <param name="Name"></param>
+    ''' <param name="Xpath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function GetData_MapTotal(ByVal Name As String, ByVal Xpath As String) As XmlDocument
+        Dim TempStr As New StringBuilder
+        MKDM = Base.GetMKDM(Name)
+        If MKDM = -1 Then           '检测模块功能是否存在
+            Return Base.RetError("<Error/>", "非法访问")
+        End If
+
+        If Xpath.Trim.Length = 0 Then
+            Return Base.RetError("<Result/>", "0")
+        End If
+
+        Try
+            Base.DB.Query("select top 1 Aid From " & Name & "_MapTotal")
+        Catch ex As Exception
+            Return Base.RetError("<Result/>", "#")
+        End Try
+
+        Dim Tb As New DataTable
+        Dim XsltSql As String = "Select Top 1 * From " & Name & "_MapTotal as a  where (" & Xpath & ")"
+        Try
+            Tb = Base.DB.Table(XsltSql, "XSLT")
+        Catch ex As Exception
+            Return Base.RetError("<Result/>", "空")
+        End Try
+
+        Dim XsltStr As New StringBuilder
+        Dim Cols As String = String.Empty
+        Dim i As Integer
+
+        '生成Xslt
+        XsltStr.Append("<?xml version=""1.0"" encoding=""UTF-8""?>" & vbCrLf)
+        XsltStr.Append("<xsl:stylesheet version='1.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" & vbCrLf)
+        XsltStr.Append("<xsl:template match='/'>" & vbCrLf)
+        XsltStr.Append("  <Result>" & vbCrLf)
+        XsltStr.Append("   <xsl:for-each select='//row'>" & vbCrLf)
+        XsltStr.Append("   <记录>" & vbCrLf)
+        XsltStr.Append("    <AID><xsl:value-of select='@AID'/></AID>" & vbCrLf)
+        For i = 0 To Tb.Columns.Count - 1
+            Dim ColName As String = Tb.Columns(i).ColumnName
+            If ColName <> "AID" And ColName <> "FID" And ColName <> "AID1" And ColName <> "FID1" Then
+                XsltStr.Append("    <" & ColName & "><xsl:value-of select='@" & ColName & "'/></" & ColName & ">" & vbCrLf)
+                Cols += ColName & ","
+            End If
+        Next
+        XsltStr.Append("   </记录>" & vbCrLf)
+        XsltStr.Append("   </xsl:for-each>" & vbCrLf)
+        XsltStr.Append("  </Result>" & vbCrLf)
+        XsltStr.Append(" </xsl:template>" & vbCrLf)
+        XsltStr.Append("</xsl:stylesheet>")
+
+        ''''由于二张表都存在AID,FID,生成XML时,不能区分.所以只能先得到所有的列名.
+        Dim XmlSql As String = "Select " & Cols & "a.AID From " & Name & "_MapTotal as a where (" & Xpath & ") FOR XML RAW"
+        Try
+            Tb = Base.DB.Table(XmlSql, "select")
+        Catch ex As Exception
+            Return Base.RetError("<Result/>", "空")
+        End Try
+
+        If Tb.Rows.Count = 0 Then
+            Return Base.RetError("<Result/>", "空")
+        Else
+            If Tb.Rows.Count - 1 > 1200 Then
+                Return Base.RetError("<Result/>", "返回结果过大")
+            End If
+            TempStr.Append("<记录>")
+            For i = 0 To Tb.Rows.Count - 1
+                TempStr.Append(Tb.Rows(i).Item(0))
+            Next
+            TempStr.Append("</记录>")
+            '开始进行转换,将属性转换成子节点
+            Dim TmpXSL As String = Server.MapPath("./Submit_Temp/") & System.DateTime.Now.ToString("yyyyMMddHHmmssfff") & ".xsl"
+            Dim xslt As New Xsl.XslTransform()
+            Dim ResultXml As New XmlDocument
+            Dim fs As New IO.StringWriter()
+            Try
+                Base.pub.Text_File_SaveAs(TmpXSL, XsltStr.ToString, Encoding.UTF8)
+                xslt.Load(TmpXSL)
+                ResultXml.LoadXml(TempStr.ToString)
+                xslt.Transform(ResultXml, Nothing, fs, Nothing)
+                ResultXml.LoadXml(fs.ToString)
+            Catch ex As Exception
+                Return Base.RetError("<Result/>", "处理出错.请联系管理员")
+            End Try
+            Try     '删除临时样式文件.
+                IO.File.Delete(TmpXSL)
+            Catch ex As Exception
+            End Try
+            Return ResultXml
+        End If
+
+    End Function
+
+
+    ''' <summary>
+    ''' 得到映射的内容
+    ''' </summary>
+    ''' <param name="Name">表单库名</param>
+    ''' <param name="Xpath">查询的XPATH语句</param>
+    ''' <returns></returns>
+    ''' <remarks>测试Xpath语句: /my:myFields/my:group1[my:标题/my:group2/my:group3/my:专家姓名='222']
+    ''' 这里要注意几点的问题是,前面的节点是表示返回节点的位置.</remarks>
+    <WebMethod()> _
+    Public Function GetData_MapExt(ByVal Nodes As String, ByVal Name As String, ByVal Xpath As String) As XmlDocument
+        Dim TempStr As New StringBuilder
+        MKDM = Base.GetMKDM(Name)
+        If MKDM = -1 Then           '检测模块功能是否存在
+            Return Base.RetError("<Error/>", "非法访问")
+        End If
+
+        If Xpath.Trim.Length = 0 Then
+            Return Base.RetError("<Result/>", "0")
+        End If
+
+        Try
+            Base.DB.Query("select top 1 Aid From " & Name & "_MapExt")
+        Catch ex As Exception
+            Return Base.RetError("<Result/>", "#")
+        End Try
+
+        Dim Tb As New DataTable
+        Xpath = Xpath.ToLower.Replace("fid", "a.fid")
+        Dim XsltSql As String = "Select Top 1 * From " & Name & "_MapExt where " & Xpath
+        Try
+            Tb = Base.DB.Table(XsltSql, "XSLT")
+        Catch ex As Exception
+            Return Base.RetError("<Result/>", "空")
+        End Try
+
+        Dim XsltStr As New StringBuilder
+        Dim Cols As String = String.Empty
+        Dim i As Integer
+
+        '生成Xslt
+        XsltStr.Append("<?xml version=""1.0"" encoding=""UTF-8""?>" & vbCrLf)
+        XsltStr.Append("<xsl:stylesheet version='1.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" & vbCrLf)
+        XsltStr.Append("<xsl:template match='/'>" & vbCrLf)
+        XsltStr.Append("  <Result>" & vbCrLf)
+        XsltStr.Append("   <xsl:for-each select='//row'>" & vbCrLf)
+        XsltStr.Append("   <记录>" & vbCrLf)
+        XsltStr.Append("    <FID><xsl:value-of select='@FID'/></FID>" & vbCrLf)
+        If Nodes.Trim.Length = 0 Then
+            For i = 0 To Tb.Columns.Count - 1
+                Dim ColName As String = Tb.Columns(i).ColumnName
+                If ColName <> "AID" And ColName <> "FID" And ColName <> "AID1" And ColName <> "FID1" Then
+                    XsltStr.Append("    <" & ColName & "><xsl:value-of select='@" & ColName & "'/></" & ColName & ">" & vbCrLf)
+                End If
+            Next
+        Else
+            Dim Tmp As String()
+            Tmp = Nodes.Split(",")
+            For i = 0 To Tmp.GetUpperBound(0)
+                Dim ColName As String = Tmp(i)
+                If ColName <> "AID" And ColName <> "FID" And ColName <> "AID1" And ColName <> "FID1" Then
+                    XsltStr.Append("    <" & ColName & "><xsl:value-of select='@" & ColName & "'/></" & ColName & ">" & vbCrLf)
+                End If
+            Next
+        End If
+
+        XsltStr.Append("   </记录>" & vbCrLf)
+        XsltStr.Append("   </xsl:for-each>" & vbCrLf)
+        XsltStr.Append("  </Result>" & vbCrLf)
+        XsltStr.Append(" </xsl:template>" & vbCrLf)
+        XsltStr.Append("</xsl:stylesheet>")
+
+        ''''由于二张表都存在AID,FID,生成XML时,不能区分.所以只能先得到所有的列名.
+        Dim XmlSql As String = "Select * From " & Name & "_MapExt where " & Xpath & " FOR XML RAW"
+        Try
+            Tb = Base.DB.Table(XmlSql, "select")
+        Catch ex As Exception
+            Return Base.RetError("<Result/>", "空")
+        End Try
+
+        If Tb.Rows.Count = 0 Then
+            Return Base.RetError("<Result/>", "空")
+        Else
+            If Tb.Rows.Count - 1 > 1200 Then
+                Return Base.RetError("<Result/>", "返回结果过大")
+            End If
+            TempStr.Append("<记录>")
+            For i = 0 To Tb.Rows.Count - 1
+                TempStr.Append(Tb.Rows(i).Item(0))
+            Next
+            TempStr.Append("</记录>")
+            '开始进行转换,将属性转换成子节点
+            Dim TmpXSL As String = Server.MapPath("./Submit_Temp/") & System.DateTime.Now.ToString("yyyyMMddHHmmssfff") & ".xsl"
+            Dim xslt As New Xsl.XslTransform()
+            Dim ResultXml As New XmlDocument
+            Dim fs As New IO.StringWriter()
+            Try
+                Base.pub.Text_File_SaveAs(TmpXSL, XsltStr.ToString, Encoding.UTF8)
+                xslt.Load(TmpXSL)
+                ResultXml.LoadXml(TempStr.ToString)
+                xslt.Transform(ResultXml, Nothing, fs, Nothing)
+                ResultXml.LoadXml(fs.ToString)
+            Catch ex As Exception
+                Return Base.RetError("<Result/>", "处理出错.请联系管理员")
+            End Try
+            Try     '删除临时样式文件.
+                IO.File.Delete(TmpXSL)
+            Catch ex As Exception
+            End Try
+            Return ResultXml
+        End If
+
+    End Function
+
+
+    ''' <summary>
+    ''' 过滤掉相同的记录.显示不同的记录(两种)
+    ''' </summary>
+    ''' <param name="SourceKu">源库名</param>
+    ''' <param name="Xpath1">源库进行的查询的Xpath语句</param>
+    ''' <param name="FilterKu">要过滤的库名</param>
+    ''' <param name="Xpath2">过滤库名的XPATH查询语句</param>
+    ''' <param name="SourceNode">源库名的条件节点</param>
+    ''' <param name="FilterNode">过滤库名的条件节点</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function Filtration_Width_Different_Forms2(ByVal SourceKu As String, ByVal Xpath1 As String, ByVal FilterKu As String, ByVal Xpath2 As String, ByVal SourceNode As String, ByVal FilterNode As String, ByVal SourceNode2 As String, ByVal FilterNode2 As String) As XmlDocument
+        '先检测二个库名是否有效
+        Dim TempStr As New StringBuilder
+        Dim FilterString As New StringBuilder
+        Dim i As Integer
+        Dim Result As String
+        Dim TmpResult As String
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+            TmpResult = Base.GetXML_MKDM(FilterKu, xmlDoc)
+            If Not TmpResult Is Nothing Then
+                Return Base.RetError("<Error/>", TmpResult)
+            End If
+        Else
+            '检测过滤库是否存在
+            Result = CheckFileName(FilterKu)
+            If Not Result Is Nothing Then
+                Return Base.RetError("<Error/>", Result)
+            End If
+            Try
+                xmlDoc.Load(FileName)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "XML结构错误")
+            End Try
+        End If
+        Dim Tmp As String
+        '先查询过滤的库,得到结果,存在临时数组中.
+        If Xpath2.Trim.Length > 0 And FilterNode.Trim.Length > 0 Then
+            Dim TempNodeList As XmlNodeList
+            Dim TempNode As XmlNode
+            Dim namespaces As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc)
+            Try
+                TempNodeList = xmlDoc.DocumentElement.SelectNodes(Xpath2, namespaces)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "过滤Xpath语法错：" & ex.Message)
+            End Try
+            For i = 0 To TempNodeList.Count - 1
+                Try
+                    TempNode = TempNodeList.Item(i).Clone.SelectSingleNode(FilterNode, namespaces)
+                Catch ex As Exception
+                    Return Base.RetError("<Error/>", "得到过滤库出错1[" & i + 1 & "]" & ex.Message)
+                End Try
+                Try         '对数据内容进行容错
+                    Tmp = TempNode.ChildNodes.Item(0).Value()
+                    FilterString.Append(Tmp)
+                Catch ex As Exception
+                End Try
+                FilterString.Append("$")
+                Try
+                    TempNode = TempNodeList.Item(i).Clone.SelectSingleNode(FilterNode2, namespaces)
+                Catch ex As Exception
+                    Return Base.RetError("<Error/>", "得到过滤库出错2[" & i + 1 & "]" & ex.Message)
+                End Try
+                Try
+                    Tmp = TempNode.ChildNodes.Item(0).Value()
+                    FilterString.Append(Tmp)
+                Catch ex As Exception
+                End Try
+                FilterString.Append("$$$")
+            Next
+        End If
+
+
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+            TmpResult = Base.GetXML_MKDM(SourceKu, xmlDoc)
+            If Not TmpResult Is Nothing Then
+                Return Base.RetError("<Error/>", TmpResult)
+            End If
+        Else
+            Result = CheckFileName(SourceKu)
+            If Not Result Is Nothing Then
+                Return Base.RetError("<Error/>", Result)
+            End If
+            Try
+                xmlDoc.Load(FileName)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "XML结构错误")
+            End Try
+        End If
+        Dim Tmp1, Tmp2 As String
+        '先根据父节点的Xpath查询到需要的内容。
+        If Xpath1.Trim.Length > 0 Then
+            Dim TempNodeList As XmlNodeList
+            Dim TempNode As XmlNode
+            Dim namespaces As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc)
+            Try
+                TempNodeList = xmlDoc.DocumentElement.SelectNodes(Xpath1, namespaces)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "得到所需内容出错：" & ex.Message)
+            End Try
+            For i = 0 To TempNodeList.Count - 1
+                Tmp1 = ""
+                Tmp2 = ""
+                Try
+                    TempNode = TempNodeList.Item(i).Clone.SelectSingleNode(SourceNode, namespaces)
+                Catch ex As Exception
+                    Return Base.RetError("<Error/>", "得到节点内容出错：[" & i + 1 & "]" & ex.Message)
+                End Try
+                Try
+                    Tmp1 = TempNode.ChildNodes.Item(0).Value()
+                Catch ex As Exception
+                End Try
+                Tmp1 = Tmp1 & "$"
+                Try
+                    TempNode = TempNodeList.Item(i).Clone.SelectSingleNode(SourceNode2, namespaces)
+                Catch ex As Exception
+                    Return Base.RetError("<Error/>", "得到节点2内容出错：[" & i + 1 & "]" & ex.Message)
+                End Try
+                Try
+                    Tmp2 = TempNode.ChildNodes.Item(0).Value()
+                    '先得查找到正确的节点,再对节点进行判断,有没有过滤的内容当中
+                    If FilterString.ToString.IndexOf(Tmp1 & Tmp2 & "$$$") < 0 Then
+                        TempStr.Append(TempNodeList.Item(i).OuterXml)
+                    End If
+                Catch ex As Exception
+                End Try
+            Next
+            xmlDoc.DocumentElement.InnerXml = TempStr.ToString
+            TempStr = Nothing
+            FilterString = Nothing
+        End If
+
+        '再根据条件去查询子节点的内容。进行聚合
+        Return xmlDoc
+
+    End Function
+
+
+    ''' <summary>
+    ''' 过滤掉相同的记录.显示不同的记录(两种)
+    ''' </summary>
+    ''' <param name="SourceKu">源库名</param>
+    ''' <param name="Xpath1">源库进行的查询的Xpath语句</param>
+    ''' <param name="FilterKu">要过滤的库名</param>
+    ''' <param name="Xpath2">过滤库名的XPATH查询语句</param>
+    ''' <param name="SourceNode">源库名的条件节点</param>
+    ''' <param name="FilterNode">过滤库名的条件节点</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function Filtration_Width_Different_Forms(ByVal SourceKu As String, ByVal Xpath1 As String, ByVal FilterKu As String, ByVal Xpath2 As String, ByVal SourceNode As String, ByVal FilterNode As String) As XmlDocument
+        '先检测二个库名是否有效
+        Dim TempStr As New StringBuilder
+        Dim FilterString As New StringBuilder
+        Dim tmp As String
+        Dim TmpResult As String
+        Dim i As Integer
+
+        Dim Result As String
+        '检测过滤库是否存在
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+            TmpResult = Base.GetXML_MKDM(FilterKu, xmlDoc)
+            If Not TmpResult Is Nothing Then
+                Return Base.RetError("<Error/>", TmpResult)
+            End If
+        Else
+            Result = CheckFileName(FilterKu)
+            If Not Result Is Nothing Then
+                Return Base.RetError("<Error/>", Result)
+            End If
+            Try
+                xmlDoc.Load(FileName)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "过滤库XML结构错误")
+            End Try
+        End If
+
+
+        '先查询过滤的库,得到结果,存在临时数组中.
+        If Xpath2.Trim.Length > 0 And FilterNode.Trim.Length > 0 Then
+            Dim TempNodeList As XmlNodeList
+            Dim TempNode As XmlNode
+            Dim namespaces As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc)
+            Try
+                TempNodeList = xmlDoc.DocumentElement.SelectNodes(Xpath2, namespaces)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "过滤Xpath语法错：" & ex.Message)
+            End Try
+
+            For i = 0 To TempNodeList.Count - 1
+                Try
+                    TempNode = TempNodeList.Item(i).Clone.SelectSingleNode(FilterNode, namespaces)
+                Catch ex As Exception
+                    Return Base.RetError("<Error/>", "得到过滤库出错：" & ex.Message)
+                End Try
+                Try
+                    tmp = TempNode.ChildNodes.Item(0).Value()
+                    If tmp.Trim.Length > 0 Then FilterString.Append(tmp & "$$$")
+                Catch ex As Exception
+                End Try
+            Next
+        End If
+
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+            TmpResult = Base.GetXML_MKDM(SourceKu, xmlDoc)
+            If Not TmpResult Is Nothing Then
+                Return Base.RetError("<Error/>", TmpResult)
+            End If
+        Else
+            Result = CheckFileName(SourceKu)
+            If Not Result Is Nothing Then
+                Return Base.RetError("<Error/>", Result)
+            End If
+            Try
+                xmlDoc.Load(FileName)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "XML结构错误")
+            End Try
+        End If
+
+        '先根据父节点的Xpath查询到需要的内容。
+        If Xpath1.Trim.Length > 0 Then
+            Dim TempNodeList As XmlNodeList
+            Dim TempNode As XmlNode
+            Dim namespaces As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc)
+            Try
+                TempNodeList = xmlDoc.DocumentElement.SelectNodes(Xpath1, namespaces)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "Xpath语法错：" & ex.Message)
+            End Try
+
+            For i = 0 To TempNodeList.Count - 1
+                Try
+                    TempNode = TempNodeList.Item(i).Clone.SelectSingleNode(SourceNode, namespaces)
+                Catch ex As Exception
+                    Return Base.RetError("<Error/>", "得到结果库出错：" & ex.Message)
+                End Try
+                Try
+                    tmp = TempNode.ChildNodes.Item(0).Value()
+                    If FilterString.ToString.IndexOf(tmp & "$$$") < 0 Then                     '先得查找到正确的节点,再对节点进行判断,有没有过滤的内容当中
+                        TempStr.Append(TempNodeList.Item(i).OuterXml)
+                    End If
+                Catch ex As Exception
+                End Try
+            Next
+            xmlDoc.DocumentElement.InnerXml = TempStr.ToString
+            TempStr = Nothing
+            FilterString = Nothing
+        End If
+
+        '再根据条件去查询子节点的内容。进行聚合
+        Return xmlDoc
+    End Function
+
+
+
+    
+
+    <WebMethod()> _
+    Public Function GetSums(ByVal KuName1 As String, ByVal Xpath1 As String, ByVal KuName2 As String, ByVal Xpath2 As String, ByVal KuName3 As String, ByVal Xpath3 As String, ByVal KuName4 As String, ByVal Xpath4 As String, ByVal KuName5 As String, ByVal Xpath5 As String, ByVal KuName6 As String, ByVal Xpath6 As String, ByVal KuName7 As String, ByVal Xpath7 As String, ByVal KuName8 As String, ByVal Xpath8 As String, ByVal KuName9 As String, ByVal Xpath9 As String, ByVal KuName10 As String, ByVal Xpath10 As String, ByVal KuName11 As String, ByVal Xpath11 As String) As XmlDocument
+
+        Dim OutStr As New StringBuilder
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLMapping").ToLower = "true" Then
+            '            调用二维映射程序()
+            If Xpath1.Trim.Length > 0 Then OutStr.Append("<查询结果1>" & Base.GetDataPublicFun_Mapping(KuName1, Xpath1) & "</查询结果1>")
+            If Xpath2.Trim.Length > 0 Then OutStr.Append("<查询结果2>" & Base.GetDataPublicFun_Mapping(KuName2, Xpath2) & "</查询结果2>")
+            If Xpath3.Trim.Length > 0 Then OutStr.Append("<查询结果3>" & Base.GetDataPublicFun_Mapping(KuName3, Xpath3) & "</查询结果3>")
+            If Xpath4.Trim.Length > 0 Then OutStr.Append("<查询结果4>" & Base.GetDataPublicFun_Mapping(KuName4, Xpath4) & "</查询结果4>")
+            If Xpath5.Trim.Length > 0 Then OutStr.Append("<查询结果5>" & Base.GetDataPublicFun_Mapping(KuName5, Xpath5) & "</查询结果5>")
+            If Xpath6.Trim.Length > 0 Then OutStr.Append("<查询结果6>" & Base.GetDataPublicFun_Mapping(KuName6, Xpath6) & "</查询结果6>")
+            If Xpath7.Trim.Length > 0 Then OutStr.Append("<查询结果7>" & Base.GetDataPublicFun_Mapping(KuName7, Xpath7) & "</查询结果7>")
+            If Xpath8.Trim.Length > 0 Then OutStr.Append("<查询结果8>" & Base.GetDataPublicFun_Mapping(KuName8, Xpath8) & "</查询结果8>")
+            If Xpath9.Trim.Length > 0 Then OutStr.Append("<查询结果9>" & Base.GetDataPublicFun_Mapping(KuName9, Xpath9) & "</查询结果9>")
+            If Xpath10.Trim.Length > 0 Then OutStr.Append("<查询结果10>" & Base.GetDataPublicFun_Mapping(KuName10, Xpath10) & "</查询结果10>")
+            If Xpath11.Trim.Length > 0 Then OutStr.Append("<查询结果11>" & Base.GetDataPublicFun_Mapping(KuName11, Xpath11) & "</查询结果11>")
+            Base.Dispose()
+            Return Base.RetError("<Result/>", OutStr.ToString())
+        Else
+            Return Base.RetError("<Result/>", "未开启二维映射功能")
+        End If
+
+    End Function
+
+    ''' <summary>
+    ''' 二维表格映射之后的SUM函数
+    ''' </summary>
+    ''' <param name="Name"></param>
+    ''' <param name="Xpath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetSum_Mapping(ByVal Name As String, ByVal Xpath As String) As XmlDocument
+        Dim TempStr As New StringBuilder
+        MKDM = Base.GetMKDM(Name)
+        If MKDM = -1 Then           '检测模块功能是否存在
+            Return Base.RetError("<Error/>", "非法访问")
+        End If
+
+        If Xpath.Trim.Length = 0 Then
+            Return Base.RetError("<Result/>", "0")
+        End If
+
+        Try
+            Base.DB.Query("select Aid From " & Name & "_MapExt")
+            Base.DB.Query("select Aid From " & Name & "_Mapping")
+        Catch ex As Exception
+            Return Base.RetError("<Result/>", "#")
+        End Try
+
+        Dim Row As Data.DataRow
+        Dim TempSql As String = Base.ReplaceXpath2Select(Xpath, Name)
+        If TempSql Is Nothing Then
+            Return Base.RetError("<Result/>", "#")
+        Else
+            Row = Base.DB.Row(TempSql, "select")
+            Return Base.RetError("<Result/>", Row.Item(0).ToString)
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 得到总记录数
+    ''' </summary>
+    ''' <param name="Name"></param>
+    ''' <param name="Xpath"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function GetCount(ByVal Name As String, ByVal Xpath As String) As XmlDocument
+        '主要是得到Xpath中,要求的格式的求合
+        '格式 Count (//节点)
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+            Dim sqlLibrary As New SQLLibrary
+            Return sqlLibrary.QueryCount(Name, Xpath)
+        Else
+            Dim Result As String = CheckFileName(Name)
+            If Not Result Is Nothing Then
+                Return Base.RetError("<Error/>", Result)
+            End If
+            Try
+                xmlDoc.Load(FileName)
+            Catch ex As Exception
+                Base.RetError("<Error/>", "XML结构错误：" & ex.Message)
+            End Try
+        End If
+        If Xpath.Trim.Length = 0 Then Xpath = "//*"
+        Dim nav As XPath.XPathNavigator = xmlDoc.CreateNavigator()
+        Dim names As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc)
+        Dim Temp As String = nav.Evaluate("count(" & Xpath & ")", names)
+        '返回结果
+        xmlDoc.LoadXml("<Result/>")
+        xmlDoc.DocumentElement.InnerText = Temp
+        Return xmlDoc
+    End Function
+
+
+    ''' <summary>
+    ''' 得到排序后的数据(两种,未测试)
+    ''' </summary>
+    ''' <param name="Name">库名</param>
+    ''' <param name="Xpath">XPATH语句</param>
+    ''' <param name="OrderKind">排序类型</param>
+    ''' <returns></returns>
+    ''' <remarks>排序类型:1 顺序,2 倒序</remarks>
+    <WebMethod()> _
+    Public Function GetDataByOrder(ByVal Name As String, ByVal Xpath As String, ByVal OrderKind As String) As XmlDocument
+        Dim TempStr As New StringBuilder
+        Dim OrderName As String = ""
+        Dim Tb As New DataTable
+
+        Dim TmpResult As String
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+            TmpResult = Base.GetXML_MKDM(Name, xmlDoc)
+            If Not TmpResult Is Nothing Then
+                Return Base.RetError("<Error/>", TmpResult)
+            End If
+        Else
+            Dim Result As String = CheckFileName(Name)
+            If Not Result Is Nothing Then
+                Return Base.RetError("<Error/>", Result)
+            End If
+            Try
+                xmlDoc.Load(FileName)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "XML结构错误：" & ex.Message)
+            End Try
+        End If
+        If Xpath.Trim.Length = 0 Then
+            Return Base.RetError("<Error/>", "Xpath内容不能为空,即排序的节点不能为空")
+        End If
+
+        Dim nav As XPath.XPathNavigator = xmlDoc.CreateNavigator()
+        Dim names As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc)
+        Dim exp As XPath.XPathExpression = nav.Compile(Xpath)
+        exp.SetContext(names)
+        If IsNumeric(OrderKind) = False Then
+            Return Base.RetError("<Error/>", "OrderKind错误，请输入数字1为升序,2为倒序")
+        End If
+        If OrderKind = 1 Then
+            exp.AddSort("text()", System.Xml.XPath.XmlSortOrder.Ascending, System.Xml.XPath.XmlCaseOrder.None, "", System.Xml.XPath.XmlDataType.Text)
+        Else
+            exp.AddSort("text()", System.Xml.XPath.XmlSortOrder.Descending, System.Xml.XPath.XmlCaseOrder.None, "", System.Xml.XPath.XmlDataType.Text)
+        End If
+
+        Dim oIterator As XPath.XPathNodeIterator = nav.Select(exp)
+        xmlDoc.LoadXml("<排序内容/>")
+        While (oIterator.MoveNext())
+            TempStr.Append(oIterator.Current.OuterXml)
+        End While
+        xmlDoc.DocumentElement.InnerXml = TempStr.ToString
+        TempStr = Nothing
+        Return xmlDoc
+    End Function
+
+    ''' <summary>
+    ''' 得到排序后的数据
+    ''' </summary>
+    ''' <param name="Name">库名</param>
+    ''' <param name="Xpath">XPATH语句</param>
+    ''' <param name="OrderKind">排序类型</param>
+    ''' <returns></returns>
+    ''' <remarks>排序类型:1 顺序,2 倒序</remarks>
+    <WebMethod()> _
+    Public Function GetDataByOrder1(ByVal Name As String, ByVal Xpath As String, ByVal OrderKind As String) As XmlDocument
+        '对XML文件库进行处理
+        Dim TempStr As New StringBuilder
+
+        Dim TmpResult As String
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+            TmpResult = Base.GetXML_MKDM(Name, xmlDoc)
+            If Not TmpResult Is Nothing Then
+                Return Base.RetError("<Error/>", TmpResult)
+            End If
+        Else
+            Dim Result As String = CheckFileName(Name)
+            If Not Result Is Nothing Then
+                Return Base.RetError("<Error/>", Result)
+            End If
+            Try
+                xmlDoc.Load(FileName)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "XML结构错误")
+            End Try
+        End If
+        Dim i, j As Integer
+        If Xpath.Trim.Length = 0 Then
+            Return Base.RetError("<Error/>", "Xpath不能为空")
+        Else
+            Dim TempNodeList As XmlNodeList
+            Dim namespaces As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc)
+            Dim cc As Integer = 0
+            Try
+                TempNodeList = xmlDoc.DocumentElement.SelectNodes(Xpath, namespaces)
+                Dim TempNodeValue As XmlNode
+                For i = 0 To TempNodeList.Count - 1
+                    TempNodeValue = TempNodeList.Item(i).CloneNode(True)
+                    If IsDBNull(TempNodeValue) = False And IsDBNull(TempNodeValue.Value) = False Then
+                        If TempNodeValue.InnerText.Length > 0 Then
+                            For j = i + 1 To TempNodeList.Count - 1
+                                If IsDBNull(TempNodeList.Item(j)) = False Then
+                                    If TempNodeList.Item(j).InnerText.Length > 0 Then
+                                        If Asc(TempNodeValue.InnerText.ToString.ToLower.Substring(0, 2)) > Asc(TempNodeList.Item(j).InnerText.ToString.ToLower.Substring(0, 2)) Then
+                                            TempNodeValue.InnerText = TempNodeList.Item(j).InnerXml
+                                            TempNodeList.Item(j).InnerXml = TempNodeList.Item(i).InnerXml
+                                            TempNodeList.Item(i).InnerXml = TempNodeValue.InnerXml
+                                        End If
+                                    Else
+                                        TempNodeValue.InnerXml = TempNodeList.Item(j).InnerXml
+                                        TempNodeList.Item(j).InnerXml = TempNodeList.Item(i).InnerXml
+                                        TempNodeList.Item(i).InnerXml = TempNodeValue.InnerXml
+                                    End If
+                                Else
+                                    TempNodeValue.InnerXml = TempNodeList.Item(j).InnerXml
+                                    TempNodeList.Item(j).InnerXml = TempNodeList.Item(i).InnerXml
+                                    TempNodeList.Item(i).InnerXml = TempNodeValue.InnerXml
+                                End If
+                            Next
+                        End If
+                    End If
+                    TempStr.Append(TempNodeList.Item(i).OuterXml)
+                Next
+                xmlDoc.DocumentElement.InnerXml = TempStr.ToString
+                TempStr = Nothing
+                Return xmlDoc
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "Xpath语法错：" & ex.Message)
+            End Try
+        End If
+    End Function
+
+
+    ''' <summary>
+    ''' 使用XPAH的一些公用函数来得到结果
+    ''' </summary>
+    ''' <param name="Name">库名</param>
+    ''' <param name="Xpath">Xpath语句</param>
+    ''' <returns></returns>
+    ''' <remarks>像SUM(),Count()等函数</remarks>
+    <WebMethod()> _
+    Public Function GetDataPublicFun(ByVal Name As String, ByVal Xpath As String) As XmlDocument
+        '主要是得到Xpath中,要求的格式的求合
+
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLMapping").ToLower = "true" Then
+            Return Base.RetError("<Result/>", Base.GetDataPublicFun_Mapping(Name, Xpath))
+        End If
+
+        Dim TmpResult As String
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true" Then
+            TmpResult = Base.GetXML_MKDM(Name, xmlDoc)
+            If Not TmpResult Is Nothing Then
+                Return Base.RetError("<Error/>", TmpResult)
+            End If
+        Else
+            Dim Result As String = CheckFileName(Name)
+            If Not Result Is Nothing Then
+                Return Base.RetError("<Error/>", Result)
+            End If
+            Try
+                xmlDoc.Load(FileName)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "XML结构错误：" & ex.Message)
+            End Try
+        End If
+        If Xpath.Trim.Length = 0 Then
+            Return Base.RetError("<Error/>", "Xpath不能为空!")
+        End If
+
+        Dim nav As XPath.XPathNavigator = xmlDoc.CreateNavigator()
+        Dim names As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc)
+        Dim Temp As String = nav.Evaluate(Xpath, names)
+        '返回结果
+        Return Base.RetError("<Result/>", Temp)
+
+    End Function
+
+
+    ''' <summary>
+    ''' 多库进行汇总(两种,未测试)
+    ''' </summary>
+    ''' <param name="SourceKu">源库名</param>
+    ''' <param name="Xpath">源库名Xpath</param>
+    ''' <param name="JoinKu1">汇总库名1</param>
+    ''' <param name="Xpath1">汇总库Xpath1</param>
+    ''' <param name="SourceNode1">源库名的查询节点</param>
+    ''' <param name="JoinKu2"></param>
+    ''' <param name="Xpath2"></param>
+    ''' <param name="SourceNode2"></param>
+    ''' <param name="JoinKu3"></param>
+    ''' <param name="Xpath3"></param>
+    ''' <param name="SourceNode3"></param>
+    ''' <param name="JoinKu4"></param>
+    ''' <param name="Xpath4"></param>
+    ''' <param name="SourceNode4"></param>
+    ''' <param name="JoinKu5"></param>
+    ''' <param name="Xpath5"></param>
+    ''' <param name="SourceNode5"></param>
+    ''' <param name="JoinKu6"></param>
+    ''' <param name="Xpath6"></param>
+    ''' <param name="SourceNode6"></param>
+    ''' <param name="JoinKu7"></param>
+    ''' <param name="Xpath7"></param>
+    ''' <param name="SourceNode7"></param>
+    ''' <param name="JoinKu8"></param>
+    ''' <param name="Xpath8"></param>
+    ''' <param name="SourceNode8"></param>
+    ''' <returns></returns>
+    ''' <remarks>Xpath1 中的 $$$ 将会替换成 源库名的查询节点内容
+    ''' 例:count(//my:考勤[my:姓名='$$$'])
+    ''' </remarks>
+    <WebMethod()> _
+    Public Function UionQuery(ByVal SourceKu As String, ByVal Xpath As String, ByVal JoinKu1 As String, ByVal Xpath1 As String, ByVal SourceNode1 As String, ByVal JoinKu2 As String, ByVal Xpath2 As String, ByVal SourceNode2 As String, ByVal JoinKu3 As String, ByVal Xpath3 As String, ByVal SourceNode3 As String, ByVal JoinKu4 As String, ByVal Xpath4 As String, ByVal SourceNode4 As String, ByVal JoinKu5 As String, ByVal Xpath5 As String, ByVal SourceNode5 As String, ByVal JoinKu6 As String, ByVal Xpath6 As String, ByVal SourceNode6 As String, ByVal JoinKu7 As String, ByVal Xpath7 As String, ByVal SourceNode7 As String, ByVal JoinKu8 As String, ByVal Xpath8 As String, ByVal SourceNode8 As String, ByVal JoinKu9 As String, ByVal Xpath9 As String, ByVal SourceNode9 As String) As XmlDocument
+
+        '先检得到源库的列表
+        Dim TmpResult As String
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true1" Then
+            TmpResult = Base.GetXML_MKDM(SourceKu, xmlDoc)
+            If Not TmpResult Is Nothing Then
+                Return Base.RetError("<Error/>", TmpResult)
+            End If
+        Else
+            Dim Result As String
+            '检测源库是否存在
+            Result = CheckFileName(SourceKu)
+            If Not Result Is Nothing Then
+                Return Base.RetError("<Error/>", Result)
+            End If
+            Try
+                xmlDoc.Load(FileName)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "XML结构错误")
+            End Try
+        End If
+        Dim TempNodeList As XmlNodeList
+        Dim namespaces As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc)
+        '根据XPATH得到源库的列表数据
+        If Xpath.Trim.Length > 0 And Xpath.Trim.ToLower <> "null" Then
+            Try
+                TempNodeList = xmlDoc.DocumentElement.SelectNodes(Xpath, namespaces)
+            Catch ex As Exception
+                Return Base.RetError("<Error/>", "Xpath语法错：" & ex.Message)
+            End Try
+        Else        '如果Xpath 为空的话,取全部.
+            xmlDoc.DocumentElement.InnerXml = xmlDoc.DocumentElement.FirstChild.OuterXml
+            Return xmlDoc
+        End If
+
+        '对第一个计算进行处理
+        If Xpath1.Trim.Length > 0 And Xpath1.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu1, Xpath1, SourceNode1, "查询结果1", TempNodeList, namespaces)
+        Else        '如果一个计算表达式都没有的话,直接返回
+            Dim Temp As New StringBuilder
+            Dim i As Integer
+            For i = 0 To TempNodeList.Count - 1
+                Temp.Append(TempNodeList.Item(i).OuterXml)
+            Next
+            xmlDoc.DocumentElement.InnerXml = Temp.ToString
+            Temp = Nothing
+            Return xmlDoc
+        End If
+
+        '对第二个计算进行处理
+        If Xpath2.Trim.Length > 0 And Xpath2.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu2, Xpath2, SourceNode2, "查询结果2", TempNodeList, namespaces)
+        End If
+
+        '对第三个计算进行处理
+        If Xpath3.Trim.Length > 0 And Xpath3.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu3, Xpath3, SourceNode3, "查询结果3", TempNodeList, namespaces)
+        End If
+
+        '对第四个计算进行处理
+        If Xpath4.Trim.Length > 0 And Xpath4.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu4, Xpath4, SourceNode4, "查询结果4", TempNodeList, namespaces)
+        End If
+
+        '对第五个计算进行处理
+        If Xpath5.Trim.Length > 0 And Xpath5.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu5, Xpath5, SourceNode5, "查询结果5", TempNodeList, namespaces)
+        End If
+
+        '对第六个计算进行处理
+        If Xpath6.Trim.Length > 0 And Xpath6.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu6, Xpath6, SourceNode6, "查询结果6", TempNodeList, namespaces)
+        End If
+
+        '对第七个计算进行处理
+        If Xpath7.Trim.Length > 0 And Xpath7.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu7, Xpath7, SourceNode7, "查询结果7", TempNodeList, namespaces)
+        End If
+
+        '对第八个计算进行处理
+        If Xpath8.Trim.Length > 0 And Xpath8.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu8, Xpath8, SourceNode8, "查询结果8", TempNodeList, namespaces)
+        End If
+
+        '对第八个计算进行处理
+        If Xpath9.Trim.Length > 0 And Xpath9.Trim.ToLower <> "null" Then
+            xmlDoc1 = MoreKuGetValue(JoinKu9, Xpath9, SourceNode9, "查询结果9", TempNodeList, namespaces)
+        End If
+
+        '再根据条件去查询子节点的内容。进行聚合
+        Return xmlDoc1
+
+    End Function
+
+
+    ''' <summary>
+    ''' 对异库进行查询,并返回值
+    ''' </summary>
+    ''' <param name="TempKu">临时库</param>
+    ''' <param name="TXpath">临时Xpath</param>
+    ''' <param name="TempSourceNode">条件库名</param>
+    ''' <param name="NodeText">添加的节点名称</param>
+    ''' <param name="TempNodeList">目的节点集</param>
+    ''' <param name="namespaces">用到的命名空间</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function MoreKuGetValue(ByVal TempKu As String, ByVal TXpath As String, ByVal TempSourceNode As String, ByVal NodeText As String, ByRef TempNodeList As XmlNodeList, ByVal namespaces As XmlNamespaceManager) As XmlDocument
+        Dim Result, TempXpath As String
+        Dim TempNode As XmlNode
+        Dim TempStr As New StringBuilder
+        If TXpath.Trim.Length > 0 Then
+            Dim TmpResult As String
+            If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLXML").ToLower = "true1" Then
+                TmpResult = Base.GetXML_MKDM(TempKu, xmlDoc)
+                If Not TmpResult Is Nothing Then
+                    Return Base.RetError("<Error/>", TmpResult)
+                End If
+            Else
+                Result = CheckFileName(TempKu)
+                If Not Result Is Nothing Then
+                    Return Base.RetError("<Error/>", Result)
+                End If
+                Try
+                    xmlDoc1.Load(FileName)
+                Catch ex As Exception
+                    Return Base.RetError("<Error/>", "XML结构错误")
+                End Try
+            End If
+            Dim i As Integer
+            For i = 0 To TempNodeList.Count - 1
+                TempNode = TempNodeList.Item(i).Clone.SelectSingleNode(TempSourceNode, namespaces)
+                If Not TempNode Is Nothing Then
+                    If Not TempNode.ChildNodes.Item(0) Is Nothing Then
+                        TempXpath = TXpath
+                        TempXpath = TempXpath.Replace("$$$", TempNode.ChildNodes.Item(0).Value())
+                        Dim Node1 As XmlNode = xmlDoc.CreateNode(XmlNodeType.Element, "", NodeText, "")
+                        If Base.pub.GetWebConfig("SunfunSoft.Xman.FormLibrary.SQLMapping").ToLower = "true1" Then
+                            '调用二维映射程序
+                            Node1.InnerText = Base.GetDataPublicFun_Mapping(TempKu, TempXpath)
+                        Else
+                            Dim nav As XPath.XPathNavigator = xmlDoc1.CreateNavigator()
+                            Dim names As XmlNamespaceManager = Base.GetXmlNamespaceManager(xmlDoc1)
+                            Dim Temp As String = nav.Evaluate(TempXpath, names)
+
+                            If Temp = "非数字" Then
+                                Dim TNodeList As XmlNodeList = xmlDoc.DocumentElement.SelectNodes(TempXpath.ToLower.Replace("sum", ""), names)
+                                Dim j As Integer
+                                Dim TempInt As Int64 = 0
+                                For j = 0 To TempNodeList.Count - 1
+                                    If Not TempNodeList.Item(j).Value Is Nothing Then
+                                        Try '万一出现字符的情况,进行容错
+                                            TempInt = TempInt + TempNodeList.Item(j).Value
+                                        Catch ex As Exception
+                                        End Try
+                                    End If
+                                Next
+                                Node1.InnerText = TempInt
+                            Else
+                                Node1.InnerText = Temp
+                            End If
+                        End If
+                        TempNodeList.Item(i).AppendChild(Node1.CloneNode(True))
+                    Else
+                        Dim Node1 As XmlNode = xmlDoc.CreateNode(XmlNodeType.Element, "", NodeText, "")
+                        Node1.InnerText = ""
+                        TempNodeList.Item(i).AppendChild(Node1.CloneNode(True))
+                    End If
+                Else
+                    Dim Node1 As XmlNode = xmlDoc.CreateNode(XmlNodeType.Element, "", NodeText, "")
+                    Node1.InnerText = ""
+                    TempNodeList.Item(i).AppendChild(Node1.CloneNode(True))
+                End If
+                TempStr.Append(TempNodeList.Item(i).OuterXml)
+            Next
+            xmlDoc1.DocumentElement.InnerXml = TempStr.ToString
+            TempStr = Nothing
+        Else
+            Dim i As Integer
+            For i = 0 To TempNodeList.Count - 1
+                TempStr.Append(TempNodeList.Item(i).OuterXml)
+            Next
+            xmlDoc1.DocumentElement.InnerText = TempStr.ToString
+        End If
+        Return xmlDoc1
+    End Function
+
+
+    ''' <summary>
+    ''' 对库名进行检测,XML库专用
+    ''' </summary>
+    ''' <param name="Name"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function CheckFileName(ByVal Name As String) As String
+        '检测输入的合法性
+        If Name.Trim.Length = 0 Then
+            Return "库名不能为空!"
+        End If
+
+        '将库名自动加上扩展名
+        If Name.IndexOf(".库.xml") < 0 Then
+            FileName = RootPath & "\" & Name.Trim & ".库.xml"
+        Else
+            FileName = RootPath & "\" & Name.Trim
+        End If
+
+        '检测库名所指向的文件是否存在
+        If IO.File.Exists(FileName) = False Then
+            Return "所输入库名不存在,请确认!"
+        End If
+
+        '检测认证
+        Dim Result As String = Base.Check_RZM()
+        If Not Result Is Nothing Then
+            'Return Result
+        End If
+
+        Return Nothing
+
+    End Function
+
+
+    Protected Overrides Sub Finalize()
+        Base.Dispose()
+        xmlDoc1 = Nothing
+        xmlDoc = Nothing
+        MyBase.Finalize()
+    End Sub
+
+    Public Sub New()
+
+    End Sub
+
+    ''' <summary>
+    ''' 添加流程图状态
+    ''' </summary>
+    ''' <param name="xmbh">项目编号</param>
+    ''' <param name="xmzt">流程图状态</param>
+    ''' <param name="back">(0,1);0代表正常，1代表退回</param>
+    ''' <param name="fid">表单号</param>
+    ''' <param name="types">(0,1)0代表开始，1代表结束</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Function addlczt(ByVal xmbh As String, ByVal xmzt As String, ByVal back As String, ByVal fid As String, ByVal types As String) As XmlDocument
+        Dim type As Integer
+        Try
+            type = types
+        Catch ex As Exception
+            type = 0
+        End Try
+        Try
+            If xmbh.Length > 0 And xmzt.Length > 0 Then
+                If back.Length > 0 And back = "1" Then
+                    Dim tb As DataTable
+                    tb = Base.DB.Table("select id from lc_lczt where xmbh='" & Base.SqlFilter(xmbh) & "' and xmzt='" & Base.SqlFilter(xmzt) & "' and bz=0", "ss")
+                    If tb.Rows.Count > 0 Then
+                        Base.DB.Query("update lc_lczt set bz=1,fid='" + fid + "',type=0 where xmbh='" & Base.SqlFilter(xmbh) & "' and id>" & tb.Rows(0)(0).ToString & "")
+                    End If
+
+                ElseIf xmbh.Trim.Length > 0 Then
+                    Dim tb As DataTable
+                    tb = Base.DB.Table("select id from lc_lczt where xmbh='" & Base.SqlFilter(xmbh) & "' and xmzt='" & Base.SqlFilter(xmzt) & "' and bz=0", "ss")
+                    If type = 0 Then
+                        If tb.Rows.Count > 0 Then
+                            Base.DB.Query("update lc_lczt set fid='" + fid + "' where id=" & tb.Rows(0)(0).ToString & "")
+                        Else
+                            Base.DB.Query("insert into lc_lczt(xmbh,xmzt,fid,type,starttime) values('" & Base.SqlFilter(xmbh) & "','" & Base.SqlFilter(xmzt) & "','" & fid & "'," & type & ",getdate())")
+                        End If
+                    Else
+                        Base.DB.Query("update lc_lczt set fid='" + fid + "',endtime=getdate(),type=1 where id=" & tb.Rows(0)(0).ToString & "")
+                    End If
+
+                End If
+            End If
+        Catch ex As Exception
+            Return Base.RetError("<Result/>", "失败")
+        End Try
+
+        Return Base.RetError("<Result/>", "成功")
+    End Function
+    End Class

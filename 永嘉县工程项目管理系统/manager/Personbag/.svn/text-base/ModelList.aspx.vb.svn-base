@@ -1,0 +1,70 @@
+﻿Imports System.IO
+Imports System.Xml
+
+Partial Class manager_Personbag_ModelList
+    Inherits System.Web.UI.Page
+    Dim RootPath As String
+    Dim Base As New Base
+    Dim CurrentUrl As String
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到当前路径的实际路径　
+        RootPath = Request.MapPath("../../") & "ApplicationTemplateLibrary\"
+        RootPath = RootPath.Substring(0, RootPath.Length - 1)
+        '得到当前的ＵＲＬ路径        
+        Dim Url As String = Request.ServerVariables("Url").ToLower
+        Dim Host As String = Request.ServerVariables("http_host")
+        CurrentUrl = Url.Replace("manager/personbag/modellist.aspx", "ApplicationTemplateLibrary/")
+        Base.IO.CreateDir(RootPath)         '对目录做试控性的操行
+        GridView1.DataSource = Base.IO.CreateDataSetFromFileList(RootPath, SearchStr.Text.Trim)
+        If Not Page.IsPostBack Then
+            GridView1.DataBind()
+            If GridView1.Rows.Count = 0 Then
+                Response.Write("<br><BR><BR><center>库中暂时无文件</center>")
+            End If
+        End If
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        Dim TempFileName As String = GridView1.DataKeys(e.NewSelectedIndex).Item(0)
+
+        Dim Login, Login_User As String
+        Login = Request.ServerVariables("LOGON_USER")
+        Login_User = Login.Substring(Login.IndexOf("\") + 1)
+        Dim UserDir As String = RootPath.Replace("ApplicationTemplateLibrary", "PersonalFolders\" & Login_User & "\")
+        Try
+            Base.IO.CreateDir(UserDir)     '创建当前用户目录，如果存在，则不理。
+            If File.Exists(UserDir & "\" & TempFileName) = False Then
+                File.Copy(RootPath & "\" & TempFileName, UserDir & "\" & TempFileName, False)
+                Base.Js.alert(Me, "加入公文包成功!")
+            Else
+                Base.Js.alert(Me, "公文包中已经存在此模板!")
+            End If
+        Catch ex As Exception
+            Base.Js.alert(Me, "加入公文包失败!")
+            'Throw ex
+        End Try
+
+        '刷新显示的列表
+        GridView1.DataSource = Base.IO.CreateDataSetFromFileList(RootPath, SearchStr.Text.Trim)
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs) Handles GridView1.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow Then            '鼠标效果
+            e.Row.Attributes.Add("onmouseover", "OnMouseOver(this)")
+            e.Row.Attributes.Add("onmouseout", "OnMouseOut(this)")
+            e.Row.Attributes("style") = "Cursor:hand"
+            e.Row.Cells(1).Text = "<a href='" & CurrentUrl & e.Row.Cells(1).Text & "'>" & e.Row.Cells(1).Text & "</a>"
+        End If
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        GridView1.DataSource = Base.IO.CreateDataSetFromFileList(RootPath, SearchStr.Text.Trim)
+        GridView1.DataBind()
+    End Sub
+End Class

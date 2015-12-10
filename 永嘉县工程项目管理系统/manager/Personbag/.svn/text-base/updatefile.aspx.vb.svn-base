@@ -1,0 +1,8 @@
+﻿
+Partial Class manager_Personbag_updatefile
+    Inherits System.Web.UI.Page
+    Public flpath As String
+    Protected Sub form1_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles form1.Load
+        flpath = Server.UrlEncode(Request("flpath"))
+    End Sub
+End Class

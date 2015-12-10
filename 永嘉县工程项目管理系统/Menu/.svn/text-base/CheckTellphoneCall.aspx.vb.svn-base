@@ -1,0 +1,37 @@
+﻿
+Partial Class Menu_CheckTellphoneCall
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Response.Buffer = False
+        Response.BufferOutput = False
+        Response.Expires = 0
+
+        Dim Topstr As String = Base.pub.GetWebConfig("SunfunSoft.Xman.Session.TopStr").ToString
+
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Dim Tb As New DataTable
+        '刷新
+        Dim TelCount As Integer = 0
+        Dim row As DataRow = Base.DB.Row("SELECT Top 1 CID FROM TelephoneCall where looked=0 and userid=" & UserID, "dd")
+        If row Is Nothing Then
+            TelCount = 0
+        Else
+            TelCount = row.Item("CID")
+        End If
+
+        Dim Out As String = TelCount & "<table>"
+        Dim i As Integer
+        Tb = Base.DB.Table("SELECT TOP 2 CID, Tel FROM TelephoneCall ORDER BY CID DESC", "dd")
+        For i = 0 To Tb.Rows.Count - 1
+            Out += "<tr><td><a href='javascript:void(0)' onclick=""window.open('menu/TellphoneCall.aspx?cid=" & Tb.Rows(i).Item("CID").ToString & "','ECP','height=500, width=700, top=100, left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no, status=yes');"" style='font-size:9pt;'>" & Tb.Rows(i).Item("Tel").ToString & "</a></td></tr>"
+        Next
+        Out += "</scrpt>"
+        Response.Write(Out)
+        Response.End()
+    End Sub
+End Class

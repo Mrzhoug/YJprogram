@@ -1,0 +1,101 @@
+K 25
+svn:wc:ra_dav:version-url
+V 181
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/ProcessManager
+END
+processRuleList.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 205
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/ProcessManager/processRuleList.aspx.vb
+END
+processRuleSetting.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 208
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/ProcessManager/processRuleSetting.aspx.vb
+END
+processConditionList.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 207
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/ProcessManager/processConditionList.aspx
+END
+processStatus.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 200
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/ProcessManager/processStatus.aspx
+END
+processConditionSetting.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 210
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/ProcessManager/processConditionSetting.aspx
+END
+processFunction.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 202
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/ProcessManager/processFunction.aspx
+END
+Default.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 194
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/ProcessManager/Default.aspx
+END
+processConditionList.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 210
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/ProcessManager/processConditionList.aspx.vb
+END
+processStatus.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 203
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/ProcessManager/processStatus.aspx.vb
+END
+newProcess.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 197
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/ProcessManager/newProcess.aspx
+END
+processConditionSetting.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 213
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/ProcessManager/processConditionSetting.aspx.vb
+END
+processFunction.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 205
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/ProcessManager/processFunction.aspx.vb
+END
+Default.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 197
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/ProcessManager/Default.aspx.vb
+END
+newProcess.aspx.vb
+K 25
+svn:wc:ra_dav:version-url
+V 200
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/ProcessManager/newProcess.aspx.vb
+END
+processRuleList.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 202
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/ProcessManager/processRuleList.aspx
+END
+processRuleSetting.aspx
+K 25
+svn:wc:ra_dav:version-url
+V 205
+/sunfunsoft/sunfungov/!svn/ver/8883/xman%E5%B9%B3%E5%8F%B0/%E6%B0%B8%E5%98%89%E5%8E%BF%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/manager/ProcessManager/processRuleSetting.aspx
+END

@@ -1,0 +1,43 @@
+BODY
+{
+	FONT-SIZE: 9pt;FONT-FAMILY: ËÎÌו;
+}
+ 
+textarea,select,input{font-family: ËÎÌו; font-size:9pt; cursor: hand;}
+
+.button {  font-size: 9pt; height: 20px; border: 1px #000000 solid; background-color: #FFFFFF}
+
+td
+{
+	font-size:9pt;
+}
+
+a
+{
+	text-decoration: none;
+	color: #00599B;
+}
+a:hover
+{
+	text-decoration: underline;
+}
+a.red
+{
+	color: red;
+}
+a img
+{
+	border: none;
+}
+
+
+.dmenu
+{
+	background-color:#C1D9F3; 
+	height:35px;	
+}
+
+.dback
+{
+	background-color:#EFF5FB;
+}

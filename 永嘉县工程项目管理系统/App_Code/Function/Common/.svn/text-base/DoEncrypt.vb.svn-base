@@ -1,0 +1,105 @@
+﻿Imports System.Text
+Imports System.Security.Cryptography
+Imports System.IO
+
+Public Class DoEncrypt
+    ''' <summary>
+    ''' MD5加密方法
+    ''' </summary>
+    ''' <param name="key">要加密的字符串</param>
+    ''' <returns>返回加密后的字符串,如果返回为 null 则表示加密失败.</returns>
+    Public Shared Function GetMD5(ByVal key As String) As String
+        Return System.Web.Security.FormsAuthentication.HashPasswordForStoringInConfigFile(key, "MD5").ToLower()
+    End Function
+
+#Region "DEC加密的封装方法"
+    Private Shared Key As String = "xman"
+    ''' <summary>
+    ''' 使用默认key进行DEC加密
+    ''' </summary>
+    ''' <param name="pToEncrypt">要加密的字符串</param>
+    ''' <returns>加密后的字符串</returns>
+    Public Shared Function GetDESEncrypt(ByVal pToEncrypt As String) As String
+        Return DESEncrypt(pToEncrypt, Key)
+    End Function
+
+    ''' <summary>
+    ''' 使用默认key进行DEC解密
+    ''' </summary>
+    ''' <param name="pToDecrypt">解密字符串</param>
+    ''' <returns>解密后字符</returns>
+    Public Shared Function GetDESDecrypt(ByVal pToDecrypt As String) As String
+        Return DESDecrypt(pToDecrypt, Key)
+    End Function
+
+    ''' <summary>
+    ''' DES加密的原始方法
+    ''' </summary>
+    ''' <param name="pToEncrypt">要加密的字符串</param>
+    ''' <param name="sKey">加密Key</param>
+    ''' <returns>加密后的字符串</returns>
+    Public Shared Function DESEncrypt(ByVal pToEncrypt As String, ByVal sKey As String) As String
+        Dim des As DESCryptoServiceProvider = New DESCryptoServiceProvider() '把字符串放到byte数组中
+        Dim inputByteArray() As Byte = Encoding.Default.GetBytes(pToEncrypt)
+
+        des.Key = ASCIIEncoding.ASCII.GetBytes(sKey) '建立加密对象的密钥和偏移量
+        des.IV = ASCIIEncoding.ASCII.GetBytes(sKey) '原文使用ASCIIEncoding.ASCII方法的GetBytes方法
+        Dim ms As MemoryStream = New MemoryStream() '使得输入密码必须输入英文文本
+        Dim cs As CryptoStream = New CryptoStream(ms, des.CreateEncryptor(), CryptoStreamMode.Write)
+
+        cs.Write(inputByteArray, 0, inputByteArray.Length)
+        cs.FlushFinalBlock()
+        Dim ret As StringBuilder = New StringBuilder()
+        Dim b
+        For Each b In ms.ToArray()
+            ret.AppendFormat("{0:X2}", b)
+        Next
+
+        Return ret.ToString()
+    End Function
+
+    ''' <summary>
+    ''' DES解密的原始方法
+    ''' </summary>
+    ''' <param name="pToDecrypt">解密字符串</param>
+    ''' <param name="sKey">解密Key</param>
+    ''' <returns>解密后字符</returns>
+    Public Shared Function DESDecrypt(ByVal pToDecrypt As String, ByVal sKey As String) As String
+        Dim des As DESCryptoServiceProvider = New DESCryptoServiceProvider()
+
+        Dim inputByteArray(pToDecrypt.Length / 2) As Byte
+        Dim x As Integer
+        For x = 0 To pToDecrypt.Length / 2 - 1
+            Dim i As Integer = Convert.ToInt32(pToDecrypt.Substring(x * 2, 2), 16)
+            inputByteArray(x) = Convert.ToByte(i)
+        Next
+        des.Key = ASCIIEncoding.ASCII.GetBytes(sKey) '建立加密对象的密钥和偏移量，此值重要，不能修改
+        des.IV = ASCIIEncoding.ASCII.GetBytes(sKey)
+        Dim ms As MemoryStream = New MemoryStream()
+        Dim cs As CryptoStream = New CryptoStream(ms, des.CreateDecryptor(), CryptoStreamMode.Write)
+
+        cs.Write(inputByteArray, 0, inputByteArray.Length)
+        cs.FlushFinalBlock()
+
+        Dim ret As StringBuilder = New StringBuilder() '建立StringBuild对象，CreateDecrypt使用的是流对象，必须把解密后的文本变成流对象
+
+        Return System.Text.Encoding.Default.GetString(ms.ToArray())
+
+    End Function
+#End Region
+
+
+    Public Shared Function FileToBase64(ByVal filePath As String) As String
+        
+        Dim fs As FileStream = File.OpenRead(filePath)
+        Dim br As New BinaryReader(fs)
+        Dim bt() As Byte = br.ReadBytes(Convert.ToInt32(fs.Length))
+        Dim base64String As String = Convert.ToBase64String(bt)
+
+        br.Close()
+        fs.Close()
+
+        Return base64String
+    End Function
+
+End Class

@@ -1,0 +1,208 @@
+﻿Imports System.IO
+Partial Class manager_lctmanage_cslist
+    Inherits System.Web.UI.Page
+    Dim base As New Base
+    Dim MaxPage As Integer
+    Dim pageindex As Integer
+    Dim Login_User As String
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        'If Not base.CheckUserAuthentication() Then
+        '    Response.Write("非法访问！")
+        '    Response.End()
+        'End If
+
+        If Page.IsPostBack = False Then
+            'Dim d1 As Date
+            'd1 = DateAdd("m", 1, Now)
+            'd1 = CDate(Year(d1) & "-" & Month(d1))
+            'txtssj.Text = CDate(Now.Year & "-" & Now.Month).ToString("yyyy-MM-dd")
+            'txtesj.Text = DateAdd("d", -1, d1).ToString("yyyy-MM-dd")
+            loadgv()
+        End If
+    End Sub
+    'Public tdxm1 As New DataTable
+    Private Sub loadgv()
+        Dim sqlstr As String = ""
+        'Dim xmmc As String
+        'Dim stime As String
+        'Dim etime As String
+        'Dim xmht As String
+        'Dim yzdw As String
+
+        ''xmmc = base.SqlFilter(txtxmmc.Text.Trim)
+        'stime = base.SqlFilter(txtssj.Text.Trim)
+        'etime = base.SqlFilter(txtesj.Text.Trim)
+        ''xmht = base.SqlFilter(txtht.Text.Trim)
+        '' yzdw = base.SqlFilter(txtdw.Text.Trim)
+        'If xmmc <> "" Then
+        '    sqlstr = sqlstr + " and my项目名称 like '%" & xmmc & "%'"
+        'End If
+        'If stime <> "" Then
+        '    'sqlstr = sqlstr + " and convert(datetime,my创建时间,20)>='" & stime & "'"
+        'End If
+        'If etime <> "" Then
+        '    'sqlstr = sqlstr + " and convert(datetime,my创建时间,20)<='" & etime & "'"
+        'End If
+        'If xmht <> "" Then
+        '    sqlstr = sqlstr + " and my合同编号 like '%" & xmht & "%'"
+        'End If
+        'If yzdw <> "" Then
+        '    sqlstr = sqlstr + " and my业主单位 like '%" & yzdw & "%'"
+        'End If
+        'If DropDownList1.SelectedIndex = 1 Then
+        '    sqlstr = sqlstr + " and (select count(lc_lczt.fid) from lc_lczt,lc_order where lc_lczt.xmbh=my项目编号 and lc_lczt.bz=0 and lc_order.lczt=lc_lczt.xmzt and lc_order.lcbs=substring(my项目编号,1,2) and isnull(lc_lczt.endtime,getdate()) -lc_lczt.starttime>lc_order.days)>0"
+        'ElseIf (DropDownList1.SelectedIndex = 2) Then
+        '    sqlstr = sqlstr + " and (select count(lc_lczt.fid) from lc_lczt,lc_order where lc_lczt.xmbh=my项目编号 and lc_lczt.bz=0 and lc_order.lczt=lc_lczt.xmzt and lc_order.lcbs=substring(my项目编号,1,2) and isnull(lc_lczt.endtime,getdate()) -lc_lczt.starttime>lc_order.days)=0"
+
+        'End If
+        'sqlstr = sqlstr + " and (select count(lc_lczt.fid) from lc_lczt,lc_order where lc_lczt.xmbh=my项目编号 and lc_lczt.bz=0 and lc_order.lczt=lc_lczt.xmzt and lc_order.lcbs=substring(my项目编号,1,2) and isnull(lc_lczt.endtime,getdate()) -lc_lczt.starttime>lc_order.days and lc_lczt.starttime + lc_order.days>='" & stime & "' and lc_lczt.starttime + lc_order.days<='" & etime & "' and lc_order.days<>0 and lc_order.days is not null and lc_lczt.cstype<>1)>0"
+
+
+        sqlstr = sqlstr + " and (select count(lc_lczt.fid) from lc_lczt,lc_order where lc_lczt.xmbh=my项目编号 and lc_lczt.bz=0 and lc_order.lczt=lc_lczt.xmzt and lc_order.lcbs=substring(my项目编号,1,2)  and lc_order.days<>0 and lc_order.days is not null and lc_lczt.cstype<>1)>0"
+        Dim tdxm As New DataTable
+        tdxm = base.DB.Table("select my项目编号,my合同编号,my项目名称,my业主单位 from 项目基本信息_MapExt where 1=1 and my流程状态<>'资料归档' " & sqlstr & "", "tb")
+        'tdxm = base.DB.Table("select my项目编号,my合同编号,my项目名称,my业主单位 from 项目基本信息_MapExt where my流程状态<>'资料归档'", "tb") and my流程状态<>'资料归档'
+        If tdxm.Rows.Count = 0 Then
+            base.Js.alert(Me, "本月暂无项目超时记录！")
+        End If
+        GridView1.DataSource = tdxm
+        GridView1.DataBind()
+        MaxPage = tdxm.Rows.Count
+        PageBar.InnerHtml = base.pub.WritePage(GridView1, MaxPage)
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        Dim xmbh As String
+        Dim k As Integer
+        Dim tb As New DataTable
+        For i = 0 To GridView1.Rows.Count - 1
+            xmbh = GridView1.DataKeys(i).Item(0)
+            'tb = base.DB.Table("select lc_lczt.xmzt,lc_order.shapeid,lc_lczt.fid,lc_order.days,(select KSMC from GY_KSDM where ksdm=lc_order.bm) as bm,lc_lczt.type,lc_lczt.starttime,lc_lczt.endtime from lc_lczt,lc_order where lc_lczt.xmbh='" & xmbh & "' and lc_lczt.bz=0 and lc_order.lczt=lc_lczt.xmzt and lc_order.lcbs='" & xmbh.Substring(0, 2).ToLower & "' and isnull(lc_lczt.endtime,getdate()) -lc_lczt.starttime>lc_order.days and lc_order.days<>0 and lc_order.days is not null and lc_lczt.cstype<>1", "tb")
+            tb = base.DB.Table("select lc_lczt.xmzt,lc_order.shapeid,lc_lczt.fid,lc_order.days,(select KSMC from GY_KSDM where ksdm=lc_order.bm) as bm,lc_lczt.type,lc_lczt.starttime,lc_lczt.endtime from lc_lczt,lc_order where lc_lczt.xmbh='" & xmbh & "' and lc_lczt.bz=0 and lc_order.lczt=lc_lczt.xmzt and lc_order.lcbs='" & xmbh.Substring(0, 2).ToLower & "'  and lc_order.days<>0 and lc_order.days is not null and lc_lczt.cstype<>1", "tb")
+            If tb.Rows.Count > 0 Then
+                For k = 0 To tb.Rows.Count - 1
+                    If k = 0 Then
+                        GridView1.Rows(i).Cells(4).Text = tb.Rows(k)("bm").ToString + "(" + tb.Rows(k)("xmzt").ToString + ")"
+                    Else
+                        GridView1.Rows(i).Cells(4).Text = GridView1.Rows(i).Cells(4).Text + "，" + tb.Rows(k)("bm").ToString + "(" + tb.Rows(k)("xmzt").ToString + ")"
+                    End If
+                Next
+            End If
+            GridView1.Rows(i).Cells(5).Text = "<a href='javascript:void(0)' onclick=""window.open('xglczt.aspx?xmbh=" & GridView1.DataKeys(i).Item(0) & "','修改','height=320, width=400, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')"">修改</a>"
+        Next
+        GridView1.Columns(0).Visible = False
+    End Sub
+    Protected Sub GridView1_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs) Handles GridView1.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            e.Row.Attributes.Add("OnDblClick", "openlct('" & GridView1.DataKeys(e.Row.RowIndex).Item(0) & "')")
+        End If
+    End Sub
+
+    'Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+    '    loadgv()
+    'End Sub
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        loadgv()
+    End Sub
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button2.Click
+
+        Dim ExpDB As String = Server.MapPath("../../")
+        Dim TempOpDir As String = ExpDB & "/Submit_Temp/"
+        Dim OutFileName As String = "Excel." & Timer.ToString.Replace(".", "") & ".xls"
+        If File.Exists(ExpDB & "/ExampleDB.xls") = False Then
+            base.Js.alert(Me, "环境错误，请与管理员联系")
+            Exit Sub
+        End If
+        Try
+            File.Copy(ExpDB & "/ExampleDB.xls", TempOpDir & OutFileName, True)
+        Catch ex As Exception
+            base.Js.alert(Me, "对目录没有写的权限。复制文件出错")
+            Exit Sub
+        End Try
+
+        Dim tb As New DataTable
+        Dim i As Integer = 0
+
+        tb.Columns.Add("合同编号")
+        tb.Columns.Add("项目名称")
+        tb.Columns.Add("业主单位")
+        tb.Columns.Add("超时部门")
+        Dim rw As DataRow
+        Dim sqlstr As String = ""
+        Dim xmmc As String
+        Dim stime As String
+        Dim etime As String
+        Dim xmht As String
+        Dim yzdw As String
+
+        ' xmmc = base.SqlFilter(txtxmmc.Text.Trim)
+        stime = base.SqlFilter(txtssj.Text.Trim)
+        etime = base.SqlFilter(txtesj.Text.Trim)
+        ' xmht = base.SqlFilter(txtht.Text.Trim)
+        ' yzdw = base.SqlFilter(txtdw.Text.Trim)
+        If xmmc <> "" Then
+            sqlstr = sqlstr + " and my项目名称 like '%" & xmmc & "%'"
+        End If
+        If stime <> "" Then
+            ' sqlstr = sqlstr + " and convert(datetime,my创建时间,20)>='" & stime & "'"
+        End If
+        If etime <> "" Then
+            ' sqlstr = sqlstr + " and convert(datetime,my创建时间,20)<='" & etime & "'"
+        End If
+        If xmht <> "" Then
+            sqlstr = sqlstr + " and my合同编号 like '%" & xmht & "%'"
+        End If
+        If yzdw <> "" Then
+            sqlstr = sqlstr + " and my业主单位 like '%" & yzdw & "%'"
+        End If
+        'If DropDownList1.SelectedIndex = 1 Then
+        '    sqlstr = sqlstr + " and (select count(lc_lczt.fid) from lc_lczt,lc_order where lc_lczt.xmbh=my项目编号 and lc_lczt.bz=0 and lc_order.lczt=lc_lczt.xmzt and lc_order.lcbs=substring(my项目编号,1,2) and isnull(lc_lczt.endtime,getdate()) -lc_lczt.starttime>lc_order.days)>0"
+        'ElseIf (DropDownList1.SelectedIndex = 2) Then
+        '    sqlstr = sqlstr + " and (select count(lc_lczt.fid) from lc_lczt,lc_order where lc_lczt.xmbh=my项目编号 and lc_lczt.bz=0 and lc_order.lczt=lc_lczt.xmzt and lc_order.lcbs=substring(my项目编号,1,2) and isnull(lc_lczt.endtime,getdate()) -lc_lczt.starttime>lc_order.days)=0"
+
+        'End If
+        sqlstr = sqlstr + " and (select count(lc_lczt.fid) from lc_lczt,lc_order where lc_lczt.xmbh=my项目编号 and lc_lczt.bz=0 and lc_order.lczt=lc_lczt.xmzt and lc_order.lcbs=substring(my项目编号,1,2) and isnull(lc_lczt.endtime,getdate()) -lc_lczt.starttime>lc_order.days and lc_lczt.starttime + lc_order.days>='" & stime & "' and lc_lczt.starttime + lc_order.days<='" & etime & "' and lc_order.days<>0 and lc_order.days is not null and lc_lczt.cstype<>1)>0"
+        Dim tdxm As New DataTable
+        tdxm = base.DB.Table("select my项目编号,my合同编号,my项目名称,my业主单位 from 项目基本信息_MapExt where 1=1" & sqlstr & "", "tb")
+        If tdxm.Rows.Count = 0 Then
+            base.Js.alert(Me, "本月暂无项目超时记录！")
+            Return
+        End If
+
+        For i = 0 To tdxm.Rows.Count - 1
+            rw = tb.NewRow()
+            rw("合同编号") = tdxm.Rows(i)("my合同编号").ToString.Trim()
+            rw("项目名称") = tdxm.Rows(i)("my项目名称").ToString.Trim()
+            rw("业主单位") = tdxm.Rows(i)("my业主单位").ToString.Trim()
+            rw("超时部门") = getcsbm(tdxm.Rows(i)("my项目编号").ToString.Trim())
+            tb.Rows.Add(rw)
+        Next
+
+        Dim e1 As New SunfunExcel(TempOpDir & OutFileName)
+        e1.SaveExcel(tb)
+        Response.Redirect("../../Submit_Temp/" & OutFileName)
+
+    End Sub
+
+
+    Function getcsbm(ByVal xmbh As String) As String
+        Dim csbm As String
+        Dim k As Integer
+        Dim tb As New DataTable
+        tb = base.DB.Table("select lc_lczt.xmzt,lc_order.shapeid,lc_lczt.fid,lc_order.days,(select KSMC from GY_KSDM where ksdm=lc_order.bm) as bm,lc_lczt.type,lc_lczt.starttime,lc_lczt.endtime from lc_lczt,lc_order where lc_lczt.xmbh='" & xmbh & "' and lc_lczt.bz=0 and lc_order.lczt=lc_lczt.xmzt and lc_order.lcbs='" & xmbh.Substring(0, 2).ToLower & "' and isnull(lc_lczt.endtime,getdate()) -lc_lczt.starttime>lc_order.days and lc_order.days<>0 and lc_order.days is not null and lc_lczt.cstype<>1", "tb")
+        If tb.Rows.Count > 0 Then
+            For k = 0 To tb.Rows.Count - 1
+                If k = 0 Then
+                    csbm = tb.Rows(k)("bm").ToString + "(" + tb.Rows(k)("xmzt").ToString + ")"
+                Else
+                    csbm = csbm + "，" + tb.Rows(k)("bm").ToString + "(" + tb.Rows(k)("xmzt").ToString + ")"
+                End If
+            Next
+        End If
+        Return csbm
+    End Function
+End Class

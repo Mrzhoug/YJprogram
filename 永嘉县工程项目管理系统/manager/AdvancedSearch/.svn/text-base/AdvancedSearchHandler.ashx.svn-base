@@ -1,0 +1,194 @@
+﻿<%@ WebHandler Language="VB" Class="AdvancedSearchHandler" %>
+
+Imports System
+Imports System.Web
+Imports System.IO
+
+Public Class AdvancedSearchHandler : Implements IHttpHandler
+    
+    Dim Base As New Base
+    
+    Public Sub ProcessRequest(ByVal context As HttpContext) Implements IHttpHandler.ProcessRequest
+        context.Response.ContentType = "text/plain"
+        Dim mkdm As Integer
+        Try
+            mkdm = Convert.ToInt32(context.Request("mkdm"))
+        Catch ex As Exception
+            mkdm = 0
+        End Try
+        If mkdm = 0 Then
+            context.Response.Write("非法参数")
+        End If
+        
+        Dim dt As New DataTable
+        Dim sqlstr As String
+        
+        sqlstr = "select * from AdvancedSearchSetting where mkdm = " & mkdm & " order by orderby"
+        dt = Base.DB.Table(sqlstr, "dd")
+        
+        Dim temp As String = String.Empty
+        
+        For i As Integer = 0 To dt.Rows.Count - 1
+            
+            Dim condtionID As Integer = Convert.ToInt32(dt.Rows(i).Item("id"))
+            Dim condtionType As String = dt.Rows(i).Item("conditionType").ToString()
+            Dim searchType As String = dt.Rows(i).Item("searchType").ToString()
+            Dim searchNode As String = dt.Rows(i).Item("searchNode").ToString().Replace("<", "").Replace(":", "").Replace(">", "")
+            
+            '表示为区间型搜索
+            If condtionType = "conditionInterval" Then
+                
+                Dim textFrom As String = String.Empty
+                Dim textTo As String = String.Empty
+                
+                textFrom = context.Request("textboxIntervalFrom" + i.ToString())
+                textTo = context.Request("textboxIntervalTo" + i.ToString())
+                
+                If textFrom <> "" Or textTo <> "" Then
+                    
+                    If searchType = "typeDate" Then
+                        temp += " and cast(" + searchNode + " as datetime)"
+                        sqlstr += ""
+                        If textFrom = "" Then
+                            temp += " <= '" + textTo + "'"
+                        End If
+                        
+                        If textTo = "" Then
+                            temp += " >= '" + textFrom + "'"
+                            
+                        End If
+                        
+                        If textFrom <> "" And textTo <> "" Then
+                            temp += " between "
+                            temp += "'" + textFrom + "'"
+                            temp += " and "
+                            temp += "'" + textTo + "'"
+                        End If
+                        
+                    End If
+                
+                    If searchType = "typeNumber" Then
+                        temp += " and cast(" + searchNode + " as float)"
+                        
+                        If textFrom = "" Then
+                            temp += " <= " + textTo + ""
+                        End If
+                        
+                        If textTo = "" Then
+                            temp += " >= " + textFrom + ""
+                            
+                        End If
+                        
+                        If textFrom <> "" And textTo <> "" Then
+                            temp += " between "
+                            temp += "" + textFrom + ""
+                            temp += " and "
+                            temp += "" + textTo + ""
+                        End If
+                    
+                    End If
+                
+                    If searchType = "typeString" Then
+                        temp += " and " + searchNode
+                        
+                        If textFrom = "" Then
+                            temp += " <= " + textTo + ""
+                        End If
+                        
+                        If textTo = "" Then
+                            temp += " >= " + textFrom + ""
+                            
+                        End If
+                        
+                        If textFrom <> "" And textTo <> "" Then
+                            temp += " between "
+                            temp += "" + textFrom + ""
+                            temp += " and "
+                            temp += "" + textTo + ""
+                        End If
+                    End If
+
+                    temp += " and " + searchNode + "!='空'"
+                End If
+                
+            End If
+            
+            
+            '相等搜索
+            If condtionType = "conditionEqual" Then
+                If searchType = "typeDropDown" Then
+                    Dim tempdt As New DataTable
+                    Dim SourceNodeName As String = String.Empty
+                    Dim customSource As String = String.Empty
+                    sqlstr = "select * from AdvancedSearchDropDownListSetting where searchsettingid=" & condtionID
+                    tempdt = Base.DB.Table(sqlstr, "da")
+                    If tempdt.Rows.Count > 0 Then
+                        If IsDBNull(tempdt.Rows(0).Item("SourceNodeSelect")) Then
+                            customSource = tempdt.Rows(0).Item("CustomSoruceText")
+                        Else
+                            SourceNodeName = tempdt.Rows(0).Item("SourceNodeSelect")
+                        End If
+                    Else
+                        SourceNodeName = ""
+                    End If
+                    If SourceNodeName <> String.Empty Then
+                        Dim tempstr() As String = SourceNodeName.Split(",")
+                        Dim requestStr As String
+                        Dim optionID As String
+                        For j As Integer = 0 To tempstr.Length - 1
+                            optionID = "option" & i & "-" & j
+                            requestStr = context.Request(optionID).Replace(":", "")
+                            If requestStr <> "全部" Then
+                                temp += " and " + tempstr(j).ToString().Replace(":", "") + " = '" + requestStr + "'"
+                                temp += " and " + tempstr(j).ToString().Replace(":", "") + "!='空'"
+                            End If
+                        Next
+                    Else
+                        Dim optionID As String
+                        Dim requestStr As String
+                        optionID = "option" & i & "-0"
+                        requestStr = context.Request(optionID)
+                        If requestStr <> "全部" Then
+                            temp += " and " + searchNode + " = '" + requestStr + "'"
+                            temp += " and " + searchNode + "!='空'"
+                        End If
+                    End If
+                    
+                    
+                    
+                    
+                   
+                Else
+                    Dim textStr As String = context.Request("textbox" + i.ToString())
+                    If textStr <> "" Then
+                        temp += " and " + searchNode + " = '" + textStr + "'"
+                        temp += " and " + searchNode + "!='空'"
+                    End If
+                End If
+                
+                
+            End If
+            
+            '相似搜索
+            If condtionType = "conditionLike" Then
+                Dim textStr As String = context.Request("textbox" + i.ToString())
+                If textStr <> "" Then
+                    temp += " and " + searchNode + " like '%" + textStr + "%'"
+                    temp += " and " + searchNode + "!='空'"
+                End If
+            End If
+                
+            
+        Next
+
+        context.Response.Write(temp)
+        
+    End Sub
+ 
+    Public ReadOnly Property IsReusable() As Boolean Implements IHttpHandler.IsReusable
+        Get
+            Return False
+        End Get
+    End Property
+
+End Class

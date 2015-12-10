@@ -1,0 +1,64 @@
+﻿
+Partial Class manager_lctmanage_addlczt
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        If Not Base.CheckUserAuthentication() Then
+            Response.Write("非法操作")
+            Response.End()
+        End If
+        Dim xmhb As String = ""
+        Dim xmzt As String = ""
+        Dim back As String = ""
+        Dim fid As String = ""
+        Dim type As Integer = 0
+        Try
+            type = Convert.ToInt32(Request("type"))
+        Catch ex As Exception
+            type = 0
+        End Try
+        Try
+            xmhb = Request("xmbh")
+        Catch ex As Exception
+            xmhb = ""
+        End Try
+        Try
+            xmzt = Request("xmzt")
+        Catch ex As Exception
+            xmzt = ""
+        End Try
+        Try
+            back = Request("back")
+        Catch ex As Exception
+            back = ""
+        End Try
+        Try
+            fid = Request("fid")
+        Catch ex As Exception
+            fid = ""
+        End Try
+        If xmhb.Length > 0 And xmzt.Length > 0 Then
+            If back.Length > 0 And back = "1" Then
+                Dim tb As DataTable
+                tb = Base.DB.Table("select id from lc_lczt where xmbh='" & Base.SqlFilter(xmhb) & "' and xmzt='" & Base.SqlFilter(xmzt) & "' and bz=0", "ss")
+                If tb.Rows.Count > 0 Then
+                    Base.DB.Query("update lc_lczt set bz=1,fid='" + fid + "',type=0 where xmbh='" & Base.SqlFilter(xmhb) & "' and id>" & tb.Rows(0)(0).ToString & "")
+                End If
+
+            ElseIf xmhb.Trim.Length > 0 Then
+                Dim tb As DataTable
+                tb = Base.DB.Table("select id from lc_lczt where xmbh='" & Base.SqlFilter(xmhb) & "' and xmzt='" & Base.SqlFilter(xmzt) & "' and bz=0", "ss")
+                If type = 0 Then
+                    If tb.Rows.Count > 0 Then
+                        Base.DB.Query("update lc_lczt set fid='" + fid + "' where id=" & tb.Rows(0)(0).ToString & "")
+                    Else
+                        Base.DB.Query("insert into lc_lczt(xmbh,xmzt,fid,type,starttime) values('" & Base.SqlFilter(xmhb) & "','" & Base.SqlFilter(xmzt) & "','" & fid & "'," & type & ",getdate())")
+                    End If
+                Else
+                    Base.DB.Query("update lc_lczt set fid='" + fid + "',endtime=getdate(),type=1 where id=" & tb.Rows(0)(0).ToString & "")
+                End If
+
+            End If
+        End If
+    End Sub
+End Class

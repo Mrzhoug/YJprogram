@@ -1,0 +1,64 @@
+﻿
+Partial Class manager_Forms_OpenHistory
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Dim Cid As Integer
+        Try
+            Cid = Request("CID")
+        Catch ex As Exception
+            Cid = 0
+        End Try
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("SELECT [CID], [UserName], [XMDM], [XMMC], [FormName] FROM [Form_Modify_Log] where Cid =" & Cid, "Form_Modify_Log")
+        If Tb.Rows.Count = 0 Then
+            Base.Js.alert(Me, "非法访问!")
+            Exit Sub
+        Else
+
+        End If
+        Dim MKMC As String = Tb.Rows(0)(3).ToString
+        Dim FId As Integer = Tb.Rows(0)(4)
+
+        Tb = Base.DB.Table("SELECT FID,MKDM FROM XX_XMJC WHERE Fid = " & FId, "XX_XMJC")
+        If Tb.Rows.Count = 0 Then
+            Response.Write("你无权限访问,或是记录已经不存在")
+            Response.End()
+        End If
+        Dim MKDM As Integer = Tb.Rows(0)(1)
+        Dim Qx As Integer = Base.GetUserHaveQX(UserID, MKDM)
+        '这里对表单进行处理，判断表单是只读，或是可写的，或是没有权限的。
+        If Qx <= 1 Then
+            Response.Write("无权打开此表单的历史记录，请联系管理员" & Qx)
+            Response.End()
+        End If
+
+        '进行文件的处理
+        Dim DFileName As String = Server.MapPath("../../") & "\History\" & MKMC & "\" & Cid & ".xml"
+        If IO.File.Exists(DFileName) = False Then
+            Response.Write("历史记录文件已经不存在.")
+            Response.End()
+        End If
+
+        '调用打印输出程序
+        SendContent3(Base.IO.Text_File_Read(DFileName))
+    End Sub
+
+    Sub SendContent3(ByVal Content As String)
+        Dim Temp As String = String.Empty
+        Temp += "<script language=javascript>" & vbCrLf
+        Temp += " var content;" & vbCrLf
+        Temp += " content = """ & Content.Replace("""", "\""").Replace(Chr(13) & Chr(10), "\n") & """;" & vbCrLf
+        Temp += "</scr" & "ipt>" & vbCrLf
+        Response.ContentEncoding = Encoding.UTF8
+        Response.Write(Temp)
+        Exit Sub
+    End Sub
+End Class

@@ -1,0 +1,84 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="OpenHistory.aspx.vb" Inherits="manager_Forms_OpenHistory" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>打开表单</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+    <OBJECT ID="Xman" CLASSID="CLSID:EAFA9174-B955-4DC3-B450-031001466185" CODEBASE="/SunFun.CAB#version=1,0,0,0"></OBJECT>
+    </div>
+    </form>
+</body>
+</html>
+
+<script language="javascript" type="text/javascript" >
+
+//生成文件，并执行。
+var Xman = document.getElementById("Xman");
+var result;
+var controls = 1;
+try
+{
+    result = Xman.SaveTextFile("",content,"UTF-8",true);
+}
+catch(e)
+{
+    //表示IE禁用了控件,导致控件无法运作
+    result = "OK";
+}
+
+
+if (result!="OK") 
+{
+    if (result=="写入文件失败。")
+    {
+        alert('不能同时打开多张单，请先关闭其他表单！');
+    }
+    else
+    {
+      if (objflag==0)  alert('打开出错。你将此站点加为信任站点！');
+    }
+}
+else
+{
+    try
+    {//开始执行
+        Xman.StartFile();
+    }
+    catch(e)
+    {
+        window.location.href = "../../Controls.aspx";
+        controls = 0;
+    }
+}
+
+if (controls == 1) 
+{
+
+    //先判断是否有上级框，在有流程的情况，可以找到parent.main
+    if (parent.main != null)
+    {
+        //window.history.back(-1);
+            window.close(-1);
+    }
+    else
+    {
+        //判断是否在无流程的情况，可以找到parent.subnav
+        if (parent.subnav == null)
+        {
+            //对流程的情况下．进行转回．
+            window.close(-1);
+        }
+        else
+        {
+            //对无流程的情况，重新载入当前列表
+            //parent.subnav.location.reload();
+            window.location.href="../XJXM/ShowList.aspx?LCDM=" + lcdm;
+        }
+    }
+}
+</script>

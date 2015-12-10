@@ -1,0 +1,62 @@
+﻿
+Partial Class manager_Desktop_LookPublicMessage
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim PID As Integer
+    Dim action As String
+    Dim Login_User As String
+    Dim UserID As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Try
+            PID = Request("PID")
+        Catch ex As Exception
+            Response.Write("非法调用，或是参数不正确！")
+            Response.End()
+        End Try
+
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("select sm.CID, sm.Title,sm.Content,sm.SendDate,GY_YGDM.YGXM,sm.FromID from SendMessage as sm,GY_YGDM where sm.FromID=GY_YGDM.YGDM and sm.CId=" & PID, "PublicMessage")
+        If Tb.Rows.Count = 0 Then
+            Response.Write("公告不存在,或已经被删除！")
+            Response.End()
+        End If
+
+        Dim PubUserID As Integer = Tb.Rows(0).Item(5)
+        If Page.IsPostBack = False Then
+            User1.InnerText = Tb.Rows(0).Item(4).ToString
+            Titles.InnerText = Tb.Rows(0).Item(1).ToString
+            Content.Text = Tb.Rows(0).Item(2).ToString.Replace(Chr(13), "<br>")
+            PDate.InnerText = Tb.Rows(0).Item(3).ToString
+        End If
+        Dim MessageId As Integer = Tb.Rows(0).Item(0)
+
+        If Base.DB.Table("select Cid from  PublicMessageLookLog where UserID= " & UserID & " and MessageId = " & MessageId, "PublicMessageLookLog").Rows.Count = 0 Then
+            '表示是第一次查看．做标志
+            Base.DB.Query("insert into PublicMessageLookLog(UserID,MessageId,LookDate) values(" & UserID & "," & MessageId & ",getdate())")
+        End If
+
+        Dim i As Integer
+        Tb = Base.DB.Table("Select GY_YGDM.YGXM,PublicMessageLookLog.LookDate From PublicMessageLookLog,GY_YGDM where GY_YGDM.YGDM = PublicMessageLookLog.UserID and PublicMessageLookLog.MessageID = " & MessageId, "dd")
+        Dim TmpLookList As String = ""
+        For i = 0 To Tb.Rows.Count - 1
+            TmpLookList = TmpLookList & Tb.Rows(i)("YGXM").ToString & "<span style='color:#999999'>(" & Tb.Rows(i)("LookDate").ToString & ")</span>&nbsp;&nbsp;"
+        Next
+        looklist.InnerHtml = TmpLookList
+
+
+        '显示文件附件
+        filelist.InnerHtml = Base.ShowFileAttachment_Open(Server.MapPath("../../") & "\PersonalFolders\MessageAttachment\" & MessageId, MessageId)
+
+    End Sub
+
+    'Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+    '    'Dim sql As String
+    '    'sql = "update SendMessage set Title='" & Base.SqlFilter(Title.Text) & "',Content='" & Base.SqlFilter(Content.Text) & "',sendDate='" & Base.SqlFilter(PDate.Text) & "' where cid=" & PID
+    '    'Base.DB.Query(sql)
+    '    'Base.Js.WriteScript(Me, "opener.window.parent.MessageBox('操作成功','你已经成功修改了公告!');var url = opener.window.location.href;opener.window.location.href=url;window.close();")
+    'End Sub
+End Class

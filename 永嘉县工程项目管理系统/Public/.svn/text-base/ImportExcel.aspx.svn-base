@@ -1,0 +1,55 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ImportExcel.aspx.vb" Inherits="Public_ImportExcel" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>数据导入</title>
+    <link href="../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+</head>
+<body>
+    <center>
+    <form id="form1" runat="server" style="width:500px">
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>数据导入</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right">
+                            导入数据：
+                        </th>
+                        <td width="75%" style="text-align:left">
+                            <asp:FileUpload ID="FileUpload1" runat="server" />
+                            <asp:Button ID="Button1" runat="server" Text="上 传" CssClass="btnsubmit" />
+                            <asp:Button ID="Button2" runat="server" Text="导 入" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            上传模版：
+                        </th>
+                        <td  style="text-align:left">
+				            <asp:FileUpload ID="FileUpload2" runat="server" Visible="false" />
+                            <asp:Button ID="Button3" runat="server" Text="上传模板" Visible="false" CssClass="btnsubmit" />
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="2">
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            使用说明：<asp:LinkButton ID="LinkButton1" runat="server">点击此处</asp:LinkButton>下载该项目模板，按照模板内的字段填入相对应的信息进行数据填写。然后进行导入。
+                        </td>
+                    </tr>                 
+                </table>
+            </div>
+        </div>
+    </form>
+    </center>
+</body>
+</html>

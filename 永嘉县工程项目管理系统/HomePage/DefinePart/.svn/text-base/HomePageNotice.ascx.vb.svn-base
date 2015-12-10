@@ -1,0 +1,36 @@
+﻿
+Partial Class HomePage_DefinePart_HomePageNotice
+    Inherits System.Web.UI.UserControl
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim Base As New Base
+        Dim tb As New Data.DataTable
+
+        tb = Base.DB.Table("select top 7 * from EP_HomePageNotice order by [uptime] desc", "managelist")
+        If tb.Rows.Count > 0 Then
+            Dim i As Integer = 0
+            Dim str, str1 As String
+            str = ""
+            Dim PubDate As Date
+            For i = 0 To tb.Rows.Count - 1
+                str1 = tb.Rows(i)("title")
+                If str1.Length > 14 Then
+                    str1 = str1.Substring(0, 12) & ".."
+                End If
+                Try
+                    PubDate = CDate(tb.Rows(i)("uptime").ToString).Date
+                Catch ex As Exception
+                    PubDate = Now.Date
+                End Try
+                If DateDiff(DateInterval.Day, PubDate, Now) <= 2 Then
+                    str = str & "<TR><TD  style='WIDTH: 18px; HEIGHT: 19px' align=right valign='top'><IMG src='images/news1.gif'/> </TD><TD style='HEIGHT: 19px' align=left >&nbsp;<a href='HomePageNoticeShow.aspx?cid=" & tb.Rows(i)("cid").ToString & "'>" & str1 & "</a>&nbsp;[" & PubDate & "]<img src='../../images/new.gif' border=0></TD></tr>"
+                Else
+                    str = str & "<TR><TD  style='WIDTH: 18px; HEIGHT: 19px' align=right valign='top'><IMG src='images/news1.gif'/> </TD><TD style='HEIGHT: 19px' align=left >&nbsp;<a href='HomePageNoticeShow.aspx?cid=" & tb.Rows(i)("cid").ToString & "'>" & str1 & "</a>&nbsp;[" & PubDate & "]</TD></tr>"
+                End If
+            Next
+            conte.InnerHtml = str
+        End If
+        tb = Nothing
+        Base = Nothing
+    End Sub
+End Class

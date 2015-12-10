@@ -1,0 +1,85 @@
+﻿
+Partial Class manager_YGDM_System_User
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim FullName As String
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking("../manager/YGDM/Default.aspx")   '检测文件检测
+
+        Dim UserID As String
+        UserID = Request("UserID")
+        If UserID.Trim.Length = 0 Then
+            Base.Js.alert(Me, "非法访问", "default.aspx")
+            Exit Sub
+        End If
+
+        If Base.Js.chknum(UserID) = False Then
+            Base.Js.alert(Me, "非法访问", "default.aspx")
+            Exit Sub
+        End If
+
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("SELECT [YGDM],YGXM, [DLMC], [QYBZ] FROM [GY_YGDM] where ygdm=" & UserID, "GY_YGDM")
+        If tb.Rows.Count = 0 Then
+            Base.Js.CloseGoTo(Me, "系统错误，无法添加账号！", "default.aspx")
+            Exit Sub
+        End If
+        '对用户值进行赋值
+        UserName.Text = tb.Rows(0).Item(2).ToString.Trim
+        FullName = tb.Rows(0).Item(1).ToString.Trim
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Try
+            Dim NetCmd As New netcommand.net
+            Dim Result As String
+            Result = NetCmd.AddUser(UserName.Text.Trim, Password1.Value.Trim, "X-Man账号", FullName)
+            If Result.IndexOf("命令成功完成") >= 0 Then
+                AddLoginRolu(UserName.Text.Trim.ToLower)
+                Base.Js.CloseGoTo(Me, "账号:" & UserName.Text.Trim & " 添加成功！", "default.aspx")
+            Else
+                Base.Js.CloseGoTo(Me, "账号:" & UserName.Text.Trim & " 添加出错，请稍候再试或联系管理员！", "default.aspx")
+            End If
+
+        Catch ex As Exception
+            Base.Js.CloseGoTo(Me, "暂时不能进行分配账号，如果问题请联系管理员！", "default.aspx")
+        End Try
+    End Sub
+
+    Sub AddLoginRolu(ByVal LoginName As String)
+        Dim rootpath As String = String.Empty
+        rootpath = Server.MapPath("../../")
+        rootpath = IO.Directory.GetParent(rootpath).ToString
+        Dim PTName As String = "GovTest"
+        Dim index As Integer
+        index = rootpath.LastIndexOf("\")
+        If index > 0 Then
+            PTName = rootpath.Substring(index + 1)
+            rootpath = rootpath.Substring(0, index + 1)
+        End If
+
+        Dim LoginRoluFile As String = rootpath & "LoginRolu.Xml"
+        If IO.File.Exists(LoginRoluFile) = False Then
+            Base.IO.Text_File_Save(LoginRoluFile, "<?xml version=""1.0"" encoding=""UTF-8""?>" & vbCrLf & "<温州市公共信息平台>" & vbCrLf & "<登陆规则>" & vbCrLf & "<登陆名称></登陆名称>" & vbCrLf & "<平台名称></平台名称>" & vbCrLf & "<加入时间></加入时间>" & vbCrLf & "</登陆规则>" & vbCrLf & "</温州市公共信息平台>", Encoding.UTF8)
+        End If
+
+        Dim XmlDoc As New System.Xml.XmlDocument
+        XmlDoc.Load(LoginRoluFile)
+
+        Dim RootNode As System.Xml.XmlNode
+        RootNode = XmlDoc.DocumentElement
+
+        Dim Node As System.Xml.XmlNode = RootNode.SelectSingleNode("/温州市公共信息平台/登陆规则[登陆名称='" & LoginName & "']")
+        If Node Is Nothing Then
+            '没有查找到．进行添加
+            Dim xeUserInfo As System.Xml.XmlElement = XmlDoc.CreateElement("登陆规则")        ';//创建一个节点
+            xeUserInfo.InnerXml = "<登陆名称>" & LoginName & "</登陆名称><平台名称>" & PTName & "</平台名称><加入时间>" & Now() & "</加入时间>"
+            RootNode.AppendChild(xeUserInfo)      ';//将结果添加到根节点中.
+            XmlDoc.Save(LoginRoluFile)
+        Else
+            '有查找到，进行更新
+            Node.InnerXml = "<登陆名称>" & LoginName & "</登陆名称><平台名称>" & PTName & "</平台名称><加入时间>" & Now() & "</加入时间>"
+            XmlDoc.Save(LoginRoluFile)
+        End If
+    End Sub
+End Class

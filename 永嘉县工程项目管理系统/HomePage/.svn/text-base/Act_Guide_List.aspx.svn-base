@@ -1,0 +1,72 @@
+﻿<%@ Page Language="VB" MasterPageFile="~/HomePage/MasterPage.master" AutoEventWireup="false" CodeFile="Act_Guide_List.aspx.vb" Inherits="HomePage_Act_Guide_List"%>
+<%@ Register Src="DefinePart/HomePageNotice.ascx" TagName="HomePageNotice" TagPrefix="uc1" %>
+<%@ Register Src="DefinePart/UserLogin.ascx" TagName="UserLogin" TagPrefix="uc2" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+<table border="0" style="width: 100%" cellpadding=0 cellspacing=0>
+        <tr>
+            <td style="width: 259px" valign="top">
+                <uc1:HomePageNotice ID="HomePageNotice2" runat="server" />
+                <uc2:UserLogin ID="UserLogin2" runat="server" />
+            </td>
+            <td valign="top">
+            
+            
+<table id="Table_01" width="580" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td><img src="images/actGuide.gif" alt=""></td>
+	</tr>
+	<tr>
+	<td style="background:url(images/页面2_12.gif);">
+               <table style="width: 100%">
+        <tr>
+            <td valign="top" style="font-size:9pt;" >
+                &nbsp;&nbsp;&nbsp;&nbsp;关键字：<asp:TextBox ID="TextBox1" runat="server"
+                    Width="256px"></asp:TextBox>
+                <asp:Button ID="Button1" runat="server" Text=" 查 找 " /><br />
+              <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" CellPadding="4" DataSourceID="Conn" ForeColor="#333333" HorizontalAlign="Center"
+                    Width="96%" Font-Size="9pt" PageSize="20" DataKeyNames="Cid">
+                    <FooterStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
+                    <Columns>
+                        <asp:TemplateField HeaderText="序号">
+                            <ItemStyle HorizontalAlign="Center" Width="30px" />
+                        </asp:TemplateField>
+                        <asp:BoundField DataField="Title" HeaderText="指南标题" SortExpression="Title" />
+                    </Columns>
+                    <RowStyle BackColor="#F7F6F3" ForeColor="#333333" />
+                    <EditRowStyle BackColor="#999999" />
+                    <SelectedRowStyle BackColor="#E2DED6" Font-Bold="True" ForeColor="#333333" />
+                    <PagerStyle BackColor="#284775" ForeColor="White" HorizontalAlign="Center" />
+                    <HeaderStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
+                    <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
+                  <PagerSettings Visible="False" />
+                </asp:GridView>
+                <table align="center" bgcolor="#e0e0e0" height="26" valign="middle" width="96%">
+                    <tr>
+                        <td id="PageBar" runat="server" align="center" style="height: 22px">
+                        </td>
+                    </tr>
+                </table>
+                <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+SelectCommand="SELECT [Title], [UpTime], [Cid] FROM [Act_Guide] ORDER BY [UpTime] DESC">
+                </asp:SqlDataSource>
+            </td>
+            <td>
+            </td>
+        </tr>
+        
+    </table> 
+    </td>
+	</tr>
+	<tr><td><img src="images/页面2_16.gif" alt="" /></td></tr>
+</table>     
+ 
+        
+        
+            </td>
+            <td>
+            </td>
+        </tr>
+        
+    </table>
+</asp:Content>
+

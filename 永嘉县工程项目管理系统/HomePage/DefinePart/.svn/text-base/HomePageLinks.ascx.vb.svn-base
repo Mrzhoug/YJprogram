@@ -1,0 +1,5 @@
+﻿
+Partial Class HomePage_DefinePart_HomePageLinks
+    Inherits System.Web.UI.UserControl
+
+End Class

@@ -1,0 +1,80 @@
+﻿<%@ Page Language="VB" MasterPageFile="~/HomePage/MasterPage.master" AutoEventWireup="false" CodeFile="DepartmentsSearch.aspx.vb" Inherits="HomePage_DepartmentsSearch" title="部门查找" %>
+
+<%@ Register Src="DefinePart/UserLogined.ascx" TagName="UserLogined" TagPrefix="uc4" %>
+
+<%@ Register Src="DefinePart/ShortMessage.ascx" TagName="ShortMessage" TagPrefix="uc3" %>
+<%@ Register Src="DefinePart/HomePageNotice.ascx" TagName="HomePageNotice" TagPrefix="uc1" %>
+<%@ Register Src="DefinePart/UserLogin.ascx" TagName="UserLogin" TagPrefix="uc2" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+<table border="0" style="width: 100%" cellpadding=0 cellspacing=0>
+        <tr>
+            <td style="width: 259px" valign="top">
+                <uc1:HomePageNotice ID="HomePageNotice2" runat="server" />
+                <uc4:UserLogined ID="UserLogined1" runat="server" />
+            </td>
+            <td valign="top">
+                <table id="Table_01" width="580" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td height=32><img src="images/bmSearch.gif" alt=""></td>
+	</tr>
+	<tr>
+	<td style="background:url(images/页面2_12.gif);" valign=top >
+             <table style="width: 100%">
+            <tr valign=top >
+                <td style="font-size:9pt;">
+                    &nbsp;&nbsp;&nbsp;&nbsp;关键字：<asp:TextBox ID="TextBox1" runat="server" Width="304px"></asp:TextBox>
+                    <asp:Button ID="Button1" runat="server" Text=" 查 找 " />
+                    <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" CellPadding="4"
+                        DataKeyNames="KSDM" DataSourceID="Conn" ForeColor="#333333"
+                        HorizontalAlign="Center" Width="96%" Font-Size="9pt" PageSize="15" AllowPaging="True" GridLines="None">
+                        <FooterStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
+                        <Columns>
+                            <asp:BoundField DataField="KSMC" HeaderText="部门名称" SortExpression="KSMC" >
+                                <ItemStyle HorizontalAlign="Center" />
+                            </asp:BoundField>
+                            <asp:CommandField HeaderText="显示表单" SelectText="显示表单" ShowSelectButton="True">
+                                <ItemStyle HorizontalAlign="Center" Width="60px" />
+                            </asp:CommandField>
+                            <asp:ButtonField CommandName="RegUser" HeaderText="开通账号" Text="申请开通">
+                                <ItemStyle HorizontalAlign="Center" Width="60px" />
+                            </asp:ButtonField>
+                        </Columns>
+                        <RowStyle BackColor="#F7F6F3" ForeColor="#333333" />
+                        <EditRowStyle BackColor="#999999" />
+                        <SelectedRowStyle BackColor="#E2DED6" Font-Bold="True" ForeColor="#333333" />
+                        <PagerStyle BackColor="#284775" ForeColor="White" HorizontalAlign="Center" />
+                        <HeaderStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
+                        <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
+                        <PagerSettings Visible="False" />
+                    </asp:GridView>
+                    <table align="center" bgcolor="#e0e0e0" height="26" valign="middle" width="96%">
+                        <tr>
+                            <td id="PageBar" runat="server" align="center" style="height: 22px">
+                            </td>
+                        </tr>
+                    </table>
+                    <asp:SqlDataSource ID="Conn" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+                        SelectCommand="SELECT [KSDM], [KSMC] FROM [GY_KSDM]"></asp:SqlDataSource>
+                </td>
+            </tr>
+        </table>   
+    </td>
+	</tr>
+	<tr><td><img src="images/页面2_16.gif" alt="" /></td></tr>
+</table>     
+
+          
+      
+        
+        
+        
+            </td>
+            <td>
+            </td>
+        </tr>
+        
+    </table>
+       
+
+</asp:Content>
+

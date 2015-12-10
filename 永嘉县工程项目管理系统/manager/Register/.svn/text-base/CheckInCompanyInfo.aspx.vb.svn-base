@@ -1,0 +1,44 @@
+﻿
+Partial Class manager_Register_CheckInCompanyInfo
+    Inherits System.Web.UI.Page
+
+    Protected Sub Page_Load(sender As Object, e As System.EventArgs) Handles Me.Load
+        Dim RegisterCompanyUser As New RegisterCompanyUser
+
+
+        Dim id As Integer
+        Try
+            id = Convert.ToInt32(Request("id"))
+        Catch ex As Exception
+            Response.Write("非法访问")
+            Response.End()
+        End Try
+
+        Dim companyInfo As New MRegisterUser
+        companyInfo = RegisterCompanyUser.GetCompanyInfo(id)
+
+        If companyInfo Is Nothing Then
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+        If companyInfo.IsEnable = True Then
+            Response.Write("该账号已审核！")
+            Response.End()
+        End If
+
+
+        If RegisterCompanyUser.CreateSystemAccount(companyInfo) Then
+            Response.Write("审核成功！")
+        Else
+            Response.Write("审核失败！")
+        End If
+
+
+
+
+
+
+
+    End Sub
+End Class

@@ -1,0 +1,146 @@
+﻿
+Imports System.IO
+Imports MSWord = Microsoft.Office.Interop.Word
+
+'参考文档
+'http://www.cnblogs.com/m-cnblogs/archive/2011/07/28/2708734.html
+
+Partial Class Public_ExportContract
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        Dim strold As String = Request.QueryString("strold")
+        Dim strnew As String = Request.QueryString("strnew")
+        Dim strdocname As String = Request.QueryString("strdocname")
+        Dim filepath As String = Server.MapPath("") & "\" & strdocname & ".doc"
+        If File.Exists(filepath) Then
+            'ExtWord(replaceWord(filepath, strold, strnew))
+            Label2.Text = "生成完毕，请<a href='temp\" & replaceWord(filepath, strold, strnew) & "'>点击此处</a>下载"
+            Label2.Visible = True
+        Else
+            Base.Js.alert(Me, "模版文件不存在")
+        End If
+
+    End Sub
+
+
+
+    ''' <summary>
+    ''' word文档保留格式的替换
+    ''' </summary>
+    ''' <param name="filePath">模版文件路径</param>
+    ''' <param name="strold">表示文字</param>
+    ''' <param name="strnew">替换文字</param>
+    ''' <returns>生成的新文件名</returns>
+    ''' <remarks></remarks>
+    Function replaceWord(ByVal filePath As String, ByVal strold As String, ByVal strnew As String) As String
+
+        Dim app As New MSWord.Application
+        Dim nullobj As Object = System.Reflection.Missing.Value
+
+        Dim file As Object = filePath
+
+        Dim doc As MSWord.Document
+        '打开word副本
+        doc = app.Documents.Add(file, nullobj, nullobj, nullobj)
+
+        '将文件放到临时目录里
+        Dim tempFolder As String = Server.MapPath("") & "\temp\"
+        If Not IO.Directory.Exists(tempFolder) Then
+            IO.Directory.CreateDirectory(tempFolder)
+        End If
+        Dim tempFileName As String = "房屋租赁协议书" & Date.Now.ToString("yyyyMMddhhmmss") & ".doc"
+
+        Dim FindText As Object
+        Dim ReplaceWith As Object
+        Dim Replace As Object
+
+
+        Dim str_old() As String = strold.Split(";")
+        Dim str_new() As String = strnew.Split(";")
+
+        Dim i As Integer
+        For i = 0 To str_old.Length - 1
+            doc.Content.Find.Text = "[<" & str_old(i) & ">]" ' strOldText
+            FindText = "[<" & str_old(i) & ">]" ' strOldText 要查找的文本
+            ReplaceWith = str_new(i) 'strNewText 替换文本
+
+            'wdReplaceAll - 替换找到的所有项。
+            'wdReplaceNone - 不替换找到的任何项。
+            'wdReplaceOne - 替换找到的第一项。
+            Replace = Microsoft.Office.Interop.Word.WdReplace.wdReplaceAll
+
+            '移除Find的搜索文本和段落格式设置
+            doc.Content.Find.ClearFormatting()
+
+            '搜索替换功能
+            If doc.Content.Find.Execute(FindText, nullobj, nullobj, nullobj, nullobj, nullobj, nullobj, nullobj, nullobj, ReplaceWith, Replace, nullobj, nullobj, nullobj, nullobj) Then
+            End If
+        Next
+        doc.SaveAs(tempFolder & tempFileName)
+        doc.Close(nullobj, nullobj, nullobj)
+        app.Quit(nullobj, nullobj, nullobj)
+        app = Nothing
+
+        Return tempFileName
+
+    End Function
+
+
+    ''' <summary>
+    ''' 输出WORD，给客户端下载
+    ''' </summary>
+    ''' <param name="filePath">WORD文件路径</param>
+    ''' <remarks></remarks>
+    Sub ExtWord(ByVal filePath As String)
+        '版本1
+        'Dim file As New IO.FileInfo(filePath)
+        'System.Web.HttpContext.Current.Response.Clear()
+        'System.Web.HttpContext.Current.Response.Charset = "GB2312"
+        'System.Web.HttpContext.Current.Response.ContentEncoding = System.Text.Encoding.UTF8
+        ''添加头信息，为"文件下载/另存为"对话框指定默认文件名 
+        'System.Web.HttpContext.Current.Response.AddHeader("Content-Disposition", "attachment; filename=" + HttpUtility.UrlEncode(file.Name, System.Text.Encoding.UTF8))
+        ''添加头信息，指定文件大小，让浏览器能够显示下载进度 
+        'System.Web.HttpContext.Current.Response.AddHeader("Content-Length", file.Length.ToString())
+        ''指定返回的是一个不能被客户端读取的流，必须被下载 
+        'System.Web.HttpContext.Current.Response.ContentType = "application/ms-word"
+        ''把文件流发送到客户端 
+        'System.Web.HttpContext.Current.Response.WriteFile(file.FullName)
+
+        'System.Web.HttpContext.Current.Response.Flush()
+        ''停止页面的执行
+        'System.Web.HttpContext.Current.ApplicationInstance.CompleteRequest()
+
+
+        '版本2
+        'Dim filename As String = filePath
+        'Dim stream As FileStream = New FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read)
+        'Dim Type1 As String
+        'Type1 = filename.Substring(filename.LastIndexOf("."))
+
+        'Dim DownFileName As String
+        'Dim idx As Integer = filename.LastIndexOf("\")
+        'If idx > 0 Then
+        '    DownFileName = filename.Substring(idx + 1)
+        'Else
+        '    DownFileName = filename
+        'End If
+
+        'Try
+        '    Dim bufSize As Integer = stream.Length
+        '    Dim buf(bufSize) As Byte
+        '    Dim bytesRead As Integer = stream.Read(buf, 0, bufSize)
+        '    Dim UTF8 As Encoding = Encoding.GetEncoding("GB2312")
+        '    Response.ContentEncoding = UTF8
+        '    Response.AddHeader("Content-Disposition", "attachment; filename=" & HttpUtility.UrlEncode(DownFileName, Encoding.UTF8))
+        '    Response.AddHeader("Content-Length", bufSize.ToString())
+        '    Response.OutputStream.Write(buf, 0, bytesRead)
+        '    Response.End()
+        'Catch ex As Exception
+        '    Base.Js.alert(Me, "打开出错.")
+        'End Try
+    End Sub
+
+End Class

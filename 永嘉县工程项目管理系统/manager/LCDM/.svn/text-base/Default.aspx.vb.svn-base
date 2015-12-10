@@ -1,0 +1,114 @@
+﻿
+Partial Class manager_LCDM_Default
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking()        '这里对文件进行权限限制
+    End Sub
+
+    Protected Sub GridView1_RowUpdating(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewUpdateEventArgs) Handles GridView1.RowUpdating
+        If e.NewValues(0).ToString.Trim.Length = 0 Then
+            Base.Js.alert(Me, "修改后的流程名称不能为空!")
+            Exit Sub
+        End If
+        If e.NewValues(1).ToString.Trim.Length = 0 Then
+            Base.Js.alert(Me, "修改后的流程说明不能为空!")
+            Exit Sub
+        End If
+
+        Dim LCDM As String = GridView1.DataKeys(e.RowIndex).Item(0)
+        ConnLC.UpdateCommand = "update Gy_LCDM set LCMC = '" & e.NewValues(0) & "' , LCSM = '" & e.NewValues(1) & "' where LCDM = " & LCDM
+        ConnLC.Update()
+        GridView1.DataBind()
+        '更新显示组中的事情。
+        Base.DB.Query("UPDATE Gy_Group SET Group_Name = '" & e.NewValues(0) & "' WHERE LCDM = " & LCDM)
+
+    End Sub
+
+
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i
+        For i = 0 To GridView1.Rows.Count - 1
+            If GridView1.DataKeys(i).Item(1) = True Then
+                GridView1.Rows(i).Cells(5).Text = "无状态"
+            Else
+                GridView1.Rows(i).Cells(5).Text = "<a href='LCZT_Manage.aspx?LCDM=" & GridView1.DataKeys(i).Item(0) & "'>状态维护</a>"
+                GridView1.Rows(i).Cells(6).Text = "<a href='javascript:void(0)' onclick=""window.open('../CreateFunction/ShowListModify.aspx?LCDM=" & GridView1.DataKeys(i).Item(0) & "','自定义显示列','height=320, width=610, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no');"">编辑列</a>"
+                'GridView1.Rows(i).Cells(6).Text = "<a href='../CreateFunction/ShowListModify.aspx?LCDM=" & GridView1.DataKeys(i).Item(0) & "'>编辑列</a>"
+            End If
+            If i <> GridView1.EditIndex Then
+                CType(GridView1.Rows(i).Cells(4).Controls(0), LinkButton).Attributes.Add("onclick", "return confirm('你确认删除此流程吗? 数据文件将会被保留!');")
+            End If
+
+            GridView1.Rows(i).Attributes.Add("onmouseover", "OnMouseOver(this)")
+            GridView1.Rows(i).Attributes.Add("onmouseout", "OnMouseOut(this)")
+        Next
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+        GridView1.SelectedIndex = -1
+    End Sub
+
+    Protected Sub Button1_Click1(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        If TextBox5.Text.Trim.Length = 0 Then
+            Base.Js.alert(Me, "请输入流程名称!")
+            Exit Sub
+        End If
+        If TextBox6.Text.Trim.Length = 0 Then
+            Base.Js.alert(Me, "请输入流程说明!")
+            Exit Sub
+        End If
+
+        '判断此流程是否已经用过．
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("Select LCDM from GY_LCDM where LCMC='" & TextBox5.Text.Trim & "'", "GY_LCDM")
+        If tb.Rows.Count > 0 Then
+            Base.Js.alert(Me, "此名称的流程已经存在，你重新输入流程名！")
+            Exit Sub
+        End If
+
+        Dim sql As String
+        sql = "insert into GY_LCDM(lcmc,lcsm) values('" & TextBox5.Text.Trim & "','" & TextBox6.Text.Trim & "')"
+        Dim LCDM As Integer
+        Try
+            Base.DB.Query(sql)
+            tb = Base.DB.Table("select LCDM from GY_LCDM where lcmc='" & TextBox5.Text.Trim & "' and lcsm='" & TextBox6.Text.Trim & "'", "GY_LCDM")
+            LCDM = tb.Rows(0).Item(0)
+            '添加显示组中的数据
+            Base.DB.Query("insert into Gy_Group(Group_Name,Group_Kind,LCFlag,LCDM) values('" & TextBox5.Text.Trim & "',1,0," & LCDM & ")")
+            GridView1.DataBind()
+        Catch ex As Exception
+            Base.Js.alert(Me, "添加流程失败!")
+        End Try
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging1(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+        Dim index As Integer = e.NewSelectedIndex
+        Dim tb As New Data.DataTable
+        Dim i As Integer
+        Dim MKDM As String
+        Try
+            Base.DB.Query("delete GY_LCDM Where LCDM = " & GridView1.DataKeys(index).Item(0))
+
+            '得到未完成列表,完成列表的模块代码,去权限表中去除
+            tb = Base.DB.Table("Select MKDM from GY_MKXX WHERE List_QX_LCDM = " & GridView1.DataKeys(index).Item(0) & " AND MKMC like '%完成列表'", "GY_MKXX")
+            If tb.Rows.Count > 0 Then MKDM = tb.Rows(0).Item(0) Else MKDM = -1
+            For i = 1 To tb.Rows.Count - 1
+                MKDM += "," & tb.Rows(i).Item(0)
+            Next
+            Base.DB.Query("Delete GY_Group_Info where MKDM in(" & MKDM & ")")
+            '删除权限表中的数据,才能删除流程组名.
+            Dim GroupID As Integer
+            tb = Base.DB.Table("select Group_ID from Gy_GROUP where LCDM=" & GridView1.DataKeys(index).Item(0), "GYGRoup")
+            If tb.Rows.Count > 0 Then
+                GroupID = tb.Rows(0)(0)
+                Base.DB.Query("delete GY_YGQX where Group_ID = " & GroupID)
+            End If
+            Base.DB.Query("Delete Gy_Group where LCDM = " & GridView1.DataKeys(index).Item(0))
+        Catch ex As Exception
+            Base.Js.alert(Me, "删除记录失败!")
+        End Try
+        GridView1.DataBind()
+    End Sub
+End Class

@@ -1,0 +1,50 @@
+﻿
+Partial Class manager_LCDM_LCDM_Expansion
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim MaxRow As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking()
+
+        Dim TempSql As String
+        Dim Tb As New Data.DataTable
+        If TextBox1.Text.Length > 0 Then
+            TempSql = "SELECT * FROM GY_LCDM where LCMC like '%" & Base.SqlFilter(TextBox1.Text) & "%'"
+        Else
+            TempSql = "SELECT * FROM GY_LCDM"
+        End If
+        Conn.SelectCommand = TempSql
+        Tb = Base.DB.Table(TempSql, "dd")
+        MaxRow = Tb.Rows.Count
+
+
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        PageBar.InnerHtml = Base.pub.WritePage(GridView1, MaxRow)
+    End Sub
+
+    Protected Sub GridView1_RowUpdating(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewUpdateEventArgs) Handles GridView1.RowUpdating
+
+        Dim PublicList As Boolean
+        Dim PublicForm As Boolean
+        Try
+            PublicList = e.NewValues(1)
+        Catch ex As Exception
+            PublicList = False
+        End Try
+        Try
+            PublicForm = e.NewValues(2)
+        Catch ex As Exception
+            PublicForm = True
+        End Try
+        Dim LCDM As Integer = GridView1.DataKeys(e.RowIndex).Item(0)
+        Conn.UpdateCommand = "update GY_LCDM set publiclist='" & PublicList & "' , PublicForm='" & PublicForm & "' where LCDM = " & LCDM
+        Conn.Update()
+
+    End Sub
+
+    Protected Sub Button1_Click1(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        GridView1.DataBind()
+    End Sub
+End Class

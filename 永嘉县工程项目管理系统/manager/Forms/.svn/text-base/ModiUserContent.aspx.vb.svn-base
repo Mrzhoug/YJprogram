@@ -1,0 +1,295 @@
+﻿Imports System.Xml
+Partial Class manager_YGDM_ModiUserContent
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim Mkdm As Integer
+    Dim XMDM As Integer
+    Dim BaseDir As String = Server.MapPath("../../") & "FormFolder\XMAN-YGDM"
+    Dim XsnDir As String = "XMAN-YGDM"
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Dim Action As String = Context.Request.Params("Action")
+        If Action = "save" Then         '表示是保存
+            Save_Form()
+        End If
+
+        Dim TmpYGDM As Integer
+        Try
+            TmpYGDM = Request("YGDM")
+        Catch ex As Exception
+            TmpYGDM = 0
+        End Try
+
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("SELECT YGDM,YGXM,DLMC,Mobile,SSKS,QYBZ,EMAIL from GY_YGDM where YGDM = " & TmpYGDM, "XX_XMJC")
+        If Tb.Rows.Count = 0 Then
+            Response.Write("非法调用")
+            Response.End()
+        End If
+
+
+        Base.pub.CreateDir(BaseDir)
+        Dim uri As String = Server.MapPath("../../") & "TemplateLibrary\" & XsnDir & ".xsn"
+        If IO.File.Exists(uri) = False Then
+            Response.Write("用户无详细信息")
+            Response.End()
+        End If
+        Dim PublicUrl As String = Request("publicurl")
+        Dim Form As InfoJetSoft.Service.InfoJetForm = Nothing
+        Dim DfileName As String = BaseDir & "\" & TmpYGDM & ".xml"
+        Dim templatefile As String = Server.MapPath("../../") & "TemplateLibrary\" & XsnDir & "\template.xml"
+
+        If IO.File.Exists(DfileName) = False Then
+            If IO.File.Exists(templatefile) = False Then
+                Response.Write("详细信息未设置")
+                Response.End()
+            Else
+                Try
+                    IO.File.Copy(templatefile, DfileName, True)
+                Catch ex As Exception
+                    Response.Write("读取失败,请与管理员联系")
+                    Response.End()
+                End Try
+            End If
+        End If
+
+
+        '如果是架构更新，先更新表单头部,因为模板已经是最新，内容则是在临时文件中更新，为了保护现有文件
+        Dim NewTitle As String = Base.IO.Text_File_Read(templatefile)
+        Dim index As Integer
+        index = NewTitle.LastIndexOf("?>")
+        NewTitle = NewTitle.Substring(0, index + 2)
+        Dim OldTitle As String = Base.IO.Text_File_Read(DfileName)
+        index = OldTitle.LastIndexOf("?>")
+        Base.IO.Text_File_SaveAs(DfileName, NewTitle & OldTitle.Substring(index + 2), Encoding.UTF8)
+        '进行文件的处理,下面进行更新架构
+        '开始同步节点.头文件上面已经更新
+        Base.XmlClass.GetXmlFile(templatefile)
+        Dim RootNode As XmlNodeList = Base.XmlClass.GetRootNode
+        ComparedForm(RootNode, DfileName)
+
+
+        '更新用户名，姓名
+        Dim Result As String = Base.UpdateUserContent(TmpYGDM, 2, True)
+        If Not Result Is Nothing Then
+            Response.Write(Result)
+            Response.End()
+        End If
+
+        
+
+        Dim xml As String = Base.pub.Text_File_Read(DfileName)
+
+
+
+        Dim Fs As IO.FileStream = New IO.FileStream(uri, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read)  '当False为True是.向文件添加内容
+        Dim xsnContent(Fs.Length) As Byte
+        Dim strread As New IO.BinaryReader(Fs) '流处理要传输的文件
+        strread.Read(xsnContent, 0, xsnContent.Length)
+
+        '得到列表后,进行检测,模板是否已经注册过.
+        Dim uriList As String() = InfoJetSoft.Service.InfoJetService.List()
+        Dim RegFlag As Boolean = False
+        Dim i As Integer
+        For i = 0 To uriList.GetUpperBound(0)
+            If uriList(i).IndexOf("/" & XsnDir & ".xsn") > 0 Then
+                PublicUrl = uriList(i)
+                RegFlag = True
+                Exit For
+            End If
+        Next
+
+        If RegFlag = False Then
+            Try
+                PublicUrl = InfoJetSoft.Service.InfoJetService.Register(Context, xsnContent)
+            Catch ex As Exception
+                Response.Write("意外出错,稍后再试!")
+                Response.End()
+            End Try
+        End If
+
+        If Not PublicUrl Is Nothing Then
+            Try
+                Form = InfoJetSoft.Service.InfoJetService.BuildFormByXML(Context, PublicUrl, xml, "")
+            Catch ex As Exception
+                xDocContent.Text = ""
+                Exit Sub
+            End Try
+            xDocContent.Text = Form.Xhtml
+            YGDM.Value = TmpYGDM
+        End If
+    End Sub
+
+    Function Save_Form()
+        '表示是WEB提交的
+        Dim PublicUrl As String = Context.Request.Params("xdoc_param_xsn_uri")
+        Base.InfoJetRegister(PublicUrl, Server.MapPath("./"))
+        Dim form As InfoJetSoft.Service.InfoJetForm = InfoJetSoft.Service.InfoJetService.ReloadForm(Context, "")
+
+        Base.XmlClass.GetXmlText(form.Xml.Trim)
+        Dim RootNodeName As String = Base.XmlClass.GetRootNodeName
+        Dim TempNode As System.Xml.XmlNode = Base.XmlClass.GetRootNode.Item(0)
+        Dim Search_Fid As String = Base.XmlClass.GetFormID
+        Dim Xpath As String = "//" & RootNodeName & "/" & Search_Fid.Replace("表单号", "标题") & "/" & Search_Fid
+        Dim TitleNode As System.Xml.XmlNode = Base.XmlClass.FindNode(Xpath)
+        Dim YGDM As String = TitleNode.InnerText.ToString.Trim
+        Try
+            TitleNode = Base.XmlClass.FindNode("//my:姓名")
+            Dim YGXM As String = TitleNode.InnerText.ToString
+            If YGXM.Trim.Length > 0 Then
+                Base.DB.Query("update GY_YGDM set  YGXM = '" & YGXM & "' where YGDM=" & YGDM)
+            End If
+        Catch ex As Exception
+        End Try
+        
+        Try
+            TitleNode = Base.XmlClass.FindNode("//my:移动电话")
+            Dim Mobile As String = TitleNode.InnerText.ToString
+            If Mobile.Trim.Length > 0 Then
+                Base.DB.Query("update GY_YGDM set  Mobile = '" & Mobile & "' where YGDM=" & YGDM)
+            End If
+        Catch ex As Exception
+        End Try
+
+        Try
+            TitleNode = Base.XmlClass.FindNode("//my:EMAIL")
+            Dim EMAIL As String = TitleNode.InnerText.ToString
+            If EMAIL.Trim.Length > 0 Then
+                Base.DB.Query("update GY_YGDM set  EMAIL = '" & EMAIL & "' where YGDM=" & YGDM)
+            End If
+        Catch ex As Exception
+        End Try
+
+        Try
+            TitleNode = Base.XmlClass.FindNode("//my:是否在岗")
+            If TitleNode.InnerText.ToString().ToLower = "true" Then
+                Base.DB.Query("update GY_YGDM set QYBZ=1  where YGDM=" & YGDM)
+            Else
+                Base.DB.Query("update GY_YGDM set QYBZ=0  where YGDM=" & YGDM)
+            End If
+        Catch ex As Exception
+
+        End Try
+
+        '检测库是否存在
+        Dim KuFile As String = BaseDir & ".库.xml"
+        Dim templatefile As String = Server.MapPath("../../") & "TemplateLibrary\" & XsnDir & "\template.xml"
+        If IO.File.Exists(KuFile) = False Then
+            If IO.File.Exists(templatefile) = False Then
+                Response.Write("详细信息未设置")
+                Response.End()
+            Else
+                Try
+                    IO.File.Copy(templatefile, KuFile, True)
+                Catch ex As Exception
+                    Response.Write("读取失败,请与管理员联系")
+                    Response.End()
+                End Try
+            End If
+        End If
+
+        Dim Tb As New DataTable
+        Tb = Base.DB.Table("Select YGDM From GY_YGDM where YGDM= " & YGDM, "ddd")
+        If Tb.Rows.Count > 0 Then
+            Base.pub.Text_File_SaveAs(BaseDir & "/" & YGDM & ".xml", form.Xml.Trim(), Encoding.UTF8)
+            '入库操作,XML入库
+            Base.XmlClass.GetXmlFile(KuFile)
+
+            Dim Node2 As XmlNode = Base.XmlClass.FindNode("//" & RootNodeName & "/" & Search_Fid.Replace("表单号", "标题") & "[" & Search_Fid & "='" & YGDM & "']")
+            If Node2 Is Nothing Then
+                '6.添加用户操作记录,添加新表单
+                '这里对模板库中的空记录进行处理。防止在引用库时，出现空记录导致SUM不能用。
+                Dim NodeNull As XmlNode = Base.XmlClass.FindNode("//" & RootNodeName & "/" & Search_Fid.Replace("表单号", "标题") & "[" & Search_Fid & "='']")
+                If NodeNull Is Nothing Then
+                    Try
+                        Base.XmlClass.AddNode(TempNode)
+                    Catch ex As Exception
+                        Response.Write("系统错误：入库失败！")
+                    End Try
+                Else
+                    Try
+                        Base.XmlClass.UpdateNode("//" & RootNodeName & "/" & Search_Fid.Replace("表单号", "标题") & "[" & Search_Fid & "='']", TempNode)
+                    Catch ex As Exception
+                        Response.Write("系统错误：入库失败！")
+                    End Try
+                End If
+            Else
+                '6.添加用户操作记录,修改表单
+                Try
+                    Base.XmlClass.UpdateNode("//" & RootNodeName & "/" & Search_Fid.Replace("表单号", "标题") & "[" & Search_Fid & "='" & YGDM & "']", TempNode)
+                Catch ex As Exception
+                    Response.Write("系统错误：入库失败！")
+                End Try
+            End If
+            clientscript.InnerHtml = "<script language='javascript'>alert('保存成功');</script>"
+        Else
+            clientscript.InnerHtml = "<script language='javascript'>alert('更新失败');</script>"
+        End If
+        Return Nothing
+    End Function
+
+
+    Function ComparedForm(ByVal xmluser As XmlNodeList, ByVal DfileName As String) As String
+        '用递归的方法查找所有节点.并显示出来
+        'On Error Resume Next
+        Dim i, j As Integer
+        For i = 0 To xmluser.Count - 1
+            If xmluser.Item(i).Name <> "#text" Then  '过滤掉为空的值项
+                Dim xml1 As New SunFun.Xmlclass
+                xml1.GetXmlFile(DfileName)
+                Dim Node2 As XmlNode
+                Try
+                    Node2 = xml1.FindNode("//" & xmluser.Item(i).Name)
+                Catch ex As Exception
+                    'Response.Write("read error")
+                    'Return Nothing
+                    Node2 = Nothing
+                End Try
+
+                If Node2 Is Nothing Then
+                    '如果找不到此节点.那移值进去.他的子节点也就不用判断了
+                    Dim NodeFather As XmlNode = xmluser.Item(i).ParentNode
+                    Dim TempNode As XmlNode
+                    If xmluser.Item(i).PreviousSibling Is Nothing Then
+                        '表示是下级节点
+                        Dim TmpNd1 As XmlNodeList = xml1.FindNodes("//" & NodeFather.Name)
+                        For j = 0 To TmpNd1.Count - 1
+                            TempNode = TmpNd1.Item(j)
+                            Dim NewNodeName As String = xmluser.Item(i).Name
+                            NewNodeName = NewNodeName.Substring(NewNodeName.IndexOf(":") + 1)
+                            Dim InsertNode As XmlNode = xml1.xmlDoc.CreateNode(XmlNodeType.Element, xmluser.Item(i).Prefix, NewNodeName, xmluser.Item(i).NamespaceURI)
+                            InsertNode.InnerXml = xmluser.Item(i).InnerXml
+                            TempNode.InsertBefore(InsertNode, TempNode.FirstChild)
+                            xml1.Save()
+                        Next
+                    Else
+                        '表示是同级节点.得到前一节点进行插入操作
+                        Dim TmpNd1 As XmlNodeList = xml1.FindNodes("//" & xmluser.Item(i).PreviousSibling.Name)
+                        For j = 0 To TmpNd1.Count - 1
+                            TempNode = TmpNd1.Item(j)
+                            Dim NewNodeName As String = xmluser.Item(i).Name
+                            NewNodeName = NewNodeName.Substring(NewNodeName.IndexOf(":") + 1)
+                            Dim InsertNode As XmlNode = xml1.xmlDoc.CreateNode(XmlNodeType.Element, xmluser.Item(i).Prefix, NewNodeName, xmluser.Item(i).NamespaceURI)
+                            InsertNode.InnerXml = xmluser.Item(i).InnerXml
+                            TempNode.ParentNode.InsertAfter(InsertNode, TempNode)
+                            xml1.Save()
+                        Next
+                    End If
+                Else
+                    '如果找到,则检测子节点.
+                    If xmluser.Item(i).ChildNodes.Count >= 1 Then
+                        ComparedForm(xmluser.Item(i).ChildNodes, DfileName)
+                    End If
+                End If
+                xml1 = Nothing
+            End If
+        Next
+        Return Nothing
+    End Function
+
+End Class

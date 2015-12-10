@@ -1,0 +1,182 @@
+﻿Imports System.IO
+
+Partial Class HomePage_Forms_MyFormShow
+    Inherits System.Web.UI.Page
+
+    Dim LCDM As Integer
+    Dim Base As New Base
+    Dim TempTable As New Data.DataTable
+    Dim MaxTitle As Integer
+    Dim MKMC As String
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim SelectSQL As String
+    Dim MKDM As Integer
+    Dim sth As Boolean = False
+    Dim FilterName, FilterValue As String
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        FilterName = ""
+        FilterValue = ""
+        Try
+            MKDM = Request("MKDM")
+        Catch ex As Exception
+            Base.Js.closestr(Me, "非法访问!")
+            Exit Sub
+        End Try
+        If Base.HomePageUserCheck = False Then
+            Base.Js.closestr(Me, "你还没有登陆,请先登陆")
+            Exit Sub
+        End If
+        Login_User = Session("LoginName").ToString.Trim
+        UserID = Base.GetUserID(Login_User)
+
+        '得到模块名称
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("SELECT MKMC,XsnDir,NoLcDM,IsStop FROM GY_MKXX where MKDM =" & MKDM, "GY_MKXX1")
+        If tb.Rows.Count <= 0 Then
+            Base.Js.closestr(Me, "功能模板有问题!")
+            Exit Sub
+        Else
+            If IsDBNull(tb.Rows(0)("IsStop")) = True Then
+            Else
+                If tb.Rows(0)("IsStop") = 1 Then
+                    sth = True
+                End If
+            End If
+
+        End If
+
+        LCDM = tb.Rows(0)("NoLcDM")
+        Base.Js.WriteScript(Me, "var lcdm=" & LCDM & ";")
+        MKMC = tb.Rows(0).Item(0).ToString.Trim
+        SelectSQL = "SELECT XX_XMJC.FID,GY_XMXX.XMDM FROM GY_XMXX,XX_XMJC where XX_XMJC.XMDM = GY_XMXX.XMDM And GY_XMXX.LCDM=" & LCDM & " and (GY_XMXX.XMJD is not null) and GY_XMXX.XMSM='" & Login_User & "'"
+        If Page.IsPostBack = False Then
+
+            TempTable = Base.DataFromSearch_NoLC(GridView1, LCDM, TextBox1.Text.Trim, False, SelectSQL, FilterName, FilterValue)
+            If TempTable.Rows.Count = 0 Then
+                Response.Write("<font color='red'>&nbsp;&nbsp;当前不存在任何表单，请点击[新建表单]按钮来创建新的表单</font>")
+            End If
+            GridView1.DataBind()
+
+            Dim back As Int16
+            Try
+                back = Request("back")
+            Catch ex As Exception
+                back = 0
+            End Try
+        End If
+    End Sub
+
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        TempTable = Base.DataFromSearch_NoLC(GridView1, LCDM, TextBox1.Text.Trim, True, SelectSQL, FilterName, FilterValue)
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.SelectedIndexChanged
+    End Sub
+
+    Protected Sub GridView1_SelectedIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewSelectEventArgs) Handles GridView1.SelectedIndexChanging
+    End Sub
+
+    Protected Sub GridView1_RowDeleting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs)
+
+        Dim index As Integer = e.RowIndex
+        Dim Fid As String = GridView1.DataKeys(index).Item(0)
+
+        '从模板信息表中,得到当前模板的模板名
+
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("select xsndir,MKMC from GY_MKXX where NoLCDM = " & LCDM, "GY_MKXX")
+        Dim XsnDir As String = tb.Rows(0).Item(0).ToString.Trim
+        Dim XMMC As String = tb.Rows(0).Item(1).ToString.Trim
+
+        tb = Base.DB.Table("SELECT xmdm,Lock FROM XX_XMJC where fid=" & Fid, "XX_XMJC")
+        Dim XMDM As String = tb.Rows(0).Item(0)
+        Dim Lock As Integer
+        Try
+            Lock = tb.Rows(0)(1)
+        Catch ex As Exception
+            Lock = 0
+        End Try
+
+        If Lock = 1 Then
+            Base.Js.alert(Me, "此表单已经锁定,删除文件前请解锁")
+            Exit Sub
+        End If
+        tb = Nothing
+
+        Dim DFileName = Server.MapPath("../../") & "\流程文件夹\" & XMMC & "\" & Fid & ".xml"
+
+        '先删除数据库
+        Base.DB.Query("delete GY_XMXX where XMDM = " & XMDM)
+        Base.System_UserOp_Log(UserID, "delete GY_XMXX where XMDM = " & XMDM)
+        Base.DB.Query("delete XX_XMJC where FID = " & Fid)
+        Base.System_UserOp_Log(UserID, "delete XX_XMJC where FID = " & Fid)
+        '再删除库中的记录
+        Dim TempFileName As String = Server.MapPath("../../") & "\流程文件夹\" & XMMC & ".库.xml"
+        Dim Node As System.Xml.XmlNode = Base.XmlClass.GetXmlFile(TempFileName).ChildNodes(0)
+        Dim Fid_NodeName As String = Base.XmlClass.GetFormID
+        Base.XmlClass.DelNode("//" & Node.Name & "/" & Fid_NodeName.Replace("表单号", "标题") & "[" & Fid_NodeName & "='" & Fid & "']")
+        '再删除文件
+        Try
+            If File.Exists(DFileName) = True Then
+                File.Delete(DFileName)
+                Base.System_UserOp_Log(UserID, "删除文件:" & DFileName)
+            End If
+        Catch ex As Exception
+            Base.Js.alert(Me, "表单正在使用中,删除文件失败!")
+        End Try
+        Response.Redirect("MyFormShow.aspx?MKDM=" & MKDM)
+    End Sub
+
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs)
+    End Sub
+
+    Protected Sub GridView1_RowDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewRowEventArgs)
+        If e.Row.RowType = DataControlRowType.DataRow Then
+
+            'If AutoUpdate.Checked = True Then
+            '    e.Row.Attributes.Add("OnDblClick", "DbClickEvent('" & GridView1.DataKeys(e.Row.RowIndex).Item(0) & "&AutoUpdate=1')")
+            'Else
+            '    If spbz.Checked = True Then
+            '        '选中申请审批
+            '        e.Row.Attributes.Add("OnDblClick", "DbClickEventSP('" & GridView1.DataKeys(e.Row.RowIndex).Item(0) & "')")
+            '    Else
+            '        If LookSP.Checked = True Then
+            '            e.Row.Attributes.Add("OnDblClick", "DbClickEventLookSP('" & GridView1.DataKeys(e.Row.RowIndex).Item(0) & "')")
+            '        Else
+            e.Row.Attributes.Add("OnDblClick", "DbClickEvent('" & GridView1.DataKeys(e.Row.RowIndex).Item(0) & "')")
+            '        End If
+            '    End If
+            'End If
+
+            '鼠标效果
+            e.Row.Attributes.Add("onmouseover", "OnMouseOver(this)")
+            e.Row.Attributes.Add("onmouseout", "OnMouseOut(this)")
+            e.Row.Attributes("style") = "Cursor:hand"
+        End If
+
+    End Sub
+
+    Protected Sub Button3_Click(ByVal sender As Object, ByVal e As System.EventArgs)
+        Base.DataFromSearch_NoLC(GridView1, LCDM, TextBox1.Text.Trim, True, SelectSQL, FilterName, FilterValue)
+        GridView1.DataBind()
+    End Sub
+
+
+    Protected Sub Button2_Click(ByVal sender As Object, ByVal e As System.EventArgs)
+        If sth = False Then
+            Response.Redirect("FunctionNOLc.aspx?LCDM=" & LCDM & "&MKDM=" & MKDM)
+        Else
+            Base.Js.alert(Me, "对不起,此表单已经停止提交")
+        End If
+    End Sub
+
+End Class

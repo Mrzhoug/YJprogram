@@ -1,0 +1,223 @@
+﻿Imports Microsoft.VisualBasic
+
+Public Class MRegisterUser
+
+    Private _ID As Integer
+    Public Property ID() As Integer
+        Get
+            Return _ID
+        End Get
+        Set(ByVal value As Integer)
+            _ID = value
+        End Set
+    End Property
+
+
+    Private _userName As String
+    Public Property UserName() As String
+        Get
+            Return _userName
+        End Get
+        Set(ByVal value As String)
+            _userName = value
+        End Set
+    End Property
+
+    Private _password As String
+    Public Property Password() As String
+        Get
+            Return _password
+        End Get
+        Set(ByVal value As String)
+            _password = value
+        End Set
+    End Property
+
+
+    Private _companyName As String
+    Public Property CompanyName() As String
+        Get
+            Return _companyName
+        End Get
+        Set(ByVal value As String)
+            _companyName = value
+        End Set
+    End Property
+
+    Private _companyNo As String
+    Public Property CompanyNo() As String
+        Get
+            Return _companyNo
+        End Get
+        Set(ByVal value As String)
+            _companyNo = value
+        End Set
+    End Property
+
+
+    Private _companyCreateTime As String
+    Public Property CompanyCreateTime() As String
+        Get
+            Return _companyCreateTime
+        End Get
+        Set(ByVal value As String)
+            _companyCreateTime = value
+        End Set
+    End Property
+
+
+    Private _companyOwner As String
+    Public Property CompanyOwner() As String
+        Get
+            Return _companyOwner
+        End Get
+        Set(ByVal value As String)
+            _companyOwner = value
+        End Set
+    End Property
+
+    Private _companyOwnerTel As String
+    Public Property CompanyOwnerTel() As String
+        Get
+            Return _companyOwnerTel
+        End Get
+        Set(ByVal value As String)
+            _companyOwnerTel = value
+        End Set
+    End Property
+
+    Private _companyContacts As String
+    Public Property CompanyContacts() As String
+        Get
+            Return _companyContacts
+        End Get
+        Set(ByVal value As String)
+            _companyContacts = value
+        End Set
+    End Property
+
+    Private _companyContactsTel As String
+    Public Property CompanyContactsTel() As String
+        Get
+            Return _companyContactsTel
+        End Get
+        Set(ByVal value As String)
+            _companyContactsTel = value
+        End Set
+    End Property
+
+    Private _companyAddress As String
+    Public Property CompanyAddress() As String
+        Get
+            Return _companyAddress
+        End Get
+        Set(ByVal value As String)
+            _companyAddress = value
+        End Set
+    End Property
+
+
+    Private _companyType As String
+    Public Property CompanyType() As String
+        Get
+            Return _companyType
+        End Get
+        Set(ByVal value As String)
+            _companyType = value
+        End Set
+    End Property
+
+    Private _companyMoney As String
+    Public Property CompanyMoney() As String
+        Get
+            Return _companyMoney
+        End Get
+        Set(ByVal value As String)
+            _companyMoney = value
+        End Set
+    End Property
+
+    Private _peopleNum As String
+    Public Property PeopleNum() As String
+        Get
+            Return _peopleNum
+        End Get
+        Set(ByVal value As String)
+            _peopleNum = value
+        End Set
+    End Property
+
+
+    Private _peopleNum1 As String
+    Public Property PeopleNum1() As String
+        Get
+            Return _peopleNum1
+        End Get
+        Set(ByVal value As String)
+            _peopleNum1 = value
+        End Set
+    End Property
+
+    Private _peopleNum2 As String
+    Public Property PeopleNum2() As String
+        Get
+            Return _peopleNum2
+        End Get
+        Set(ByVal value As String)
+            _peopleNum2 = value
+        End Set
+    End Property
+
+    Private _peopleNum3 As String
+    Public Property PeopleNum3() As String
+        Get
+            Return _peopleNum3
+        End Get
+        Set(ByVal value As String)
+            _peopleNum3 = value
+        End Set
+    End Property
+
+    Private _imgUrl As String
+    Public Property ImgUrl() As String
+        Get
+            Return _imgUrl
+        End Get
+        Set(ByVal value As String)
+            _imgUrl = value
+        End Set
+    End Property
+
+    Private _registerTime As DateTime
+    Public Property RegisterTime() As DateTime
+        Get
+            Return _registerTime
+        End Get
+        Set(ByVal value As DateTime)
+            _registerTime = value
+        End Set
+    End Property
+
+    Private _isEnable As Boolean
+    Public Property IsEnable() As Boolean
+        Get
+            Return _isEnable
+        End Get
+        Set(ByVal value As Boolean)
+            _isEnable = value
+        End Set
+    End Property
+
+    Private _isDel As Boolean
+    Public Property IsDel() As Boolean
+        Get
+            Return _isDel
+        End Get
+        Set(ByVal value As Boolean)
+            _isDel = value
+        End Set
+    End Property
+
+
+
+End Class

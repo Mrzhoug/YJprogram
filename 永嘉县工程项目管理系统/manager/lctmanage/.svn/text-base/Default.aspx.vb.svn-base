@@ -1,0 +1,260 @@
+﻿Imports System.Data
+Imports System.IO
+Imports System.Xml
+Imports Microsoft.Office.Interop.Word
+Imports Microsoft.Office.Interop
+Imports System
+
+Partial Class manager_lctmanage_Default
+    Inherits System.Web.UI.Page
+
+    Dim Base As New Base
+    Protected Sub form1_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles form1.Load
+        'If Not Base.CheckUserAuthentication() Then
+        '    Response.Write("非法访问！")
+        '    Response.End()
+        'End If
+        Dim xmbh As String = ""
+        Dim xmzt As String = ""
+        Try
+            xmbh = Request("xmbh")
+        Catch ex As Exception
+
+        End Try
+
+        If xmbh = "" Then
+            Base.Js.alert(Me, "错误传递！")
+            Exit Sub
+        End If
+        Dim xmldoc As New XmlDocument
+        If xmbh <> "" Then
+            Try
+                xmldoc.Load(Server.MapPath("../../lct/lcmb") & "\\yjxmgl.xml")
+            Catch ex As Exception
+                Exit Sub
+            End Try
+        End If
+        Dim sqltest As String = ""
+
+        'If xmzt <> "" Then
+        '    sqltest = " and lczt='" & xmzt & "'"
+        'End If
+        Dim i As Integer = 0
+        Dim Tb As New Data.DataTable
+        Dim fid As String
+        Try
+            ' Tb = Base.DB.Table("select (select top 1 shapeid from lc_order where lczt=lc_lczt.xmzt and lcbs='" & xmbh.Substring(0, 2).ToLower & "'),fid,(select  top 1  days from lc_order where lczt=lc_lczt.xmzt and lcbs='" & xmbh.Substring(0, 2).ToLower & "'),(select  top 1  bm from lc_order where lczt=lc_lczt.xmzt and lcbs='" & xmbh.Substring(0, 2).ToLower & "'),type,starttime,endtime from lc_lczt where xmbh='" & xmbh & "' and bz=0", "tb")
+            Tb = Base.DB.Table("select lc_order.shapeid,lc_lczt.fid,lc_order.days,(select KSMC from GY_KSDM where ksdm=lc_order.bm) as bm,lc_lczt.type,lc_lczt.starttime,lc_lczt.endtime,lc_lczt.cstype,lc_lczt.note,lc_lczt.enable from lc_lczt,lc_order where lc_lczt.xmbh='" & xmbh & "' and lc_lczt.bz=0 and lc_order.lczt=lc_lczt.xmzt", "tb")
+            If Tb.Rows.Count > 0 Then
+                For i = 0 To Tb.Rows.Count - 1
+                    If Tb.Rows(i)(0).ToString.Length > 0 Then
+                        fid = Tb.Rows(i)(1).ToString
+                        Dim xmllist As XmlNodeList = xmldoc.SelectNodes("//v:rect[@id='" & Tb.Rows(i)(0).ToString & "']", Base.GetXmlNamespaceManager_lct(xmldoc))
+                        Dim xmllist1 As XmlNodeList = xmldoc.SelectNodes("//v:oval[@id='" & Tb.Rows(i)(0).ToString & "']", Base.GetXmlNamespaceManager_lct(xmldoc))
+                        Dim xmllist2 As XmlNodeList = xmldoc.SelectNodes("//v:shape[(v:textbox/w:txbxContent/w:p/w:r/w:t!='' or v:textbox/w:txbxContent/w:p/w:hyperlink/w:r/w:t!='') and @id='" & Tb.Rows(i)(0).ToString & "']", Base.GetXmlNamespaceManager_lct(xmldoc))
+                        Dim colorstr As String = ""
+                        Dim days As Integer
+                        Dim stime As System.DateTime
+                        Dim etime As System.DateTime
+                        Dim type As String
+                        Dim ts As TimeSpan
+                        Dim dy As Double
+                        Dim cstype As String
+                        Dim showstr As String
+                        Dim bm As String
+                        Dim note As String
+                        Dim csbool As String = ""
+                        Dim enable As String
+
+                        enable = Tb.Rows(i)("enable").ToString
+
+                        cstype = Tb.Rows(i)("cstype").ToString
+                        If cstype = "1" Then
+                            csbool = "是"
+                        Else
+                            csbool = "否"
+                        End If
+                        note = Tb.Rows(i)("note").ToString
+                        bm = Tb.Rows(i)("bm").ToString
+                        type = Tb.Rows(i)("type").ToString
+                        Try
+                            days = Convert.ToInt32(Tb.Rows(i)(2).ToString)
+                        Catch ex As Exception
+                            days = 0
+                        End Try
+
+                        If type = "1" Then
+                            Try
+                                stime = Convert.ToDateTime(Tb.Rows(i)("starttime").ToString)
+                                etime = Convert.ToDateTime(Tb.Rows(i)("endtime").ToString)
+                            Catch ex As Exception
+                                stime = Convert.ToDateTime(System.DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"))
+                                etime = Convert.ToDateTime(System.DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"))
+                            End Try
+
+                            showstr = " <br/>开始时间：" & stime.ToString & " <br/>结束时间：" & etime.ToString & " <br/>超时日期：" & stime.AddDays(days) & " <br/>有效天数：" & days & " 天 <br/>是否修改：" & csbool & ""
+                            If cstype = "1" Then
+                                showstr += " <br/>修改备注：" & note & ""
+                            End If
+
+                            ts = etime - stime
+                            dy = Convert.ToDouble(ts.TotalDays.ToString)
+                            If dy > days And days <> 0 And cstype <> "1" Then
+                                colorstr = "#ff0000"
+                            Else
+                                colorstr = "#00b0f0"
+                            End If
+
+                        Else
+                            Try
+                                stime = Convert.ToDateTime(Tb.Rows(i)("starttime").ToString)
+                            Catch ex As Exception
+                                stime = Convert.ToDateTime(System.DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"))
+                            End Try
+                            etime = System.DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss")
+                            showstr = " <br/>开始时间：" & stime.ToString & " <br/>结束时间： <br/>超时日期：" & stime.AddDays(days) & " <br/>有效天数：" & days & " 天 <br/>是否修改：" & csbool & ""
+                            If cstype = "1" Then
+                                showstr += " <br/>修改备注：" & note & ""
+                            End If
+                            ts = etime - stime
+                            dy = Convert.ToDouble(ts.TotalDays.ToString)
+                            If dy > days And days <> 0 And cstype <> "1" Then
+                                colorstr = "#ff0000"
+                            Else
+                                If (enable <> "1") Then
+                                    colorstr = "#45D855"
+                                End If
+                            End If
+                        End If
+                        If xmllist.Count > 0 Then
+                            Dim xn As System.Xml.XmlNode
+                            For Each xn In xmllist '遍历所有子节点 
+                                Dim xe As XmlElement = CType(xn, XmlElement) '将子节点类型转换为XmlElement类型 
+                                xe.SetAttribute("fillcolor", colorstr) '则修改该属性
+                                xe.SetAttribute("onmouseover", "show('" & showstr & "');") '则修改该属性
+                                xe.SetAttribute("onmouseout", "hidden();") '则修改该属性
+                                xe.RemoveAttribute("filled")
+                                If fid.Length > 0 Then
+                                    xe.SetAttribute("href", "../../manager/Forms/OpenInfoPath.aspx?fid=" & fid & "") '则修改该属性
+                                End If
+                            Next xn
+                        End If
+
+
+                        If xmllist1.Count > 0 Then
+                            Dim xn As System.Xml.XmlNode
+                            For Each xn In xmllist1 '遍历所有子节点 
+                                Dim xe As XmlElement = CType(xn, XmlElement) '将子节点类型转换为XmlElement类型 
+                                xe.SetAttribute("fillcolor", colorstr) '则修改该属性
+                                xe.SetAttribute("onmouseover", "show('" & showstr & "');") '则修改该属性
+                                xe.SetAttribute("onmouseout", "hidden();") '则修改该属性
+                                xe.RemoveAttribute("filled")
+                                If fid.Length > 0 Then
+                                    xe.SetAttribute("href", "../../manager/Forms/OpenInfoPath.aspx?fid=" & fid & "") '则修改该属性
+                                End If
+                            Next xn
+                        End If
+                        If xmllist2.Count > 0 Then
+                            Dim xn As System.Xml.XmlNode
+                            For Each xn In xmllist2 '遍历所有子节点 
+                                Dim xe As XmlElement = CType(xn, XmlElement) '将子节点类型转换为XmlElement类型 
+                                xe.SetAttribute("fillcolor", colorstr) '则修改该属性
+                                xe.SetAttribute("onmouseover", "show('" & showstr & "');") '则修改该属性
+                                xe.SetAttribute("onmouseout", "hidden();") '则修改该属性
+                                xe.RemoveAttribute("filled")
+                                If fid.Length > 0 Then
+                                    xe.SetAttribute("href", "../../manager/Forms/OpenInfoPath.aspx?fid=" & fid & "") '则修改该属性
+                                End If
+                            Next xn
+                        End If
+                    End If
+                Next
+            End If
+            If Not Directory.Exists(Server.MapPath("../../lct") & "\\" & xmbh) Then
+                Directory.CreateDirectory(Server.MapPath("../../lct") & "\\" & xmbh)
+            End If
+
+            'Dim wd As New Aspose.Words.Document(Server.MapPath("../../lct/lcmb") & "\sg.xml")
+            'wd.Save(Server.MapPath("../../lct") & "\\" & xmbh & "\\xmllct.HTML")
+            Try
+                xmldoc.Save(Server.MapPath("../../lct") & "\\" & xmbh & "\\lctest.xml") '保存。 
+            Catch ex As Exception
+
+            End Try
+
+
+            '定义Word对象
+            Dim wordApp As New Word.ApplicationClass
+            '要转换的文件名
+            Dim fileName As Object = Server.MapPath("../../lct") & "\\" & xmbh & "\\lctest.xml"
+            '默认值
+            'Response.Write(fileName)
+            'Response.End()
+            Dim miss As Object = System.Reflection.Missing.Value
+            '打开要转换的 DOC 文件
+            Dim doc As Word.Document = DirectCast(wordApp.Documents.Open(fileName, miss, miss, miss, miss, miss, _
+             miss, miss, miss, miss, miss, miss, _
+             miss, miss, miss, miss), Word.Document)
+            Dim lctname As String = "xmllct.HTML"
+            '转换后的文件名
+            fileName = Server.MapPath("../../lct") & "\\" & xmbh & "\\" & lctname
+            '保存的文件格式
+            Dim saveFormat As Object = Word.WdSaveFormat.wdFormatHTML
+            ' Dim strtype As Object = System.Text.UTF8Encoding.UTF8
+            '按文本文件保存           
+            doc.SaveAs(fileName, saveFormat, miss, miss, miss, miss, _
+             miss, miss, miss, miss, miss, miss, _
+             miss, miss, miss, miss)
+            '关闭是否保存文件，这里为不保存
+            Dim changes As Object = False
+            '关闭文件
+            doc.Close(changes, miss, miss)
+            '退出 Word 应用程序
+            wordApp.Quit(changes, miss, miss)
+
+            Dim fs As New FileStream(fileName, FileMode.Open)
+            Dim content As String
+            Dim javastr As String
+            javastr = ""
+            javastr += "<div id='d1' align='center' style='position:absolute;z-index:999; width :230px;background-color:#FFC0CB;display:none;'><table width='100%' height='100%'><tr><td align='left'><font size='2tp' color=''><div id='nr'></div></font></td></tr></table></div>"
+            javastr += "<script language='javascript' type='text/javascript'>"
+            javastr += "var d1 = document.getElementById('d1');"
+            javastr += "function show(str) {"
+            javastr += "nr.innerHTML = str;"
+            javastr += "d1.style.pixelLeft = window.event.clientX + window.document.body.scrollLeft + 5;"
+            javastr += "d1.style.pixelTop = window.event.clientY + window.document.body.scrollTop + 5; "
+            javastr += "d1.style.display = 'block';"
+            javastr += "}"
+            javastr += "function hidden() {"
+            javastr += "d1.style.display = 'none';"
+            javastr += "}"
+            javastr += "</script>"
+            javastr += "</body>"
+            'Dim newcontent As String
+            Dim sw As New IO.StreamReader(fs, Encoding.GetEncoding("gb2312"))
+            content = sw.ReadToEnd
+            content = content.Replace("%3f", "?")
+            content = content.Replace("</body>", javastr)
+            content = content.Replace("<div class=Section1 style='layout-grid:15.6pt'>", "<div class=Section1 style='layout-grid:15.6pt;position:absolute;'>")
+            sw.ReadToEnd()
+            sw.Close()
+            fs.Close()
+            fs = New FileStream(fileName, FileMode.Open)
+            Dim write As New StreamWriter(fs, Encoding.GetEncoding("gb2312"))
+            write.Write(content)
+            write.Close()
+            fs.Close()
+
+            'Response.Write("../../lct/" & xmbh & "/" & lctname & "")
+            ' Exit Sub
+            '  Response.Write("<script type ='text/javascript' language='javascript'> printHidden(" & fileName & ")</script>")
+            fomriframe.InnerHtml = "<script type ='text/javascript' language='javascript'> openlct('../../lct/" & xmbh & "/" & lctname & "');</script>"
+            ' fomriframe.InnerHtml = "<img alt='' src=""../../lct/" & xmbh & "/xmllct.files/image001.gif"" />"
+        Catch ex As Exception
+            DoLog.LogErrorToFile("流程图打开失败  ", ex.ToString)
+            Base.Js.alert(Me, "流程图显示出错，请检查流程图设置！")
+        End Try
+
+
+    End Sub
+End Class

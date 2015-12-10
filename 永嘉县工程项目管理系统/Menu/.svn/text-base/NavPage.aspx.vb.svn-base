@@ -1,0 +1,24 @@
+﻿
+Partial Class Menu_NavPage
+    Inherits System.Web.UI.Page
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim Js As New JsClass
+        Dim LCDM As String
+        LCDM = Request("LCDM")
+        If LCDM Is Nothing Then
+            Js.alert(Me, "非法访问!")
+            Response.End()
+        End If
+        If Js.IsInt(LCDM) = False Then
+            Js.alert(Me, "非法访问!")
+            Response.End()
+        End If
+        Dim Str As String
+        Str = "<FRAMESET rows=""23, *"">"
+        Str += "<FRAME name=subnav marginWidth=0 marginHeight=0 src=""buttonbar.aspx?LCDM=" & LCDM & """ frameBorder=no noResize scrolling=no >"
+        Str += "<FRAME name=main1 marginWidth=0 marginHeight=0 src=""../Manager/Blank.aspx"" frameBorder=no>"
+        Str += "</FRAMESET>"
+        Response.Write(Str)
+    End Sub
+End Class

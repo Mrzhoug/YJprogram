@@ -1,0 +1,162 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="DesktopStyle2.aspx.vb" Inherits="manager_Desktop_DesktopStyle2" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <link href="../../images/desktop/css.css" type="text/css" rel="stylesheet" />
+    <title>我的桌面</title>
+    <style type="text/css">
+    <!--
+        a:link{text-decoration:none;}
+        a:visited{text-decoration:none;}
+        a:hover{text-decoration:none;}
+    body {
+	    margin-left: 0px;
+	    margin-top: 0px;
+	    margin-right: 0px;
+	    margin-bottom: 0px;
+    }
+    -->
+    </style>
+</head>
+<script language="javascript" src="../../Pub/function.js" ></script>
+<script language="javascript" >
+<!--
+function show(objname)
+{
+    var obj = document.getElementById(objname);
+    if (obj.style.display=="")
+    {
+        obj.style.display= "none";
+    }
+    else
+    {   
+        obj.style.display= "";
+    }
+}
+-->
+</script>
+<body style="background-color: #dedfe1">
+<form id="form1" runat="server">
+<!-- ImageReady Slices (页面.psd) -->
+<table id="Table2" width="845" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td width="422" height="30" background="../../images/NewDesktop/页面_01.gif" align="right" valign="bottom">
+		    <table width="410" height=25 border="0" cellpadding="0" cellspacing="0">
+		        <tr>
+		            <td><span style="font-size:11pt;color:White; font-weight:bold;">最新消息</span></td>
+		            <td width="70">[<a href="javascript:void(0)" onclick="window.open('WriteSendMessage.aspx','写短消息','height=280, width=650, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')">写短消息</a>]</td>
+		            <td width="35"><a href="../../manager/Desktop/ListSendMessage.aspx">更多</a></td>
+		        </tr>
+		    </table>
+        </td>
+		<td width="423" height="30" background="../../images/NewDesktop/页面_02.gif" align="right" valign="bottom">
+		    <table width="413" height=25 border="0" cellpadding="0" cellspacing="0">
+		        <tr>
+		            <td><span style="font-size:11pt;color:White; font-weight:bold;">公告新闻</span></td>
+		            <td width="70">[<a href="javascript:void(0)" onclick="window.open('WritePublicMessage.aspx','发布公告','height=300, width=600, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')">发布公告</a>]</td>
+		            <td width="40"><a href="../../manager/Desktop/ListPublicMessage.aspx">更多</a></td>
+		        </tr>
+		    </table>
+		</td>
+	</tr>
+	<tr>
+		<td background="../../images/NewDesktop/页面_03.gif" valign="top">
+            <asp:GridView ID="GridView2" runat="server" AutoGenerateColumns="False"
+                BackColor="White" BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px"
+                CellPadding="4" DataKeyNames="cid,YGXM,SendDate,title" DataSourceID="ReviceMessage" Font-Size="9pt"
+                ForeColor="Black" HorizontalAlign="Center"
+                PageSize="5" Width="96%">
+                <FooterStyle BackColor="#CCCC99" />
+                <Columns>
+                    <asp:BoundField DataField="YGXM" HeaderText="消息来源" SortExpression="YGXM">
+                        <ItemStyle HorizontalAlign="Center" Width="80px" />
+                    </asp:BoundField>
+                    <asp:BoundField DataField="Content" HeaderText="信息内容" />
+                    <asp:TemplateField>
+                        <ItemStyle HorizontalAlign="Center" Width="30px" />
+                    </asp:TemplateField>
+                </Columns>
+                <RowStyle BackColor="White" />
+                <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+                <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Center" />
+                <HeaderStyle BackColor="#E0E0E0" Font-Bold="False" ForeColor="Black" />
+                <AlternatingRowStyle BackColor="White" />
+            </asp:GridView>
+            </td>
+		<td background="../../images/NewDesktop/页面_04.gif" valign="top" height="115">
+<!--            <marquee direction="up" scrollamount="2" onMouseOver="this.stop()" onMouseOut="this.start()" style="height: 115px"> -->
+                <p align="right" style="font-size:9pt">
+                    <TABLE style="WIDTH: 95%" cellSpacing="0" cellPadding="0" border="0"><tbody id="PubMessage" runat=server></tbody>
+                    </TABLE>
+                </p>
+<!--            </marquee>  -->
+		</td>
+	</tr>
+	
+	<tr>
+		<td height="11">
+			<img src="../../images/NewDesktop/页面_06.gif" width="422" height="11" alt=""></td>
+		<td>
+			<img src="../../images/NewDesktop/页面_07.gif" width="423" height="11" alt=""></td>
+	</tr>
+	
+	<tr>
+		<td height="33" colspan="2" background="../../images/NewDesktop/页面_08.gif" align="right" valign="bottom">
+		    <table width="835" height=28 border="0" cellpadding="0" cellspacing="0">
+		        <tr>
+		            <td><span style="font-size:11pt;color:White; font-weight:bold;">审阅信息</span></td>
+		            <td width="240" align="right"><span id="SpCount" runat="server">[0/0]</span>&nbsp;&nbsp;</td>
+		            <td width="40"><a href="../../manager/Desktop/XMSP_List.aspx">更多</a></td>
+		        </tr>
+		    </table>
+        </td>
+	</tr>
+	<tr>
+		<td colspan="2" background="../../images/NewDesktop/页面_09.gif" style="height: 305px" valign="top">
+            <asp:GridView ID="GridView4" runat="server" AutoGenerateColumns="False" BackColor="White"
+                BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4"
+                DataSourceID="SpMessage" Font-Size="9pt" ForeColor="Black" HorizontalAlign="Center"
+                Width="98%" DataKeyNames="cid,MKDM,XMDM">
+                <FooterStyle BackColor="#CCCC99" />
+                <RowStyle BackColor="White" />
+                <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+                <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Center" />
+                <HeaderStyle BackColor="#E0E0E0" Font-Bold="False" ForeColor="Black" />
+                <AlternatingRowStyle BackColor="White" />
+                            <Columns>
+                                <asp:BoundField DataField="FQR" HeaderText="发起人">
+                                    <ItemStyle HorizontalAlign="Center" />
+                                </asp:BoundField>
+                                <asp:BoundField DataField="MKMC" HeaderText="表单名" >
+                                    <ItemStyle HorizontalAlign="Center" />
+                                </asp:BoundField>
+                                <asp:BoundField DataField="FQtime" HeaderText="发起时间">
+                                    <ItemStyle HorizontalAlign="Center" />
+                                </asp:BoundField>
+                                <asp:TemplateField HeaderText="自定义显示列(点击可显示多行)"></asp:TemplateField>
+                            </Columns>
+            </asp:GridView>
+		</td>
+	</tr>	
+	
+	<tr>
+		<td height="9" colspan="2">
+			<img src="../../images/NewDesktop/页面_11.gif" width="845" height="9" alt=""></td>
+	</tr>
+</table>
+<!-- End ImageReady Slices -->
+           <asp:SqlDataSource ID="ReviceMessage" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+                SelectCommand="SELECT top 4 [SendMessage].[Cid], [SendMessage].[FromID], SendMessage.Title,[SendMessage].[Content], [SendMessage].[UpID], [SendMessage].[LookFlag],GY_YGDM.YGXM,[SendMessage].SendDate FROM [SendMessage],GY_YGDM WHERE ([ToID] = @ToID) and GY_YGDM.YGDM=[SendMessage].FromID  order by SendMessage.SendDate desc">
+                <SelectParameters>
+                    <asp:Parameter DefaultValue="-1" Name="ToID" Type="Decimal" />
+                </SelectParameters>
+            </asp:SqlDataSource>
+        <asp:SqlDataSource ID="SpMessage" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT top 10 [CID], [XMMC], [MKMC], [YGDM], [SPNR], [SPYJ], [FQR], [SPBZ], [ZFBZ],[FQtime],GY_XMSP.XMDM,GY_XMSP.MKDM FROM [GY_XMSP],Gy_XMXX,GY_MKXX WHERE  GY_XMSP.XMDM=GY_XMXX.XMDM and GY_XMSP.MKDM=GY_MKXX.MKDM and  ([YGDM] = @YGDM and spbz=0 and zfbz=0) order by Cid desc ">
+            <SelectParameters>
+                <asp:Parameter DefaultValue="-1" Name="YGDM" Type="String" />
+            </SelectParameters>
+        </asp:SqlDataSource>
+    </form>
+</body>
+</html>

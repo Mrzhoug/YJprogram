@@ -1,0 +1,19 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="NewDefault.aspx.vb" Inherits="NewDefault" %>
+
+<HTML>
+<HEAD>
+<TITLE> SunFunSoft X-MAN V2.0  </TITLE>
+<META http-equiv=Content-Type content="text/html; charset=GB2312">
+<META http-equiv=Pragma content=no-cache>
+<META content="MSHTML 6.00.2900.2180" name=GENERATOR></HEAD>
+<FRAMESET border=0 frameSpacing=0 rows="55, *" frameBorder=0>
+<FRAME name=header marginWidth=0 marginHeight=0 src="menu\Logo.aspx" frameBorder=no noResize scrolling=no>
+<FRAMESET rows="*, 19">
+<FRAMESET cols="160, *">
+<FRAME style="BORDER-RIGHT: #004f4f 2px groove" border=2 name=mainnav marginWidth=0 marginHeight=0 src="menu\navbar.aspx" frameBorder=no noResize>
+<FRAME name=main marginWidth=0 marginHeight=0 src="manager/desktop/MyDesktop.aspx" frameBorder=no>
+</FRAMESET>
+<FRAME name=footer marginWidth=0 marginHeight=0 src="menu\footer.htm" frameBorder=no noResize scrolling=no>
+</FRAMESET>
+</FRAMESET>
+</HTML>

@@ -1,0 +1,53 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="KS_NoticeList.aspx.vb" Inherits="manager_HomePageManage_KS_NoticeList" %>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>公告列表</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+                
+            &nbsp; &nbsp; &nbsp;<asp:HyperLink ID="HyperLink1" runat="server" NavigateUrl="ks_NoticeAdd.aspx" Font-Size="9pt">添加公告</asp:HyperLink>
+            <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataSourceID="SqlDataSource1"  OnRowDeleting="GridView1_RowDeleting" DataKeyNames="cid"  BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" Width="98%" OnDataBound="GridView1_DataBound" BackColor="White" ForeColor="Black" HorizontalAlign="Center" PageSize="15" >
+                <Columns>
+                    <asp:BoundField DataField="Cid" HeaderText="CID" InsertVisible="False" ReadOnly="True"
+                        SortExpression="Cid" >
+                       
+                        <HeaderStyle Width="8%" />
+                    </asp:BoundField>
+                    <asp:BoundField DataField="Title" HeaderText="公告标题" SortExpression="Title" >
+                        <HeaderStyle Width="51%" />
+                    </asp:BoundField>
+                    <asp:BoundField DataField="Uptime" HeaderText="发表时间" SortExpression="Uptime">
+                        
+                        <HeaderStyle Width="15%" />
+                    </asp:BoundField>
+               
+                    <asp:CommandField ShowDeleteButton="True" >
+                        <HeaderStyle Width="8%" />
+                        <ItemStyle HorizontalAlign="Center" />
+                    </asp:CommandField>
+                </Columns>
+                <FooterStyle BackColor="#CCCC99" />
+                <RowStyle Font-Size="9pt" BackColor="White" />
+                <SelectedRowStyle BackColor="#CE5D5A" Font-Bold="True" ForeColor="White" />
+                <PagerStyle BackColor="#E0E0E0" ForeColor="Black" HorizontalAlign="Right" />
+                <HeaderStyle BackColor="#6B696B" Font-Bold="True" ForeColor="White" Font-Size="9pt" />
+                <AlternatingRowStyle BackColor="White" />
+            </asp:GridView>
+        <table align="center" bgcolor="#e0e0e0" height="26" valign="middle" width="98%">
+            <tr>
+                <td id="PageBar" runat="server" align="center">
+                </td>
+            </tr>
+        </table>
+
+    </div>
+            
+            <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+                SelectCommand="SELECT [CID], [Title],[Uptime] FROM [KS_Notice] order by uptime desc,cID desc"></asp:SqlDataSource>
+    </form>
+</body>
+</html>

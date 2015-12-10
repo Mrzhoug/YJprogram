@@ -1,0 +1,450 @@
+﻿Imports Microsoft.VisualBasic
+Imports System
+Imports System.Data
+Imports System.Xml
+Imports System.IO
+
+Public Class XmlClass
+
+    Public xmlDoc As XmlDocument
+    Private xnRoot As XmlNode
+    Private XmlFilePath As String = ""
+    Dim XmlUserSub As XmlNodeList
+    Public ErrorMessage As String = Nothing
+
+    Public Sub New()
+        ' TODO: 在此处添加构造函数逻辑
+        xmlDoc = New XmlDocument()
+        xmlDoc.PreserveWhitespace = False
+    End Sub
+
+    '		//载入文件
+    Public Function GetXmlFile(ByVal FilePath As String) As XmlNode
+        Try
+            'Dim strfile As String
+            'Dim sr As New StreamReader(FilePath)
+            'strfile = sr.ReadToEnd()
+            'sr.Close()
+
+            'If strfile.IndexOf("UTF-8") <> -1 Then
+            '    strfile = strfile.Replace("UTF-8", "GB2313")
+            '    Dim sw As New StreamWriter(FilePath)
+            '    sw.Write(strfile)
+            '    sw.Close()
+            'End If
+
+            XmlFilePath = FilePath
+            xmlDoc.Load(XmlFilePath)
+            Return xmlDoc.DocumentElement  ';//获取唯一表示的根节点.
+        Catch ex As Exception
+            ErrorMessage = ex.Message
+            Return Nothing
+        End Try
+    End Function
+
+    Public Sub GetXmlText(ByVal Text As String)
+        Try
+            xmlDoc.LoadXml(Text)
+        Catch ex As Exception
+            ErrorMessage = ex.Message
+        End Try
+    End Sub
+
+    Public Function GetFormID() As String
+        xnRoot = xmlDoc.DocumentElement
+        Dim dd As String = ""
+        Dim i As Integer    '添加原来XML文件中存在的命名空间.进行查询
+        For i = 0 To xnRoot.Attributes.Count - 1
+            Dim temp As String() = xnRoot.Attributes(i).Name.Split(":")
+            temp(1) = temp(1) & ":表单号"
+            If FindNode("//" & temp(1)) Is Nothing = False Then
+                Return temp(1)      '得到项目代码的命名空间
+            End If
+        Next
+        Return "my:表单号"      '返回系统默的节点.
+    End Function
+
+    Public Function ReadNode() As XmlNodeList
+        Dim XmlRoot As XmlNode = xmlDoc.DocumentElement  ';//获取唯一表示的根节点.
+        Dim XmlUserInfo As XmlNodeList = XmlRoot.ChildNodes     ';//获取根节点的子节点.   
+        Dim i
+        'Dim XmlUserSub As XmlNodeList = Nothing
+        For i = 0 To XmlUserInfo.Count - 1
+            XmlUserSub = XmlUserInfo.Item(i).ChildNodes
+        Next
+        Return XmlUserSub
+    End Function
+
+    Public Function SetAttributes(ByVal Node As XmlNode, ByVal AttributesName As String, ByVal value As String) As Boolean
+        '设置要节点的属性值.
+        Try
+            Node.Attributes(AttributesName).Value = value
+            'xmlDoc.DocumentElement.Attributes(AttributesName).InnerText = value        '表示根节点的属性值.
+        Catch ex As Exception
+            ErrorMessage = ex.ToString
+            Return False
+        End Try
+        xmlDoc.Save(XmlFilePath)
+        Return True
+    End Function
+
+    Public Function Save() As Boolean
+        Try
+            xmlDoc.PreserveWhitespace = True            '保留格式文本
+            xmlDoc.Save(XmlFilePath)
+            xmlDoc.PreserveWhitespace = False
+        Catch ex As Exception
+            Return False
+        End Try
+        Return True
+    End Function
+
+    Public Function GetRootNode() As XmlNodeList        '返回根节点的Node列表
+        xnRoot = xmlDoc.DocumentElement
+        Return xnRoot.ChildNodes
+    End Function
+
+    ''' <summary>
+    ''' 返回根节点的节点名称
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetRootNodeName() As String         '返回根节点的Node列表
+        Dim Restr As String = ""
+        xnRoot = xmlDoc.DocumentElement
+        Restr = xnRoot.ChildNodes.Item(0).Name
+        If Restr = "#whitespace" Then
+            Restr = xnRoot.ChildNodes.Item(1).Name
+        End If
+        Return Restr
+    End Function
+
+    Public Sub RemoveAllNode()
+        Dim XmlRoot As XmlNode = xmlDoc.DocumentElement  ';//获取唯一表示的根节点.
+        Dim XmlUserInfo As XmlNodeList = XmlRoot.ChildNodes     ';//获取根节点的子节点.   
+        Dim i
+        For i = 0 To XmlUserInfo.Count - 1
+            XmlUserInfo.Item(i).InnerText = ""
+        Next
+        xmlDoc.Save(XmlFilePath)
+    End Sub
+
+    Public Sub ClearAllNode()
+        Dim XmlRoot As XmlNode = xmlDoc.DocumentElement  ';//获取唯一表示的根节点.
+        XmlRoot.InnerText = ""
+        xmlDoc.Save(XmlFilePath)
+    End Sub
+
+    Public Function ListNode() As String
+        Return List1(GetRootNode())
+    End Function
+
+    Function List1(ByVal xmluser As XmlNodeList) As String
+        '用递归的方法查找所有节点.并显示出来
+        Dim i As Integer
+        Dim Temp As String = String.Empty
+        For i = 0 To xmluser.Count - 1
+            If xmluser.Item(i).Name <> "#text" Then  '过滤掉为空的值项
+                If xmluser.Item(i).ChildNodes.Count >= 1 Then
+                    Temp = Temp & "<" & xmluser.Item(i).Name & ">" & xmluser.Item(i).ChildNodes.Item(0).Value & vbCrLf
+                    Temp = Temp & List1(xmluser.Item(i).ChildNodes)
+                Else
+                    Temp = Temp & "<" & xmluser.Item(i).Name & ">" & vbCrLf
+                End If
+                Temp = Temp & "</" & xmluser.Item(i).Name & ">" & vbCrLf
+            End If
+        Next
+        Return Temp
+    End Function
+
+
+
+    Public Function FindNode(ByVal Xpath As String) As XmlNode
+        '-----用这种方式查询,能查询得到,也能更新.命名空间
+        xnRoot = xmlDoc.DocumentElement
+        Dim manager As XmlNamespaceManager = GetNameSpaceManager()
+        Dim Node As XmlNode = xnRoot.SelectSingleNode(Xpath, manager)
+        Return Node     '返回查找到你的节点
+    End Function
+
+    Public Function FindNode_With_OneNamespace(ByVal Xpath As String, ByVal Namespaces As String) As XmlNode
+        '-----用这种方式查询,能查询得到,也能更新.命名空间
+        xnRoot = xmlDoc.DocumentElement
+        Dim manager As XmlNamespaceManager = New XmlNamespaceManager(xmlDoc.NameTable)
+        manager.AddNamespace(Namespaces, xnRoot.NamespaceURI)
+        Dim Node As XmlNode = xnRoot.SelectSingleNode(Xpath, manager)
+        Return Node     '返回查找到你的节点
+    End Function
+
+    Public Function FindNode_Without_Namespace(ByVal Xpath As String) As XmlNode
+        '-----用这种方式查询,适用于不无命名空间的查询
+        xnRoot = xmlDoc.DocumentElement
+        'manager.AddNamespace("my", xnRoot.NamespaceURI)
+        Dim Node As XmlNode = xnRoot.SelectSingleNode(Xpath)
+        Return Node     '返回查找到你的节点
+    End Function
+
+    Public Function GetNameSpaceManager() As XmlNamespaceManager
+        xnRoot = xmlDoc.DocumentElement
+        Dim manager As XmlNamespaceManager = New XmlNamespaceManager(xmlDoc.NameTable)
+        Dim i As Integer    '添加原来XML文件中存在的命名空间.进行查询
+        For i = 0 To xnRoot.Attributes.Count - 1
+            'On Error Resume Next
+            Dim temp As String() = xnRoot.Attributes(i).Name.Split(":")
+            If temp.GetUpperBound(0) > 0 Then       '过滤一些属性值,因为节点上不一定都是命名空间的.
+                manager.AddNamespace(temp(1), xnRoot.Attributes(i).InnerText)
+            End If
+        Next
+        Return manager
+    End Function
+
+    Public Function FindNodes(ByVal Xpath As String) As XmlNodeList
+        '-----用这种方式查询,能查询得到,也能更新.命名空间
+        xnRoot = xmlDoc.DocumentElement
+        Dim manager As XmlNamespaceManager = GetNameSpaceManager()
+        Dim NodeList As XmlNodeList = xnRoot.SelectNodes(Xpath, manager)
+        Return NodeList     '返回查找到你的节点
+    End Function
+
+
+    Public Function UpdateNode(ByVal Xpath, ByVal NodeName, ByVal Value) As Boolean
+        '现在只是修改找到节点的一个节点进行修改
+        Dim Node As XmlNode = FindNode(Xpath)
+        If Not Node Is Nothing Then '找到节点,进行更新
+            Try
+                Node(NodeName).InnerText = Value
+                xmlDoc.Save(XmlFilePath)
+                Return True
+            Catch ex As Exception
+                ErrorMessage = ex.ToString
+                Return False
+            End Try
+        Else            '表示没有找到节点.
+            Return False
+        End If
+    End Function
+
+    Public Function UpdateNode(ByVal Xpath As String, ByVal TempNode As XmlNode) As Boolean
+        '进行一个节点下统一更新.原理是删除当前的记录.将新的记录插入 
+        Dim Node As XmlNode = FindNode(Xpath)
+        Dim Node1 As XmlNode
+        If Not Node Is Nothing Then '找到节点,进行批量更新
+            If Not Node.ParentNode Is Nothing Then      '主要针对X-MAN在查找时.标题节点存在下一节点上.所以要返回
+                Node1 = Node.ParentNode
+            Else
+                Node1 = Node
+            End If
+            Dim i As Integer
+            Dim TempXml As String = String.Empty
+            For i = 0 To TempNode.ChildNodes.Count - 1
+                TempXml = TempXml & TempNode.ChildNodes.Item(i).OuterXml
+            Next
+            Node1.InnerXml = TempXml          '直接将输出的XML文件进行写入
+            'CopyNode(Node1, TempNode.ChildNodes)        '开始复制节点,效率太低
+            xmlDoc.Save(XmlFilePath)
+            Return True
+        Else            '表示没有找到节点.
+            Return False
+        End If
+    End Function
+
+    Public Function UpdateNode(ByVal Xpath As String, ByVal TempNode As XmlNode, ByVal Add_Node_Flag As Boolean) As Boolean
+        '表示如果更新的节点不存在,则新建
+        Dim flag As Boolean
+        flag = UpdateNode(Xpath, TempNode)     '进行更新.返回值
+        If Add_Node_Flag = True And flag = True Then
+            Dim xnRoot As XmlNode = xmlDoc.DocumentElement      '//查找根节点(元素)
+            '根据目的文件的节点创建
+            'Dim xeUserInfo As XmlElement = xmlDoc.CreateElement(xnRoot.ChildNodes.Item(0).Name, xnRoot.ChildNodes.Item(0).NamespaceURI)        ';//创建一个节点
+            '以下是,根据源文件的节点创建.
+            Dim i As Integer
+            Dim TempXml As String = String.Empty
+            For i = 0 To TempNode.ChildNodes.Count - 1
+                TempXml = TempXml & TempNode.ChildNodes.Item(i).OuterXml
+            Next
+            Dim xeUserInfo As XmlElement = xmlDoc.CreateElement(TempNode.Item(0).ParentNode.Name, TempNode.Item(0).ParentNode.NamespaceURI)        ';//创建一个节点
+            xeUserInfo.InnerXml = TempXml               '直接采用XML结构输出成字符,再返回
+            'CopyNode(xeUserInfo, TempNode.ChildNodes)        '开始复制节点,效率太低
+            xnRoot.AppendChild(xeUserInfo)      ';//将结果添加到根节点中.
+            xmlDoc.Save(XmlFilePath)
+        End If
+    End Function
+
+    Public Sub AddNode(ByVal TempNodeList As XmlNodeList)        '//添加节点.以目的文件的结构来建立
+        Dim xnRoot As XmlNode = xmlDoc.DocumentElement      '//查找根节点(元素)
+        Dim xeUserInfo As XmlElement = xmlDoc.CreateElement(xnRoot.ChildNodes.Item(0).Name, xnRoot.ChildNodes.Item(0).NamespaceURI)        ';//创建一个节点
+        Dim i As Integer
+        Dim TempXml As String = String.Empty
+        For i = 0 To TempNodeList.Count - 1
+            TempXml = TempXml & TempNodeList.Item(i).OuterXml
+        Next
+        xeUserInfo.InnerXml = TempXml               '直接采用XML结构输出成字符,再返回
+        'CopyNode(xeUserInfo, TempNodeList)        '开始复制节点,效率太低
+        xnRoot.AppendChild(xeUserInfo)      ';//将结果添加到根节点中.
+        xmlDoc.Save(XmlFilePath)
+    End Sub
+
+    Public Sub AddNode(ByVal RootNode As XmlNode)        '//添加节点.以源文件的文件结构来建立根节点
+        Dim NodeList1 As XmlNodeList = RootNode.ChildNodes
+        Dim xnRoot As XmlNode = xmlDoc.DocumentElement      '//查找根节点(元素)
+        Dim xeUserInfo As XmlElement = xmlDoc.CreateElement(RootNode.Name, RootNode.NamespaceURI)
+        Dim i As Integer
+        Dim TempXml As String = String.Empty
+        For i = 0 To NodeList1.Count - 1
+            TempXml = TempXml & NodeList1.Item(i).OuterXml
+        Next
+        xeUserInfo.InnerXml = TempXml               '直接采用XML结构输出成字符,再返回
+        'CopyNode(xeUserInfo, NodeList1)        '开始复制节点,效率太低
+        xnRoot.AppendChild(xeUserInfo)      ';//将结果添加到根节点中.
+        xmlDoc.Save(XmlFilePath)
+    End Sub
+
+    Public Sub AddNodeAll(ByVal RootNode As XmlNode)        '//添加节点.以源文件的文件结构来建立根节点
+        Dim NodeList1 As XmlNodeList = RootNode.ChildNodes
+        Dim xnRoot As XmlNode = xmlDoc.DocumentElement      '//查找根节点(元素)
+        Dim xeUserInfo As XmlElement = xmlDoc.CreateElement(RootNode.Name, RootNode.NamespaceURI)
+        Dim i As Integer
+        Dim TempXml As String = String.Empty
+        For i = 0 To NodeList1.Count - 1
+            TempXml = TempXml & NodeList1.Item(i).OuterXml
+        Next
+        xeUserInfo.InnerXml = TempXml               '直接采用XML结构输出成字符,再返回
+        'CopyNode(xeUserInfo, NodeList1)        '开始复制节点,效率太低
+        xnRoot.AppendChild(xeUserInfo)      ';//将结果添加到根节点中.
+        ' xmlDoc.Save(XmlFilePath)
+    End Sub
+
+    Sub AddNode_anyway(ByVal Xpath As String, ByVal TempNode As XmlNode)
+        Dim Node3 As XmlNode = FindNode(Xpath)
+        If Node3 Is Nothing Then
+        Else
+            Dim NodeList1 As XmlNodeList = TempNode.ChildNodes
+            Dim xeUserInfo As XmlElement = xmlDoc.CreateElement(TempNode.Name, TempNode.NamespaceURI)
+            CopyNode(xeUserInfo, NodeList1)        '开始复制节点
+            Node3.AppendChild(xeUserInfo)
+            xmlDoc.Save(XmlFilePath)
+        End If
+    End Sub
+
+    Public Sub Add_One_Node(ByVal NodeName As String, ByVal NodeValue As String)
+        Dim xesub1 As XmlElement
+        xesub1 = xmlDoc.CreateElement(NodeName)
+        xesub1.InnerText = NodeValue
+        xnRoot.LastChild.AppendChild(xesub1)
+    End Sub
+
+    Sub CopyNode(ByVal xeUserInfo As XmlElement, ByVal NodeList1 As XmlNodeList)
+        '对所有的节点进行递归.创建新的节点.此功能集成在添加节点中用到
+        Dim i As Integer
+        For i = 0 To NodeList1.Count - 1
+            If NodeList1.Item(i).Name <> "#text" Then   '过滤掉为空的值项
+                Dim xesub1 As XmlElement
+                xesub1 = xmlDoc.CreateElement(NodeList1.Item(i).Name, NodeList1.Item(i).NamespaceURI)
+                If Not NodeList1.Item(i).ChildNodes.Item(0) Is Nothing Then     '主要用来判断当前节点的值是否为空
+                    xesub1.InnerText = NodeList1.Item(i).ChildNodes.Item(0).Value
+                End If
+                Dim j As Integer
+                For j = 0 To NodeList1.Item(i).Attributes.Count - 1     '添加这一节点上的属性值
+                    Dim TempAttrib As XmlAttribute = xmlDoc.CreateAttribute(NodeList1.Item(i).Attributes(j).Name, NodeList1.Item(i).Attributes(j).NamespaceURI)
+                    TempAttrib.Value = NodeList1.Item(i).Attributes(j).Value
+                    xesub1.Attributes.Append(TempAttrib)
+                Next
+                If NodeList1.Item(i).ChildNodes.Count >= 1 Then
+                    CopyNode(xesub1, NodeList1.Item(i).ChildNodes)
+                End If
+                xeUserInfo.AppendChild(xesub1)      ';//将添加到节点中.
+            End If
+        Next
+    End Sub
+
+
+
+    Public Function DelNode(ByVal XPath As String) As Boolean
+        '找出第一个与之匹配的节点,进行删除.
+        Dim Node As XmlNode = FindNode(XPath)
+        If Not Node Is Nothing Then '找到节点,进行更新
+            Try
+                xnRoot.RemoveChild(Node)
+                xmlDoc.Save(XmlFilePath)
+                Return True
+            Catch ex As Exception
+
+            End Try
+            Try
+                xnRoot.RemoveChild(Node.ParentNode)
+                xmlDoc.Save(XmlFilePath)
+                Return True
+            Catch ex As Exception
+                Return False
+            End Try
+
+        Else            '表示没有找到节点.
+            Return False
+        End If
+    End Function
+
+    '//生成DATASET
+    Public Function CreateDataSet(ByVal userid As String) As DataSet
+        Dim reader As XmlNodeReader = New XmlNodeReader(xmlDoc)
+        Dim ds As DataSet = New DataSet("myDataSet")
+        Dim myTable As DataTable = New DataTable(userid)
+        Dim c1 As DataColumn = New DataColumn("序号", Type.GetType("System.Int32"))
+        c1.AutoIncrement = True
+        Dim c2 As DataColumn = New DataColumn("列1")
+        Dim c3 As DataColumn = New DataColumn("列2")
+        Dim c4 As DataColumn = New DataColumn("列3")
+        Dim c5 As DataColumn = New DataColumn("列4")
+        myTable.Columns.Add(c1)
+        myTable.Columns.Add(c2)
+        myTable.Columns.Add(c3)
+        myTable.Columns.Add(c4)
+        myTable.Columns.Add(c5)
+        ds.Tables.Add(myTable)
+        Dim newRow As DataRow
+        Dim xnRoot As XmlNode = xmlDoc.DocumentElement      ';//获取唯一表示的根节点.
+        Dim xnlUserInfo As XmlNodeList = xnRoot.ChildNodes      ';//获取根节点的子节点  
+        Dim i, j
+        For i = 0 To xnlUserInfo.Count - 1
+            Dim xnlUserSub As XmlNodeList = xnlUserInfo.Item(i).ChildNodes
+            newRow = myTable.NewRow()
+            For j = 0 To xnlUserSub.Count - 1
+                Dim xnSub As XmlNode = xnlUserSub.Item(j)
+                newRow(j + 1) = xnSub.InnerText          ';//显示子节点点文本     
+            Next
+            myTable.Rows.Add(newRow)
+        Next
+        ds.AcceptChanges()
+        Return ds
+    End Function
+
+
+    '//返回数量
+    Public Function GetNum(ByVal userid As String) As String
+        Dim mytable As DataTable = Me.CreateDataSet(userid).Tables(userid)
+        Return mytable.Rows.Count.ToString()
+    End Function
+
+    Function ListNodeName(ByVal xmluser As XmlNodeList) As String
+        '用递归的方法查找所有节点.并显示出来
+        Dim i As Integer
+        Dim Temp As String = String.Empty
+        For i = 0 To xmluser.Count - 1
+            If xmluser.Item(i).Name <> "#text" Then  '过滤掉为空的值项
+                If xmluser.Item(i).ChildNodes.Count >= 1 Then
+                    Temp = Temp & "<" & xmluser.Item(i).Name & ">" & "|"
+                    Temp = Temp & ListNodeName(xmluser.Item(i).ChildNodes)
+                Else
+                    Temp = Temp & "<" & xmluser.Item(i).Name & ">" & "|"
+                End If
+            End If
+        Next
+        Return Temp
+    End Function
+
+    Function GetNodeNameList(ByVal TempNode As XmlNode) As String()
+        Dim NodeName As String = ListNodeName(TempNode.ChildNodes)
+        NodeName = NodeName.Substring(0, NodeName.Length - 1)
+        Return NodeName.Split("|")
+    End Function
+
+End Class

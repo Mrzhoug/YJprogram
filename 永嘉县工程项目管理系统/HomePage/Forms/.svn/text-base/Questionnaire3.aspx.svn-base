@@ -1,0 +1,83 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="Questionnaire3.aspx.vb" Inherits="HomePage_Forms_Questionnaire3" ValidateRequest="false" %>
+
+<html>
+<head id="Head1" runat="server">
+    <title>Web方式打开表单</title>
+    <link rel="stylesheet" type="text/css" href="../../images/Ext.UI/resources/css/ext-all.css" />
+    <script type="text/javascript" src="../../images/Ext.UI/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="../../images/Ext.UI/ext-all.js"></script>
+    <script type="text/javascript" src="../../images/Ext.UI/TabCloseMenu.js"></script>
+    <script type="text/javascript" src="../../pub/function.js"></script>
+    
+    <style type="text/css">
+        TD { FONT-SIZE: 8.5pt; LINE-HEIGHT: 180%; FONT-FAMILY: "verdana", "Helvetica", "sans-serif" }
+	    A:link { FONT-SIZE: 8.5pt; COLOR: #000000; FONT-FAMILY: "verdana", "Helvetica", "sans-serif"; TEXT-DECORATION: none }
+	    A:hover { FONT-SIZE: 8.5pt; COLOR: #b84e07; FONT-FAMILY: "verdana", "Helvetica", "sans-serif"; TEXT-DECORATION: underline }
+	    A:visited { FONT-SIZE: 8.5pt; COLOR: #000000; FONT-FAMILY: "verdana", "Helvetica", "sans-serif"; TEXT-DECORATION: none }
+	</style>
+    <link rel="stylesheet" type="text/css" media="all" href="../../Manager/Forms/js/calendar-win2k-cold-1.css"	title="win2k-cold-1" />
+    <script type="text/javascript" src="../../Manager/Forms/js/calendar.js"></script>
+	<script type="text/javascript" src="../../Manager/Forms/js/calendar-en.js"></script>
+	<script type="text/javascript" src="../../Manager/Forms/js/calendar-setup.js"></script>
+	<script type="text/javascript" src="../../Manager/Forms/js/infojet.js"></script>
+</head>
+
+<body onload="InfoJet_Init();" style="margin:0;">
+    <form name="xmlForm" action="../../submit.aspx" method="post">
+    <div id="toolbar"></div><br />
+    <input id="FileName" type="hidden" name="FileName" runat="server" />
+    <center>
+        <span style="color:Red">请详细对照相应的内容，查看是否填写正确，如果正确请按[确定保存]</span>
+        <asp:Label id="xDocContent" runat="server">xDocContent</asp:Label>&nbsp;<br />
+    </center>
+    </form>
+<span id="clientscript" runat="server"></span>
+
+<script language="javascript" type="text/javascript">
+   
+	var tb = new Ext.Toolbar();
+    tb.render('toolbar');
+
+    // They can also be referenced by id in or components
+    tb.add("-",
+    {
+    	icon: '../../images/Ext.UI/icons/fam/add.gif', 
+    	iconCls: 'blist',
+        text: '确定保存&nbsp;',
+        handler: onItemClick
+    },"-"
+     );
+     
+     function onItemClick(item){
+        switch (item.text)
+        {
+            case '确定保存&nbsp;': doSubmit();      break; 
+        }
+    }
+//});
+
+
+if (toolbar==false)
+{
+    show("toolbar");
+}
+</script>
+</body>
+</html>
+
+
+
+<script type="text/javascript" language="javascript">
+          
+    function doSubmit()
+    {
+        if (InfoJet_IsValid()==false)
+        {
+            alert("请将必填项填完(带红星的输入框)!");
+            return false;
+        }
+        document.forms( "xmlForm" ).action = "../../submit.aspx?state=-1";
+        document.forms( "xmlForm" ).submit();
+    }
+  
+</script>

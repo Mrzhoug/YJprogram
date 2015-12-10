@@ -1,0 +1,127 @@
+﻿
+Partial Class manager_XJXM_ShowAbout_XMXD_NoLc
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+    Dim Fid As String
+    Dim XMDM, MKDM As Integer
+    Dim HasDel As Boolean = False
+
+
+    Dim ShowMsgs As String = ","            '用来存储已经显示过的内容
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+
+        Try
+            Fid = Request("SID")
+        Catch ex As Exception
+            Fid = 0
+        End Try
+        Dim Tb As New Data.DataTable
+        If Fid = 0 Then     '表示FID为空,是有流程传过来的.
+            Try
+                XMDM = Request("xmdm")
+                MKDM = Request("mkdm")
+            Catch ex As Exception
+                XMDM = 0
+                MKDM = 0
+            End Try
+            Tb = Base.DB.Table("select FID,XMDM,MKDM from XX_XMJC where xmdm=" & XMDM & " and mkdm=" & MKDM, "XX_XMJC")
+            If Tb.Rows.Count = 0 Then
+                Base.Js.alert(Me, "项目流程有问题！")
+                Exit Sub
+            End If
+            Fid = Tb.Rows(0)(0)
+        Else
+
+            Tb = Base.DB.Table("select XMDM,MKDM from XX_XMJC where FID=" & Fid, "XX_XMJC")
+            If Tb.Rows.Count = 0 Then
+                Base.Js.alert(Me, "项目流程有问题！")
+                Exit Sub
+            End If
+            MKDM = Tb.Rows(0)(1)
+        End If
+
+        If Base.GetUserHaveQX(UserID, MKDM) >= 8 Then HasDel = True
+
+        '进行分发记录的删除
+        Dim DelMsgID As Integer
+        Try
+            DelMsgID = Request("msgid")
+        Catch ex As Exception
+            DelMsgID = 0
+        End Try
+        If DelMsgID > 0 And HasDel = True Then
+            Base.DB.Query("Delete Gy_XmXd where msgid=" & DelMsgID)
+            Base.DB.Query("Delete Sendmessage where cid=" & DelMsgID)
+            Response.Redirect("ShowAbout_XMXD_NoLc.aspx?SID=" & Fid) '如果是删除操作,成功后进行返回
+        End If
+
+        Dim s As String = "<table border=0 width=700 cellpadding=3 style='font-size:9pt;'><tr bgcolor='#DEDFDE' align='center'><td>发送部门</td><td>发送人</td><td width=120>内容</td><td>接收部门</td><td width=80>时间</td><td width=80></td></tr>"
+        Dim i As Integer
+        Tb = Base.DB.Table("SELECT msgid FROM Gy_XmXd where fid = " & Fid, "ddd")
+        If Tb.Rows.Count = 0 Then
+            Response.Write("<br><br><center><b>暂无分发记录</b></center>")
+            Response.End()
+        Else
+            For i = 0 To Tb.Rows.Count - 1
+                If ShowMsgs.IndexOf(Tb.Rows(i).Item(0).ToString) < 0 Then
+                    ShowMsgs = ShowMsgs & Tb.Rows(i).Item(0).ToString & ","
+                    s += ShowMsg(Tb.Rows(i).Item(0).ToString, 0)
+                End If
+            Next
+        End If
+        s += "</table>"
+        Response.Write(s)
+
+    End Sub
+
+    Function ShowMsg(ByVal msgid As Integer, ByVal Dept As Integer)
+        Dim tb As New DataTable
+        Dim sql As String
+        Dim i, j As Integer
+        Dim Restr As String = ""
+        Dim LookStr As String
+        If Dept = 0 Then
+            sql = "select cid,[content],FromID,FromKSDM,ToKSDM,SendDate,lookflag from SendMessage where toksdm<>0 and cid=" & msgid
+        Else
+            sql = "select cid,[content],FromID,FromKSDM,ToKSDM,SendDate,lookflag from SendMessage where toksdm<>0 and upid=" & msgid
+        End If
+        tb = Base.DB.Table(sql, "msgid")
+        Dim DelStr As String = ""
+
+        For i = 0 To tb.Rows.Count - 1
+            msgid = tb.Rows(i).Item(0)
+            If tb.Rows(i).Item("LookFlag").ToString.Trim() = "1" Then
+                LookStr = " <font color='#6a6a6a'>已读</font> "
+            Else
+                LookStr = " <font color='#6a6a6a'>未读</font>  "
+            End If
+            If HasDel = True Then
+                DelStr = LookStr & "<a href='?" & Request.ServerVariables("QUERY_STRING") & "&msgid=" & msgid & "'>删除</a>"
+            Else
+                DelStr = LookStr
+            End If
+            If Dept > 0 Then
+                Restr += "<tr bgcolor='#fbfbfb'><td width=140>"
+                For j = 1 To Dept
+                    Restr += "<img src='../../images/Ext.UI/resources/images/default/layout/expand.gif'>&nbsp;"
+                Next
+                Restr += Base.GetKSMC(tb.Rows(i)("FromKSDM")) & "</td><td>" & Base.GetUserName(tb.Rows(i)("FromID"), 3) & "</td><td>" & tb.Rows(i)("Content").ToString & "</td><td width=120 align=center>" & Base.GetUserName(tb.Rows(i)("TOID"), 3) & "</td><td width=100>" & tb.Rows(i)("SendDate") & "</td><td>" & DelStr & "</td></tr>"
+            Else
+                Restr += "<tr bgcolor='#f3f3f3'><td align=center >" & Base.GetKSMC(tb.Rows(i)("FromKSDM")) & "</td><td align=center>" & Base.GetUserName(tb.Rows(i)("FromID"), 3) & "</td><td align=center>" & tb.Rows(i)("Content").ToString & "</td><td align=center>" & Base.GetKSMC(tb.Rows(i)("TOKSDM")) & "</td><td width=100>" & tb.Rows(i)("SendDate") & "</td><td>" & DelStr & "</td></tr>"
+            End If
+            ShowMsgs += msgid & ","
+            Restr += ShowMsg(msgid, Dept + 1)
+        Next
+        Return Restr
+    End Function
+
+    
+End Class

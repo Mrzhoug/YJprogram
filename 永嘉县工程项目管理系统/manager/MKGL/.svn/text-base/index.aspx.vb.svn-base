@@ -1,0 +1,60 @@
+﻿
+Partial Class manager_MKGL_Index
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim P As Integer
+    Dim MaxPage As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking()        '这里对文件进行权限限制
+
+        Dim sql As String
+        Dim SearchStr As String = TextBox1.Text.Trim
+        If SearchStr.Length > 0 Then
+            sql = "select * from gy_mkxx where not GY_MKXX.XDLJ like '../FormFolder/%.xml' and (GY_MKXX.LIST_QX_LCDM is null or GY_MKXX.LIST_QX_LCDM = 0) and xsndir is null and MKMC like '%" & SearchStr & "%'"
+        Else
+            sql = "select * from gy_mkxx where not GY_MKXX.XDLJ like '../FormFolder/%.xml' and (GY_MKXX.LIST_QX_LCDM is null or GY_MKXX.LIST_QX_LCDM = 0) and xsndir is null"
+        End If
+
+        Conn.SelectCommand = sql
+        MaxPage = Base.DB.Table(sql, "maxpage").Rows.Count
+
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Int16
+        For i = 0 To GridView1.Rows.Count - 1
+            CType(GridView1.Rows(i).Cells(4).Controls(0), LinkButton).Attributes.Add("onclick", "return confirm('您真的要删除此模块吗？');")
+            If "http:" = GridView1.Rows(i).Cells(1).Text.Trim.Substring(0, 5).ToLower Then
+                GridView1.Rows(i).Cells(2).Text = "<a href='http:" & GridView1.Rows(i).Cells(1).Text.Trim.ToLower.Replace("http:", "") & "'>主页</a>"
+            Else
+                GridView1.Rows(i).Cells(2).Text = "<a href='../" & GridView1.Rows(i).Cells(1).Text.Trim & "'>主页</a>"
+            End If
+
+            GridView1.Rows(i).Cells(3).Text = "<a href='javascript:void(0)' onclick=""window.open('Modify.aspx?MKDM=" & GridView1.DataKeys(i).Item(0) & "&Page=" & GridView1.PageIndex & "','Modify_mk','height=450, width=500, top=130, left=200, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no')"">修改</a>"
+            GridView1.Rows(i).Attributes.Add("onmouseover", "OnMouseOver(this)")
+            GridView1.Rows(i).Attributes.Add("onmouseout", "OnMouseOut(this)")
+        Next
+        PageBar.InnerHtml = Base.pub.WritePage(GridView1, MaxPage)
+    End Sub
+
+    Protected Sub GridView1_RowDeleting(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewDeleteEventArgs) Handles GridView1.RowDeleting
+
+
+
+
+        Dim mkdm As String
+        mkdm = GridView1.DataKeys(e.RowIndex).Item(0)
+        Try
+            Conn.DeleteCommand = "delete from GY_MKXX where mkdm=" & mkdm
+            Conn.Delete()
+        Catch ex As Exception
+            Conn.DeleteCommand = "delete from GY_MKXX where mkdm=-1"
+            Conn.Delete()
+            Base.Js.alert(Me, "删除失败，此模块正在使用中！")
+        End Try
+    End Sub
+End Class

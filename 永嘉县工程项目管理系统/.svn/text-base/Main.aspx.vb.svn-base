@@ -1,0 +1,248 @@
+﻿
+Partial Class Main
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim Login_User As String
+    Dim UserID As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+
+        '判断是否采用TABS的界面.如果不是.则跳回老的界面
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.Tabs").ToLower = "false" Then
+            Response.Redirect("Newdefault.aspx")
+        End If
+
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        '设置系统标题
+        Dim LogoStr As String = Base.pub.GetWebConfig("SunfunSoft.Xman.Title").ToString
+        If LogoStr.Trim.Length > 0 Then
+            logo1.InnerHtml = "&nbsp;&nbsp;&nbsp;<span style='font-size:15pt;'>" & LogoStr & "</span>"
+            Me.Title = "SunFunSoft Xman 3.0"
+        End If
+
+
+        Dim tb As New Data.DataTable
+        Dim YGXM As String
+        Try
+            tb = Base.DB.Table("select YGDM,YGXM from GY_YGDM where DLMC ='" & Base.SqlFilter(Login_User) & "' and QYBZ=1", "GY_YGDM")
+            If tb.Rows.Count > 0 Then
+                UserID = tb.Rows(0)(0)
+                YGXM = tb.Rows(0).Item(1)
+            Else
+                Response.Write("<b>系统不允许此用户进入本系统,菜单无法显示!</b><br>")
+                Response.Write("<b><font color=red>解决办法</font></b>:通知管理员.在本系统中添加用户即可!")
+                Response.End()
+            End If
+        Catch ex As Exception
+            Response.Write("数据库连接错误")
+            Response.End()
+        End Try
+
+
+        Dim Temp As String = ""
+        Dim i, j As Integer
+        Dim Tb_Item As New Data.DataTable
+        Dim group_id As Long
+
+
+        If Login_User.Trim.Length = 0 Then
+            Response.Write("<b>得到不IIS用户.菜单无法显示!</b><br>")
+            Response.Write("<b><font color=red>解决办法</font></b>:将在IIS中,将站点设为集成windows登陆方式即可!")
+            Response.Write("Internet 信息服务->选中你的站点->右键属性->目录安全性->编辑->将[匿名访问]的钩去掉,并钩选[集成windows身份验证]->确定->确定")
+            Response.End()
+        End If
+
+
+        Dim ScriptOut As String = String.Empty
+        ScriptOut += "<script language='javascript'>function showview() {var viewport = new Ext.Viewport({layout:'border',items:[ new Ext.BoxComponent({ " & vbCrLf
+        ScriptOut += "region:  'north',el: 'north',height:40 }), {region:'west',id:'west-panel',title:'功能菜单',split:true,width: 200,minSize: 200,"
+        ScriptOut += "maxSize: 400,collapsible: true,margins:'0 0 0 5',layout:'accordion',layoutConfig:{animate:true},items: ["
+        'ScriptOut += "{title:'我的文件夹',contentEl: 'west',border:false,iconCls:'nav'}" & vbCrLf
+
+
+        '显示系统菜单与无流程的功能。
+        tb = Base.DB.Table("select Group_Id,Group_Name,LCDM From Gy_Group where Group_Kind = 1 order by orderby", "Gy_Group")
+        Dim Item_Temp As String = String.Empty
+        Dim XDLJ As String = String.Empty
+        Dim MKMC As String = String.Empty
+        Dim MKDM As Integer
+        Dim ShowTitleFlag As Boolean = False    '判断是否显示
+        Dim LCDM As Integer
+
+        Dim TempScriptOut As String = String.Empty      '菜单临时变量,由于将[我的文件夹]移到最后.所以得采用临时变量暂存菜单
+        For i = 0 To tb.Rows.Count - 1
+
+            If IsDBNull(tb.Rows(i)(2)) = True Then
+                LCDM = 0
+            Else
+                LCDM = tb.Rows(i)(2)
+            End If
+            group_id = tb.Rows(i).Item(0)
+
+            If LCDM <> 0 Then
+                '有流程的流程显示
+                TempScriptOut += ShowLC_Menu(LCDM, group_id)
+            Else
+                ShowTitleFlag = False
+
+                Item_Temp = ",{title:'" & tb.Rows(i).Item(1) & "',border:false,html:'<iframe id=""left_iframe_" & group_id & """ class=""iframestyle"" src=""Menu/ExtMenu.aspx?GroupID=" & group_id & """ ></iframe>',iconCls:'nav'}"
+
+                ' " and  not GY_MKXX.XDLJ like '../FormFolder/%.xml' and (GY_MKXX.LIST_QX_LCDM is null or GY_MKXX.LIST_QX_LCDM = 0)"
+                '上面的条件是过滤掉,表单类型的功能,以及项目相关型的功能(如删除项目功能,显示未完成列表功能)
+                Tb_Item = Base.DB.Table("SELECT GY_MKXX.MKMC,GY_MKXX.XDLJ,GY_MKXX.List_QX_LCDM,NoLcDm,GY_MKXX.MKDM,ShowFunName FROM GY_MKXX,GY_Group_INFO Where GY_GROUP_INFO.MKDM = GY_MKXX.MKDM And GY_Group_info.GROUP_ID = " & group_id & " and (GY_MKXX.LIST_QX_LCDM is null or GY_MKXX.LIST_QX_LCDM = 0) order by GY_Group_info.orderby", "GY_MKXX")
+                For j = 0 To Tb_Item.Rows.Count - 1
+                    MKDM = Tb_Item.Rows(j)(4)
+                    '检测当前用户对该项目是否有访问权限
+                    If Base.GetUserHaveQX(UserID, MKDM) > 0 Or Base.CheckDistributionQX(UserID, MKDM) = True Then           '如果有分发的,也显示
+                        ShowTitleFlag = True    '表示，如果该组中有一条记录是有权限的，显示该组
+                    End If
+                Next
+                If ShowTitleFlag = True Then
+                    TempScriptOut += Item_Temp
+                End If
+            End If
+        Next
+
+        Dim ShowTitle As String = String.Empty      '临时标题
+        If Base.GetXmanConfigEnabled("/系统配置/我的文件夹", ".") = True Then
+            ShowTitle = Base.GetXmanConfigName("/系统配置/我的文件夹", ".")
+            If ShowTitle = "" Then ShowTitle = "个人资料"
+            TempScriptOut += ",{title:'" & ShowTitle & "',contentEl: 'west',border:false,html:'<iframe id=""left_iframe_0"" class=""iframestyle"" src=""Menu/ExtMenu.aspx"" frameborder=0 ></iframe>',iconCls:'nav'}"
+        End If
+
+        ScriptOut += TempScriptOut.Substring(1)
+        ScriptOut += "]},tabs ] });}" & vbCrLf
+
+        '判断是否开启ECP功能。
+        ScriptOut += "var isECP;" & vbCrLf
+        If Base.pub.GetWebConfig("SunfunSoft.Xman.ECP.Value").ToLower = "true" Then
+            ScriptOut += "isECP = true;" & vbCrLf
+        Else
+            ScriptOut += "isECP = false;" & vbCrLf
+        End If
+        '添加当前用户名到状态名.
+        ScriptOut += "window.status='当前用户：" & YGXM & " (" & Login_User & ")';" & vbCrLf
+        'ScriptOut += "</scr" + "ipt>"
+        Dim str As String = String.Empty
+
+        Dim homedt As New DataTable
+        homedt = Base.DB.Table("select * from homepage ", "dt")
+        If homedt.Rows.Count > 0 Then
+            Dim mktype As String = homedt.Rows(0)("mktype").ToString
+            Dim mkmcs As String = homedt.Rows(0)("mkmc").ToString
+            Dim url As String = homedt.Rows(0)("url").ToString
+            Dim mkdms As String = homedt.Rows(0)("mkdm").ToString
+            If mktype = 0 Then
+                If mkdms = 0 Then
+                    str += "function AddDefaultPage() {"
+                    str += "    var tab = new Ext.TabPanel({"
+                    str += "        id:     'desktop',"
+                    str += "        title:  '信息中心',"
+                    str += "        iconCls:  'nav',"
+                    str += "        html:   '<iframe class=""iframestyle"" src=""manager/desktop/Mydesktop.aspx"" frameborder=0 ></iframe >',"
+                    str += "        closable: false,"
+                    str += "        autoScroll: true"
+                    str += "    });"
+                    str += "    tabs.add(tab);"
+                    str += "    tab.show();"
+                    str += "}"
+                Else
+                    Dim lcdms As String = Base.DB.ExeScalar("select NoLCDM from GY_MKXX where mkdm=" & mkdms & "")
+                    If lcdms.Trim = "" Then
+                        Dim urls As String = Base.DB.ExeScalar("select xdlj from GY_MKXX where mkdm=" & mkdms & "")
+                        str += "function AddDefaultPage() {"
+                        str += "    var tab = new Ext.TabPanel({"
+                        str += "        id:     'desktop',"
+                        str += "        title:  '" & mkmcs & "',"
+                        str += "        iconCls:  'nav',"
+                        str += "        html:   '<iframe class=""iframestyle"" src=""" & urls.Replace("../", "") & """ frameborder=0 ></iframe >',"
+                        str += "        closable: false,"
+                        str += "        autoScroll: true"
+                        str += "    });"
+                        str += "    tabs.add(tab);"
+                        str += "    tab.show();"
+                        str += "}"
+                    Else
+                        str += "function AddDefaultPage() {"
+                        str += "    var tab = new Ext.TabPanel({"
+                        str += "        id:     'desktop',"
+                        str += "        title:  '" & mkmcs & "',"
+                        str += "        iconCls:  'nav',"
+                        str += "        html:   '<iframe class=""iframestyle"" src=""Menu/NavPage.aspx?LCDM=" & lcdms & """ frameborder=0 ></iframe >',"
+                        str += "        closable: false,"
+                        str += "        autoScroll: true"
+                        str += "    });"
+                        str += "    tabs.add(tab);"
+                        str += "    tab.show();"
+                        str += "}"
+                    End If
+
+                End If
+
+            Else
+                str += "function AddDefaultPage() {"
+                str += "    var tab = new Ext.TabPanel({"
+                str += "        id:     'desktop',"
+                str += "        title:  '" & mkmcs & "',"
+                str += "        iconCls:  'nav',"
+                str += "        html:   '<iframe class=""iframestyle"" src=""" & url & """ frameborder=0 ></iframe >',"
+                str += "        closable: false,"
+                str += "        autoScroll: true"
+                str += "    });"
+                str += "    tabs.add(tab);"
+                str += "    tab.show();"
+                str += "}"
+            End If
+        Else
+            str += "function AddDefaultPage() {"
+            str += "    var tab = new Ext.TabPanel({"
+            str += "        id:     'desktop',"
+            str += "        title:  '信息中心',"
+            str += "        iconCls:  'nav',"
+            str += "        html:   '<iframe class=""iframestyle"" src=""manager/desktop/Mydesktop.aspx"" frameborder=0 ></iframe >',"
+            str += "        closable: false,"
+            str += "        autoScroll: true"
+            str += "    });"
+            str += "    tabs.add(tab);"
+            str += "    tab.show();"
+            str += "}"
+        End If
+        ScriptOut += str
+        ScriptOut += "</script>"
+        Response.Write(ScriptOut)
+
+    End Sub
+
+
+    '-----------------------------------------------------------------------------------
+    '有流程的情况下显示菜单
+    Function ShowLC_Menu(ByVal LCDM As Integer, ByVal GroupID As Integer) As String
+        Dim i As Integer
+        Dim Temp As String = String.Empty
+        Dim LCMC As String = String.Empty
+        Dim Tb As New Data.DataTable
+        Dim Sql As String
+        Sql = "SELECT GY_XMZT.LCDM FROM GY_XMZT, GY_ZTMX, Gy_Group_Info, GY_YGQX "
+        Sql += "where GY_XMZT.XMZT = GY_ZTMX.XMZT And Gy_Group_Info.MKDM = GY_ZTMX.MKDM and GY_YGQX.GRoup_ID = GY_Group_Info.Group_ID and GY_YGQX.YGDM  = " & UserID & " and GY_XMZT.lcdm=" & LCDM
+        Sql += " group by GY_XMZT.LCDM"
+        Tb = Base.DB.Table(Sql, "Gy_LCDM")
+
+        If Tb.Rows.Count > 0 Then
+            Dim TempTb As New Data.DataTable
+            For i = 0 To Tb.Rows.Count - 1
+                '这里做功能性的判断,是否显示此菜单
+                LCDM = Tb.Rows(i).Item(0).ToString.Trim     '得到流程代码
+                TempTb = Base.DB.Table("SELECT LCMC FROM GY_LCDM where LCDM = " & LCDM, "GY_LCDM")
+                If TempTb.Rows.Count > 0 Then
+                    LCMC = TempTb.Rows(0).Item(0).ToString.Trim     '得到流程名称
+                    Temp += ",{title:'" & LCMC & "',border:false,html:'<iframe id=""left_iframe_" & GroupID & """ class=""iframestyle"" src=""Menu/ExtMenu.aspx?GroupID=" & GroupID & """ frameborder=0 ></iframe>',iconCls:'nav'}"
+                End If
+            Next
+            TempTb = Nothing
+        End If
+        Return Temp
+    End Function
+End Class

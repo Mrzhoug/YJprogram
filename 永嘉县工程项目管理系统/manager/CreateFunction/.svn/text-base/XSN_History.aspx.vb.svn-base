@@ -1,0 +1,50 @@
+﻿Imports System.xml
+Partial Class manager_CreateFunction_XSN_History
+    Inherits System.Web.UI.Page
+    Dim RootPath As String
+    Dim Base As New Base
+    Dim CurrentUrl As String
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Cells(3).Text = "<a href='" & CurrentUrl & GridView1.Rows(i).Cells(1).Text & "'>下载模板</a>"
+            GridView1.Rows(i).Attributes.Add("onmouseover", "OnMouseOver(this)")
+            GridView1.Rows(i).Attributes.Add("onmouseout", "OnMouseOut(this)")
+        Next
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking("../manager/CreateFunction/XSN_Model.aspx")
+
+        '得到当前路径的实际路径　
+        RootPath = Request.MapPath("../../") & "TemplateLibrary\"
+        Dim Url As String = Request.ServerVariables("Url")
+        Dim Host As String = Request.ServerVariables("http_host")
+        Dim Index As Integer
+        Index = Url.ToLower.LastIndexOf("manager/createfunction/")
+        CurrentUrl = Url.ToLower.Substring(0, Index) & "TemplateLibrary/"
+        Dim BakDir As String
+        BakDir = Request("XSN")
+        If BakDir.Trim.Length = 0 Then
+            Base.Js.alert(Me, "非法访问")
+            Exit Sub
+        End If
+        Dim OpPath As String = RootPath & "XsnBackup\" & BakDir
+        If IO.Directory.Exists(RootPath & "xsnbackup\" & BakDir) = False Then
+            Base.Js.alert(Me, "无历史记录或非法访问!")
+            Exit Sub
+        End If
+
+        CurrentUrl += "XsnBackup/" & BakDir & "/"
+
+        GridView1.DataSource = Base.IO.CreateDataSetFromFileList(OpPath)
+        If Not Page.IsPostBack Then
+            GridView1.DataBind()
+        End If
+    End Sub
+
+    Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+        GridView1.PageIndex = e.NewPageIndex
+        GridView1.DataBind()
+    End Sub
+End Class

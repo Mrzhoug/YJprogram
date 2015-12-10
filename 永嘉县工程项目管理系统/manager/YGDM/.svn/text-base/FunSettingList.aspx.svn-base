@@ -1,0 +1,126 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="FunSettingList.aspx.vb" Inherits="manager_YGDM_FunSettingList" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>组权限查看</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+</head>
+<body>
+    <center>
+    <form id="form1" runat="server" style="width:550px">
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span>查看组权限</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="left" style="text-align:center; width:45%;">
+                            <span id="group_name" runat="server"></span>
+                        </th>                        
+                    </tr>
+                    <tr style=" height:340px;">
+                        <td style="vertical-align:top; text-align:center; ">
+                            <asp:GridView id="GridView2" runat="server" ForeColor="Black" AllowPaging="True" AutoGenerateColumns="False"                                 
+                                Width="98%" CssClass="cooltable" Font-Size="9pt" DataSourceID="Conn1"
+                                DataKeyNames="Cid,Group_ID"   >
+                                
+                                <Columns>
+                                    <asp:TemplateField HeaderText="功能名" SortExpression="DLMC">
+                                        <EditItemTemplate>
+                                            <asp:Label ID="Label1" runat="server" Text='<%# Bind("MKMC") %>'></asp:Label>
+                                        </EditItemTemplate>
+                                        <ItemStyle HorizontalAlign="Left" VerticalAlign="Middle"  />
+                                        <HeaderStyle HorizontalAlign="Center" VerticalAlign="Middle"  />
+                                        <ItemTemplate>
+                                            <asp:Label ID="Label1" runat="server" Text='<%# Bind("MKMC") %>'></asp:Label>
+                                        </ItemTemplate>
+
+                                        <ItemStyle HorizontalAlign="Left" Width="45%"  />
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="读">
+                                        <EditItemTemplate>
+                                            <asp:CheckBox ID="CheckBox1" runat="server" Checked='<%# Bind("CanRead") %>'  />
+                                        </EditItemTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox2" runat="server" Checked='<%# Bind("CanRead") %>' Enabled="False"  />
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center"  />
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="写">
+                                        <EditItemTemplate>
+                                            <asp:CheckBox ID="CheckBox2" runat="server" Checked='<%# Bind("CanWrite") %>'  />
+                                        </EditItemTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox3" runat="server" Checked='<%# Bind("CanWrite") %>' Enabled="False"  />
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center"  />
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="改">
+                                        <EditItemTemplate>
+                                            <asp:CheckBox ID="CheckBox3" runat="server" Checked='<%# Bind("CanModify") %>'  />
+                                        </EditItemTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox4" runat="server" Checked='<%# Bind("CanModify") %>' Enabled="False" />
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center"   />
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="删">
+                                        <EditItemTemplate>
+                                            <asp:CheckBox ID="CheckBox4" runat="server" Checked='<%# Bind("CanDelete") %>'  />
+                                        </EditItemTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox5" runat="server" Checked='<%# Bind("CanDelete") %>' Enabled="False" />
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center" />
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="列表">
+                                        <EditItemTemplate>
+                                            <asp:CheckBox ID="CheckBox5" runat="server" Checked='<%# Bind("CanListForm") %>'  />
+                                        </EditItemTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox6" runat="server" Checked='<%# Bind("CanListForm") %>' Enabled="False"  />
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center"   />
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="全">
+                                        <EditItemTemplate>
+                                            <asp:CheckBox ID="CheckBox6" runat="server" Checked='<%# Bind("CanAll") %>'  />
+                                        </EditItemTemplate>
+                                        <ItemTemplate>
+                                            <asp:CheckBox ID="CheckBox7" runat="server" Checked='<%# Bind("CanAll") %>' Enabled="False"  />
+                                        </ItemTemplate>
+                                        <ItemStyle HorizontalAlign="Center"  />
+                                    </asp:TemplateField>
+                                    <asp:CommandField ShowSelectButton="True" Visible="False" />
+                                </Columns>
+                                <RowStyle CssClass="cooltableRowStyle" />
+                                <AlternatingRowStyle CssClass="cooltableAlternatingRowStyle" />
+                                <RowStyle HorizontalAlign="Center" />
+                                
+                            </asp:GridView>
+                            <%--<table align="center" style="width:98%; height:26px; text-align:center; vertical-align:middle; background-color:#EBECEE;">
+                                <tr>
+                                    <td id="PageBar" runat="server" align="center"></td>
+                                </tr>
+                            </table>--%>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <asp:SqlDataSource ID="Conn1" runat="server" ConnectionString="<%$ ConnectionStrings:Conn %>"
+            SelectCommand="SELECT Cid,Group_ID, GY_GROUP_INFO.MKDM, ShowFunName, MKMC,CanRead,CanWrite,CanModify,CanDelete,CanAll,CanListForm FROM GY_MKXX,GY_GROUP_INFO where GY_MKXX.MKDM = GY_GROUP_INFO.MKDM and Group_Id=@GroupID  order by OrderBy">
+            <SelectParameters>
+                <asp:Parameter DefaultValue="0" Name="groupid" />
+            </SelectParameters>
+        </asp:SqlDataSource>    
+    </form>
+    </center>
+</body>
+</html>

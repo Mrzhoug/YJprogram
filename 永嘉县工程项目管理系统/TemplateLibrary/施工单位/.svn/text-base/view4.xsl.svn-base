@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns3="http://schemas.microsoft.com/office/infopath/2003/myXSD" xmlns:tr="http://schemas.microsoft.com/office/infopath/2003/sample/TravelRequest" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:ns2="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-30T00:40:51" xmlns:ns1="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-07-20T06:01:42" xmlns:ns4="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-08-12T00:41:12" xmlns:ns5="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-08-14T01:23:01" xmlns:dfs="http://schemas.microsoft.com/office/infopath/2003/dataFormSolution" xmlns:tns="http://tempuri.org/" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:ns6="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:my="http://schemas.microsoft.com/office/infopath/2003/myXSD/2006-05-23T07:44:28" xmlns:xdEnvironment="http://schemas.microsoft.com/office/infopath/2006/xslt/environment" xmlns:xdUser="http://schemas.microsoft.com/office/infopath/2006/xslt/User" xmlns:xsf2="http://schemas.microsoft.com/office/infopath/2006/solutionDefinition/extensions" xmlns:xd="http://schemas.microsoft.com/office/infopath/2003" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:xdExtension="http://schemas.microsoft.com/office/infopath/2003/xslt/extension" xmlns:xdXDocument="http://schemas.microsoft.com/office/infopath/2003/xslt/xDocument" xmlns:xdSolution="http://schemas.microsoft.com/office/infopath/2003/xslt/solution" xmlns:xdFormatting="http://schemas.microsoft.com/office/infopath/2003/xslt/formatting" xmlns:xdImage="http://schemas.microsoft.com/office/infopath/2003/xslt/xImage" xmlns:xdUtil="http://schemas.microsoft.com/office/infopath/2003/xslt/Util" xmlns:xdMath="http://schemas.microsoft.com/office/infopath/2003/xslt/Math" xmlns:xdDate="http://schemas.microsoft.com/office/infopath/2003/xslt/Date" xmlns:sig="http://www.w3.org/2000/09/xmldsig#" xmlns:xdSignatureProperties="http://schemas.microsoft.com/office/infopath/2003/SignatureProperties" xmlns:ipApp="http://schemas.microsoft.com/office/infopath/2006/XPathExtension/ipApp">
+	<xsl:output method="html" indent="no"/>
+	<xsl:template match="my:Xman">
+		<html xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+			<head>
+				<meta content="text/html" http-equiv="Content-Type"></meta>
+				<style controlStyle="controlStyle">@media screen 			{ 			BODY{margin-left:21px;background-position:21px 0px;} 			} 		BODY{color:windowtext;background-color:window;layout-grid:none;} 		.xdListItem {display:inline-block;width:100%;vertical-align:text-top;} 		.xdListBox,.xdComboBox{margin:1px;} 		.xdInlinePicture{margin:1px; BEHAVIOR: url(#default#urn::xdPicture) } 		.xdLinkedPicture{margin:1px; BEHAVIOR: url(#default#urn::xdPicture) url(#default#urn::controls/Binder) } 		.xdSection{border:1pt solid #FFFFFF;margin:6px 0px 6px 0px;padding:1px 1px 1px 5px;} 		.xdRepeatingSection{border:1pt solid #FFFFFF;margin:6px 0px 6px 0px;padding:1px 1px 1px 5px;} 		.xdMultiSelectList{margin:1px;display:inline-block; border:1pt solid #dcdcdc; padding:1px 1px 1px 5px; text-indent:0; color:windowtext; background-color:window; overflow:auto; behavior: url(#default#DataBindingUI) url(#default#urn::controls/Binder) url(#default#MultiSelectHelper) url(#default#ScrollableRegion);} 		.xdMultiSelectListItem{display:block;white-space:nowrap}		.xdMultiSelectFillIn{display:inline-block;white-space:nowrap;text-overflow:ellipsis;;padding:1px;margin:1px;border: 1pt solid #dcdcdc;overflow:hidden;text-align:left;}		.xdBehavior_Formatting {BEHAVIOR: url(#default#urn::controls/Binder) url(#default#Formatting);} 	 .xdBehavior_FormattingNoBUI{BEHAVIOR: url(#default#CalPopup) url(#default#urn::controls/Binder) url(#default#Formatting);} 	.xdExpressionBox{margin: 1px;padding:1px;word-wrap: break-word;text-overflow: ellipsis;overflow-x:hidden;}.xdBehavior_GhostedText,.xdBehavior_GhostedTextNoBUI{BEHAVIOR: url(#default#urn::controls/Binder) url(#default#TextField) url(#default#GhostedText);}	.xdBehavior_GTFormatting{BEHAVIOR: url(#default#urn::controls/Binder) url(#default#Formatting) url(#default#GhostedText);}	.xdBehavior_GTFormattingNoBUI{BEHAVIOR: url(#default#CalPopup) url(#default#urn::controls/Binder) url(#default#Formatting) url(#default#GhostedText);}	.xdBehavior_Boolean{BEHAVIOR: url(#default#urn::controls/Binder) url(#default#BooleanHelper);}	.xdBehavior_Select{BEHAVIOR: url(#default#urn::controls/Binder) url(#default#SelectHelper);}	.xdBehavior_ComboBox{BEHAVIOR: url(#default#ComboBox)} 	.xdBehavior_ComboBoxTextField{BEHAVIOR: url(#default#ComboBoxTextField);} 	.xdRepeatingTable{BORDER-TOP-STYLE: none; BORDER-RIGHT-STYLE: none; BORDER-LEFT-STYLE: none; BORDER-BOTTOM-STYLE: none; BORDER-COLLAPSE: collapse; WORD-WRAP: break-word;}.xdScrollableRegion{BEHAVIOR: url(#default#ScrollableRegion);} 		.xdLayoutRegion{display:inline-block;} 		.xdMaster{BEHAVIOR: url(#default#MasterHelper);} 		.xdActiveX{margin:1px; BEHAVIOR: url(#default#ActiveX);} 		.xdFileAttachment{display:inline-block;margin:1px;BEHAVIOR:url(#default#urn::xdFileAttachment);} 		.xdPageBreak{display: none;}BODY{margin-right:21px;} 		.xdTextBoxRTL{display:inline-block;white-space:nowrap;text-overflow:ellipsis;;padding:1px;margin:1px;border: 1pt solid #dcdcdc;color:windowtext;background-color:window;overflow:hidden;text-align:right;word-wrap:normal;} 		.xdRichTextBoxRTL{display:inline-block;;padding:1px;margin:1px;border: 1pt solid #dcdcdc;color:windowtext;background-color:window;overflow-x:hidden;word-wrap:break-word;text-overflow:ellipsis;text-align:right;font-weight:normal;font-style:normal;text-decoration:none;vertical-align:baseline;} 		.xdDTTextRTL{height:100%;width:100%;margin-left:22px;overflow:hidden;padding:0px;white-space:nowrap;} 		.xdDTButtonRTL{margin-right:-21px;height:18px;width:20px;behavior: url(#default#DTPicker);} 		.xdMultiSelectFillinRTL{display:inline-block;white-space:nowrap;text-overflow:ellipsis;;padding:1px;margin:1px;border: 1pt solid #dcdcdc;overflow:hidden;text-align:right;}.xdTextBox{display:inline-block;white-space:nowrap;text-overflow:ellipsis;;padding:1px;margin:1px;border: 1pt solid #dcdcdc;color:windowtext;background-color:window;overflow:hidden;text-align:left;word-wrap:normal;} 		.xdRichTextBox{display:inline-block;;padding:1px;margin:1px;border: 1pt solid #dcdcdc;color:windowtext;background-color:window;overflow-x:hidden;word-wrap:break-word;text-overflow:ellipsis;text-align:left;font-weight:normal;font-style:normal;text-decoration:none;vertical-align:baseline;} 		.xdDTPicker{;display:inline;margin:1px;margin-bottom: 2px;border: 1pt solid #dcdcdc;color:windowtext;background-color:window;overflow:hidden;text-indent:0} 		.xdDTText{height:100%;width:100%;margin-right:22px;overflow:hidden;padding:0px;white-space:nowrap;} 		.xdDTButton{margin-left:-21px;height:18px;width:20px;behavior: url(#default#DTPicker);} 		.xdRepeatingTable TD {VERTICAL-ALIGN: top;}</style>
+				<style tableEditor="TableStyleRulesID">TABLE.xdLayout TD {
+	BORDER-BOTTOM: medium none; BORDER-LEFT: medium none; BORDER-TOP: medium none; BORDER-RIGHT: medium none
+}
+TABLE.msoUcTable TD {
+	BORDER-BOTTOM: 1pt solid; BORDER-LEFT: 1pt solid; BORDER-TOP: 1pt solid; BORDER-RIGHT: 1pt solid
+}
+TABLE {
+	BEHAVIOR: url (#default#urn::tables/NDTable)
+}
+</style>
+				<style languageStyle="languageStyle">BODY {
+	FONT-FAMILY: SimSun; FONT-SIZE: 10pt
+}
+TABLE {
+	FONT-FAMILY: SimSun; FONT-SIZE: 10pt
+}
+SELECT {
+	FONT-FAMILY: SimSun; FONT-SIZE: 10pt
+}
+.optionalPlaceholder {
+	FONT-STYLE: normal; PADDING-LEFT: 20px; FONT-FAMILY: SimSun; COLOR: #333333; FONT-SIZE: 9pt; FONT-WEIGHT: normal; TEXT-DECORATION: none; BEHAVIOR: url(#default#xOptional)
+}
+.langFont {
+	FONT-FAMILY: SimSun
+}
+.defaultInDocUI {
+	FONT-FAMILY: SimSun; FONT-SIZE: 9pt
+}
+.optionalPlaceholder {
+	PADDING-RIGHT: 20px
+}
+</style>
+				<style themeStyle="urn:office.microsoft.com:themeBlackWhite">BODY {
+	BACKGROUND-COLOR: white; COLOR: black
+}
+TABLE {
+	BORDER-BOTTOM: medium none; BORDER-LEFT: medium none; BORDER-COLLAPSE: collapse; BORDER-TOP: medium none; BORDER-RIGHT: medium none
+}
+TD {
+	BORDER-BOTTOM-COLOR: #000000; BORDER-TOP-COLOR: #000000; BORDER-RIGHT-COLOR: #000000; BORDER-LEFT-COLOR: #000000
+}
+TH {
+	BORDER-BOTTOM-COLOR: #000000; BACKGROUND-COLOR: #ffffff; BORDER-TOP-COLOR: #000000; COLOR: black; BORDER-RIGHT-COLOR: #000000; BORDER-LEFT-COLOR: #000000
+}
+.xdTableHeader {
+	BACKGROUND-COLOR: #ffffff; COLOR: black
+}
+P {
+	MARGIN-TOP: 0px
+}
+H1 {
+	MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px; COLOR: #000000
+}
+H2 {
+	MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px; COLOR: #000000
+}
+H3 {
+	MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px; COLOR: #000000
+}
+H4 {
+	MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px; COLOR: #000000
+}
+H5 {
+	MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px; COLOR: #000000
+}
+H6 {
+	MARGIN-TOP: 0px; MARGIN-BOTTOM: 0px; COLOR: #ffffff
+}
+.primaryVeryDark {
+	BACKGROUND-COLOR: #000000; COLOR: #ffffff
+}
+.primaryDark {
+	BACKGROUND-COLOR: #000000; COLOR: white
+}
+.primaryMedium {
+	BACKGROUND-COLOR: #ffffff; COLOR: black
+}
+.primaryLight {
+	BACKGROUND-COLOR: #ffffff; COLOR: black
+}
+.accentDark {
+	BACKGROUND-COLOR: #000000; COLOR: white
+}
+.accentLight {
+	BACKGROUND-COLOR: #ffffff; COLOR: black
+}
+</style>
+			</head>
+			<body style="BACKGROUND-COLOR: #ffffff; COLOR: #000000">
+				<span>
+					<xsl:attribute name="style">
+						<xsl:if test="my:RootNode/my:其他/my:点击按钮 != &quot;项目预算&quot;">msos-xCollection-项目信息_93-editing:disabled;</xsl:if>
+					</xsl:attribute>
+					<div align="center"><xsl:apply-templates select="my:RootNode" mode="_1"/>
+					</div>
+					<div/>
+					<div> </div>
+					<div/>
+					<div> </div>
+				</span>
+			</body>
+		</html>
+	</xsl:template>
+	<xsl:template match="my:RootNode" mode="_1">
+		<div style="PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-LEFT: 0px; WIDTH: 543px; PADDING-RIGHT: 0px; PADDING-TOP: 0px" class="xdRepeatingSection xdRepeating" title="" align="left" xd:CtrlId="CTRL125" xd:xctname="RepeatingSection" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+			<xsl:attribute name="style">PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-LEFT: 0px; WIDTH: 543px; PADDING-RIGHT: 0px; PADDING-TOP: 0px;<xsl:if test="my:申请信息/my:申请类型 != &quot;长期&quot;">msos-xCollection-派车情况表_1434-editing:disabled;</xsl:if>
+			</xsl:attribute>
+			<div align="left">
+				<table style="BORDER-BOTTOM-STYLE: none; BORDER-LEFT-STYLE: none; WIDTH: 540px; BORDER-COLLAPSE: collapse; WORD-WRAP: break-word; BORDER-TOP-STYLE: none; TABLE-LAYOUT: fixed; BORDER-RIGHT-STYLE: none" class="xdFormLayout xdLayout" border="1">
+					<colgroup>
+						<col style="WIDTH: 135px"></col>
+						<col style="WIDTH: 287px"></col>
+						<col style="WIDTH: 118px"></col>
+					</colgroup>
+					<tbody vAlign="top">
+						<tr style="MIN-HEIGHT: 49px" class="primaryVeryDark">
+							<td style="BORDER-BOTTOM: #000000 1pt solid; TEXT-ALIGN: left; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 2px; BACKGROUND-COLOR: #ffffff; PADDING-LEFT: 2px; PADDING-RIGHT: 2px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; BORDER-RIGHT: #000000 1pt; PADDING-TOP: 2px">
+								<div align="center"> </div>
+							</td>
+							<td style="BORDER-BOTTOM: #000000 1pt solid; TEXT-ALIGN: left; BORDER-LEFT: #000000 1pt; PADDING-BOTTOM: 2px; BACKGROUND-COLOR: #ffffff; PADDING-LEFT: 2px; PADDING-RIGHT: 2px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; BORDER-RIGHT: #000000 1pt; PADDING-TOP: 2px">
+								<h2 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="center">
+									<span>
+										<span>
+											<font color="#000000" face="黑体">
+												<strong>施工单位</strong>
+											</font>
+										</span>
+									</span>
+								</h2>
+							</td>
+							<td style="BORDER-BOTTOM: #000000 1pt solid; TEXT-ALIGN: left; BORDER-LEFT: #000000 1pt; PADDING-BOTTOM: 0px; BACKGROUND-COLOR: #ffffff; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: bottom; BORDER-TOP: #000000 1pt solid; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+								<h2 style="LINE-HEIGHT: 1.5; FONT-WEIGHT: normal" align="center">
+									<span>
+										<span>
+											<font color="#000000" face="黑体">
+												<font size="2"></font>
+											</font>
+										</span>
+									</span> </h2>
+							</td>
+						</tr>
+						<tr style="MIN-HEIGHT: 104px" class="primarylight">
+							<td colSpan="3" style="BORDER-BOTTOM: #000000 1pt; TEXT-ALIGN: left; BORDER-LEFT: #000000 1pt; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: top; BORDER-TOP: #000000 1pt solid; BORDER-RIGHT: #000000 1pt; PADDING-TOP: 0px">
+								<font color="#ff0000">
+									<div align="center">
+										<table style="BORDER-BOTTOM: medium none; BORDER-LEFT: medium none; WIDTH: 538px; BORDER-COLLAPSE: collapse; WORD-WRAP: break-word; TABLE-LAYOUT: fixed; BORDER-TOP: medium none; BORDER-RIGHT: medium none" class="xdLayout" border="1" borderColor="buttontext">
+											<colgroup>
+												<col style="WIDTH: 135px"></col>
+												<col style="WIDTH: 157px"></col>
+												<col style="WIDTH: 131px"></col>
+												<col style="WIDTH: 115px"></col>
+											</colgroup>
+											<tbody vAlign="top">
+												<tr style="MIN-HEIGHT: 22px">
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<div style="LINE-HEIGHT: 1.5" align="left">
+															<font size="2" face="宋体">单位名称: </font>
+														</div>
+													</td>
+													<td colSpan="3" style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<div>
+															<font size="2" face="宋体">
+																<div style="LINE-HEIGHT: 1.5" align="left"><span hideFocus="1" class="xdTextBox" title="" xd:CtrlId="CTRL966" xd:xctname="PlainText" tabIndex="0" xd:binding="my:内容/my:单位名称" style="WIDTH: 100%">
+																		<xsl:value-of select="my:内容/my:单位名称"/>
+																	</span>
+																</div>
+															</font>
+														</div>
+													</td>
+												</tr>
+												<tr style="MIN-HEIGHT: 21px">
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<div style="LINE-HEIGHT: 1.5" align="left">
+															<font size="2" face="宋体">主要联系人: </font>
+														</div>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<font size="2" face="宋体">
+															<div style="LINE-HEIGHT: 1.5" align="left"><span hideFocus="1" class="xdTextBox" title="" xd:CtrlId="CTRL967" xd:xctname="PlainText" tabIndex="0" xd:binding="my:内容/my:主要联系人" style="WIDTH: 100%">
+																	<xsl:value-of select="my:内容/my:主要联系人"/>
+																</span>
+															</div>
+														</font>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<div style="LINE-HEIGHT: 1.5" align="left">
+															<font size="2" face="宋体">联系电话: </font>
+														</div>
+													</td>
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<div style="LINE-HEIGHT: 1.5" align="left">
+															<font size="2" face="宋体"><span hideFocus="1" class="xdTextBox" title="" xd:CtrlId="CTRL968" xd:xctname="PlainText" tabIndex="0" xd:binding="my:内容/my:联系电话" style="WIDTH: 100%">
+																	<xsl:value-of select="my:内容/my:联系电话"/>
+																</span>
+															</font>
+														</div>
+													</td>
+												</tr>
+												<tr style="MIN-HEIGHT: 22px">
+													<td style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<div style="LINE-HEIGHT: 1.5" align="left">
+															<font size="2" face="宋体">资质说明: </font>
+														</div>
+													</td>
+													<td colSpan="3" style="BORDER-BOTTOM: #000000 1pt solid; BORDER-LEFT: #000000 1pt solid; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; VERTICAL-ALIGN: middle; BORDER-TOP: #000000 1pt solid; BORDER-RIGHT: #000000 1pt solid; PADDING-TOP: 0px">
+														<div style="LINE-HEIGHT: 1.5" align="left"><span hideFocus="1" class="xdTextBox" title="" xd:CtrlId="CTRL969" xd:xctname="PlainText" tabIndex="0" xd:binding="my:内容/my:资质说明" xd:datafmt="&quot;string&quot;,&quot;plainMultiline&quot;" style="OVERFLOW-X: visible; OVERFLOW-Y: visible; WIDTH: 100%; WORD-WRAP: break-word; WHITE-SPACE: normal; HEIGHT: 200px">
+																<xsl:choose>
+																	<xsl:when test="function-available('xdFormatting:formatString')">
+																		<xsl:value-of select="xdFormatting:formatString(my:内容/my:资质说明,&quot;string&quot;,&quot;plainMultiline&quot;)" disable-output-escaping="yes"/>
+																	</xsl:when>
+																	<xsl:otherwise>
+																		<xsl:value-of select="my:内容/my:资质说明" disable-output-escaping="yes"/>
+																	</xsl:otherwise>
+																</xsl:choose>
+															</span>
+															<font size="2" face="宋体"></font>
+														</div>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+										<font color="#ff0000">
+											<font color="#eaeef4" size="4"></font>
+										</font>
+									</div>
+								</font>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</xsl:template>
+</xsl:stylesheet>

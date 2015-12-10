@@ -1,0 +1,136 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="ProjectXd.aspx.vb" Inherits="manager_Forms_ProjectXd" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+    <title>修订查看</title>
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+</head>
+<body>
+    <form id="form1" runat="server">
+        意见：<asp:TextBox ID="TextBox1" runat="server" Height="32px" Width="560px"></asp:TextBox>
+        <asp:Button ID="Button1" runat="server" Height="36px" Text=" 确 定 " /><br />
+        <hr />
+<script language="javascript" type="text/javascript">
+
+    var maxnum;                     //记录图片总数
+    var xdtext;                     //显示的内容
+    var imgsrc= new Array();		//存储图片数组
+	<%=GetImages%>
+	var currentindex = 0;
+	
+	document.write("<center><p>" + xdtext + "</p><div id=\"pic\" style=\" background-color:#FFFFFF;position:relative;\" onmousemove='test()' >");
+	document.write("<span id='bar'></span><br>");
+	document.write("	<a href='javascript:void(0);' onclick='imgclick();'><img id=\"img\" src=\"" + imgsrc[0] + "\" border='0' /></a>");
+	document.write("</div></center>");
+	showbar();
+    
+
+function test()
+{
+	var img1 = document.getElementById("img");
+	var x = event.offsetX + 13;
+	var y = event.offsetY;
+	if (x< (img1.width/2))
+	{
+		img1.style.cursor = "../../images/pre.ani";
+		img1.title = "点击跳到上一页";
+	}
+	else
+	{
+		img1.style.cursor = "../../images/next.ani";
+		img1.title = "点击跳到下一页";
+	}
+}		
+		
+		
+		
+function ResizeImg(imgs,max)
+{
+	var pic= new Image();
+	pic.src=imgs.src;
+	if(pic.width > pic.height)
+	{
+		imgs.width = max;
+		imgs.height = max/pic.width * pic.height;
+	}
+	else
+	{
+		imgs.height = max;
+		imgs.width = max/pic.height * pic.width;
+	}
+}
+
+function showbar()
+{
+    var obj = document.getElementById("bar");
+    obj.innerHTML = "<a href='javascript:void(0)' onclick='Prevpic()'>上一张</a> 第" + (currentindex+1) + "张 共" + (maxnum+1) + "张 <a href='javascript:void(0)' onclick='Nextpic()'>下一张</a> ";
+}
+
+function Prevpic()
+{
+    var img1 = document.getElementById("img");
+		if (currentindex>0) 
+		{
+		    currentindex = currentindex - 1;
+	    }
+	    else
+	    {
+	        alert("当前已经是首页了!");
+	    }
+    img1.src = imgsrc[currentindex];
+    showbar();
+}
+
+function Nextpic()
+{
+    var img1 = document.getElementById("img");
+		if (maxnum > currentindex) 
+		{
+		    currentindex = currentindex + 1;
+        }
+        else
+        {
+            alert("当前已经是尾页了!");
+        }
+    img1.src = imgsrc[currentindex];
+    showbar();
+}
+
+function imgclick()
+{
+    var img1 = document.getElementById("img");
+    var x = event.offsetX + 13;
+	var y = event.offsetY;
+	if (x< (img1.width/2))
+	{
+		if (currentindex>0) 
+		{
+		    currentindex = currentindex - 1;
+	    }
+	    else
+	    {
+	        alert("当前已经是首页了!");
+	    }
+	}
+	else
+	{
+		if (maxnum > currentindex) 
+		{
+		    currentindex = currentindex + 1;
+        }
+        else
+        {
+            alert("当前已经是尾页了!");
+        }
+	}
+    img1.src = imgsrc[currentindex];
+    showbar();
+}
+</script>
+
+    </form>
+</body>
+</html>

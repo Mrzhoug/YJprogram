@@ -1,0 +1,53 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="FileOption.aspx.vb" Inherits="manager_Personbag_FileOption" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head id="Head1" runat="server">
+    <title>文件目录</title>
+    <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>
+</head>
+<body>
+    <center>
+    <form id="form1" runat="server" >
+
+
+        <div class="topnav">
+            <span class="preload1"></span><span class="preload2"></span>
+            <ul id="topnavbar">
+                <li class="topmenu"><a class="top_link" id="operater2" href="javascript:void(0);">
+                <span runat="server" id="spanTitle"></span></a></li>
+            </ul>
+        </div>
+
+        <div class="main" style="border:none;">
+            <div class="formtable">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <th align="right" style="width:30%">
+                            源文件(夹)路径：
+                        </th>
+                        <td style="text-align:left">                            
+                            <asp:Label ID="Label1" runat="server" Text=""  ></asp:Label>                         
+                        </td>
+                    </tr>
+                    <tr>
+                        <th align="right">
+                            目的路径：
+                        </th>
+                        <td width="75%" style="text-align:left">                            
+                            <asp:TextBox ID="TextBox1" runat="server" Enabled="False"></asp:TextBox>
+                            <asp:Button ID="Button1" runat="server" Text="确定操作" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <asp:ListBox ID="ListBox1" runat="server" Height="140px" Width="375px" AutoPostBack="True"></asp:ListBox>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+    </center>
+
+</body>
+</html>

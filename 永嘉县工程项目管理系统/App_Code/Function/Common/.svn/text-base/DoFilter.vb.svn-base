@@ -1,0 +1,51 @@
+﻿Public Class DoFilter
+
+
+    ''' <summary>
+    ''' SQL语句过滤
+    ''' </summary>
+    ''' <param name="str"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function SQLFilter(ByVal str As String) As String
+        str = str.Trim()
+        If Not str Is Nothing Then
+            Dim aryReg() As String = {"exec", "insert", "select", "delete", "update", "master", "truncate", "char", "declare"}
+            Dim i As Integer
+            For i = 0 To aryReg.Length - 1
+                str = str.Replace(aryReg(i), String.Empty)
+            Next
+        End If
+        Return str
+    End Function
+
+    ''' <summary>
+    ''' 过滤所有特殊特号
+    ''' </summary>
+    ''' <param name="str"></param>
+    ''' <returns></returns>
+    Public Shared Function FilterSymbol(ByVal str As String) As String
+        Dim aryReg() As String = {"'", "\"", ""\r", "\n", "<", ">", "%", "?", ",", ".", "=", "-", "_", ";", "|", "[", "]", "&", "/"}
+        Dim i As Integer
+        For i = 0 To aryReg.Length - 1
+            str = str.Replace(aryReg(i), String.Empty)
+        Next
+        Return str
+    End Function
+
+    ''' <summary>
+    ''' 过滤一般特殊特号,如单引、双引和回车和分号等
+    ''' </summary>
+    ''' <param name="theString"></param>
+    ''' <returns></returns>
+    Public Shared Function SafetyStr(ByVal theString As String) As String
+        Dim aryReg() As String = {"'", ";", "\"", ""\r", "\n", "<", ">"}
+        Dim i As Integer
+        For i = 0 To aryReg.Length - 1
+            theString = theString.Replace(aryReg(i), String.Empty)
+        Next
+        Return theString
+    End Function
+
+
+End Class

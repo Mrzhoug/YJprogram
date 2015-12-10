@@ -1,0 +1,81 @@
+﻿
+Partial Class manager_XJXM_Add_XMXX
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim LCDM As Integer
+    Dim MKDM As Integer
+    Dim Login_User As String
+    Dim UserID As Integer
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        '得到用户信息
+        Login_User = Base.GetWebUserName
+        UserID = Base.GetUserID(Login_User)
+
+        Try
+            LCDM = Request("LCDM")
+        Catch ex As Exception
+            Base.Js.alert(Me, "非法访问!")
+            Response.End()
+        End Try
+
+        Dim tb As New Data.DataTable
+        tb = Base.DB.Table("SELECT LCMC FROM GY_LCDM where LCDM = " & LCDM, "GY_LCDM")
+        If tb Is Nothing Then
+            Base.Js.alert(Me, "参数错误或非法访问")
+            Response.End()
+        End If
+        Dim XMMC As String = tb.Rows(0).Item(0)         '流程名称与项目名称一样,这里不做显示的,只是用来做标识 
+
+        '流程存在.判断用户是否有权限创建
+        '后面的ORDER BY 语句,用来显示状态的顺序
+        tb = Base.DB.Table("SELECT GY_ZTMX.XMZT,GY_ZTMX.MKDM, GY_ZTMX.SPBZ, GY_ZTMX.TimeBZ, GY_ZTMX.RuleTime  FROM GY_ZTMX,GY_XMZT where GY_XMZT.XMZT = GY_ZTMX.XMZT and gy_XMZT.LCDM =" & LCDM & "  ORDER BY GY_XMZT.OrderBy, GY_XMZT.XMZT", "GY_ZTMX")
+        If tb.Rows.Count > 0 Then
+            MKDM = tb.Rows(0)(1)
+        Else
+            Response.Write("流程为空,不能新建")
+            Response.End()
+        End If
+        Dim Qx As Integer = Base.GetUserHaveQX(UserID, MKDM)
+        '判断能力权限,1读,2写,4改,8删除
+        If Qx < 2 Then
+            Base.Js.alert(Me, "你无权进行新建流程,请与管理员联系")
+            Exit Sub
+        End If
+
+        Dim XMLX As String = Now()
+        '添加一个项目(自动添加,项目名称,登陆名,登陆时间)        '得到流程名，用流程名做为项目的名称
+        Try
+            Base.DB.Query("insert into GY_XMXX(xmmc,xmsm,xmlx,lcdm) values('" & XMMC & "','" & Login_User & "','" & XMLX & "'," & LCDM & ")")
+        Catch ex As Exception
+            Base.Js.alert(Me, "新建失败")
+            Exit Sub
+        End Try
+
+        Dim Fid, i As Integer
+        Dim XMDM As Integer
+        Try
+            tb = Base.DB.Table("select XMDM from GY_XMXX where xmmc='" & XMMC & "' and xmsm='" & Login_User & "' and xmlx='" & XMLX & "'", "GY_XMXX")
+            XMDM = tb.Rows(0)(0)
+        Catch ex As Exception
+            Response.End()
+        End Try
+
+        Fid = tb.Rows(0).Item(0)
+        '后面的ORDER BY 语句,用来显示状态的顺序
+        tb = Base.DB.Table("SELECT GY_ZTMX.XMZT,GY_ZTMX.MKDM, GY_ZTMX.SPBZ, GY_ZTMX.TimeBZ, GY_ZTMX.RuleTime  FROM GY_ZTMX,GY_XMZT where GY_XMZT.XMZT = GY_ZTMX.XMZT and gy_XMZT.LCDM =" & LCDM & "  ORDER BY GY_XMZT.OrderBy, GY_XMZT.XMZT", "GY_ZTMX")
+        Dim Sql As String = String.Empty
+        For i = 0 To tb.Rows.Count - 1
+            If i = 0 Then MKDM = tb.Rows(0)(1)
+            Sql = Sql & "insert into XX_XMJC(xmdm,xmzt,mkdm,spbz,timebz,ruletime) values("
+            Sql = Sql & Fid & ","
+            Sql = Sql & tb.Rows(i).Item(0) & ","
+            Sql = Sql & tb.Rows(i).Item(1) & ","
+            Sql = Sql & tb.Rows(i).Item(2) & ","
+            Sql = Sql & tb.Rows(i).Item(3) & ",'"
+            Sql = Sql & tb.Rows(i).Item(4) & "')"
+        Next
+        If Sql <> "" Then Base.DB.Query(Sql)
+
+        Response.Redirect("../Forms/Function.aspx?XMDM=" & XMDM & "&MKDM=" & MKDM & "&Flag=False")
+    End Sub
+End Class

@@ -1,0 +1,99 @@
+﻿
+Partial Class manager_YGDM_UserPowerList
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim UserID As Integer
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Base.Checking("../manager/YGDM/Default.aspx")
+
+        Try
+            UserID = Request("UserID")
+        Catch ex As Exception
+            UserID = 0
+        End Try
+
+        Dim Row As DataRow
+        Row = Base.DB.Row("select [YGDM], [YGXM], [DLMC], [SSKS] from [GY_YGDM] where YGDM = " & UserID, "GY_YGDM")
+
+        If Row Is Nothing Then
+            Base.Js.closestr(Me, "没有您想查看的用户，请从正确途径打开些网页！")
+        Else
+            LbRealName.Text = Row.Item("YGXM")
+            LbLoginName.Text = Row.Item("DLMC")
+            Conn1.SelectParameters("ygdm").DefaultValue = Row.Item("ygdm")
+            Conn2.SelectParameters("ygdm").DefaultValue = Row.Item("ygdm")
+            '如果可是名称不为空，则显示科室名称
+
+            If IsDBNull(Row.Item("ssks")) Then
+                LbPartment.Text = "未分配科室"
+            ElseIf Row.Item("ssks") = 0 Then
+                LbPartment.Text = "未分配科室"
+            Else
+                Dim Row1 As DataRow
+                Row1 = Base.DB.Row("select ksmc from gy_ksdm where ksdm = " & Row.Item("ssks"), "gy_ksmc")
+                LbPartment.Text = Row1.Item("ksmc")
+            End If
+        End If
+
+        Dim SqlQuerry As String = Base.SqlFilter(TextBox1.Text.Trim)
+        If SqlQuerry.Length > 0 Then
+            Conn2.SelectCommand = "select gy_group.group_id,gy_group.group_name from gy_group where gy_group.group_id not in(select gy_group.group_id from gy_group,gy_ygqx where gy_group.group_id = gy_ygqx.group_id and gy_ygqx.ygdm = @ygdm) and group_name like '%" & SqlQuerry & "%'"
+        Else
+            Conn2.SelectCommand = "select gy_group.group_id,gy_group.group_name from gy_group where gy_group.group_id not in(select gy_group.group_id from gy_group,gy_ygqx where gy_group.group_id = gy_ygqx.group_id and gy_ygqx.ygdm = @ygdm) "
+        End If
+
+
+
+    End Sub
+
+    Protected Sub btn_add_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btn_add.Click
+        Dim i As Integer
+        Dim ck As New CheckBox
+        For i = 0 To Me.GridView2.Rows.Count - 1
+            ck = GridView2.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                Try
+                    Conn2.InsertCommand = "insert into gy_ygqx(ygdm,group_id) values(" & UserID & "," & GridView2.DataKeys(i)(0) & ")"
+                    Conn2.Insert()
+                Catch ex As Exception
+                    Base.Js.alert(Me, "添加出错。请联系管理员!")
+                End Try
+            End If
+        Next
+        GridView1.DataBind()
+        GridView2.DataBind()
+    End Sub
+
+    Protected Sub btn_del_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btn_del.Click
+        Dim ck As CheckBox
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                Conn1.DeleteCommand = "delete gy_ygqx where ygdm=" & UserID & " and group_id = " & GridView1.DataKeys(i)(0)
+                Conn1.Delete()
+            End If
+        Next
+        GridView1.DataBind()
+        GridView2.DataBind()
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Cells(2).Text = "<center><a href='javascript:void(0)' onclick=""window.open('FunSettingList.aspx?GroupID=" & GridView1.DataKeys(i).Item(0) & "','权限查看','height=450, width=650, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')"">查看</a></center>"
+        Next
+    End Sub
+
+    Protected Sub GridView2_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView2.DataBound
+        Dim i As Integer
+        For i = 0 To GridView2.Rows.Count - 1
+            GridView2.Rows(i).Cells(2).Text = "<center><a href='javascript:void(0)' onclick=""window.open('FunSettingList.aspx?GroupID=" & GridView2.DataKeys(i).Item(0) & "','权限查看','height=450, width=650, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')"">查看</a></center>"
+        Next
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        GridView2.DataBind()
+    End Sub
+End Class

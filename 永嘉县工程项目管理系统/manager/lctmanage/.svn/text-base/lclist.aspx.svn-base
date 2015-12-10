@@ -1,0 +1,82 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="lclist.aspx.vb" Inherits="manager_lctmanage_lclist"  Theme="SkinFile"%>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title></title>
+     <link href="../../App_Themes/StyleSheet.css" type="text/css" rel="Stylesheet"/>  
+     <script language="javascript" type="text/javascript" src="../../Pub/function.js"></script>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>   
+     
+     &nbsp  &nbsp  &nbsp  流程类型：<asp:DropDownList ID="DropDownList1" runat="server">
+            <asp:ListItem Value="0">全部</asp:ListItem>
+            <asp:ListItem Value="sg">施工变施工流程</asp:ListItem>
+            <asp:ListItem Value="yw">施工变业务流程</asp:ListItem>
+            <asp:ListItem Value="ds">电室流程</asp:ListItem>
+            <asp:ListItem Value="xg">线改流程</asp:ListItem>
+            <asp:ListItem Value="qt">其他工程</asp:ListItem>
+            <asp:ListItem Value="xt">系统内工程</asp:ListItem>
+        </asp:DropDownList>
+    流程状态：<asp:TextBox ID="TextBox1" runat="server" Width="293px"></asp:TextBox>       
+        <asp:Button ID="Button1" runat="server" Text=" 搜 索 " CssClass="btnsubmit" />
+<%--        <input id="Button2" type="button" value="添加流程" class="btnsubmit" onclick="window.open('addlc.aspx','添加流程','height=250, width=400, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')" />
+--%>        <input id="Button3" type="button" value="模板管理" class="btnsubmit" onclick="window.open('addtemplate.aspx','流程模板管理','height=200, width=650, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')" />
+        <asp:Button ID="Button4" runat="server" Text="删除所选" OnClientClick="return confirm('你确定要删除所选用户吗?');" CssClass="btnsubmit" /> 
+<%--        <input id="Button5" type="button" value="测试" class="btnsubmit" onclick="window.open('default.aspx?xmbh=sg&xmzt=资料整理','流程图','height=800, width=1024, top=150, left=300, toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no, status=no')" />
+--%>        
+        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" 
+            DataKeyNames="id" SkinID="GridViewSkin1"
+            DataMember="DefaultView" Width="98%" BackColor="White" 
+            BorderColor="#DEDFDE" BorderStyle="None" BorderWidth="1px" CellPadding="4" 
+            Font-Size="9pt" ForeColor="Black" 
+            AllowPaging="true" HorizontalAlign="Center" EnableModelValidation="True" 
+            PageSize="15">
+            <Columns>
+                <asp:TemplateField>
+                    <HeaderTemplate>
+                        <asp:CheckBox ID="CheckBox1" runat="server"  onclick="SelectCheckboxAll(this,'GridView1');"  />
+                    </HeaderTemplate>
+                    <ItemStyle HorizontalAlign="Center" Width="30px" />
+                    <ItemTemplate>
+                        <asp:CheckBox ID="CheckBox1" runat="server" />
+                    </ItemTemplate>
+                </asp:TemplateField>
+                <asp:BoundField DataField="id" HeaderText="ID" InsertVisible="False" ReadOnly="True"
+                    SortExpression="id" >
+                    <ItemStyle Width="40px" />
+                </asp:BoundField>
+                <asp:BoundField DataField="lcname" HeaderText="流程名称" />
+                <asp:BoundField DataField="shapeid" HeaderText="图形ID" 
+                    SortExpression="shapeid" >
+                     <ItemStyle HorizontalAlign="Center" />
+                </asp:BoundField>
+                <asp:BoundField DataField="lczt" HeaderText="流程状态" >
+                    <ItemStyle HorizontalAlign="Center" Width="100px" />
+                </asp:BoundField>
+                 <asp:BoundField DataField="bm" HeaderText="操作部门" >
+                    <ItemStyle HorizontalAlign="Center" Width="100px" />
+                </asp:BoundField>
+                 <asp:BoundField DataField="days" HeaderText="有效天数" >
+                    <ItemStyle HorizontalAlign="Center" Width="100px" />
+                </asp:BoundField>
+                <asp:BoundField DataField="lcbs" HeaderText="模板类型">
+                 <ItemStyle HorizontalAlign="Center" Width="150px" />
+                </asp:BoundField>
+                <asp:BoundField HeaderText="修改">
+                <ItemStyle HorizontalAlign="Center" Width="100px" />
+                </asp:BoundField>
+                <asp:CommandField ShowSelectButton="True" Visible="False" >
+                    <ItemStyle HorizontalAlign="Center" />
+                </asp:CommandField>
+            </Columns>      
+            <PagerSettings Visible="false" />
+        </asp:GridView>
+         <table align="center" width="98%" height="26" valign="middle" bgcolor="#EBECEE" ><tr><td id="PageBar" runat="server" align="center"></td></tr></table>     
+    </div>
+    </form>
+</body>
+</html>

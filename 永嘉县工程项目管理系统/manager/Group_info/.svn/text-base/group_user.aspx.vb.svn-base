@@ -1,0 +1,129 @@
+﻿
+Partial Class manager_Group_info_Group_User
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim group_id, user_id, user_id2 As Integer
+    Dim GU As String
+    Dim dt_group_user, dt_mkzm As New DataTable
+    Dim Flag As Boolean = False
+    Dim SysGroup As Integer             '用来标志是否是系统组
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Try
+            group_id = Request("group_id")
+        Catch ex As Exception
+            Response.End()
+        End Try
+
+        Dim Row As DataRow = Base.DB.Row("select * from [GY_GROUP] where GROUP_ID=" & group_id, "Gy_Group")
+        If Row Is Nothing Then
+            Base.Js.closestr(Me, "没有您想修改的组，请从正确途径打开些网页！")
+        End If
+        tb_groupName.InnerText = Row.Item("group_name").ToString.Trim
+        If Row.Item("LCDM").ToString.Trim <> "" Then Flag = True
+        SqlDataSource2.SelectParameters("groupid").DefaultValue = group_id
+        Try
+            SysGroup = Row.Item("IsSysGroup")
+        Catch ex As Exception
+            SysGroup = 0
+        End Try
+        If SysGroup = 1 Then                '表示是系统组
+            btn_add.Enabled = False
+            btn_del.Enabled = False
+        End If
+
+        If Not IsPostBack Then
+            Dim dt As New DataTable
+            dt = Base.DB.Table("select KSDM,KSMC from GY_KSDM", "dd")
+            If dt.Rows.Count <> 0 Then
+                Dim i As Integer = 0
+                For i = 0 To dt.Rows.Count - 1
+                    DropDownList1.Items.Add(New ListItem(dt.Rows(i)(1).ToString(), dt.Rows(i)(0).ToString()))
+                Next
+            End If
+        End If
+
+
+    End Sub
+
+    Protected Sub btn_add_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btn_add.Click
+        Dim i As Integer
+        Dim ck As New CheckBox
+        For i = 0 To Me.GridView2.Rows.Count - 1
+            ck = GridView2.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                If Base.DB.GetRowCount("select * from [GY_YGQX] where GROUP_ID=" & group_id & " and YGDM=" & GridView2.DataKeys(i)(0), "dd") < 1 Then
+                    Try
+                        Me.SqlDataSource2.InsertParameters(0).DefaultValue = GridView2.DataKeys(i)(0)
+                        Me.SqlDataSource2.InsertParameters(1).DefaultValue = group_id
+                        Me.SqlDataSource2.Insert()
+                    Catch ex As Exception
+                        Response.Write(GridView2.DataKeys.Count)
+                    End Try
+
+                End If
+            End If
+        Next
+        Me.GridView1.DataBind()
+    End Sub
+
+    Protected Sub btn_del_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btn_del.Click
+        Dim ck As CheckBox
+        Dim i As Integer
+        For i = 0 To Me.GridView1.Rows.Count - 1
+            ck = GridView1.Rows(i).Cells(0).Controls(1)
+            If ck.Checked = True Then
+                '   Base.Zh.ExeSql("delete from [GY_YGQX] where GROUP_ID=" & group_id & " AND YGDM=" & Me.GridView1.DataKeys(i)(0))
+                Me.SqlDataSource1.DeleteParameters(0).DefaultValue = group_id
+                Me.SqlDataSource1.DeleteParameters(1).DefaultValue = Me.GridView1.DataKeys(i)(0)
+                Me.SqlDataSource1.Delete()
+            End If
+        Next
+        GridView2.DataBind()
+    End Sub
+
+    'Protected Sub cmd_return_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles cmd_return.Click
+    '    If Flag = True Then
+    '        Base.Js.CloseGoTo(Me, "../LCDM/LCQX_Manage.aspx")
+    '    Else
+    '        Response.Write("<script language=javascript>window.close();</script>")
+    '    End If
+    'End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Cells(3).Text = Base.DB.ExeScalar("select KSMC From GY_KSDM where KSDM=" & GridView1.DataKeys(i).Item(1))
+            GridView1.Rows(i).Attributes.Add("onmouseover", "this.style.backgroundColor='#e4e4e4'")
+            GridView1.Rows(i).Attributes.Add("onmouseout", "this.style.backgroundColor='white'")
+        Next
+    End Sub
+
+    Protected Sub GridView2_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView2.DataBound
+        Dim i As Integer
+        For i = 0 To GridView2.Rows.Count - 1
+            GridView2.Rows(i).Cells(3).Text = Base.DB.ExeScalar("select KSMC From GY_KSDM where KSDM=" & GridView2.DataKeys(i).Item(1))
+            GridView2.Rows(i).Attributes.Add("onmouseover", "this.style.backgroundColor='#e4e4e4'")
+            GridView2.Rows(i).Attributes.Add("onmouseout", "this.style.backgroundColor='white'")
+        Next
+    End Sub
+
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+
+
+        Dim sqlstr As String
+        sqlstr = "SELECT * FROM [GY_YGDM] where YGDM not in(SELECT GY_YGDM.YGDM FROM [GY_YGDM],GY_YGQX where GY_YGQX.YGDM=GY_YGDM.YGDM and (GY_YGQX.GROUP_ID =" & group_id & ")) "
+
+        If TextBox1.Text <> "" Then
+            sqlstr = sqlstr & " and (ygxm like '%" & Base.SqlFilter(TextBox1.Text) & "%' or dlmc like '%" & Base.SqlFilter(TextBox1.Text) & "%') "
+        End If
+
+
+        If DropDownList1.SelectedValue <> 0 Then
+            sqlstr = sqlstr & " and ssks=" & DropDownList1.SelectedValue
+        End If
+
+        SqlDataSource2.SelectCommand = sqlstr
+        GridView2.DataBind()
+    End Sub
+End Class

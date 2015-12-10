@@ -1,0 +1,29 @@
+﻿
+Partial Class HomePage_Act_Guide_List
+    Inherits System.Web.UI.Page
+    Dim Base As New Base
+    Dim RowCount As Integer
+    Protected Sub Button1_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles Button1.Click
+        GridView1.DataBind()
+    End Sub
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim SqlQuerry As String = String.Empty
+        If TextBox1.Text.Trim.Length > 0 Then
+            SqlQuerry = " Where [Title] like '%" & TextBox1.Text.Trim.Replace("'", "''") & "%'"
+        Else
+            SqlQuerry = ""
+        End If
+        Conn.SelectCommand = "SELECT [Title], [UpTime], [Cid] FROM [Act_Guide] " & Base.SqlFilter(SqlQuerry) & "  ORDER BY [UpTime] DESC"
+        RowCount = Base.DB.GetRowCount("SELECT [Title], [UpTime], [Cid] FROM [Act_Guide] " & Base.SqlFilter(SqlQuerry) & "  ORDER BY [UpTime] DESC", "dd")
+    End Sub
+
+    Protected Sub GridView1_DataBound(ByVal sender As Object, ByVal e As System.EventArgs) Handles GridView1.DataBound
+        Dim i As Integer
+        For i = 0 To GridView1.Rows.Count - 1
+            GridView1.Rows(i).Cells(0).Text = i + 1
+            GridView1.Rows(i).Cells(1).Text = "<a href='Act_Guide_Show.aspx?Cid=" & GridView1.DataKeys(i).Item(0) & "'>" & GridView1.Rows(i).Cells(1).Text & "</a>"
+        Next
+        PageBar.InnerHtml = Base.pub.WritePage(GridView1, RowCount)
+    End Sub
+End Class

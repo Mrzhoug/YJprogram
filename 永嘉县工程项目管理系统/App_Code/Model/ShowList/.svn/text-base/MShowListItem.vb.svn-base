@@ -1,0 +1,78 @@
+﻿Imports Microsoft.VisualBasic
+
+''' <summary>
+''' 显示列对应实体类
+''' </summary>
+''' <remarks></remarks>
+Public Class MShowListItem
+
+    Private _ID As Integer
+    ''' <summary>
+    ''' ID
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property ID() As Integer
+        Get
+            Return _ID
+        End Get
+        Set(ByVal value As Integer)
+            _ID = value
+        End Set
+    End Property
+
+
+    Private _LCDM As Integer
+    ''' <summary>
+    ''' 流程名称
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property LCDM() As Integer
+        Get
+            Return _LCDM
+        End Get
+        Set(ByVal value As Integer)
+            _LCDM = value
+        End Set
+    End Property
+
+
+    Private _ShowName As String
+    ''' <summary>
+    ''' 显示内容
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property ShowName() As String
+        Get
+            Return _ShowName
+        End Get
+        Set(ByVal value As String)
+            _ShowName = value
+        End Set
+    End Property
+
+    Private _NodeName As String
+    ''' <summary>
+    ''' 对应节点
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property NodeName() As String
+        Get
+            Return _NodeName
+        End Get
+        Set(ByVal value As String)
+            _NodeName = value
+        End Set
+    End Property
+
+
+End Class
+
+

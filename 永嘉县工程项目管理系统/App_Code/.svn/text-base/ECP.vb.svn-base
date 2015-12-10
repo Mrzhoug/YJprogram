@@ -1,0 +1,110 @@
+﻿Imports System.Web
+Imports System.Web.Services
+Imports System.Web.Services.Protocols
+Imports System.Xml
+
+<WebService(Namespace:="http://tempuri.org/")> _
+<WebServiceBinding(ConformsTo:=WsiProfiles.BasicProfile1_1)> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+Public Class ECP
+     Inherits System.Web.Services.WebService
+    Dim Base As New Base
+    Dim RootPath As String = Server.MapPath("./FormFolder")
+    Dim FileName As String
+
+
+    ''' <summary>
+    ''' ECP接口
+    ''' </summary>
+    ''' <param name="UID">ECP座机的电话号码</param>
+    ''' <param name="PWD">密码</param>
+    ''' <param name="Tel">来电号码</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    <WebMethod()> _
+    Public Function TelephoneCall(ByVal UID As String, ByVal PWD As String, ByVal Tel As String) As String
+
+        '对XML文件库进行处理,读取配置文件
+        Dim CInfoKu As String = Base.pub.GetWebConfig("SunfunSoft.Xman.ECP.CustomerInformation.Value").ToString
+        Dim Result As String
+        If CInfoKu.Trim.Length > 0 Then
+            Result = CheckFileName(CInfoKu)
+        Else
+            Result = CheckFileName("客户信息")
+        End If
+
+        If Not Result Is Nothing Then
+            Return Result
+        End If
+
+        If UID.Length > 0 And PWD.ToLower = "sunfun88324268" And Tel.Length > 0 Then
+            Dim RootNode As XmlNode
+            Try
+                RootNode = Base.XmlClass.GetXmlFile(FileName)
+            Catch ex As Exception
+                Return "XML结构错误"
+            End Try
+            Dim TmpNode As XmlNode
+            Dim Tmp As String
+            Try
+                TmpNode = Base.XmlClass.FindNode("//my:客户信息[my:电话='" & Tel & "']/my:标题/my:表单号")
+            Catch ex As Exception
+                Return "Xpath语法错：" & ex.Message
+            End Try
+            Try
+                Tmp = TmpNode.InnerText
+            Catch ex As Exception
+                Tmp = ""
+            End Try
+            Dim Tb As New DataTable
+            Tb = Base.DB.Table("SELECT UserID FROM TelephoneConfig where TelNum='" & UID & "'", "dd")
+            Dim i As Integer
+            Dim UserId As Integer
+            For i = 0 To Tb.Rows.Count - 1
+                UserId = Tb.Rows(i)("UserID").ToString
+                If Tmp.ToString.Length > 0 Then
+                    Base.DB.Query("insert into TelephoneCall(UserId,Tel,Fid) values(" & UserId & ",'" & Base.SqlFilter(Tel) & "'," & Tmp & ")")
+                Else
+                    Base.DB.Query("insert into TelephoneCall(UserId,Tel,Fid) values(" & UserId & ",'" & Base.SqlFilter(Tel) & "',0)")
+                End If
+            Next
+            Return "OK"
+        Else
+            Return "认证失败"
+        End If
+    End Function
+
+    ''' <summary>
+    ''' 对库名进行检测,XML库专用
+    ''' </summary>
+    ''' <param name="Name"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Function CheckFileName(ByVal Name As String) As String
+        '检测输入的合法性
+        If Name.Trim.Length = 0 Then
+            Return "库名不能为空!"
+        End If
+
+        '将库名自动加上扩展名
+        If Name.IndexOf(".库.xml") < 0 Then
+            FileName = RootPath & "\" & Name.Trim & ".库.xml"
+        Else
+            FileName = RootPath & "\" & Name.Trim
+        End If
+
+        '检测库名所指向的文件是否存在
+        If IO.File.Exists(FileName) = False Then
+            Return "所输入库名不存在,请确认!"
+        End If
+
+        '检测认证
+        Dim Result As String = Base.Check_RZM()
+        If Not Result Is Nothing Then
+            'Return Result
+        End If
+
+        Return Nothing
+    End Function
+
+End Class

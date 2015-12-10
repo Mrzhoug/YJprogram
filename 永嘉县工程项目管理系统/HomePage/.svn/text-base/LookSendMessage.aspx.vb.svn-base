@@ -1,0 +1,34 @@
+﻿
+Partial Class HomePage_LookSendMessage
+    Inherits System.Web.UI.Page
+
+    Dim SID As Integer
+    Dim Base As New Base
+
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Try
+            SID = Request("SID")
+        Catch ex As Exception
+            Response.Write("非法访问")
+            Response.End()
+        End Try
+        Dim Tb As New Data.DataTable
+        Tb = Base.DB.Table("select GY_YGDM.YGXM from SendMessage,GY_YGDM Where SendMessage.FromID = GY_YGDM.YGDM and Cid = " & SID, "SendMessage")
+        If Tb.Rows.Count > 0 Then
+            FormID.Text = Tb.Rows(0).Item(0)
+        Else
+            Response.Write("非法访问")
+            Response.End()
+        End If
+
+        Tb = Base.DB.Table("select Title,[Content],SendDate from SendMessage Where Cid = " & SID, "SendMessage")
+        If Tb.Rows.Count > 0 Then
+            Date1.Text = Tb.Rows(0).Item(2)
+            Title.Text = Tb.Rows(0).Item(0)
+            Content.Text = Tb.Rows(0).Item(1).Replace(Chr(13), "<br>")
+        End If
+
+
+    End Sub
+
+End Class

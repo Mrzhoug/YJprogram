@@ -1,0 +1,117 @@
+﻿Imports Microsoft.VisualBasic
+Imports System.Collections.Generic
+
+''' <summary>
+''' 模块相关操作函数
+''' </summary>
+''' <remarks></remarks>
+Public Class Modules
+
+
+    ''' <summary>
+    ''' 通过LCDM获取MKMC
+    ''' </summary>
+    ''' <param name="LCDM"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function GetMKMCByLCDM(ByVal LCDM As Integer) As String
+
+        Dim sqlstr As String
+        sqlstr = "SELECT MKMC FROM GY_MKXX where NoLcDM =" & LCDM
+
+        Dim mkmc As String
+        Try
+            mkmc = SqlHelper.ExecuteScalar(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            mkmc = ""
+            DoLog.LogErrorToFile("Modules - GetMKMCByLCDM", ex.ToString())
+        End Try
+
+        Return mkmc
+    End Function
+
+    ''' <summary>
+    ''' 通过LCDM获取MKDM
+    ''' </summary>
+    ''' <param name="LCDM"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function GetMKDMByLCDM(ByVal LCDM As Integer) As Integer
+        Dim sqlstr As String
+        sqlstr = "SELECT MKDM FROM GY_MKXX where NoLcDM =" & LCDM
+
+        Dim mkdm As Integer
+        Try
+            mkdm = Convert.ToInt32(SqlHelper.ExecuteScalar(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing))
+        Catch ex As Exception
+            mkdm = 0
+            DoLog.LogErrorToFile("Modules - GetMKDMByLCDM", ex.ToString())
+        End Try
+        Return mkdm
+    End Function
+
+    ''' <summary>
+    ''' 通过模块代码获取模名称
+    ''' </summary>
+    ''' <param name="MKDM"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function GetMKMCByMKDM(ByVal MKDM As Integer) As Integer
+        Dim sqlstr As String
+        sqlstr = "SELECT MKMC FROM GY_MKXX where MKDM =" & MKDM
+
+        Dim mkmc As String
+        Try
+            mkmc = SqlHelper.ExecuteScalar(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            mkmc = ""
+            DoLog.LogErrorToFile("Modules - GetMKMCByMKDM", ex.ToString())
+        End Try
+        Return mkmc
+    End Function
+
+    ''' <summary>
+    ''' 更具LCDM获取LCMC
+    ''' </summary>
+    ''' <param name="LCDM"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function GetLCMCByLCDM(ByVal LCDM As Integer) As String
+        Dim sqlstr As String
+        sqlstr = "SELECT LCMC FROM GY_LCDM where LCDM = " & LCDM
+
+        Dim LCMC As String
+        Try
+            LCMC = SqlHelper.ExecuteScalar(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing)
+        Catch ex As Exception
+            LCMC = ""
+            DoLog.LogErrorToFile("Modules - GetLCMCByLCDM", ex.ToString())
+        End Try
+        Return LCMC
+    End Function
+
+    ''' <summary>
+    ''' 通过MKMC获取LCDM
+    ''' </summary>
+    ''' <param name="mkmc"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function GetLCDMByMKMC(ByVal mkmc As String) As Integer
+        Dim sqlstr As String
+        sqlstr = "SELECT NoLcDM FROM GY_MKXX where MKMC ='" + mkmc + "'"
+
+        Dim lcdm As Integer
+        Try
+            lcdm = Convert.ToInt32(SqlHelper.ExecuteScalar(SqlHelper.ConnectionString, CommandType.Text, sqlstr, Nothing))
+        Catch ex As Exception
+            lcdm = -1
+            DoLog.LogErrorToFile("Modules - GetLCDMByMKMC", ex.ToString())
+        End Try
+
+        Return lcdm
+    End Function
+  
+
+
+
+End Class

@@ -1,0 +1,37 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="mysharefileslist.aspx.vb" Inherits="HomePage_mysharefileslist" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head><title>文件管理</title>
+    
+    <link href="../../images/Styles.css" rel="stylesheet" type="text/css" />
+    <style >
+    <!--
+    a:link{text-decoration:none;}
+    a:visited{text-decoration:none;}
+    a:hover{text-decoration:none;}
+    -->
+    </style>
+</head>
+<body>
+<form id=form1 runat=server >
+    <span id=message runat=server ></span>
+    </form>
+</body>
+</html>
+
+
+<script language="javascript" type="text/javascript">
+<!--
+function  Clipboard(data)
+{
+    if (data!="")
+    {
+        window.clipboardData.setData('Text',data); 
+        alert("此文件的外网引用URL已经复制到剪切板中.");
+    }
+}
+
+-->
+</script>
